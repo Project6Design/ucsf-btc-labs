@@ -1,0 +1,135 @@
+{# Create classes array. The 'node' class is required for contextual edit links. #}
+{% set classes = [
+  'node',
+  'node-type-' ~ node.bundle|clean_class,
+  view_mode ? node.bundle|clean_class ~ '--layout-' ~ view_mode|clean_class
+] %}
+
+{# BEM inspired class syntax: https://en.bem.info/
+   Enable this code if you would like node classes like "article article--layout-teaser", where article is the content type and teaser is the view mode.
+{% set classes = classes|merge([
+  node.bundle|clean_class,
+  view_mode ? node.bundle|clean_class ~ '--layout-' ~ view_mode|clean_class
+]) %}
+{% set title_classes = [
+  node.bundle|clean_class ~ '__title'
+] %}
+#}
+
+<article{{ attributes.addClass(classes) }}>
+  <header>
+    {% if node.field_page_image is not empty %}
+        <div class="page__header-image">
+            <picture>
+                <source media="(min-width: 400px)"
+                        srcset="{{ node.field_page_image.0.entity.uri.value|image_style('page_header') }} 1x,
+                                {{ node.field_page_image.0.entity.uri.value|image_style('page_header_lg') }} 2x"
+                        sizes="100vw" />
+                <img src="{{ node.field_page_image.0.entity.uri.value|image_style('page_header_sm') }}" alt="{{ node.field_page_image.alt }}" />
+            </picture>
+        </div>
+    {% endif %}
+
+    {% if not node.published %}
+      <p class="node--unpublished">{{ 'Unpublished'|t }}</p>
+    {% endif %}
+  </header>
+
+
+  <div{{ content_attributes.addClass('content') }}>
+    <h1{{ title_attributes.addClass(title_classes) }}>{{ label }}</h1>
+
+    {{ content.field_introduction }}
+
+    {{ content.body }}
+
+    {{ content.field_photos }}
+  </div><!-- /.content -->
+
+  {% if content.links %}
+    <div class="links">
+      {{ content.links }}
+    </div><!-- /.links -->
+  {% endif %}
+
+  {# Root element of PhotoSwipe. Must have class pswp. #}
+  <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    {#
+      Background of PhotoSwipe.
+      It's a separate element as animating opacity is faster than rgba().
+    #}
+    <div class="pswp__bg"></div>
+
+    {# Slides wrapper with overflow:hidden. #}
+    <div class="pswp__scroll-wrap">
+
+      {#
+        Container that holds slides.
+        PhotoSwipe keeps only 3 of them in the DOM to save memory.
+        Don't modify these 3 pswp__item elements, data is added later on.
+      #}
+
+      <div class="pswp__container">
+        <div class="pswp__item"></div>
+        <div class="pswp__item"></div>
+        <div class="pswp__item"></div>
+      </div>
+
+      {#
+        Default (PhotoSwipeUI_Default) interface on top of sliding area.
+        Can be changed.
+      #}
+      <div class="pswp__ui pswp__ui--hidden">
+
+        <div class="pswp__top-bar">
+
+          {# Controls are self-explanatory. Order can be changed. #}
+
+          <div class="pswp__counter"></div>
+
+          <button class="pswp__button pswp__button--close" title="{{ 'Close (Esc)'|t }}"></button>
+
+          <button class="pswp__button pswp__button--share" title="{{ 'Share'|t }}"></button>
+
+          <button class="pswp__button pswp__button--fs" title="{{ 'Toggle fullscreen'|t }}"></button>
+
+          <button class="pswp__button pswp__button--zoom" title="{{ 'Zoom in/out'|t }}"></button>
+
+          {#
+            Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR
+            Element will get class pswp__preloader--active when preloader is
+            running.
+          #}
+
+          <div class="pswp__preloader">
+            <div class="pswp__preloader__icn">
+              <div class="pswp__preloader__cut">
+                <div class="pswp__preloader__donut"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+          <div class="pswp__share-tooltip"></div>
+        </div>
+
+        <button class="pswp__button pswp__button--arrow--left" title="{{ 'Previous (arrow left)'|t }}">
+        </button>
+
+        <button class="pswp__button pswp__button--arrow--right" title="{{ 'Next (arrow right)'|t }}">
+        </button>
+
+        <div class="pswp__caption">
+          <div class="pswp__caption__center"></div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+</article><!-- /.node -->

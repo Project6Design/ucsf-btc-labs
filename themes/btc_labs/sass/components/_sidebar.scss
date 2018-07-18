@@ -1,0 +1,110 @@
+.sidebar, #block-views-block-node-fields-block-sidebar {
+  @include clearfix;
+  @include span-columns(3 of 12);
+  @include shift(1);
+  padding-right: $base-spacing*5.5;
+
+  @include media($extra-large-screen-down) {
+    padding-right: 0;
+  }
+
+  @include media($large-screen-down) {
+    @include span-columns(12 of 12);
+    margin: 0;
+  }
+
+  a {
+    color: $red;
+    font-size: $fs-extra-small;
+
+    &.btn--primary {
+      color: $white;
+      margin-bottom: 0;
+      padding: $base-spacing $large-spacing;
+
+      &:hover {
+        color: $red;
+      }
+    }
+  }
+
+  .field--name-field-sidebar .field__value, .sidebar__item, .block-views, .views-field-field-sidebar {
+    background-color: $light-blue;
+    margin-bottom: $small-spacing;
+    color: $dark-blue;
+    padding: $base-spacing*2.1 $base-spacing*1.4 $base-spacing;
+    font-weight: bold;
+    word-wrap: break-word;
+
+    [class^="field field--name-field"] {
+      margin-bottom: $base-spacing;
+    }
+
+    .field--name-field-trial-id {
+      line-height: $base-spacing;
+    }
+
+    .field--name-field-trial-status {
+      .field__value {
+        position: relative;
+        display: inline-block;
+
+        &:after {
+          content: "";
+          background: url("../../images/recruiting.svg") no-repeat center center;
+          width: 34px;
+          height: 30px;
+          display: inline-block;
+          position: relative;
+          right: -2px;
+          top: 10px;
+        }
+      }
+    }
+
+    .field--name-field-trial-link {
+      text-transform: uppercase;
+    }
+
+    .field__label {
+      text-transform: uppercase;
+      line-height: $base-spacing;
+      font-family: "Helvetica Bold";
+    }
+
+    .field--name-field-conditions {
+      .field__value-container {
+        @include clearfix;
+
+        .field__value {
+          float: left;
+          margin-right: $small-spacing;
+        }
+      }
+    }
+
+    p {
+      font-size: $fs-extra-small;
+      line-height: $base-spacing*1.5;
+    }
+  }
+}
+
+#block-views-block-node-fields-block-sidebar {
+  display: none;
+}
+
+//pages that contain this special case sidebar
+.has-sidebar {
+  #block-views-block-node-fields-block-sidebar {
+    @include media($large-screen-down) {
+      display: block;
+    }
+  }
+}
+
+.sidebar {
+  @include media($large-screen-down) {
+    margin: 1rem 0;
+  }
+}

@@ -1,0 +1,13 @@
+name: Notification
+type: module
+description: "Adds the Notification plugin to CKEditor. This is a utility plugin that is required by other CKEditor plugins to function correctly."
+package: CKEditor
+# core: 8.x
+
+dependencies:
+  - ckeditor
+# Information added by Drupal.org packaging script on 2016-09-16
+version: '8.x-1.0'
+core: '8.x'
+project: 'notification'
+datestamp: 1474041243

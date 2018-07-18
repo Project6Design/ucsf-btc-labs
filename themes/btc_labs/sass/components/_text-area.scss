@@ -1,0 +1,122 @@
+.paragraph--type--text-area {
+  clear: both;
+
+  p {
+    font-size: $fs-small;
+  }
+
+  a {
+    color: $red;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  ul {
+    margin: $base-spacing 0;
+    margin-left: $large-spacing;
+    font-size: $fs-small;
+
+    list-style: disc outside none;
+    padding-left: 20px;
+
+    ul {
+      font-size: 1em;
+    }
+  }
+
+  ol {
+    margin: $base-spacing 0;
+    margin-left: $large-spacing;
+    font-size: $fs-small;
+
+    list-style: disc outside none;
+    list-style-type: decimal;
+    padding-left: 20px;
+
+    ol {
+      font-size: 1em;
+      list-style-type: lower-alpha;
+    }
+  }
+
+  blockquote {
+    font-family: $secondary-font-family;
+    font-size: $fs-regular-medium;
+    color: $blue;
+    border: 2px solid $medium-gray;
+    text-align: center;
+    margin: $large-spacing*2 0;
+    padding: $base-spacing*4 $base-spacing*10;
+
+    @include media($large-screen-down) {
+      padding: $base-spacing*1.5;
+    }
+  }
+}
+
+figure {
+  margin: $base-spacing;
+  box-sizing: content-box;
+
+  figcaption {
+    padding-top: $base-spacing;
+  }
+}
+
+.field--type-text-with-summary,
+.field--type-text-long {
+  ul {
+    margin: $base-spacing 0;
+    margin-left: $large-spacing;
+    font-size: $fs-small;
+
+    list-style: disc outside none;
+    padding-left: 20px;
+
+    ul {
+      font-size: 1em;
+    }
+
+    @include media($medium-screen-down) {
+      font-size: 1rem;
+    }
+  }
+
+  ol {
+    margin: $base-spacing 0;
+    margin-left: $large-spacing;
+    font-size: $fs-small;
+    list-style: disc outside none;
+    list-style-type: decimal;
+    padding-left: 20px;
+
+    ol {
+      font-size: 1em;
+      list-style-type: lower-alpha;
+    }
+
+    @include media($medium-screen-down) {
+      font-size: 1rem;
+    }
+  }
+
+  blockquote {
+    font-family: $secondary-font-family;
+    font-size: $fs-regular-medium;
+    color: $blue;
+    border: 2px solid $medium-gray;
+    text-align: center;
+    margin: $large-spacing*2 0;
+    padding: $base-spacing*4 $base-spacing*10;
+
+    @include media($large-screen-down) {
+      padding: $base-spacing*1.5;
+    }
+
+    @include media($medium-screen-down) {
+      font-size: 1.5rem;
+    }
+  }
+}

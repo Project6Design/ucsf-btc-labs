@@ -1,0 +1,8 @@
+sharemessage_test.view:
+  path: '/sharemessage-test/{sharemessage}/{view_mode}'
+  defaults:
+    view_mode: 'full'
+    _entity_view: 'sharemessage'
+  requirements:
+    _entity_access: 'sharemessage.view'
+

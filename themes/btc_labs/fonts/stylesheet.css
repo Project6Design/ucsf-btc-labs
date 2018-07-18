@@ -1,0 +1,56 @@
+@font-face {
+    font-family: "Granjon";
+    src: url("granjon/granjon.eot?") format("eot"),
+         url("granjon/granjon.woff2") format("woff2"),
+         url("granjon/granjon.woff") format("woff"),
+         url("granjon/granjon.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Granjon Italic";
+    src: url("granjon/granjon-italic.eot?") format("eot"),
+         url("granjon/granjon-italic.woff2") format("woff2"),
+         url("granjon/granjon-italic.woff") format("woff"),
+         url("granjon/granjon-italic.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Granjon Bold";
+    src: url("granjon/granjon-bold.eot?") format("eot"),
+         url("granjon/granjon-bold.woff2") format("woff2"),
+         url("granjon/granjon-bold.woff") format("woff"),
+         url("granjon/granjon-bold.ttf") format("truetype");
+}
+
+
+@font-face {
+    font-family: "Helvetica Bold";
+    src: url("helvetica/helvetica-bold.eot?") format("eot"),
+         url("helvetica/helvetica-bold.woff2") format("woff2"),
+         url("helvetica/helvetica-bold.woff") format("woff"),
+         url("helvetica/helvetica-bold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Helvetica Light";
+    src: url("helvetica/helvetica-light.eot?") format("eot"),
+         url("helvetica/helvetica-light.woff2") format("woff2"),
+         url("helvetica/helvetica-light.woff") format("woff"),
+         url("helvetica/helvetica-light.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Helvetica Light Italic";
+    src: url("helvetica/helvetica-light-italic.eot?") format("eot"),
+         url("helvetica/helvetica-light-italic.woff2") format("woff2"),
+         url("helvetica/helvetica-light-italic.woff") format("woff"),
+         url("helvetica/helvetica-light-italic.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Helvetica Medium";
+    src: url("helvetica/helvetica-medium.eot?") format("eot"),
+         url("helvetica/helvetica-medium.woff2") format("woff2"),
+         url("helvetica/helvetica-medium.woff") format("woff"),
+         url("helvetica/helvetica-medium.ttf") format("truetype");
+}

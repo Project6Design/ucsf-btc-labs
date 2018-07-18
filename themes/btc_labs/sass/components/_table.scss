@@ -1,0 +1,108 @@
+.node-id-5 {
+  .field--type-text-with-summary {
+    margin-left: -$base-spacing*15.5;
+    margin-right: -$base-spacing*15.5;
+
+    @include media($medium-screen-down) {
+      margin-left: -$base-spacing*1.5;
+      margin-right: -$base-spacing*1.5;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-bottom: $base-spacing*10;
+
+
+      td, th {
+        border: 2px solid $teal;
+        padding: $base-spacing $base-spacing*5 $base-spacing $base-spacing*6;
+      }
+
+      tr:first-child th {
+        border-top: 0;
+      }
+
+      tr td:first-child,
+      tr th:first-child {
+        border-left: 0;
+      }
+
+      tr td:last-child,
+      tr th:last-child {
+        border-right: 0;
+      }
+
+      thead {
+        background-color: $light-blue;
+        font-family: $secondary-font-family;
+        font-size: $fs-medium-large;
+        th {
+          color: $dark-blue;
+          font-weight: 300;
+          font-size: 0.8em;
+          padding: $large-spacing $base-spacing*5 $large-spacing $base-spacing*6;
+
+          @include media($large-screen-down) {
+            font-size: 0.5em;
+            padding: $base-spacing $base-spacing*2 $base-spacing $base-spacing;
+          }
+        }
+      }
+
+      tbody {
+        td {
+          @include clearfix;
+          padding: $base-spacing*3 $base-spacing*3 $base-spacing*3  $base-spacing*6;
+          vertical-align: top;
+
+          @include media($larger-screen-down) {
+            padding: $base-spacing*1 $base-spacing*3 $base-spacing*2  $base-spacing*1;
+          }
+
+          @include media($medium-screen-down) {
+            padding: $base-spacing*1;
+
+            li {
+              font-size: 0.8em;
+              a {
+                font-size: $fs-extra-small;
+              }
+            }
+          }
+
+          p {
+            float: left;
+            font-size: $fs-small;
+            color: $dark-blue;
+            width: 130px;
+          }
+
+          ul {
+            float: left;
+            list-style: none;
+            margin-top: 0;
+            margin-left: 0;
+            width: 285px;
+
+            @include media($extra-large-screen-down) {
+              width: 250px;
+            }
+
+            @include media($larger-screen-down) {
+              width: auto;
+              float: left;
+            }
+          }
+
+          a {
+            color: $red;
+
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+sharemessage.settings.settings:
+  path: '/admin/config/services/sharemessage/sharemessage-settings'
+  defaults:
+    _title: 'Global settings'
+    _form: '\Drupal\sharemessage\Form\ShareMessageSettingsForm'
+  requirements:
+    _permission: 'administer sharemessages'
+
+sharemessage.addthis.settings:
+  path: '/admin/config/services/sharemessage/addthis-settings'
+  defaults:
+    _title: 'AddThis settings'
+    _form: '\Drupal\sharemessage\Form\AddthisSettingsForm'
+  requirements:
+    _permission: 'administer sharemessages'
+
+sharemessage.sharrre.settings:
+  path: '/admin/config/services/sharemessage/sharrre-settings'
+  defaults:
+    _title: 'Sharrre settings'
+    _form: '\Drupal\sharemessage\Form\SharrreSettingsForm'
+  requirements:
+    _permission: 'administer sharemessages'
+
+sharemessage.socialshareprivacy.settings:
+  path: '/admin/config/services/sharemessage/socialshareprivacy-settings'
+  defaults:
+    _title: 'Social share privacy settings'
+    _form: '\Drupal\sharemessage\Form\SocialSharePrivacySettingsForm'
+  requirements:
+    _permission: 'administer sharemessages'
+
+sharemessage.sharrre.counter:
+  path: '/sharemessage/sharrre/counter'
+  defaults:
+    _controller: '\Drupal\sharemessage\Controller\SharrreCounterController::getCounter'
+  requirements:
+    _permission: 'view sharemessages'
+
+sharemessage.sharemessage_add:
+  path: '/admin/config/services/sharemessage/add'
+  defaults:
+    _title: 'Add new Share Message'
+    _entity_form: sharemessage.add
+  requirements:
+    _entity_create_access: sharemessage
+
+entity.sharemessage.edit_form:
+  path: '/admin/config/services/sharemessage/manage/{sharemessage}'
+  defaults:
+    _title: 'Edit Share Message'
+    _entity_form: sharemessage.edit
+  requirements:
+    _entity_access: sharemessage.update
+
+entity.sharemessage.collection:
+  path: '/admin/config/services/sharemessage'
+  defaults:
+    _title: 'Share Message list'
+    _entity_list: 'sharemessage'
+  requirements:
+    _permission: 'administer sharemessages'
+
+entity.sharemessage.delete_form:
+  path: 'admin/config/services/sharemessage/manage/{sharemessage}/delete'
+  defaults:
+    _entity_form: sharemessage.delete
+  requirements:
+    _entity_access: sharemessage.delete

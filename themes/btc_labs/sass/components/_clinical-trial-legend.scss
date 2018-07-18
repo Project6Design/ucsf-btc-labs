@@ -1,0 +1,49 @@
+.clinical-trials__legend {
+  margin-top: $large-spacing;
+  text-align: right;
+  @include span-columns(12 of 12);
+  @include clearfix;
+
+  li {
+    display: inline-block;
+    padding: 0 $base-spacing; 
+    background-image: linear-gradient(black 20%, rgba(255,255,255,0) 0%);
+    background-position: right;
+    background-size: 1px 6px;
+    background-repeat: repeat-y;
+
+    &:last-child {
+      background: none;
+    }
+
+    span {
+      vertical-align: text-bottom;
+      line-height: 40px;
+      text-transform: uppercase;
+    }
+
+    svg {
+      fill: $dark-gray;
+      width: 40px;
+      height: 40px;
+    }
+
+    &.legend__recruiting {
+      svg {
+        display: none;
+      }
+      &:after {
+        content: "";
+        background: url("../../images/recruiting-gray.svg") no-repeat center center;
+        background-size: cover;
+        width: 50px;
+        height: 40px;
+        display: inline-block;
+      }
+    }
+  }
+
+  @include media($medium-screen-down) {
+    display: none;
+  }
+}

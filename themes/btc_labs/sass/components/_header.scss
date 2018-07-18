@@ -1,0 +1,71 @@
+#header {
+  @include clearfix;
+
+  height: 165px;
+  position: fixed;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 500;
+
+  .container {
+    padding: 0 $large-spacing;
+    padding-top: 20px;
+    position: relative;
+  }
+
+  &.menu-active {
+    position: absolute;
+  }
+
+  @include media($medium-screen-down) {
+    height: 120px;
+  }
+
+
+  //ie tweaks
+  @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    .block-sitebranding {
+      img {
+        width: 100%;
+        height: auto;
+      }
+    }
+  }
+
+  .block-sitebranding {
+    float: left;
+    top: 15px;
+    position: relative;
+    max-width: 240px;
+
+    @include media($large-screen-down) {
+      top: 5px;
+      position: relative;
+      width: 180px;
+    }
+
+
+    @include media($medium-screen-down) {
+      top: 5px;
+      position: relative;
+      width: 150px;
+    }
+  }
+
+  #trigger-search {
+    display: none;
+
+    //display: inline-block;
+    position: relative;
+    top: 10px;
+
+    svg {
+      width: 35px;
+      height: 35px;
+    }
+
+    @include media($medium-screen-down) {
+      display: none;
+    }
+  }
+}

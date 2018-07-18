@@ -1,0 +1,43 @@
+<header id="header" role="banner">
+        <nav role="navigation" class="container" id="header-top-menu">
+            <ul class="left">
+              <li><a href="http://www.ucsf.edu/">University of California San Francisco</a></li>
+            </ul>
+            <ul class="right">
+              <li><a href="http://www.ucsf.edu/about/ucsf-overview">About UCSF</a></li>
+              <li><a href="http://www.ucsf.edu/search">Search UCSF</a></li>
+              <li><a href="https://www.ucsfhealth.org/" target="_blank">UCSF Medical Center</a></li>
+            </u>
+        </nav>
+    <div class="container">
+        {{ drupal_block('sitebranding') }}
+
+
+        <div class="meta-wrapper">
+            <a href="#" id="trigger-mobile-menu">
+                <img title="Mobile Menu Open" class="mobile-open" src="/{{ directory }}/images/optimized/mobile-menu.svg" />
+                <svg class="mobile-close" role="img">
+                    <title>Mobile Menu Close</title>
+                    <use xlink:href="/{{ directory }}/images/optimized/store.svg#close" />
+                </svg>
+            </a>
+            <nav role="navigation" id="meta-menu">
+                {{ drupal_menu('meta-menu', 1, 2) }}
+            </nav>
+
+            <a href="/search" id="trigger-search">
+                <svg role="img">
+                    <title>Show Search Form</title>
+                    <use xlink:href="/{{ directory }}/images/optimized/store.svg#search" />
+                </svg>
+            </a>
+        </div>
+
+        <nav role="navigation" id="main-menu">
+            {{ drupal_menu('main', 1, 2) }}
+        </nav>
+        {{ page.header }}
+    </div>
+
+    {{ drupal_block('searchform') }}
+</header>

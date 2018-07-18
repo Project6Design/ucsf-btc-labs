@@ -1,0 +1,99 @@
+.field--name-field-lab-investigators {
+  padding: 0 $base-spacing*10 $large-spacing;
+  @include clearfix;
+  clear: both;
+
+  .sf-person {
+    margin-bottom: $large-spacing;
+    @include span-columns(3 of 12);
+
+    .person__title {
+      margin-top: $base-spacing*1.5;
+      line-height: 0;
+      a {
+        color: $dark-blue;
+        font-size: $fs-small;
+        font-family: "Helvetica Bold";
+        font-weight: 500;
+      }
+    }
+  }
+
+  @include media($medium-screen-down) {
+    padding: 0 $base-spacing*1.5;
+  }
+}
+
+//in text investigators
+article {
+  .field--name-field-lab-investigators {
+    padding: $base-spacing 0;
+
+    .field__label {
+      font-size: $fs-medium-large;
+      color: $dark-blue;
+      font-family: $secondary-font-family;
+    }
+
+    .field__value-container {
+      @include clearfix;
+
+      .field__value {
+        @include span-columns(3 of 12);
+        width: 250px;
+        height: 500px;
+
+        .sf-person {
+          float: none;
+          width: 250px;
+
+          .person__title {
+            a {
+              color: $dark-blue;
+              font-size: $fs-small;
+              font-family: "Helvetica Bold";
+              font-weight: 500;
+              display: inline-block;
+              line-height: 1.2em;
+            }
+          }
+
+          .field--name-field-research-speciality {
+            font-size: $fs-small;
+            color: $dark-blue;
+            margin-bottom: $small-spacing;
+            line-height: 1.5em;
+          }
+
+          .more-link {
+            color: $red;
+            font-size: $fs-extra-small;
+          }
+        }
+
+        .field--name-field-sf-position-title {
+          color: $dark-blue;
+          font-size: $fs-small;
+
+          + a {
+            color: $red;
+            font-size: $fs-extra-small;
+          }
+        }
+        
+        a {
+          color: $dark-blue;
+          font-weight: $fw-bold;
+          font-size: $fs-small;
+        }
+      }
+    }
+  }
+}
+
+article.clinical-trial {
+  .field--name-field-lab-investigators {
+    padding: $base-spacing 0;
+    margin-left: 0;
+  }
+}

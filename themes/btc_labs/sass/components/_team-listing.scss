@@ -1,0 +1,66 @@
+#block-views-block-persons-block-team-listing {
+  @include clearfix;
+  margin-bottom: $large-spacing*5;
+
+  h3 {
+    clear: both;
+    padding: $base-spacing*5 $base-spacing*5.5 $base-spacing*3;
+    font-size: $fs-medium-large;
+    font-family: $secondary-font-family;
+
+    @include media($medium-screen-down) {
+      padding: $base-spacing*5 $base-spacing*1.5 $base-spacing*3;
+    }
+
+    + .views-row {
+      margin-left: $base-spacing*5.5;
+
+      @include media($medium-screen-down) {
+        margin-left: $base-spacing*1.5;
+      }
+    }
+  }
+
+  .views-row {
+    padding: 0;
+    max-width: 200px;
+    float: left;
+    margin-right: $base-spacing*3;
+
+    .person__listing-image {
+      position: relative;
+
+      .person__pediatrics {
+        background: url('../../images/optimized/teddy-white.svg') no-repeat center center;
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        z-index: 1;
+      }
+
+      &:after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: block;
+        content: '';
+        width: 0; 
+        height: 0; 
+        border-left: 60px solid transparent;
+        border-top: 60px solid $dark-gray;
+      }
+    }
+
+    .person__title {
+      a {
+        font-family: "Helvetica Bold";
+        font-weight: $fw-bold;
+        color: $dark-blue;
+        display: inline-block;
+        margin-top: $small-spacing;
+      }
+    }
+  }
+}

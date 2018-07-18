@@ -1,0 +1,121 @@
+// Layout
+// ------
+// Using a negative margin technique, made possible with Bourbon Neat, the page
+// is loaded in this order:
+
+// 1. Header
+// 2. Content
+// 3. Navigation menus
+// 4. Sidebar Left
+// 5. Sideabr Right
+//
+// Layout rules.
+// (Disclaimer: do not change if you're not sure you know what you're doing.)
+
+.container
+  +outer-container
+
+  width: auto
+
+.clearfix
+  +clearfix
+
+.hide-desktop
+  +media($medium-screen-up)
+    display: none
+
+.hide-mobile
+  +media($medium-screen-down)
+    display: none
+
+#highlighted
+  +media($medium-screen-down)
+    padding-top: 120px
+    background: #000
+
+#main
+  padding-top: 165px
+
+  +media($medium-screen-down)
+    padding-top: 0
+
+#content
+  min-height: 500px
+
+  .no-sidebar &
+    // 100% width for small screens. No definitions required.
+    // Same logic for medium screens. No definitions required.
+    // Same logic for large screens. No definitions required.
+
+  .one-sidebar.sidebar-second &
+    // 100% width for small screens. No definitions required.
+    // Span this div 6 columns wide for medium screens.
+    +media($medium-screen-up)
+      +span-columns(6)
+
+
+    // Span this div 8 columns wide for large screens.
+    +media($large-screen-up)
+      +span-columns(8)
+
+  .one-sidebar.sidebar-first &
+    // 100% width for small screens. No definitions required.
+    // Span this div 6 columns wide for medium screens.
+    +media($medium-screen-up)
+      +span-columns(6)
+      +shift(2)
+
+
+    // Span this div 9 columns wide for large screens.
+    +media($large-screen-up)
+      +span-columns(9)
+      +shift(3)
+
+  .two-sidebars &
+    // 100% width for small screens. No definitions required.
+    // Span this div 4 columns wide for medium screens.
+    +media($medium-screen-up)
+      +span-columns(4)
+      +shift(2)
+
+
+    // Span this div 5 columns wide for large screens.
+    +media($large-screen-up)
+      +span-columns(5)
+      +shift(3)
+
+#sidebar-first
+  // 100% width for small screens. No definitions required.
+  // Span this div 2 columns wide for medium screens.
+  +media($medium-screen-up)
+    +span-columns(2)
+
+    // Shift it to the left to place it in the far left column. Different shift for two-sidebar and one-sidebar layout.
+    +shift(-6)
+
+    .one-sidebar.sidebar-first &
+      +shift(-8)
+
+
+  +media($large-screen-up)
+    // Span this div 3 columns wide for large screens.
+    +span-columns(3)
+
+    // Shift it to the left to place it in the far left column. Different shift for two-sidebar and one-sidebar layout.
+    +shift(-8)
+
+    .one-sidebar.sidebar-first &
+      +shift(-12)
+
+#sidebar-second
+  // 100% width for small screens. No definitions required.
+  // Span this div 2 columns wide for medium screens.
+  +media($medium-screen-up)
+    +span-columns(2)
+    +shift(0)
+
+
+  +media($large-screen-up)
+    // Span this div 4 columns wide for large screens.
+    +span-columns(4)
+    +shift(0)

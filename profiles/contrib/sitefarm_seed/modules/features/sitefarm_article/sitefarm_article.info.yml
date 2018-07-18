@@ -1,0 +1,24 @@
+name: Article
+description: 'Provides Article content type and related configuration. Use <em>articles</em> for time-sensitive content like news, press releases or blog posts.'
+type: module
+core: 8.x
+dependencies:
+  - block
+  - ctools
+  - field
+  - focal_point
+  - image
+  - menu_ui
+  - metatag
+  - node
+  - options
+  - path
+  - pathauto
+  - sharemessage
+  - sitefarm_core
+  - system
+  - taxonomy
+  - text
+  - user
+  - views
+package: SiteFarm

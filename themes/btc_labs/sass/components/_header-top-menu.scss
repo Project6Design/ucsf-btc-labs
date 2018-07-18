@@ -1,0 +1,35 @@
+#header-top-menu {
+  background-color: $dark-blue;
+
+  &.container {
+    padding-top: 0 !important;
+  }
+
+  @include clearfix;
+
+  ul {
+    a {
+      color: $white;
+      font-size: 0.875em;
+      display: inline-block;
+      padding: 5px 0;
+    }
+
+    &.left {
+      float: left;
+    }
+
+    &.right {
+      float: right;
+
+      li {
+        display: inline-block;
+        margin-left: $large-spacing;
+      }
+
+      @media screen and (max-width: 924px) {
+        display: none;
+      }
+    }
+  }
+}

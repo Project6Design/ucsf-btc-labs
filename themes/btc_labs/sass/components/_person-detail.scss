@@ -1,0 +1,104 @@
+.block-btc-labs-content {
+  .sf-person--layout-full {
+    .back-link {
+      padding: 0;
+      margin-top: $small-spacing;
+      margin-left: $small-spacing;
+
+      a {
+        padding: 0;
+      }
+    }
+
+    .person__photo {
+      background-color: #4F637E;
+
+      img {
+        border: 20px solid #4F637E;
+        border-top: none;
+        margin-left: $base-spacing * 5.5;
+        margin-bottom: -$base-spacing * 14;
+        width: 410px;
+      }
+
+      @include media($medium-screen-down) {
+        text-align: center;
+
+        img {
+          margin: auto;
+          width: 80%;
+        }
+      }
+    }
+
+    h1 {
+      margin: ($large-spacing * 3) 0 0 530px;
+    }
+
+    .field--name-field-sf-position-title {
+      margin-left: 530px;
+      font-size: $fs-large;
+      color: $dark-blue;
+      float: left;
+      line-height: 50px;
+    }
+
+    @include media($extra-large-screen-down) {
+      h1, .field--name-field-sf-position-title {
+        font-size: $fs-large;
+      }
+    }
+
+
+    @include media($large-screen-down) {
+      h1, .field--name-field-sf-position-title {
+        font-size: 2.5em;
+      }
+    }
+
+
+    @include media($medium-screen-down) {
+      h1 {
+        padding: 0 ($base-spacing * 1.5);
+        margin: $base-spacing auto 0;
+        font-size: 2rem;
+      }
+
+      .field--name-field-sf-position-title {
+        padding: 0 ($base-spacing * 1.5);
+        margin: 0 auto;
+        font-size: 2rem;
+        line-height: 1.2;
+      }
+    }
+
+
+    .content {
+      margin-top: $base-spacing * 4;
+      padding: 0 ($base-spacing * 5.5);
+      max-width: 1200px;
+
+      @include media($medium-screen-down) {
+        padding: 0 ($base-spacing * 1.5);
+        margin-top: $base-spacing;
+      }
+
+
+      .paragraph--type--page-link {
+        margin-left: -$base-spacing * 15.5;
+        margin-right: -$base-spacing * 15.5;
+
+        @include media($large-screen-down) {
+          margin-left: -$base-spacing * 1.5;
+          margin-right: -$base-spacing * 1.5;
+        }
+      }
+
+      .paragraph--type--accordion.last {
+        @include media($medium-screen-down) {
+          margin-bottom: 2rem;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+.content .field--name-field-featured-publications {
+  clear: both;
+
+  .field__value p {
+    font-size: 1em;
+  }
+
+  .field__label {
+    color: $dark-blue;
+    font-size: $fs-large;
+    font-family: $secondary-font-family;
+    margin-bottom: $large-spacing;
+    line-height: 1.2;
+
+    @include media($medium-screen-down) {
+      font-size: 2.5rem;
+      margin-bottom: $base-spacing;
+    }
+  }
+
+  h3 {
+    font-size: $fs-regular-medium;
+  }
+
+  em {
+    font-size: 0.8em;
+  }
+
+  a {
+    color: $red;
+
+    &.download {
+      color: $red;
+      display: block;
+      font-size: 0.9em;
+      font-weight: $fw-bold;
+      margin-top: $large-spacing;
+
+      &:before {
+        display: inline-block;
+        content: '';
+        background: url("../../images/optimized/pdf.svg") no-repeat center center;
+        background-size: cover;
+        width: 22px;
+        height: 26px;
+        margin-right: $base-spacing;
+        vertical-align: middle;
+      }
+    }
+  }
+
+
+}

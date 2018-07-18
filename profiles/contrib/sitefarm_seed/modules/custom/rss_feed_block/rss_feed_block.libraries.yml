@@ -1,0 +1,7 @@
+rss_feed_block:
+  version: VERSION
+  js:
+    js/rss_feed.js: {}
+  dependencies:
+    - core/jquery
+    - sitefarm_core/vue

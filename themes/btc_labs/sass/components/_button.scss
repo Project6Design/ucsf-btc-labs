@@ -1,0 +1,23 @@
+a.btn--primary {
+  padding: $base-spacing $base-spacing*4;
+  background-color: $red;
+  color: $white !important;
+  font-size: 18px;
+  font-weight: $fw-bold;
+  display: inline-block;
+  margin-bottom: $base-spacing*4;
+  border-radius: 5px;
+  border: 2px solid $red;
+  font-family: "Helvetica Bold";
+  font-weight: 500;
+  text-decoration: none !important;
+
+  &:hover {
+    background-color: $white;
+    color: $red !important;
+  }
+
+  @include media($medium-screen-down) {
+    padding: $small-spacing $base-spacing;
+  }
+}

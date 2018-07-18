@@ -1,0 +1,29 @@
+name: BTC Labs
+type: theme
+description: 'UCSF Brain Tumour Center Labs Theme'
+package: Core
+# version: VERSION
+# core: 8.x
+
+libraries:
+  - core/normalize
+  - btc_labs/global
+
+
+regions:
+  header: Header
+  help: Help
+  page_top: 'Page top'
+  page_bottom: 'Page bottom'
+  highlighted: Highlighted
+  content: Content
+  sidebar_first: 'Sidebar first'
+  sidebar_second: 'Sidebar second'
+  footer: Footer
+  hidden: Hidden
+
+# Information added by Drupal.org packaging script on 2017-10-15
+version: '8.x-1.3'
+core: '8.x'
+project: 'btc_main'
+datestamp: 1508096954

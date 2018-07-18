@@ -1,0 +1,115 @@
+#block-stayinformed {
+  clear: both;
+  padding: $large-spacing*2 $base-spacing*5.5 0;
+  margin-bottom: $large-spacing*8;
+
+  @include media($medium-screen-down) {
+    padding: $large-spacing $base-spacing*1.5 0;
+    padding-top: $large-spacing;
+    margin-bottom: $large-spacing*4;
+  }
+
+  h2 {
+    margin-bottom: $large-spacing;
+  }
+
+  form {
+    background-color: $light-blue;
+    padding: $base-spacing $large-spacing*1.5;
+
+    label {
+      height: 58px;
+      color: $dark-blue;
+      font-size: $fs-medium;
+      font-family: $secondary-font-family;
+      display: inline-block;
+      line-height: 58px;
+
+      @include media($medium-screen-down) {
+        font-size: $fs-small;
+        display: block;
+        height: auto;
+        line-height: 30px;
+      }
+    }
+
+    .mc-field-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .form-field__email {
+      position: relative;
+      flex-grow: 1;
+      margin-left: $large-spacing*2;
+
+      @media screen and (max-width: 1550px) {
+        flex: 0 1 100%;
+        margin: 0;
+      }
+
+      @include media($medium-screen-down) {
+        text-align: center;
+      }
+
+      .input-wrapper {
+        float: left;
+        width: 100%;
+
+        input {
+          width: 100%;
+          height: 58px;
+          position: relative;
+          top: 2px;
+          margin: 0;
+          padding: 0 $base-spacing;
+          border: none;
+          box-shadow: none;
+          border-radius: 0;
+          font-family: $secondary-font-family;
+          font-size: 1.5em;
+
+          &::placeholder {
+            opacity: 1;
+            color: $dark-blue;
+          }
+
+          @include media($medium-screen-down) {
+            font-size: $fs-small;
+          }
+        }
+      }
+    }
+
+    .subscribe {
+      position: absolute;
+      content: "Sign Up";
+      height: 58px;
+      width: 184px;
+      background-color: $red;
+      color: $white;
+      cursor: pointer;
+      top: 2px;
+      right: 0;
+      text-align: center;
+      padding: 15px;
+      font-weight: bold;
+      display: inline-block;
+
+      @include media($medium-screen-down) {
+        margin-top: $large-spacing;
+        display: inline-block;
+        position: static;
+      }
+    }
+
+    .clear {
+      height: 0;
+    }
+
+    #mc-embedded-subscribe {
+      visibility: hidden;
+    }
+  }
+}

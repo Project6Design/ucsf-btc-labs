@@ -1,0 +1,145 @@
+.node-id-37 {
+  header {
+    h1 {
+      display: none;
+    }
+  }
+
+  @include media($medium-screen-down) {
+    #main {
+      padding-top: 0;
+    }
+
+    #highlighted {
+      padding-top: 120px;
+      background: #000;
+    }
+  }
+
+
+
+  .field--name-field-introduction {
+    text-align: left;
+    padding: ($base-spacing * 3) ($base-spacing * 5);
+    max-width: 1360px;
+    margin: auto;
+    padding-bottom: 0 !important;
+    padding-top: 0 !important;
+
+    @include media($large-screen-down) {
+      p {
+        font-size: 1em;
+      }
+
+      a {
+        font-size: 1em;
+      }
+    }
+
+
+    @include media($medium-screen-down) {
+      padding: ($large-spacing * 2) ($base-spacing * 2);
+    }
+  }
+
+  .field--name-body {
+    padding: 0 ($base-spacing * 5);
+    max-width: 1360px;
+    margin: auto;
+
+    @include media($medium-screen-down) {
+      padding: 2rem;
+    }
+  }
+
+  .block-btc-labs-content .content {
+    padding: 0;
+    margin-top: 90px;
+
+    .paragraph--type--page-link {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+}
+
+.block-homepagebadge,
+.block-homebadgebanner {
+  background: $light-blue;
+  padding: ($base-spacing * 3) ($base-spacing * 2) ($base-spacing * 3) 400px;
+  position: relative;
+  margin-bottom: $base-spacing * 10;
+
+  @include media($larger-screen-down) {
+    padding: ($base-spacing * 2.5) ($base-spacing * 2) ($base-spacing * 2.5) 200px;
+    font-size: 0.8em;
+    margin-bottom: $large-spacing;
+  }
+
+
+  @include media($medium-screen-down) {
+    padding: ($base-spacing * 3.5) ($base-spacing * 2) ($base-spacing * 3.5) 150px;
+    margin-bottom: 0;
+  }
+
+
+  .badge {
+    max-width: 400px;
+    position: absolute;
+    bottom: -$base-spacing * 11;
+    left: $base-spacing;
+
+    @include media($larger-screen-down) {
+      max-width: 200px;
+      bottom: -$base-spacing * 4;
+    }
+
+
+    @include media($medium-screen-down) {
+      img {
+        padding: 0;
+      }
+
+      top: 50%;
+      left: $base-spacing;
+      transform: translateY(-50%);
+      width: 116px;
+      height: 120px;
+    }
+  }
+
+  p {
+    span {
+      font-family: "Granjon Bold";
+
+      &.larger {
+        font-size: $fs-extra-small;
+      }
+
+      &.big {
+        vertical-align: middle;
+        font-size: $fs-medium;
+        line-height: 10px;
+      }
+    }
+
+    margin: 0;
+    font-size: $fs-medium-large;
+    line-height: 1.2;
+    color: $dark-blue;
+    font-family: "Granjon";
+
+    @include media($larger-screen-down) {
+      font-size: $fs-medium;
+    }
+
+
+    @include media($medium-screen-down) {
+      font-size: 1.5em;
+
+      span {
+        font-size: $fs-regular;
+      }
+    }
+  }
+}

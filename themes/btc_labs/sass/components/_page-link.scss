@@ -1,0 +1,115 @@
+.field--name-field-paragraphs {
+  clear: both;
+
+  .paragraph--type--page-link {
+    clear: both;
+    @include clearfix;
+    border-top: 1px solid $medium-gray;
+
+    &.has-link:hover {
+      transition: background-color 300ms linear;
+      background-color: $teal;
+    }
+
+    &:last-of-type {
+      border-bottom: 1px solid $medium-gray;
+    }
+
+    &.image-position-right {
+      .field--name-field-image {
+        float: right;
+      }
+    }
+  }
+
+  .field--name-field-image {
+    @include span-columns(6 of 12);
+    margin: 0;
+
+    img {
+      width: 100%;
+    }
+
+    @include media($large-screen-down) {
+      @include span-columns(12 of 12);
+    }
+  }
+
+  .text-wrapper {
+    @include span-columns(6 of 12);
+    padding: $base-spacing*7 $base-spacing*4 $large-spacing;
+    margin: 0;
+
+    @include media($extra-large-screen-down) {
+      padding-top: $base-spacing*5;
+    }
+
+    @include media($larger-screen-down) {
+      padding: $base-spacing*5 $large-spacing 0;
+    }
+
+    .field--name-field-title {
+      font-size: $fs-medium-large;
+      color: $dark-blue;
+      line-height: 1em;
+      margin-bottom: $base-spacing;
+      font-family: $secondary-font-family;
+
+      @include media($larger-screen-down) {
+        font-size: $fs-medium;
+      }
+    }
+
+    .field--name-field-body {
+      max-height: 177px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      p {
+        font-size: $fs-small;
+        color: $black;
+      }
+
+      @include media($larger-screen-down) {
+        p {
+          font-size: 0.875em;
+        }
+      }
+    }
+
+    .field--name-field-link {
+      color: $red;
+      font-weight: $fw-bold;
+
+      @include media($larger-screen-down) {
+        font-size: 0.875em;
+      }
+    }
+
+    @include media($large-screen-down) {
+      @include span-columns(12 of 12);
+      padding: $base-spacing*1.5 $base-spacing*1.5;
+    }
+  }
+
+  .image--large {
+    .field--name-field-image {
+      @include span-columns(7 of 12);
+      margin: 0;
+
+      @include media($large-screen-down) {
+        @include span-columns(12 of 12);
+      }
+    }
+
+    .text-wrapper {
+      @include span-columns(5 of 12);
+      margin: 0;
+
+      @include media($large-screen-down) {
+        padding: $base-spacing*1.5 $base-spacing*1.5;
+        @include span-columns(12 of 12);
+      }
+    }
+  }
+}

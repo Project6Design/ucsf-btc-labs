@@ -1,0 +1,113 @@
+{# Create classes array. The 'node' class is required for contextual edit links. #}
+{% set classes = [
+  'node',
+  node.bundle|clean_class,
+  view_mode ? node.bundle|clean_class ~ '--layout-' ~ view_mode|clean_class,
+] %}
+
+<article{{ attributes.addClass(classes) }}>
+
+    {% if teaser %}
+        {% if node.field_listing_image is not empty %}
+            <div class="news__listing-image">
+                <picture>
+                    <source media="(min-width: 100vw)"
+                            srcset="{{ node.field_listing_image.0.entity.uri.value|image_style('news_listing') }} 1x,
+                                    {{ node.field_listing_image.0.entity.uri.value|image_style('news_listing_lg') }} 2x"
+                            sizes="100vw" />
+                    <img src="{{ node.field_listing_image.0.entity.uri.value|image_style('news_listing') }}" alt="{{ node.field_listing_image.alt }}" />
+                </picture>
+            </div>
+        {% else %}
+            <div class="news__listing-image"></div>
+        {% endif %}
+
+        <div class="text-wrapper">
+          {{ title_prefix }}
+          {{ title_suffix }}
+          {{ content.field_date }}
+
+          <div class="news__title">
+              <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+          </div>
+
+          {{ content.body }}
+
+          <div class="news__categories">{{ news_categories }}
+        </div>
+
+    {% elseif view_mode == 'listing' %}
+        {{ title_prefix }}
+        {{ title_suffix }}
+
+        {% if node.field_listing_image is not empty %}
+            <div class="news__listing-image">
+                <picture>
+                    <source media="(min-width: 400px)"
+                            srcset="{{ node.field_listing_image.0.entity.uri.value|image_style('news_listing') }} 1x,
+                                    {{ node.field_listing_image.0.entity.uri.value|image_style('news_listing_lg') }} 2x"
+                            sizes="100vw" />
+                    <img src="{{ node.field_listing_image.0.entity.uri.value|image_style('news_listing') }}" alt="{{ node.field_listing_image.alt }}" />
+                </picture>
+            </div>
+        {% else %}
+            <div class="news__listing-image"></div>
+        {% endif %}
+
+        <div class="news__title">
+            <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+        </div>
+
+    {% else %}
+        <header>
+            {% if node.field_page_image is not empty %}
+                <div class="news__header-image header-image">
+                    <picture>
+                        <source media="(min-width: 400px)"
+                                srcset="{{ node.field_page_image.0.entity.uri.value|image_style('page_header') }} 1x,
+                                        {{ node.field_page_image.0.entity.uri.value|image_style('page_header_lg') }} 2x"
+                                sizes="100vw" />
+                        <img src="{{ node.field_page_image.0.entity.uri.value|image_style('page_header_sm') }}" alt="{{ node.field_page_image.alt }}" />
+                    </picture>
+                </div>
+            {% endif %}
+
+            <div class="back-link">
+                <a href="{{ path('entity.node.canonical', {'node': 32}) }}">&#60; {{ 'Back to News'|t }}</a>
+            </div>
+
+            <div class="share-links">
+                <div class="share-links__addthis addthis_inline_share_toolbox_gz4z"></div>
+                <!-- Go to www.addthis.com/dashboard to customize your tools -->
+                <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a9051e349db59a8"></script>
+            </div>
+
+            <div class="date">
+                {{ content.field_date }}
+            </div>
+
+            {% if not node.published %}
+                <p class="node--unpublished">{{ 'Unpublished'|t }}</p>
+            {% endif %}
+        </header>
+
+        <section class="content">
+            {{ title_prefix }}
+            <h1>{{ label }}</h1>
+            {{ title_suffix }}
+
+            {{ content.field_introduction }}
+
+            {{ content.body }}
+
+            {{ content.field_paragraphs }}
+            {{ content.field_featured_publications }}
+        </section>
+
+        <aside class="sidebar">
+            {{ drupal_block('views_block__news_categories_block_list') }}
+        </aside>
+
+    {% endif %}
+
+</article>

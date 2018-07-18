@@ -1,0 +1,187 @@
+[id^=block-] {
+  &.text-position-center {
+    .field--name-body {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      margin-top: $large-spacing*2;
+      width: 100%;
+      max-width: 962px;
+      padding: 0;
+
+      p {
+        font-size: $fs-medium-large;
+        font-family: $secondary-font-family;
+        line-height: 1.2em;
+        .btn--primary {
+          line-height: 1.8em;
+        }
+      }
+
+      .btn--primary {
+        margin-top: $base-spacing;
+      }
+
+      @include media($large-screen-down) {
+        padding: 0 $base-spacing*1.5;
+        p {
+          font-size: $fs-regular;
+        }
+      }
+
+      @include media($medium-screen-down) {
+        color: $dark-blue;
+        position: static;
+        transform: none;
+      }
+    }
+  }
+
+  &.text-position-right {
+    .field--name-body {
+      position: absolute;
+      top: 50%;
+      right: 2%;
+      transform: translateY(-50%);
+      max-width: 1052px;
+      padding: 0 $base-spacing*5.5;
+      color: $white;
+
+
+      p {
+        font-size: $fs-small
+      }
+
+      .btn--primary {
+        margin-top: $base-spacing;
+      }
+
+      @include media($large-screen-down) {
+        padding: 0 $base-spacing*1.5;
+      }
+
+      @include media($medium-screen-down) {
+        padding-top: $base-spacing*1.5;
+        color: $dark-blue;
+        position: static;
+        transform: none;
+
+        h2 {
+          color: $dark-blue;
+          font-size: 2em
+        }
+      }
+    }
+  }
+
+  &.text-position-left {
+    .field--name-body {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 1052px;
+      padding: 0 $base-spacing*5.5;
+      color: $white;
+
+
+      p {
+        font-size: $fs-small
+      }
+
+      .btn--primary {
+        margin-top: $base-spacing;
+      }
+
+      @include media($large-screen-down) {
+        padding: 0 $base-spacing*1.5;
+      }
+
+      @include media($medium-screen-down) {
+        padding-top: $base-spacing*1.5;
+        color: $dark-blue;
+        position: static;
+        transform: none;
+
+        h2 {
+          color: $dark-blue;
+          font-size: 2em
+        }
+      }
+    }
+  }
+
+  &.text-color-white {
+    @include media($medium-screen-down) {
+      background: $white;
+    }
+
+    h2 {
+      color: $white;
+
+      @include media($medium-screen-down) {
+        color: $dark-blue;
+      }
+    }
+    .field--name-body {
+      color: $white;
+
+      @include media($medium-screen-down) {
+        color: $dark-blue;
+      }
+    }
+  }
+
+  &.text-color-dark-blue {
+    h2 {
+      color: $dark-blue;
+      margin: 0;
+      line-height: 35px;
+    }
+
+    p {
+      color: $dark-blue;
+      font-size: $fs-regular;
+
+      &:first-of-type {
+        font-family: "Granjon Italic";
+        color: $red;
+        font-size: $fs-medium-large;
+      }
+    }
+  }
+
+  &.text-color-medium-blue {
+    h2 {
+      color: $blue;
+      margin: 0;
+      line-height: 35px;
+    }
+
+    p {
+      color: $blue;
+      font-size: $fs-regular;
+    }
+  }
+}
+
+#highlighted {
+  .block-type-background_image {
+    position: relative;
+    margin-top: -130px;
+
+    @include media($medium-screen-down) {
+      margin-top: 0;
+    }
+  }
+}
+
+
+#content {
+  .block-type-background_image {
+    .arrow-down-icon {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{# Create classes array. The 'node' class is required for contextual edit links. #}
+{% set classes = [
+  'node'
+] %}
+
+{# BEM inspired class syntax: https://en.bem.info/
+   Enable this code if you would like node classes like "article article--layout-teaser", where article is the content type and teaser is the view mode.
+{% set classes = classes|merge([
+  node.bundle|clean_class,
+  view_mode ? node.bundle|clean_class ~ '--layout-' ~ view_mode|clean_class
+]) %}
+{% set title_classes = [
+  node.bundle|clean_class ~ '__title'
+] %}
+#}
+
+<article{{ attributes.addClass(classes) }}>
+
+  {% if teaser %}
+
+    {% if node.field_listing_image is not empty %}
+      <div class="publication__listing-image">
+        <picture>
+          <source media="(min-width: 100vw)"
+                  srcset="{{ node.field_listing_image.0.entity.uri.value|image_style('research_listing') }} 1x,
+                          {{ node.field_listing_image.0.entity.uri.value|image_style('research_listing_lg') }} 2x"
+                  sizes="100vw" />
+          <img src="{{ node.field_listing_image.0.entity.uri.value|image_style('resource_listing') }}" alt="{{ node.field_listing_image.alt }}" />
+        </picture>
+      </div>
+    {% endif %}
+
+    <div class="text-wrapper">
+      <div class="publication__title">
+        <h2>{{ label }}</h2>
+      </div>
+
+      {{ content.field_publication_authors }}
+
+      <div class="publication__description">
+        {% if content.body|render %}
+          {{ content.body.0 }}
+        {% elseif description %}
+          {{ description|raw }}
+        {% endif %}
+      </div>
+
+      {% if node.field_publication_download is not empty %}
+        <span class="publication__download">
+          <a href="{{ file_url(node.field_publication_download.entity.uri.value) }}" class="dl-button"><i class="dl-icon"></i> Download</a>
+        </span>
+      {% endif %}
+
+      {% if node.field_publication_download is not empty and node.field_publication_link.0 %}
+        <span class="spacer">|</span>
+      {% endif %}
+
+      {% if node.field_publication_link.0 %}
+        <span class="publication__link">
+          <a href="{{ node.field_publication_link.0.url }}" class="more-link" target="_blank">PubMed Link &#62;</a>
+        </span>
+      {% endif %}
+
+    </div>
+
+  {% else %}
+
+    {% if title_prefix or title_suffix or display_submitted or unpublished or page is empty and label %}
+      <header>
+        {{ title_prefix }}
+        {# {% if not page and label %} #}
+          <h1{{ title_attributes.addClass(title_classes) }}>
+            {# <a href="{{ url }}" rel="bookmark"> #}{{ label }}{# </a> #}
+          </h1>
+        {# {% endif %} #}
+        {{ title_suffix }}
+
+        {% if display_submitted %}
+          <div class="submitted">
+            {{ author_picture }}
+            {% trans %}Submitted by {{ author_name }} on {{ date }}{% endtrans %}
+            {{ metadata }}
+          </div>
+        {% endif %}
+
+        {% if not node.published %}
+          <p class="node--unpublished">{{ 'Unpublished'|t }}</p>
+        {% endif %}
+      </header>
+    {% endif %}
+
+    <div{{ content_attributes.addClass('content') }}>
+      {{ content|without('links') }}
+    </div><!-- /.content -->
+
+    {% if content.links %}
+      <div class="links">
+        {{ content.links }}
+      </div><!-- /.links -->
+    {% endif %}
+
+  {% endif %}
+
+</article><!-- /.node -->

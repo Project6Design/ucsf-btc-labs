@@ -1,0 +1,120 @@
+.block-views-block-publications-block-1,
+.publications-page {
+  margin-bottom: 2rem;
+
+  .header-row {
+    padding: 0 15.5rem;
+
+    h1 {
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
+  }
+
+  .views-row {
+    clear: both;
+    padding: 40px 0;
+    margin: 0 5.5rem;
+    border-top: 1px solid #ccc;
+    // border-bottom: 1px solid #ccc;
+    min-height: 300px;
+
+    @include media($medium-screen-down) {
+      margin: 0 1.5rem;
+    }
+
+    h2 {
+      font-size: 2.3em;
+
+      @include media($medium-screen-down) {
+        font-size: 1.8em;
+      }
+
+      a {
+        color: $dark-blue;
+      }
+    }
+
+    .publication__link {
+      display: inline-block
+    }
+
+    .publication__listing-image {
+      float: right;
+      margin: 0 0 1em 1em;
+
+      @include media($medium-screen-down) {
+        float: none;
+        margin: 0 0 1em 0;
+      }
+    }
+
+    .field--name-field-publication-authors {
+      p {
+        line-height: 1.4em;
+        font-size: 1.2em;
+        margin-bottom: 25px;
+      }
+    }
+
+    .publication__description {
+      font-size: 1.1rem;
+      line-height: 1.3rem;
+      margin-bottom: 1.5rem;
+
+      p {
+        font-size: 1.1rem;
+        line-height: 1.3rem;
+        margin: 0;
+      }
+    }
+
+    .spacer {
+      margin: 0 0.75rem;
+    }
+
+    .publication__download {
+      display: inline-block;
+    }
+  }
+}
+
+a.dl-button {
+  .dl-icon {
+    width: 25px;
+    height: 25px;
+    display: inline-block;
+    background: url(../../images/PDF.svg);
+    background-size: contain;
+    position: relative;
+    top: 5px;
+  }
+
+  color: #EB093C;
+  font-size: 18px;
+}
+
+.btn-publish {
+  background-color: #EB093C;
+  border-radius: 5px;
+  text-align: center;
+  padding: 1rem 4rem;
+  color: #FFFFFF;
+  font-size: 18px;
+  display: inline-block;
+  margin: 20px 0 4rem 5.5rem;
+  border: 2px solid #EB093C;
+  font-family: "Helvetica Bold";
+  font-weight: 500;
+  text-decoration: none !important;
+
+  &:hover {
+    color: #EB093C;
+    background-color: white;
+  }
+
+   @include media($medium-screen-down) {
+    margin: 2rem 1.5rem;
+    padding: .5rem 2rem;
+   }
+}

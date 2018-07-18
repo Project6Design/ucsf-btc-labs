@@ -1,0 +1,90 @@
+.paragraph--type--accordion {
+  clear: both;
+
+  &.last {
+    border-bottom: 1px solid $dark-gray;
+    margin-bottom: $large-spacing*3;
+    @include clearfix;
+  }
+
+  a {
+    color: $red;
+  }
+
+  ul {
+    margin: $base-spacing 0;
+    margin-left: $large-spacing;
+    font-size: $fs-small;
+
+    list-style: disc outside none; 
+    padding-left: 20px;
+
+    ul {
+      font-size: 1em;
+    }
+  }
+
+  ol {
+    margin: $base-spacing 0;
+    margin-left: $large-spacing;
+    font-size: $fs-small;
+
+    list-style: disc outside none; 
+    list-style-type: decimal;
+    padding-left: 20px;
+
+    ol {
+      font-size: 1em;
+      list-style-type: lower-alpha;
+    }
+  }
+
+  .field--name-field-title {
+    font-family: $secondary-font-family;
+    font-size: $fs-medium-large;
+    border-top: 1px solid $dark-gray;
+    padding: $base-spacing $large-spacing $base-spacing 0;
+    color: $dark-blue;
+    cursor: pointer;
+    position: relative;
+
+    &:after {
+      content: "";
+      background: url("../../images/optimized/plus.svg") no-repeat center center;
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    @include media($large-screen-down) {
+      font-size: $fs-regular-medium;
+    }
+
+    @include media($medium-screen-down) {
+      font-size: $fs-regular;
+    }
+  }
+
+  .field--name-field-body {
+    display: none;
+
+    p {
+      font-size: $fs-small;
+    }
+  }
+
+  &.open {
+    .field--name-field-title {
+      &:after {
+        background: url("../../images/optimized/minus.svg") no-repeat center center;
+      }
+    }
+
+    .field--name-field-body {
+      display: block;
+    }
+  }
+}

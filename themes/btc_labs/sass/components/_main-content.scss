@@ -1,0 +1,358 @@
+//overylay activated by main menu hover dropdowns
+body {
+  position: relative;
+
+  header {
+    @include clearfix;
+  }
+
+  &:before {
+    transition: 300ms;
+    content: "";
+    pointer-events: none;
+    display: none;
+    position: absolute;
+    top: 165px;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    z-index: 3;
+    bottom: 0;
+
+    @include media($medium-screen-down) {
+      top: 215px;
+    }
+  }
+
+  &.menu-active {
+    &:before {
+      //background-color: rgba(0, 0, 0, 0.3);
+
+    }
+  }
+
+  &.modal-open {
+    overflow: hidden;
+  }
+}
+
+//basic pages
+.node-type-sf_page {
+  .block-btc-labs-content {
+    .back-link, .date {
+      padding: 0 ($base-spacing * 5.5);
+
+      @include media($large-screen-down) {
+        padding: 0 ($base-spacing * 1.5);
+      }
+    }
+
+    .content__top,
+    .content__bottom .paragraph {
+      //margin-top: 90px;
+      margin: 0 ($base-spacing * 15.5);
+
+      @include media($large-screen-down) {
+        margin: 0 ($base-spacing * 1.5);
+      }
+    }
+
+    .content__bottom {
+      .paragraph--type--page-link {
+        margin: 0;
+      }
+
+      .paragraph--type--quote {
+        padding: $base-spacing*4 $base-spacing*6;
+        margin: $large-spacing*2 ($base-spacing * 15.5);
+
+        @include media($large-screen-down) {
+          padding: $base-spacing*2;
+          margin: $base-spacing*2 ($base-spacing * 1.5);
+        }
+      }
+    }
+  }
+}
+
+//sub listing and detail pages with no sidebar
+[class*="page-condition-"] {
+  .block-btc-labs-content {
+    .back-link, .date {
+      padding: 0 ($base-spacing * 5.5);
+
+      @include media($large-screen-down) {
+        padding: 0 ($base-spacing * 1.5);
+      }
+    }
+
+    .content {
+      padding: 0 ($base-spacing * 15.5);
+
+      @include media($large-screen-down) {
+        padding: 0 ($base-spacing * 1.5);
+      }
+    }
+
+    //page-link sections need to be full width
+    article .field--name-field-paragraphs {
+      padding: 0 ($base-spacing * 15.5);
+
+      @include media($large-screen-down) {
+        padding: 0 ($base-spacing * 1.5);
+      }
+
+
+      .paragraph--type--page-link {
+        margin-left: -$base-spacing * 15.5;
+        margin-right: -$base-spacing * 15.5;
+
+        @include media($large-screen-down) {
+          margin-left: 0;
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}
+
+[class*="page-clinical-trial-"],
+[class*="page-treatment-"],
+[class*="page-treatments-"],
+[class*="page-news-"] {
+  .block-btc-labs-content {
+    .back-link, .date {
+      padding: 0 ($base-spacing * 5.5);
+
+      @include media($large-screen-down) {
+        padding: 0 ($base-spacing * 1.5);
+      }
+    }
+
+    .content {
+      padding: 0 ($base-spacing * 15.5);
+
+      @include media($large-screen-down) {
+        padding: 0 ($base-spacing * 1.5);
+      }
+    }
+
+    //page-link sections need to be full width
+    article .field--name-field-paragraphs {
+      padding: 0 0;
+
+      .paragraph--type--page-link {
+        margin-left: -$base-spacing * 10.5;
+        margin-right: -$base-spacing * 10.5;
+
+        @include media($large-screen-down) {
+          margin-left: 0;
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}
+
+//pages that have a sidebar
+.has-sidebar .block-btc-labs-content article {
+  .content {
+    @include clearfix;
+    @include span-columns(8 of 12);
+
+    padding-right: 0;
+    margin-right: 0;
+    padding-left: $base-spacing * 5.5;
+
+    @include media($large-screen-down) {
+      @include span-columns(12 of 12);
+
+      padding: 0 ($base-spacing * 1.5);
+    }
+  }
+
+  &.sf-page {
+    .content {
+      float: none;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar {
+      float: right;
+      margin-left: 0;
+    }
+
+    .content__top,
+    .content__bottom .paragraph {
+      @include clearfix;
+      @include span-columns(8 of 12);
+
+      padding-right: 0;
+      margin: 0 0 0 $base-spacing * 5.5;
+
+      @include media($large-screen-down) {
+        float: none;
+        width: auto;
+        margin: 0 ($base-spacing * 1.5);
+        padding: 0;
+
+        &:last-child {
+          margin: 0 ($base-spacing * 1.5);
+        }
+      }
+    }
+
+    .content__bottom {
+      .paragraph--type--page-link {
+        float: none;
+        width: 100%;
+        padding: 0;
+        margin: 0 !important;
+      }
+
+      .paragraph--type--quote {
+        padding: $base-spacing*4 $base-spacing*6;
+        margin: $large-spacing*2 0 $large-spacing*2 ($base-spacing * 5.5);
+
+        @include media($large-screen-down) {
+          margin: $base-spacing*2 $base-spacing;
+          padding: $base-spacing*2;
+
+          &:last-child {
+            margin: $base-spacing*2 $base-spacing;
+          }
+        }
+      }
+    }
+  }
+
+  .paragraph--type--text-area {
+    @include clearfix;
+    @include span-columns(8 of 12);
+
+    @include media($large-screen-down) {
+      @include span-columns(12 of 12);
+    }
+  }
+
+  > .field--name-field-paragraphs {
+    padding: 0 ($base-spacing * 5.5);
+
+    @include media($large-screen-down) {
+      padding: 0 ($base-spacing * 1.5);
+    }
+
+
+    .paragraph--type--page-link {
+      margin-left: -$base-spacing * 5.5;
+      margin-right: -$base-spacing * 5.5;
+
+      @include media($large-screen-down) {
+        margin-left: -$base-spacing * 1.5;
+        margin-right: -$base-spacing * 1.5;
+      }
+    }
+
+    .paragraph--type--accordion {
+      @include clearfix;
+      @include span-columns(8 of 12);
+
+      padding-right: 0;
+      margin-right: 0;
+
+      .field--name-field-title {
+        font-size: $fs-medium;
+      }
+
+      @include media($large-screen-down) {
+        @include span-columns(12 of 12);
+
+        padding: 0;
+      }
+    }
+  }
+}
+
+//special sidebar case
+[class*="page-clinical-trial-"].has-sidebar,
+[class*="page-news-"].has-sidebar {
+  .sidebar {
+    display: block !important;
+  }
+}
+
+//bio detail with sidebar
+body.has-sidebar .block-btc-labs-content .sf-person--layout-full {
+  .content {
+    @include clearfix;
+    @include span-columns(8 of 12);
+
+    padding-right: 0;
+    margin-right: 0;
+
+    @include media($medium-screen-down) {
+      @include span-columns(12 of 12);
+
+      padding: 0 ($base-spacing * 1.5);
+    }
+  }
+
+  .paragraph--type--text-area {
+    @include clearfix;
+    @include span-columns(8 of 12);
+
+    padding-right: 0;
+    margin-right: 0;
+
+    .field--name-field-title {
+      font-size: $fs-medium;
+    }
+
+    @include media($medium-screen-down) {
+      @include span-columns(12 of 12);
+
+      padding: 0;
+    }
+  }
+}
+
+//pages with no sidebar
+body[class*='page-patients-']:not(.page-patient-tools) .block-btc-labs-content article.no-sidebar,
+body[class*='page-physicians-']:not(.page-physician-tools) .block-btc-labs-content article.no-sidebar {
+  .content, .back-link, .date {
+    padding: 0 ($base-spacing * 15.5);
+
+    @include media($large-screen-down) {
+      padding: 0 ($base-spacing * 1.5);
+    }
+  }
+}
+
+.block-btc-labs-content .content h1 {
+  margin-bottom: $large-spacing;
+  margin-top: $large-spacing;
+
+  @include media($medium-screen-down) {
+    margin: $base-spacing 0;
+  }
+}
+
+.views-element-container {
+  .views-row {
+    padding: 0 ($base-spacing * 5.5);
+
+    @include media($medium-screen-down) {
+      padding: 0 ($base-spacing * 1.5);
+    }
+  }
+}
+
+.paragraph--type--page-link {
+  border-top: none !important;
+
+  &.paragraph--view-mode--default {
+    background-color: #F8F8F9;
+  }
+}

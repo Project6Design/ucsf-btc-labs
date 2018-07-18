@@ -1,0 +1,51 @@
+.field--name-field-introduction {
+  > ul {
+    list-style-position: inside;
+    list-style-type: disc;
+    margin: $base-spacing 0;
+    margin-left: $large-spacing*2;
+    font-size: $fs-small;
+
+    li {
+      font-size: $fs-small;
+      margin-bottom: $large-spacing;
+    }
+
+    ul {
+      li {
+        font-size: 1em;
+      }
+    }
+  }
+
+  ol {
+    list-style-position: inside;
+    list-style-type: decimal;
+    margin: $base-spacing 0;
+    margin-left: $large-spacing;
+    font-size: $fs-small;
+
+    ol {
+      font-size: 1em;
+    }
+  }
+
+  a {
+    color: $red;
+  }
+
+  p {
+    font-size: $fs-regular;
+  }
+
+  @include media($large-screen-down) {
+    padding: 0;
+  }
+
+  @include media($medium-screen-down) {
+    p {
+      font-size: 1.3em;
+      line-height: 1.5;
+    }
+  }
+}

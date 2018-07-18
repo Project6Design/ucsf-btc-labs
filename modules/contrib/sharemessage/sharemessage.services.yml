@@ -1,0 +1,4 @@
+services:
+  plugin.manager.sharemessage.share:
+    class: Drupal\sharemessage\SharePluginManager
+    parent: default_plugin_manager

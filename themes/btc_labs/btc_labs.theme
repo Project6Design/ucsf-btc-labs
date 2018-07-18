@@ -1,0 +1,318 @@
+<?php
+
+/**
+ * @file
+ * Preprocess functions for BTC Labs.
+ */
+
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\file\Entity\File;
+
+/**
+ * Prepares variables for the html.html.twig template.
+ */
+function btc_labs_preprocess_html(&$variables) {
+  try {
+    $variables['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
+  }
+  catch (Exception $e) {
+    // If the database is not yet available, set default values for these
+    // variables.
+    $variables['is_front'] = FALSE;
+  }
+
+  // If we're on the front page.
+  if (!$variables['is_front']) {
+    // Add unique classes for each page and website section.
+    $path = \Drupal::service('path.current')->getPath();
+    $alias = \Drupal::service('path.alias_manager')->getAliasByPath($path);
+    $alias = trim($alias, '/');
+    if (!empty($alias)) {
+      $name = str_replace('/', '-', $alias);
+      $variables['attributes']['class'][] = 'page-' . $name;
+      list($section,) = explode('/', $alias, 2);
+      if (!empty($section)) {
+        $variables['attributes']['class'][] = 'section-' . $section;
+      }
+    }
+  }
+
+  // Check, if this is a node page.
+  if ($node = \Drupal::routeMatch()->getParameter('node')) {
+      $variables['attributes']['class'][] = 'node-type-' . $node->getType();
+      $variables['attributes']['class'][] = 'node-id-' . $node->id();
+
+      if (($node->field_sidebar && $node->field_sidebar->getValue())) {
+        $variables['attributes']['class'][] = 'has-sidebar';
+      }
+      else {
+        $variables['attributes']['class'][] = 'no-sidebar';
+      }
+  }
+
+  // Add cachability metadata.
+  $theme_name = \Drupal::theme()->getActiveTheme()->getName();
+  $theme_settings = \Drupal::config($theme_name . '.settings');
+  CacheableMetadata::createFromRenderArray($variables)
+    ->addCacheableDependency($theme_settings)
+    ->applyTo($variables);
+  // Union all theme setting variables to the html.html.twig template.
+  $variables += $theme_settings->getOriginal();
+
+  // Define Pantheon environment.
+  $variables['environment'] = 'local';
+
+  if (isset($_ENV['PANTHEON_ENVIRONMENT'])) {
+    $variables['environment'] = $_ENV['PANTHEON_ENVIRONMENT'];
+  }
+}
+
+/**
+ * Prepares variables for the page.html.twig template.
+ */
+function btc_labs_preprocess_page(&$vars) {
+
+  $vars['footer_logo'] = '/' . theme_get_setting('footer_logo');
+
+  if ($copyright = theme_get_setting('copyright')) {
+    $vars['copyright'] = $copyright['value'];
+  }
+
+  if ($contact_info = theme_get_setting('contact_info')) {
+    $vars['contact_info'] = $contact_info['value'];
+  }
+
+  $vars['facebook'] = theme_get_setting('facebook');
+  $vars['twitter'] = theme_get_setting('twitter');
+  $vars['instagram'] = theme_get_setting('instagram');
+
+  // Create mobile menu based on main and meta menu.
+  $menu_tree = \Drupal::menuTree();
+  $manipulators = array(
+      // Only show links that are accessible for the current user.
+      array('callable' => 'menu.default_tree_manipulators:checkAccess'),
+      // Use the default sorting of menu links.
+      array('callable' => 'menu.default_tree_manipulators:generateIndexAndSort'),
+  );
+
+  $main_parameters = $menu_tree->getCurrentRouteMenuTreeParameters('main');
+  $main_tree = $menu_tree->load('main', $main_parameters);
+  $main_tree = $menu_tree->transform($main_tree, $manipulators);
+
+  $meta_parameters = $menu_tree->getCurrentRouteMenuTreeParameters('meta-menu');
+  $meta_tree = $menu_tree->load('meta-menu', $meta_parameters);
+  // Remove quick links.
+  // unset($meta_tree['menu_link_content:b4a5530b-bd2b-4388-a861-725895c7dc8d']);
+  $meta_tree = $menu_tree->transform($meta_tree, $manipulators);
+
+  $mobile_tree = array_merge($main_tree, $meta_tree);
+  $vars['mobile_menu'] = $menu_tree->build($mobile_tree);
+}
+
+/**
+ * Implements hook_preprocess_node().
+ */
+function btc_labs_preprocess_node(&$vars)
+{
+    $node = $vars['node'];
+    $view_mode = $vars['view_mode'];
+    $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+
+    switch ($node->getType()) {
+      case 'sf_person':
+        $vars['title'] = $node->getTitle();
+        $degree_ids = $node->field_degree->getValue();
+
+        $degrees = [];
+
+        foreach ($degree_ids as $did) {
+          $deg_term = $term_storage->load($did['target_id']);
+          $degrees[] = $deg_term->getName();
+        }
+
+        if ($degrees) {
+          $vars['title'] .= ', ' . implode(', ', $degrees);
+        }
+
+        break;
+
+      case 'clinical_trial':
+        if ($view_mode == 'full') {
+          if ($invest_ids = $node->field_lab_investigators->getValue()) {
+            $invest_ids = array_map(function ($item) {
+                return $item['target_id'];
+            }, $invest_ids);
+
+
+            $investigators = $node_storage->loadMultiple($invest_ids);
+
+            $vars['investigators'] = [];
+
+            foreach ($investigators as $inv) {
+              $title = $inv->getTitle();
+
+              $degree_ids = $inv->field_degree->getValue();
+              $degrees = [];
+
+              foreach ($degree_ids as $did) {
+                $deg_term = $term_storage->load($did['target_id']);
+                $degrees[] = $deg_term->getName();
+              }
+
+              if ($degrees) {
+                $title .= ', ' . implode(', ', $degrees);
+              }
+
+              $vars['investigators'][] = [
+                'title' => $title,
+                'url' => $inv->toUrl()->toString()
+              ];
+            }
+          }
+        }
+        else if ($view_mode == 'teaser') {
+          $ages = $node->field_ct_age->getValue();
+          $is_pediatrics = false;
+
+          foreach ($ages as $a) {
+            if ($a['target_id'] == 60) {
+              $is_pediatrics = true;
+              break;
+            }
+          }
+
+
+          $vars['pediatrics'] = $is_pediatrics;
+        }
+
+
+        break;
+
+      case 'publication':
+        $journal = $node->field_journal->value;
+        $year = $node->field_year->value;
+        $date = $node->field_publication_date->value;
+        $volume = $node->field_volume->value;
+        $issue = $node->field_issue->value;
+        $pages = $node->field_pages->value;
+        $doi = $node->field_doi->value;
+        $epub_info = $node->field_epub_info->value;
+        $description = '';
+
+        if ($journal) {
+          $description = '<em>' . $journal . '</em>. ';
+        }
+
+        if ($year || $date) {
+          $ymd = '';
+
+          if ($year) {
+            $ymd = $year;
+          }
+
+          if ($date) {
+            $ymd .= ' ' . date("M j",strtotime($date));
+          }
+
+          $description .= $ymd . '; ';
+        }
+
+        if ($volume || $issue) {
+          $voliss = '';
+
+          if ($volume) {
+            $voliss = $volume . '</strong>';
+          }
+
+          if ($issue) {
+            $voliss .= ' (' . $issue . ')';
+          }
+
+          $description .= $voliss . ': ';
+        }
+
+        if ($pages) {
+          $description .= $pages . '. ';
+        }
+
+        if ($doi) {
+          $description .= 'doi: ' . $doi . '. ';
+        }
+
+        if ($epub_info) {
+          $description .= $epub_info . '. ';
+        }
+
+        $vars['description'] = $description;
+
+        break;
+
+    }
+
+}
+
+/**
+ * Implements hook_preprocess_block().
+ */
+function btc_labs_preprocess_block(&$vars) {
+    // Add the bundle class for content blocks.
+    if ($vars['configuration']['provider'] == 'block_content') {
+        $bid = $vars['elements']['#contextual_links']['block_content']['route_parameters']['block_content'];
+        $vars['bid'] = $bid;
+        $block = \Drupal\block_content\Entity\BlockContent::load($bid);
+
+        $vars['attributes']['class'][] = 'block-type-' . $block->bundle();
+
+        switch ($block->bundle()) {
+            case 'background_image':
+                $vars['text_position'] = $block->field_text_position->value;
+                $vars['text_color'] = $block->field_text_color->value;
+                $vars['image_alt'] = $block->field_image->alt;
+
+                if ($image = File::load($block->field_image->target_id)) {
+                  $vars['image_uri'] = $image->getFileUri();
+                }
+                break;
+
+            case 'hero_slider':
+              // Make sure this block is not cached.
+              $vars['#cache']['max-age'] = 0;
+
+              // Selected a random slide.
+              if ($count = count($vars['content']['field_slides']['#items'])) {
+                $rand = rand(0, $count - 1);
+
+                $vars['content']['field_slides'][0] = $vars['content']['field_slides'][$rand];
+
+                for ($i = 1; $i < $count; $i++) {
+                  unset($vars['content']['field_slides'][$i]);
+                }
+              }
+        }
+    }
+}
+
+/**
+ * Implements hook_theme_suggestion_HOOK_alter().
+ */
+function btc_labs_theme_suggestions_block_alter(array &$suggestions, array $vars) {
+
+    // Add the block bundle to the theme suggestions.
+    if ($vars['elements']['#configuration']['provider'] == 'block_content') {
+        $bid = $vars['elements']['#contextual_links']['block_content']['route_parameters']['block_content'];
+        $block = \Drupal\block_content\Entity\BlockContent::load($bid);
+        $suggestions[] = 'block__block_content__' . $block->bundle();
+    }
+}
+
+
+/**
+ * Prepares variables for the field.html.twig template.
+ */
+function btc_labs_preprocess_field(&$variables, $hook) {
+  // Make additional variables available to the template.
+  $variables['bundle'] = $variables['element']['#bundle'];
+}
+
+

@@ -1,0 +1,34 @@
+addthis:
+  remote: http://addthis.com
+  version: -1
+  license:
+    name: Properitary
+    url: http://addthis.com
+    gpl-compatible: false
+  js:
+    //s7.addthis.com/js/300/addthis_widget.js: { type: external }
+    js/addthis.js: {}
+
+sharrre:
+  js:
+    js/sharrre.js: {}
+  css:
+    component:
+      css/sharemessage.sharrre.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+
+socialshareprivacy:
+  remote: http://panzi.github.io/SocialSharePrivacy/
+  license:
+    name: MIT
+    url: https://github.com/panzi/SocialSharePrivacy
+  js:
+    js/socialshareprivacy.js: {}
+  css:
+    component:
+      css/sharemessage.socialshareprivacy.css: {}
+  dependencies:
+    - core/jquery
+    - core/drupal

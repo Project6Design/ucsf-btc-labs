@@ -1,0 +1,27 @@
+.paragraph--type--two-columns {
+  @include clearfix;
+
+  p {
+    font-size: $fs-small;
+
+    @include media($medium-screen-down) {
+      font-size: 1rem;
+    }
+  }
+
+  div {
+    @include span-columns(6 of 12);
+
+    @include media($large-screen-down) {
+      @include span-columns(12 of 12);
+    }
+  }
+
+  .field--type-text-long {
+    padding: 0 50px;
+
+    @include media($large-screen-down) {
+      padding: 0;
+    }
+  }
+}

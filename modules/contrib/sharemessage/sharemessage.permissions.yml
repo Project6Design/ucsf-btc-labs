@@ -1,0 +1,4 @@
+view sharemessages:
+  title: 'View Share Message entities.'
+administer sharemessages:
+  title: 'Administer Share Message entities.'

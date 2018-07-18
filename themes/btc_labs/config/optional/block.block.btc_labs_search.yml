@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - search
+  theme:
+    - btc_labs
+id: btc_labs_search
+theme: btc_labs
+region: sidebar_first
+weight: -1
+provider: null
+plugin: search_form_block
+settings:
+  id: search_form_block
+  label: Search
+  provider: search
+  label_display: visible
+visibility: {  }

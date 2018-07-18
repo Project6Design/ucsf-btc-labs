@@ -1,0 +1,21 @@
+sharemessage.sharemessage_list:
+  route_name: entity.sharemessage.collection
+  base_route: entity.sharemessage.collection
+  title: 'List'
+  weight: -10
+sharemessage.settings.settings:
+  route_name: sharemessage.settings.settings
+  base_route: entity.sharemessage.collection
+  title: 'Global settings'
+sharemessage.addthis.settings:
+  route_name: sharemessage.addthis.settings
+  base_route: entity.sharemessage.collection
+  title: 'AddThis settings'
+sharemessage.sharrre.settings:
+  route_name: sharemessage.sharrre.settings
+  base_route: entity.sharemessage.collection
+  title: 'Sharrre settings'
+sharemessage.socialshareprivacy.settings:
+  route_name: sharemessage.socialshareprivacy.settings
+  base_route: entity.sharemessage.collection
+  title: 'Social Share Privacy settings'

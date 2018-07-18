@@ -1,0 +1,201 @@
+<?php
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+
+/**
+ * Implements hook_preprocess_HOOK() for html.html.twig.
+ */
+function sitefarm_core_preprocess_html(array &$variables) {
+  // The metatag module ads a pipe to the meta title before it gets to the theme
+  // In some cases it will have a prefixed pipe on the home page. Remove it.
+  /** @var \Drupal\sitefarm_core\Hooks\Preprocess $helper */
+  $helper = \Drupal::service('sf.hooks.preprocess');
+  $helper->fixMetatagFrontTitle($variables);
+}
+
+/**
+ * Implements hook_preprocess_HOOK() for node.html.twig.
+ */
+function sitefarm_core_preprocess_node(array &$variables) {
+  // Add featured status from the field_sf_featured_status field
+  /** @var \Drupal\sitefarm_core\Hooks\NodeDisplay $helper */
+  $helper = \Drupal::service('sf.hooks.node_display');
+  $helper->addFeaturedStatus($variables);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function sitefarm_core_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Fetch Helper services
+  /** @var \Drupal\sitefarm_core\Hooks\FormAlter $helper */
+  $helper = \Drupal::service('sf.hooks.form_alter');
+  /** @var \Drupal\sitefarm_core\Hooks\BlockPlace $block_helper */
+  $block_helper = \Drupal::service('sf.hooks.block_place');
+
+  // Move the Feature Content field to the Promotion Options group
+  $helper->moveFeaturedToOptionsGroup($form);
+
+  // Create a Categorizing tray for types with taxonomy references
+  $helper->createCategorizingGroup($form);
+
+  // Move the tags and branding fields to the Categorization group
+  $helper->moveTagsToCategorizingGroup($form);
+
+  // Alter the 'Add another item' text on the Email field
+  $helper->setAddAnotherItemLabel($form, 'field_sf_emails', 'Add another email');
+
+  // Alter the 'Add another item' text on the Phone Number field
+  $helper->setAddAnotherItemLabel($form, 'field_sf_phone_numbers', 'Add another phone number');
+
+  // Alter the 'Add another item' text on the Website field
+  $helper->setAddAnotherItemLabel($form, 'field_sf_websites', 'Add another Website');
+
+  // Add javascript to check the url path and populate the path visibility with
+  // the current page if using the Place Block module
+  $block_helper->attachBlockVisibilityJs($form, $form_id);
+}
+
+/**
+ * hook_form_BASE_FORM_ID_alter() for the node_form.
+ */
+function sitefarm_core_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Fetch Helper services
+  /** @var \Drupal\sitefarm_core\Hooks\NodeFormAlter $node_helper */
+  $node_helper = \Drupal::service('sf.hooks.node_form_alter');
+
+  // Remove the menu 'Weight' field so that it doesn't confuse people
+  $node_helper->removeMenuWeight($form);
+
+  // Change the Meta Tags label to 'SEO'
+  $node_helper->setMetaTagsTitle($form, 'SEO');
+
+  // Attach javascript to ensure that required javascript fields don't go under
+  // the admin toolbar
+  $node_helper->attachToolbarHidingPreventionJs($form);
+
+  // Add a label to the sidebar
+  $node_helper->addTitleToSidebar($form, 'Additional Options');
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter()
+ *
+ * For the ID form_content form.
+ */
+function sitefarm_core_form_block_content_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  /** @var \Drupal\sitefarm_core\BlockContentGenerateDescription $generator */
+  $generator = \Drupal::service('sf.block_content_generate_description');
+  $generator->createFromTitle($form);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter()
+ *
+ * For the ID form_block.
+ */
+function sitefarm_core_form_block_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Fetch Helper services
+  /** @var \Drupal\sitefarm_core\Hooks\BlockFormAlter $block_helper */
+  $block_helper = \Drupal::service('sf.hooks.block_form_alter');
+
+  // Hide the following visibility options
+  $block_helper->hideVisibilityOptions($form);
+
+  // Move the path visibility to the top
+  $block_helper->movePathVisibilityToTop($form);
+
+  // Remove Views contextual filter UI elements from Block Configuration
+  $block_helper->removeViewsContextualElements($form, $form_id);
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function sitefarm_core_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+  // Hide users who have the administrator role on admin "people" display
+  /** @var Drupal\sitefarm_core\Hooks\ViewsAlter $views_helper */
+  $views_helper = \Drupal::service('sf.hooks.views_alter');
+  $views_helper->hideAdministratorsOnPeopleDisplay($view, $query);
+}
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function sitefarm_core_field_widget_form_alter(&$element, FormStateInterface $form_state, $context) {
+  // Set the help text of the Body Summary field
+  $help_text = 'Enter text you would like to use as a brief, custom teaser OR leave blank and the system will use a trimmed segment of the body text instead.';
+  /** @var \Drupal\sitefarm_core\Hooks\WidgetAlter $widget_helper */
+  $widget_helper = \Drupal::service('sf.hooks.widget_alter');
+  $widget_helper->setBodyFieldHelpText($element, $help_text);
+}
+
+/**
+ * Implements hook_field_widget_WIDGET_TYPE_form_alter().
+ */
+function sitefarm_core_field_widget_image_focal_point_form_alter(&$element, FormStateInterface $form_state, $form) {
+  // Fetch Helper services
+  /** @var \Drupal\sitefarm_core\Hooks\WidgetAlter $widget_helper */
+  $widget_helper = \Drupal::service('sf.hooks.widget_alter');
+
+  // Add a new process function to change the title attribute of the primary image.
+  $widget_helper->setPrimaryImageTitleText($element);
+
+  // Add custom help text to focal_point UI.
+  $widget_helper->setFocalPointHelpText($element);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function sitefarm_core_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+  // Fetch Helper services
+  /** @var \Drupal\sitefarm_core\Hooks\NodeDisplay $node_helper */
+  $node_helper = \Drupal::service('sf.hooks.node_display');
+
+  // Use the Restricted text format for teasers on a body field
+  $node_helper->forceRestrictedHtmlOnTeasers($build, $view_mode);
+
+  // Strip Poster view mode html and use plain text filter
+  $node_helper->forcePlainTextOnPoster($build, $view_mode);
+}
+
+/**
+ * Implements hook_toolbar_alter().
+ */
+function sitefarm_core_toolbar_alter(&$items) {
+  // Fix the url of the Place Block link on the front page so that it works
+  /** @var \Drupal\sitefarm_core\Hooks\BlockPlace $block_helper */
+  $block_helper = \Drupal::service('sf.hooks.block_place');
+  $block_helper->fixFrontPageLink($items);
+}
+
+/**
+ * Implements hook_themes_uninstalled().
+ */
+function sitefarm_core_themes_installed(array $theme_list) {
+  // Each theme needs the ability to override image styles so that they can
+  // match the style for the custom theme. In addition, subthemes may want to
+  // alter an image style. This searches for any sitefarm image style config in
+  // a newly installed theme by looking for a prefix of "sf_".
+  /** @var \Drupal\sitefarm_core\Hooks\Themes $theme_helper */
+  $theme_helper = \Drupal::service('sf.hooks.themes');
+  $theme_helper->revertSitefarmImageStylesOnInstall($theme_list);
+}
+
+/**
+ * Implements hook_themes_uninstalled().
+ */
+function sitefarm_core_themes_uninstalled(array $themes) {
+  // Flush all caches on theme uninstall to fix multiple errors
+  // Error: Call to undefined function _datetime_type_field_views_data() in
+  // datetime_range_field_views_data()
+  // (line 14 of core/modules/datetime_range/datetime_range.views.inc).
+  /** @var \Drupal\sitefarm_core\Hooks\Themes $theme_helper */
+  $theme_helper = \Drupal::service('sf.hooks.themes');
+  $theme_helper->flushAllCaches();
+}

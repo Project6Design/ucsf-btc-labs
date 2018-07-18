@@ -1,0 +1,57 @@
+// Use this stylesheet for print styles only.
+*
+  background-color: transparent
+
+.sidebar__item,
+nav,
+header,
+.sidebar,
+#navigation,
+#header-region,
+#footer,
+.breadcrumb,
+.tabs,
+.feed-icon,
+img,
+svg,
+a,
+.field--name-field-lab-investigators,
+#block-stayinformed,
+.links
+  display: none !important;
+
+.layout-container
+  width: 100%
+
+#content,
+.title
+  margin: 20px 0
+  width: auto
+
+a
+  &:hover,
+  &:active,
+  &:link,
+  &:visited
+    color: black
+
+// CSS2 selector to add visible href after links.
+#content a
+  &:link:after,
+  &:visited:after
+    content: " (" attr(href) ") "
+    font-size: 0.8em
+    font-weight: normal
+
+
+
+section.content,
+.field--type-text-long,
+.field--type-text,
+.field--name-field-body,
+.paragraph--type--text-area,
+.paragraph--type--accordion
+  width: 100% !important;
+  display: block !important;
+
+

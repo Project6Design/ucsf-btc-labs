@@ -1,0 +1,128 @@
+.block-views-block-persons-block-team-listing-2,
+.paragraph--type--team-listing {
+  @include clearfix;
+
+  margin: $large-spacing 0;
+
+  .person-group {
+    clear: both;
+
+    @include clearfix;
+
+    margin-bottom: 180px;
+  }
+
+  .person-listing {
+    margin-left: $base-spacing * 5.5;
+
+    li {
+      @include span-columns(3 of 12);
+
+      width: 300px;
+
+      img {
+        width: 300px;
+      }
+    }
+
+    @include media($medium-screen-down) {
+      margin-left: 0;
+
+      li {
+        float: none;
+        margin: auto;
+        margin-bottom: $large-spacing;
+
+        &:last-child {
+          margin-right: auto;
+        }
+      }
+    }
+  }
+
+  .sf-person {
+    margin-bottom: $large-spacing;
+    height: 430px;
+
+    a {
+      color: $red;
+    }
+
+    &.sf-person--layout-teaser {
+      float: left;
+      margin-right: $large-spacing;
+
+      @include clearfix;
+
+      @include media($medium-screen-down) {
+        margin-bottom: $base-spacing;
+        float: none;
+        height: auto;
+        text-align: center;
+
+        img {
+          max-width: 80%;
+        }
+      }
+    }
+  }
+
+  .field--name-field-sf-position-title {
+    color: $dark-blue;
+    font-size: $fs-small;
+  }
+
+  .field--name-field-research-speciality {
+    color: $dark-blue;
+    font-size: $fs-small;
+  }
+
+  .person__title {
+    a {
+      font-size: $fs-small;
+      font-family: "Helvetica Bold";
+      font-weight: $fw-bold;
+      color: $dark-blue;
+      display: inline-block;
+      margin-top: $small-spacing;
+    }
+  }
+
+  .person__position {
+    color: $dark-blue;
+    font-size: $fs-small;
+  }
+
+  .person__listing-image {
+    position: relative;
+    width: 300px;
+
+    @include media($medium-screen-down) {
+      width: auto;
+    }
+
+    .person__pediatrics {
+      background: url("../../images/optimized/teddy-white.svg") no-repeat center center;
+      width: 30px;
+      height: 30px;
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      z-index: 1;
+    }
+
+    &.has-teddy {
+      &:after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: block;
+        content: '';
+        width: 0;
+        height: 0;
+        border-left: 60px solid transparent;
+        border-top: 60px solid $dark-gray;
+      }
+    }
+  }
+}

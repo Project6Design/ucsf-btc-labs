@@ -1,0 +1,9 @@
+id: sharemessage.attributes_only
+label: 'Share links with Addthis attributes only'
+targetEntityType: sharemessage
+cache: true
+langcode: en
+status: false
+dependencies:
+  module:
+    - sharemessage

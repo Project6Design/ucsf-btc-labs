@@ -1,0 +1,31 @@
+.pager {
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 5px;
+
+      a {
+        padding: 0 5px;
+        border: 1px solid $light-blue;
+
+        &:hover {
+          border: 1px solid $blue;
+        }
+      }
+
+      &.pager__item--active {
+        a {
+          color: $dark-blue;
+          font-weight: $fw-bold;
+          border: 1px solid $dark-blue;
+        }
+      }
+    }
+  }
+}

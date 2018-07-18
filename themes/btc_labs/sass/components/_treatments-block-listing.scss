@@ -1,0 +1,27 @@
+.block-views-block-treatments-block-listing {
+  clear: both;
+  .views-row {
+    .views-field {
+      background-color: $light-blue;
+      padding: $base-spacing*1.56 $base-spacing*3.25;
+      margin-bottom: $small-spacing;
+
+      a {
+        color: $red;
+        font-size: $fs-regular-medium;
+        font-family: $secondary-font-family;
+      }
+    }
+  }
+}
+
+body.has-sidebar {
+  .block-views-block-treatments-block-listing {
+    @include clearfix;
+    @include span-columns(8 of 12);
+
+    @include media($large-screen-down) {
+      @include span-columns(12 of 12);
+    }
+  }
+}

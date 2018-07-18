@@ -1,0 +1,38 @@
+.paragraph--type--quote {
+  font-family: $secondary-font-family;
+  font-size: $fs-regular-medium;
+  color: $blue;
+  border: 2px solid $medium-gray;
+  text-align: center;
+  margin: $large-spacing*2 0;
+  padding: $base-spacing*4 $base-spacing*6;
+
+  .field--name-field-body {
+    p {
+      font-size: $fs-small;
+      line-height: $base-spacing*3;
+
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+
+      @include media($medium-screen-down) {
+        font-size: 2rem;
+      }
+    }
+
+  }
+
+  .field--name-field-quote-attribute {
+    font-size: 0.8em;
+    font-family: $base-font-family;
+
+    &:before {
+      content: "-";
+    }
+  }
+
+  @include media($large-screen-down) {
+    padding: $base-spacing*1.5;
+  }
+}

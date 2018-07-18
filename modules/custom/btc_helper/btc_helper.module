@@ -1,0 +1,172 @@
+<?php
+
+use Drupal\Core\Breadcrumb\Breadcrumb;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\ViewExecutable;
+use Drupal\views\Plugin\views\query\QueryPluginBase;
+
+/**
+ * Implements hook_block_build_BASE_BLOCK_ID_alter().
+ *
+ * - Disable caching for system breadcrumbs block.
+ * @todo: Find a better solution with cache tags.
+ */
+function btc_helper_block_build_system_breadcrumb_block_alter(array &$build, \Drupal\Core\Block\BlockPluginInterface $block) {
+    $build['#cache']['max-age'] = 0;
+}
+
+/**
+ * Implements hook_views_query_alter().
+ *
+ * - Custom filter conditions for clinical trials.
+ */
+function btc_helper_views_query_alter(ViewExecutable $view, QueryPluginBase $query) {
+
+    if ($view->storage->get('id') === 'clinical_trials' && $view->current_display === 'block_listing') {
+
+        $filters = $view->getExposedInput();
+
+
+        // Check, if the prior treatments filter is active.
+        foreach ($query->where as &$condition_group) {
+
+            $has_pt_filter = isset($filters['prior_treatments']);
+            $pt_must_have_null_index = -1;
+
+            $has_gf_filter = isset($filters['genetic_features']);
+            $gf_must_have_null_index = -1;
+
+
+
+            // Find the index of the views MUST HAVE NULL filter to remove it,
+            // if the prior treatments filter is active.
+            foreach ($condition_group['conditions'] as $key => &$condition) {
+                if (isset($condition['field'])) {
+                    if ($condition['field'] == 'node__field_prior_treatments_must_have.field_prior_treatments_must_have_target_id') {
+                        $pt_must_have_null_index = $key;
+                    }
+
+                    if ($condition['field'] == 'node__field_gf_must_have.field_gf_must_have_target_id') {
+                        $gf_must_have_null_index = $key;
+                    }
+                }
+            }
+
+            if ($has_pt_filter && $pt_must_have_null_index >= 0) {
+                // Remove the standard null filter in case the prior treatments filter is used.
+                unset($condition_group['conditions'][$pt_must_have_null_index]);
+            }
+
+            if ($has_gf_filter && $gf_must_have_null_index >= 0) {
+                // Remove the standard null filter in case the prior treatments filter is used.
+                unset($condition_group['conditions'][$gf_must_have_null_index]);
+            }
+        }
+    }
+}
+
+/**
+ * Implements hook_system_breadcrumb_alter().
+ *
+ * Append node title to breadcrumb for certain content types and views that are
+ * not in the menu.
+ *
+ * @param \Drupal\Core\Breadcrumb\Breadcrumb $breadcrumb
+ * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+ * @param array $context
+ */
+function btc_helper_system_breadcrumb_alter(Breadcrumb &$breadcrumb, RouteMatchInterface $route_match, array $context) {
+    if ($breadcrumb && !\Drupal::service('router.admin_context')->isAdminRoute()) {
+        $node = \Drupal::request()->get('node');
+        $types = ['sf_page'];
+        $request = \Drupal::request();
+
+        // if the node is a type with no menu placement, attach a breadcrumb
+        if ($node && in_array($node->bundle(), $types)) {
+            $breadcrumb->addLink(Link::createFromRoute($node->getTitle(), '<nolink>'));
+            $breadcrumb->addCacheTags(['node:' . $node->id()]);
+        }
+    }
+}
+
+function btc_helper_form_search_block_form_alter(&$form, FormStateInterface $form_state) {
+    $theme_path = drupal_get_path('theme', 'btc_labs');
+
+    $form['icons']['#markup'] = '<svg class="search-action__search" role="img"><title>Search</title><use xlink:href="/' . $theme_path . '/images/optimized/store.svg#search-white" /></svg>';
+    $form['icons']['#allowed_tags'] = ['div','svg', 'use'];
+    $form['keys']['#attributes']['placeholder'] = 'Search';
+}
+
+
+/**
+ * Implements hook_form_alter().
+ */
+function btc_helper_form_views_exposed_form_alter(&$form, FormStateInterface $form_state) {
+    // Format exposed form on news page.
+    if ($form['#id'] == 'views-exposed-form-news-block-listing') {
+        $form['field_news_categories_target_id']['#options']['All'] = 'All Categories';
+        $form['keys']['#attributes']['placeholder'] = 'Keyword Search';
+    }
+
+    // Format exposed form on team page.
+    if ($form['#id'] == 'views-exposed-form-persons-block-team-listing') {
+        $form['field_person_category_target_id']['#options']['All'] = 'All Areas';
+        $form['keys']['#attributes']['placeholder'] = 'Keyword Search';
+    }
+
+    // Format exposed form on clinical trial page.
+    if ($form['#id'] == 'views-exposed-form-clinical-trials-block-listing') {
+        $form['keys']['#attributes']['placeholder'] = 'Keyword Search';
+        $form['keys']['#prefix'] = '<div class="group-top">';
+        $form['keys']['#suffix'] = '<a href="#advanced-search" class="advanced-search">Advanced Search for Physicians</a></div>';
+
+        $form['field_trial_status_target_id']['#options']['All'] = 'All';
+        $form['field_trial_status_target_id']['#prefix'] = '<div class="group-bottom">';
+
+        $form['field_tumor_grade_target_id']['#options']['All'] = 'All';
+        $form['field_tumor_grade_target_id']['#prefix']= '<div class="form-sub-title">' . t('Identify Relevant Clinical Trials') . '</div';
+
+        $form['field_tumor_status_target_id']['#options']['All'] = 'All';
+        $form['field_ct_age_target_id']['#options']['All'] = 'All';
+
+        $form['field_clinical_trial_phase_target_id']['#prefix'] = '<div class="group-checkboxes">';
+        $form['genetic_features']['#suffix'] = '</div>';
+
+        // Prepare conditions filter.
+        $conditions = ['' => t('All')];
+        $condition_ids = \Drupal::entityQuery('node')->condition('type','condition')->execute();
+        $condition_nodes =  \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($condition_ids);
+
+
+        foreach ($condition_nodes as $cn) {
+            $conditions[$cn->id()] = $cn->getTitle();
+        }
+
+        asort($conditions);
+
+        $form['field_conditions_target_id'] = [
+            '#type' => 'select',
+            '#options' => $conditions
+        ];
+
+        $form['actions']['submit']['#suffix'] = '<a href="#close" id="close-form">Close Advanced Search</a>';
+        $form['actions']['#suffix'] = '</div>';
+    }
+
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function btc_helper_page_attachments(array &$attachments) {
+
+    if ($node = \Drupal::routeMatch()->getParameter('node')) {
+
+        // Add the photoswipe assets for gallery pages.
+        if ($node->getType() == 'gallery') {
+            \Drupal::service('photoswipe.assets_manager')->attach($attachments);
+        }
+    }
+}

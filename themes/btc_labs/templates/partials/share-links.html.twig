@@ -1,0 +1,20 @@
+<div class="share-links">
+    {% if content.field_pdf.0 %}
+        <div class="share-links__pdf">
+            <a href="{{ content.field_pdf.0 }}">
+                <svg><use xlink:href="/{{ directory }}/images/optimized/store.svg#pdf" /></svg>
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="share-links__addthis addthis_inline_share_toolbox"></div>
+
+    <div class="share-links__print">
+        <a href="javascript:window.print()">
+            <svg><use xlink:href="/{{ directory }}/images/optimized/store.svg#print" /></svg>
+        </a>
+    </div>
+
+    <!-- Go to www.addthis.com/dashboard to customize your tools -->
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5a9051e349db59a8"></script>
+</div>

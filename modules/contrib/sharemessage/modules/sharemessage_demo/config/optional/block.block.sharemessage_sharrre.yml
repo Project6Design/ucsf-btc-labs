@@ -1,0 +1,30 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - sharemessage.sharemessage.share_message_sharrre_demo
+  module:
+    - node
+    - sharemessage
+  theme:
+    - bartik
+id: sharemessage_sharrre
+theme: bartik
+region: sidebar_first
+weight: -6
+provider: null
+plugin: sharemessage_block
+settings:
+  id: sharemessage_block
+  label: 'Share Message - Sharrre'
+  provider: sharemessage
+  label_display: visible
+  sharemessage: share_message_sharrre_demo
+visibility:
+  node_type:
+    id: node_type
+    bundles:
+      sharecontent: sharecontent
+    negate: false
+    context_mapping:
+      node: '@node.node_route_context:node'

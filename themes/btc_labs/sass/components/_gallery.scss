@@ -1,0 +1,110 @@
+.field--name-field-gallery-photos {
+  .field__value {
+    float: left;
+    width: 23%;
+  }
+}
+
+.block-views-block-galleries-block-1 {
+  @include media($large-screen-up) {
+    padding: 0 15.5rem;
+  }
+
+  .gallery-listing {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: top;
+    margin-bottom: $large-spacing;
+  }
+
+  .views-row {
+    width: 33%;
+    padding: 30px;
+    padding-bottom: 10px;
+
+    a {
+      display: block;
+      text-align: center;
+    }
+
+    h3 {
+      margin-top: 20px;
+      margin-bottom: 20px;
+      font-family: $heading-font-family;
+      color: $dark-blue;
+      font-weight: bold;
+      font-size: 1.2em;
+      text-align: center;
+
+      a {
+        color: $dark-blue;
+      }
+    }
+  }
+
+  @include media($medium-screen-down) {
+    .gallery-listing {
+      display: block;
+    }
+
+    .views-row {
+      width: 100%;
+      padding: 10px;
+    }
+  }
+}
+
+.node-type-gallery {
+  .node .content {
+    padding: 1rem;
+
+    @include media($large-screen-up) {
+      padding: 2rem 15.5rem;
+    }
+
+
+    .field--name-field-photos {
+      @include media($medium-screen-up) {
+        display: flex;
+        justify-content: left;
+        flex-wrap: wrap;
+      }
+
+      .field__value {
+        margin-bottom: 20px;
+        min-height: 270px;
+        width: 100%;
+
+        @include media($medium-screen-up) {
+          width: 50%;
+          min-height: 180px;
+          padding: 10px;
+        }
+
+
+        @include media($large-screen-up) {
+          width: 33%;
+          display: inline-block;
+          min-height: 270px;
+        }
+      }
+    }
+
+    .field--type-image {
+      text-align: center;
+    }
+
+    .field--name-field-caption {
+      font-size: 14px;
+      padding: 1rem;
+      font-style: italic;
+      text-align: center;
+    }
+  }
+}
+
+button.pswp__button {
+  &:hover {
+    background: none;
+  }
+}

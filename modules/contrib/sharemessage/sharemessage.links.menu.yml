@@ -1,0 +1,5 @@
+sharemessage.list:
+  title: Share Messages
+  description: 'Manage Share Messages.'
+  route_name: entity.sharemessage.collection
+  parent: system.admin_config_services

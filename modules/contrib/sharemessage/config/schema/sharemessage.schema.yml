@@ -1,0 +1,164 @@
+
+sharemessage.settings:
+  type: config_object
+  mapping:
+    message_enforcement:
+      type: boolean
+      label: Enforce message through URL
+    add_twitter_card:
+      type: boolean
+      label: Add meta tags for twitter
+    twitter_user:
+      type: string
+      label: Twitter account username
+
+sharemessage.addthis:
+  type: config_object
+  mapping:
+    addthis_profile_id:
+      type: string
+      label: AddThis profile ID
+    additional_services:
+      type: boolean
+      label: Show additional services
+    counter:
+      type: boolean
+      label: Show counter
+    icon_style:
+      type: string
+      label: Icon style
+    local_services_definition:
+      type: boolean
+      label: Local services definition
+    shared_video_width:
+      type: integer
+      label: Shared video width
+    shared_video_height:
+      type: integer
+      label: Shared video height
+    services:
+      type: sequence
+      label: Enabled services
+      sequence:
+        - type: string
+          label: Service name
+
+sharemessage.sharrre:
+  type: config_object
+  mapping:
+    library_url:
+      type: string
+      label: 'Remote URL for Sharrre Library (minimized version)'
+    shorter_total:
+      type: boolean
+      label: Format number like 1.2k or 5M
+    enable_hover:
+      type: boolean
+      label: Allow the sharing buttons
+    enable_counter:
+      type: boolean
+      label: Enable the total counter
+    enable_tracking:
+      type: boolean
+      label: Allow tracking social interaction with Google Analytics
+    services:
+      type: sequence
+      label: Visible services
+      sequence:
+        - type: string
+          label: Service name
+
+sharemessage.socialshareprivacy:
+  type: config_object
+  mapping:
+    services:
+      type: sequence
+      label: Visible services
+      sequence:
+        - type: string
+          label: Service name
+    facebook_action:
+      type: string
+      label: Facebok action
+    disqus_shortname:
+      type: string
+      label: Disqus shortname
+    flattr_uid:
+      type: string
+      label: Flattr user id
+
+sharemessage.sharemessage.*:
+  type: config_entity
+  label: 'Share Message'
+  mapping:
+    id:
+      type: string
+      label: 'Machine-readable name'
+    label:
+      type: label
+      label: 'Label'
+    title:
+      type: label
+      label: 'Title'
+    message_long:
+      type: label
+      label: 'Long message'
+    message_short:
+      type: label
+      label: 'Short message'
+    image_url:
+      type: string
+      label: 'Image URL'
+    fallback_image:
+      type: string
+      label: 'Fallback image UUID'
+    video_url:
+      type: string
+      label: 'Video URL'
+    share_url:
+      type: string
+      label: 'Share URL'
+    plugin:
+      type: string
+      label: 'Plugin'
+    enforce_usage:
+      type: boolean
+      label: Enforce usage through URL
+    settings:
+      type: mapping
+      label: 'Settings'
+      mapping:
+        override_default_settings:
+          type: boolean
+          label: 'Override default settings'
+        additional_services:
+          type: boolean
+          label: Show additional services
+        counter:
+          type: boolean
+          label: Show counter
+        icon_style:
+          type: string
+          label: Icon style
+        services:
+          type: sequence
+          label: Enabled services
+          sequence:
+            - type: string
+              label: Service name
+    extra_field_entity_type:
+      type: string
+      label: 'Share Message extra field entity type'
+    extra_field_bundles:
+      type: sequence
+      label: 'Entity type bundles list'
+      sequence:
+        type: string
+        label: 'Share Message extra field bundles'
+
+block.settings.sharemessage_block:
+  type: block_settings
+  mapping:
+    sharemessage:
+      type: string
+      label: Selected Share Message

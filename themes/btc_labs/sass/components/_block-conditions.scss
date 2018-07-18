@@ -1,0 +1,94 @@
+#block-conditions {
+  padding: 0 $base-spacing*15.5;
+  margin-bottom: $base-spacing*10;
+
+  .menu {
+    > .menu-item {
+      font-family: $secondary-font-family;
+      background-color: $light-blue;
+      padding: $base-spacing $large-spacing;
+      margin-bottom: $small-spacing;
+      color: $red;
+
+      a, span {
+        color: $red;
+        font-size: $fs-regular-medium;
+        font-family: $secondary-font-family;
+      }
+
+      span {
+        color: $black;
+        font-size: $fs-regular-medium;
+        font-family: $secondary-font-family;
+      }
+
+      &.menu-item--expanded {
+        padding-bottom: 0;
+
+        .menu {
+          .menu-item {
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-bottom: 0;
+
+            a, span {
+              &:before {
+                content: "⁃";
+                font-size: 30px;
+                font-family: $base-font-family;
+              }
+            }
+
+            &.menu-item--expanded {
+              padding-top: 0;
+
+              .menu-item {
+                padding-top: 0;
+                padding-bottom: 0;
+                margin-bottom: 0;
+              }
+
+              a, span {
+                &:before {
+                  font-family: $base-font-family;
+                  content: "-";
+                  font-size: 30px;
+                }
+              }
+
+              > a, > span {
+                &:before {
+                  font-family: $base-font-family;
+                  content: "⁃";
+                  font-size: 30px;
+                }
+              }
+            }
+          }
+        }
+
+      }
+    }
+  }
+
+  @include media($larger-screen-down) {
+    padding: 0 $base-spacing*1.5;
+
+    .menu > .menu-item {
+      padding-right: $small-spacing;
+
+      .menu-item {
+        padding-bottom: 0;
+        line-height: 2em;
+      }
+    }
+  }
+
+  @include media($medium-screen-down) {
+    .menu > .menu-item {
+      a, span {
+        font-size: $fs-small;
+      }
+    }
+  }
+}

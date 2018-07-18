@@ -1,0 +1,22 @@
+checkbox_with_exclude:
+  label: 'Checkbox with Exclude'
+  class: '\Drupal\block_style_plugins_test\Plugin\BlockStyle\CheckboxWithExclude'
+  exclude:
+    - 'system_powered_by_block'
+    - 'basic'
+
+form_fields_created_with_yaml:
+  label: 'Styles Created by Yaml'
+  include:
+    - 'system_powered_by_block'
+  form:
+    'test_field':
+      '#type': 'textfield'
+      '#title': 'Title Created by Yaml'
+      '#default_value': 'text goes here'
+    'second_field':
+      '#type': 'select'
+      '#title': 'Choose a style'
+      '#options':
+        'style-1': 'Style 1'
+        'style-2': 'Style 2'

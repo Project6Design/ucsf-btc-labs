@@ -1,0 +1,5 @@
+sharemessage_add:
+  route_name: sharemessage.sharemessage_add
+  title: 'Add Share Message'
+  appears_on:
+    - entity.sharemessage.collection

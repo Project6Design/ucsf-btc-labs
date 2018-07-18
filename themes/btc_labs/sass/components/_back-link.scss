@@ -1,0 +1,15 @@
+.back-link {
+  a {
+    padding: $base-spacing*1.25 0;
+    color: $dark-gray;
+    font-size: $fs-extra-small;
+    font-weight: bold;
+    display: inline-block;
+    font-family: "Helvetica Bold";
+    font-weight: 500;
+  }
+
+  @include media($medium-screen-up) {
+    float: left;
+  }
+}

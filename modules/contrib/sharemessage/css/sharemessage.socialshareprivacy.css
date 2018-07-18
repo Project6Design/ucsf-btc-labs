@@ -1,0 +1,11 @@
+.socialshareprivacy ul.social_share_privacy_area {
+  height: auto;
+}
+.socialshareprivacy ul.social_share_privacy_area li {
+  float: none;
+  width: 100%;
+}
+
+.socialshareprivacy ul.social_share_privacy_area li .dummy_btn img {
+  margin-right: 0;
+}

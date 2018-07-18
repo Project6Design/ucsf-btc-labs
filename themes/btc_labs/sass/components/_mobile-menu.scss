@@ -1,0 +1,119 @@
+#trigger-mobile-menu {
+  width: 30px;
+  height: 30px;
+  display: none;
+  position: absolute;
+  top: $base-spacing;
+  right: $large-spacing;
+  z-index: 5;
+
+  svg, img {
+    fill: $blue;
+    width: 100%;
+    height: 100%;
+  }
+
+  @include media($medium-screen-down) {
+    display: block;
+  }
+
+
+  .mobile-open {
+    display: block;
+  }
+
+  .mobile-close {
+    display: none;
+  }
+
+  &.open {
+    .mobile-close {
+      display: block;
+    }
+
+    .mobile-open {
+      display: none;
+    }
+  }
+}
+
+#mobile-menu {
+  display: none;
+  position: absolute;
+  top: 120px;
+  width: 100vw;
+  background-color: $dark-blue;
+  z-index: 99999;
+
+  .menu {
+    .menu-item {
+      border-bottom: 1px solid $medium-gray;
+      line-height: $base-spacing * 4;
+
+      a {
+        padding-left: $large-spacing;
+        min-height: $base-spacing * 4;
+        display: block;
+        color: $white;
+        font-size: $fs-small;
+      }
+    }
+
+    .menu-item--expanded {
+      position: relative;
+
+      &:before {
+        border-left: 1px solid $medium-gray;
+        content: "";
+        background: url("../../images/optimized/right-arrow.svg") no-repeat center center;
+        background-size: 30px 30px;
+        width: $base-spacing * 4;
+        height: $base-spacing * 4;
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 0;
+        cursor: pointer;
+      }
+
+      .menu {
+        display: none;
+
+        .menu-item {
+          background-color: $light-blue;
+
+          a {
+            color: $dark-blue;
+            padding-left: $large-spacing * 2;
+          }
+        }
+      }
+
+      &.open {
+        .menu {
+          display: block;
+        }
+
+        &:before {
+          border-left: 1px solid $medium-gray;
+          content: "";
+          background: url("../../images/optimized/right-arrow-blue.svg") no-repeat center center;
+          background-size: 30px 30px;
+          width: $base-spacing * 4;
+          height: $base-spacing * 4;
+          background-color: $light-blue;
+          display: block;
+          position: absolute;
+          right: 0;
+          top: 0;
+          transform: rotate(90deg);
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  &.open {
+    display: block;
+  }
+}

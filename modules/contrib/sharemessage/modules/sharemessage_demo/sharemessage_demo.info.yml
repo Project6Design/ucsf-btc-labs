@@ -1,0 +1,19 @@
+name: Share Message Demo
+type: module
+description: All elements for a functioning demo.
+package: Sharemessage
+# core: 8.x
+hidden: FALSE
+
+dependencies:
+ - drupal:node
+ - sharemessage:sharemessage
+ - drupal:block
+ - drupal:text
+ - drupal:path
+
+# Information added by Drupal.org packaging script on 2016-12-14
+version: '8.x-1.0-beta2'
+core: '8.x'
+project: 'sharemessage'
+datestamp: 1481758985

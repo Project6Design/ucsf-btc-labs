@@ -1,0 +1,49 @@
+{% set main_menu = page.primary_menu|render %}
+{% set secondary_menu = page.secondary_menu|render %}
+<div{{ attributes.addClass(
+  'layout-container',
+  main_menu or secondary_menu ? 'with-navigation',
+  secondary_menu ? 'with-subnav'
+) }}>
+
+  <!-- ______________________ HEADER _______________________ -->
+
+  {% include '@btc_labs/partials/header.html.twig' %}
+
+  <!-- ______________________ MAIN _______________________ -->
+
+  <div id="main">
+      {% if page.highlighted|render %}
+          <section id="highlighted" class="clearfix container">
+              {{ page.highlighted }}
+          </section>
+      {% endif %}
+
+      <section id="content" role="main" class="content-wrapper">
+          <div class="container">
+            {{ page.content }}
+          </div>
+        </div>
+
+      </section><!-- /#content -->
+
+      {% if page.sidebar_first|render %}
+        <aside id="sidebar-first" class="column sidebar first">
+          {{ page.sidebar_first }}
+        </aside><!-- /#sidebar-first -->
+      {% endif %}
+
+      {% if page.sidebar_second|render %}
+        <aside id="sidebar-second" class="column sidebar second">
+          {{ page.sidebar_second }}
+        </aside><!-- /#sidebar-second -->
+      {% endif %}
+  </div><!-- /#main -->
+
+  <!-- ______________________ FOOTER _______________________ -->
+
+  {% include '@btc_labs/partials/footer.html.twig' %}
+
+  <div id="mobile-menu">{{ mobile_menu }}</div>
+
+</div><!-- /.layout-container -->

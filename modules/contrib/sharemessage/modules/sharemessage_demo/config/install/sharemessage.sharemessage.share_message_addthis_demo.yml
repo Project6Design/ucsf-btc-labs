@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies: {  }
+id: share_message_addthis_demo
+label: 'Share Message - AddThis demo'
+title: 'Sharemessage for AddThis plugin'
+message_long: 'AddThis sharemessage long description for sharing.'
+message_short: 'AddThis sharemessage short description for sharing.'
+image_url: 'https://www.drupal.org/files/drupal%208%20logo%20Stacked%20CMYK%20300.png'
+fallback_image: ''
+video_url: 'https://www.youtube.com/watch?v=ktCgVopf7D0'
+share_url: ''
+plugin: addthis
+enforce_usage: false
+settings: {  }

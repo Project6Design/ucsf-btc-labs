@@ -1,0 +1,18 @@
+.research--layout-teaser {
+  .research__title {
+    a {
+      font-family: $secondary-font-family;
+      font-size: $fs-medium-large;
+    }
+  }
+
+  .field--name-body {
+    font-size: $fs-small;
+  }
+
+  .research__listing-image {
+    float: right;
+  }
+
+  @include clearfix;
+}

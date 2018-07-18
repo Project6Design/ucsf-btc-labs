@@ -1,0 +1,30 @@
+.page-search-node {
+  #block-btc-labs-content {
+    padding: $base-spacing ($base-spacing * 1.5);
+
+    h2 {
+      margin-bottom: $large-spacing;
+    }
+
+    ol {
+      li {
+        margin-bottom: $large-spacing * 1.5;
+
+        p {
+          font-size: $fs-small;
+        }
+      }
+    }
+
+    #search-form {
+      display: none;
+
+      + h3 {
+        margin-top: $large-spacing;
+        text-align: center;
+        font-size: $fs-regular;
+        font-family: $base-font-family;
+      }
+    }
+  }
+}

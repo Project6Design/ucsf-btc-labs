@@ -1,0 +1,29 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - sharemessage.sharemessage.social_share_privacy_demo
+  module:
+    - sharemessage
+  theme:
+    - bartik
+id: sharemessage_socialshareprivacy
+theme: bartik
+region: sidebar_first
+weight: -6
+provider: null
+plugin: sharemessage_block
+settings:
+  id: sharemessage_block
+  label: 'Share Message - Social Share Privacy'
+  provider: sharemessage
+  label_display: visible
+  sharemessage: social_share_privacy_demo
+visibility:
+  node_type:
+    id: node_type
+    bundles:
+      sharecontent: sharecontent
+    negate: false
+    context_mapping:
+      node: '@node.node_route_context:node'

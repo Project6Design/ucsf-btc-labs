@@ -1,0 +1,9 @@
+id: sharemessage.no_attributes
+label: 'Share links with OG tags only'
+targetEntityType: sharemessage
+cache: true
+langcode: en
+status: false
+dependencies:
+  module:
+    - sharemessage

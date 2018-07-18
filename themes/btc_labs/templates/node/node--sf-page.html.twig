@@ -1,0 +1,48 @@
+{# Create classes array. The 'node' class is required for contextual edit links. #}
+{% set classes = [
+  'node',
+  node.bundle|clean_class,
+  view_mode ? node.bundle|clean_class ~ '--layout-' ~ view_mode|clean_class,
+] %}
+
+<article{{ attributes.addClass(classes) }}>
+
+    <header>
+        {% if node.field_page_image is not empty %}
+            <div class="page__header-image">
+                <picture>
+                    <source media="(min-width: 400px)"
+                            srcset="{{ node.field_page_image.0.entity.uri.value|image_style('page_header') }} 1x,
+                                    {{ node.field_page_image.0.entity.uri.value|image_style('page_header_lg') }} 2x"
+                            sizes="100vw" />
+                    <img src="{{ node.field_page_image.0.entity.uri.value|image_style('page_header_sm') }}" alt="{{ node.field_page_image.alt }}" />
+                </picture>
+            </div>
+        {% endif %}
+
+        {{ drupal_block('btc_labs_breadcrumbs') }}
+
+        {% if not node.published %}
+            <p class="node--unpublished">{{ 'Unpublished'|t }}</p>
+        {% endif %}
+    </header>
+
+    <section class="content">
+        <div class="content__top">
+            <h1{{ title_attributes.addClass(title_classes) }}>{{ label }}</h1>
+
+            {{ content.field_introduction }}
+
+            {{ content.body }}
+        </div>
+
+        <div class="content__bottom">
+            {{ content.field_paragraphs }}
+        </div>
+    </section>
+
+    <aside class="sidebar">
+        {{ content.field_sidebar }}
+    </aside>
+
+</article>

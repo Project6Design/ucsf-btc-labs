@@ -1,0 +1,123 @@
+#main-menu {
+  //clear: right;
+  float: right;
+  margin-top: 50px;
+  margin-right: 10px;
+
+  @include media($medium-screen-down) {
+    display: none;
+  }
+
+
+  a {
+    color: $white;
+    font-size: 20px;
+    display: block;
+    padding: 0 10px 16px;
+    font-weight: 300;
+
+    @include media($large-screen-down) {
+      font-size: 18px;
+      padding: 0 5px 8px;
+    }
+
+
+    @media screen and (max-width: 840px) {
+      font-size: 16px;
+      padding: 0 5px 8px;
+    }
+
+    @media screen and (max-width: 789px) {
+      font-size: 14px;
+      padding: 0 5px 8px;
+    }
+  }
+
+  li {
+    display: inline-block;
+
+    &.menu-item--active-trail {
+      a {
+        color: $white;
+      }
+    }
+
+    &:hover {
+      > a {
+        color: $white;
+        border-bottom: 2px #B4B9BF solid;
+      }
+    }
+
+    &.menu-item--expanded {
+      position: relative;
+
+      // &:after {
+      //   content: "";
+      //   position: absolute;
+      //   border-bottom: 12px solid $dark-blue;
+      //   border-right: 12px solid transparent;
+      //   border-left: 12px solid transparent;
+      //   left: 50%;
+      //   bottom: 0;
+      //   margin-left: -6px;
+      //   opacity: 0;
+      // }
+
+      ul {
+        transition: opacity 300ms linear;
+        background-color: $dark-blue;
+        width: 270px;
+        position: absolute;
+        left: 0;
+        opacity: 0;
+        max-height: 0;
+        overflow: hidden;
+
+        li {
+          display: block;
+
+          a {
+            font-size: $fs-extra-small;
+            color: $white;
+            margin: 0;
+            padding: 0;
+          }
+
+          &:last-child {
+            a {
+              margin-bottom: 0;
+            }
+          }
+
+          &:hover {
+            background-color: #127DBC;
+
+            a {
+              color: $white;
+            }
+          }
+        }
+      }
+
+      &:hover {
+        &:after {
+          opacity: 1;
+        }
+
+        ul {
+          max-height: 370px;
+          opacity: 1;
+
+          //padding: $base-spacing 0;
+
+          li {
+            a {
+              padding: $base-spacing;
+            }
+          }
+        }
+      }
+    }
+  }
+}

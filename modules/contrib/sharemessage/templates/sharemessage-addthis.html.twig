@@ -1,0 +1,42 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a Share Message - AddThis.
+ *
+ * Available variables:
+ * - services: Enabled Share Message services to be displayed.
+ * - javascripts: A list of additional javascripts to be loaded.
+ * - additional_services: A flag indicating additional services.
+ * - counter: Total numbeer of shareable links.
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes }}>
+    {% if services %}
+        {% for service in services %}
+            {% if service == 'twitter' %}
+                {% block javascripts %}
+                    <script>
+                        var addthis_share = { templates: { twitter: "{{ twitter_template }}" } }
+                    </script>
+                {% endblock %}
+            {% endif %}
+            <a class="addthis_button_{{ service }}"></a>
+        {% endfor %}
+    {% else %}
+        <a class="addthis_button_preferred_1"></a>
+        <a class="addthis_button_preferred_2"></a>
+        <a class="addthis_button_preferred_3"></a>
+        <a class="addthis_button_preferred_4"></a>
+        <a class="addthis_button_preferred_5"></a>
+    {% endif %}
+
+    {% if additional_services %}
+        <a class="addthis_button_compact"></a>
+    {% endif %}
+
+    {% if counter %}
+        <a class="addthis_counter {{ counter }}"></a>
+    {% endif %}
+</div>

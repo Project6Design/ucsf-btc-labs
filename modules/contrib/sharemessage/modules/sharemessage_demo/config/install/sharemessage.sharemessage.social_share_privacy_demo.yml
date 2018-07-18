@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies: {  }
+id: social_share_privacy_demo
+label: 'Share Message - Social Share Privacy demo'
+title: 'Sharemessage for Social Share Privacy plugin'
+message_long: 'Social Share Privacy is a jQuery plugin that lets you add social share buttons to your website that dont allow the social sites to track your users.'
+message_short: ''
+image_url: ''
+fallback_image: ''
+video_url: ''
+share_url: ''
+plugin: socialshareprivacy
+enforce_usage: false
+settings: {  }
+extra_field_entity_type: ''
+extra_field_bundles: {  }

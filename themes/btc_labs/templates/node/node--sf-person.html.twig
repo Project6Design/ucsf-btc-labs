@@ -1,0 +1,113 @@
+{# Create classes array. The 'node' class is required for contextual edit links. #}
+{% set classes = [
+  'node',
+  node.bundle|clean_class,
+  view_mode ? node.bundle|clean_class ~ '--layout-' ~ view_mode|clean_class
+] %}
+
+<article{{ attributes.addClass(classes) }}>
+
+    {% if teaser %}
+        {{ title_prefix }}
+        {{ title_suffix }}
+
+        {% if node.field_person_photo is not empty %}
+            <div class="person__listing-image {{node.field_person_pediatrics.value == 1 ? 'has-teddy' }}">
+                <a href="{{ url }}" rel="bookmark">
+                    <picture>
+                        <source media="(min-width: 400px)"
+                                srcset="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }} 1x,
+                                        {{ node.field_person_photo.0.entity.uri.value|image_style('person_lg') }} 2x"
+                                sizes="100vw" />
+                        <img src="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }}" alt="{{ node.field_person_photo.alt }}" />
+                    </picture>
+                    {% if node.field_person_pediatrics.value == 1 %}
+                        <div class="person__pediatrics"></div>
+                    {% endif %}
+                </a>
+            </div>
+        {% endif %}
+
+        <div class="person__title">
+            <a href="{{ url }}" rel="bookmark">{{ title }}</a>
+        </div>
+          <div class="person__position">
+            {{node.field_sf_position_title.value}}
+        </div>
+
+    {% elseif view_mode == 'listing' %}
+
+        {{ title_prefix }}
+        {{ title_suffix }}
+
+        {% if node.field_person_photo is not empty %}
+            <div class="person__listing-image">
+                <a href="{{ url }}" rel="bookmark">
+                    <picture>
+                        <source media="(min-width: 400px)"
+                                srcset="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }} 1x,
+                                        {{ node.field_person_photo.0.entity.uri.value|image_style('person_lg') }} 2x"
+                                sizes="100vw" />
+                        <img src="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }}" alt="{{ node.field_person_photo.alt }}" />
+                    </picture>
+                </a>
+            </div>
+        {% endif %}
+
+        <div class="person__title">
+            <a href="{{ url }}" rel="bookmark">{{ title }}</a>
+        </div>
+
+        {{ content.field_research_speciality }}
+
+        {% if node.field_lab_url.0 %}
+            <a href="{{ node.field_lab_url.0.url }}" class="more-link" target="_blank">Lab Website &#62;</a>
+        {% endif %}
+
+    {% else %}
+
+        <header>
+            {% if node.field_person_photo is not empty %}
+                <div class="person__photo">
+                    <picture>
+                        <source media="(min-width: 400px)"
+                                srcset="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }} 1x,
+                                        {{ node.field_person_photo.0.entity.uri.value|image_style('person_lg') }} 2x"
+                                sizes="100vw" />
+                        <img src="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }}" alt="{{ node.field_person_photo.alt }}" />
+                    </picture>
+                </div>
+            {% endif %}
+
+            <div class="back-link">
+                <a href="{{ path('entity.node.canonical', {'node': 11}) }}">&#60; {{ 'Back'|t }}</a>
+            </div>
+
+            {{ title_prefix }}
+            <h1>{{ title }}</h1>
+            {{ title_suffix }}
+
+            {{ content.field_sf_position_title }}
+
+            {% if not node.published %}
+                <p class="node--unpublished">{{ 'Unpublished'|t }}</p>
+            {% endif %}
+        </header>
+
+        <section class="content">
+
+            {{ content.field_introduction }}
+
+            {{ content.body }}
+
+            {{ content.field_paragraphs }}
+
+            {{ content.field_featured_publications }}
+        </section>
+            <aside class="sidebar">
+                {{ content.field_sidebar }}
+            </aside>
+
+    {% endif %}
+
+</article>

@@ -1,0 +1,6 @@
+library_url: '//cdn.jsdelivr.net/sharrre/1.3.4/jquery.sharrre-1.3.4.min.js'
+shorter_total: true
+enable_hover: true
+enable_counter: true
+enable_tracking: false
+services: {  }

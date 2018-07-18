@@ -1,0 +1,6 @@
+services:
+  facebook: facebook
+  twitter: twitter
+facebook_action: ''
+disqus_shortname: ''
+flattr_uid: ''

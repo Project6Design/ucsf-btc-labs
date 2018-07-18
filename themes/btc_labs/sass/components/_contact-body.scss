@@ -1,0 +1,55 @@
+.node-id-10 {
+  .field--name-field-paragraphs {
+    margin: $base-spacing*4 0;
+  }
+
+  .paragraph--type--two-columns {
+    @include clearfix;
+    margin-bottom: $base-spacing*3.875;
+    display: flex;
+
+    @include media($larger-screen-down) {
+      flex-wrap: wrap;
+    }
+
+    > div {
+      flex: 0 1 50%;
+
+
+      &:first-of-type {
+        margin-right: $large-spacing*2;
+      }
+
+      h2 {
+        font-size: $fs-medium;
+      }
+
+      p {
+        font-size: $fs-small;
+      }
+
+      a {
+        color: $red;
+      }
+
+      @include media($larger-screen-down) {
+        flex: 0 1 100%;
+        margin: auto;
+        display: block;
+        float: none;
+        margin-bottom: $large-spacing;
+
+        &:first-of-type {
+          margin-right: auto;
+        }
+
+        &:last-of-type {
+          margin-right: auto;
+        }
+      }
+
+      @include media($medium-screen-down) {
+      }
+    }
+  }
+}

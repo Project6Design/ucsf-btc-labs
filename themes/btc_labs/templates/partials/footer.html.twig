@@ -1,0 +1,53 @@
+<footer id="footer" role="contentinfo">
+    <div class="container">
+        <div class="footer__top">
+            <div class="footer__logo">
+                <img src="{{ footer_logo }}" alt="Logo Footer">
+            </div>
+
+            <nav role="navigation" id="footer-menu">
+                {{ drupal_menu('footer', 1, 1) }}
+            </nav>
+
+            <div class="footer__social-links">
+                <ul>
+                    {% if twitter is not empty %}
+                        <li>
+                            <a href="{{ twitter }}" target="_blank">
+                                <svg role="img">
+                                    <title>Twitter Icon</title>
+                                    <use xlink:href="/{{ directory }}/images/optimized/store.svg#twitter-circle" />
+                                </svg>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if facebook is not empty %}
+                        <li>
+                            <a href="{{ facebook }}" target="_blank">
+                                <svg role="img">
+                                    <title>Facebook Icon</title>
+                                    <use xlink:href="/{{ directory }}/images/optimized/store.svg#facebook-circle" />
+                                </svg>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if instagram is not empty %}
+                        <li>
+                            <a href="{{ instagram }}" target="_blank">
+                                <svg role="img">
+                                    <title>Instagram Icon</title>
+                                    <use xlink:href="/{{ directory }}/images/optimized/store.svg#instagram-circle" />
+                                </svg>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer__copyright">{{ copyright|raw }}</div>
+
+        {{ page.footer }}
+    </div>
+</footer>
+

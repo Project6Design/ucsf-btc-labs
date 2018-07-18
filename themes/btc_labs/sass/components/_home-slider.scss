@@ -1,0 +1,148 @@
+.page__header-image,
+.block-type-hero_slider {
+  margin-top: -130px;
+
+  @include media($medium-screen-down) {
+    margin-top: 0;
+  }
+}
+
+
+//ie hack
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+  .page__header-image,
+  .block-type-hero_slider {
+    margin-top: -130px;
+
+    img {
+      width: 100%;
+    }
+  }
+}
+
+.block-views-block-home-carousel-block-1 {
+  background: #111;
+
+  @include media($medium-screen-up) {
+    margin-top: -130px;
+  }
+
+  .slick-dots {
+    position: absolute;
+    right: $base-spacing * 4;
+    bottom: $base-spacing * 4;
+    width: auto;
+    z-index: 99;
+
+    li {
+      border: 1px solid #D8D8D8;
+      border-radius: 50%;
+
+      &.slick-active {
+        background: #D8D8D8;
+      }
+
+      button {
+        display: none;
+      }
+    }
+
+    @include media($medium-screen-down) {
+      position: static;
+      margin-top: 0;
+      padding-bottom: $base-spacing;
+      padding-right: $base-spacing * 2;
+      text-align: right;
+    }
+  }
+
+  .slick-next {
+    right: 45px;
+  }
+
+  .slick-prev {
+    left: 8px;
+    z-index: 99;
+  }
+
+  .slider-item {
+    position: relative;
+
+    .field--name-field-image {
+      img {
+        @include media($medium-screen-up) {
+          min-height: 560px;
+        }
+
+
+        @include media($large-screen-up) {
+          min-height: inherit;
+        }
+      }
+    }
+
+    .text-wrapper {
+      position: absolute;
+      top: 50%;
+      left: $base-spacing * 5;
+      transform: translateY(-50%);
+      max-width: 550px;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+
+      .field--name-field-title,
+      .field--name-field-sub-title {
+        color: $white !important;
+      }
+
+      @include media($medium-screen-down) {
+        width: 100%;
+        padding: $base-spacing * 1.5 ;
+        position: static;
+        transform: none;
+        background: transparent;
+      }
+    }
+
+    .field--name-field-title {
+      font-size: $fs-extra-large;
+      line-height: 1.0;
+      font-family: "Granjon";
+      color: $dark-blue;
+
+      @include media($large-screen-down) {
+        font-size: $fs-medium-large;
+      }
+
+
+      @include media($medium-screen-down) {
+        font-size: 1.9rem;
+      }
+    }
+
+    .field--name-field-sub-title {
+      color: $turquoise;
+      font-size: $fs-medium-large;
+      line-height: 1.2;
+      font-family: "Granjon Italic";
+
+      @include media($medium-screen-down) {
+        font-size: $fs-regular;
+      }
+    }
+
+    .field--name-field-body {
+      p {
+        font-size: $fs-small;
+        color: $white;
+
+        @include media($medium-screen-down) {
+          font-size: $fs-extra-small;
+          margin: 0;
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+}

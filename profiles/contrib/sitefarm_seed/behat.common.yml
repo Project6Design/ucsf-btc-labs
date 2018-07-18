@@ -1,0 +1,91 @@
+default:
+  autoload:
+      '': %paths.base%/tests/features/bootstrap
+  suites:
+    default:
+      paths:
+        - %paths.base%/tests/features
+      contexts:
+        - FeatureContext
+        - Drupal\DrupalExtension\Context\DrupalContext
+        - Drupal\DrupalExtension\Context\MinkContext
+        - Drupal\DrupalExtension\Context\MessageContext
+        - Drupal\DrupalExtension\Context\MarkupContext
+        - Drupal\DrupalExtension\Context\DrushContext
+  extensions:
+    Behat\MinkExtension:
+      goutte: ~
+      selenium2: ~
+      files_path: %paths.base%/tests/files
+    Drupal\DrupalExtension:
+      blackbox: ~
+      subcontexts:
+        paths:
+          - %paths.base%
+      selectors:
+        message_selector: '.messages'
+        error_message_selector: '.messages--error'
+        success_message_selector: '.messages--status'
+      region_map:
+        # Main content area usually overridden by Panels
+        Content: ".main-content"
+        # Regular Drupal Block regions (not panels)
+        Secondary Menu Region: ".region-secondary-menu"
+        Header Region: ".region-header"
+        Primary Menu Region: ".region-primary-menu"
+        Highlighted Region: ".region-highlighted"
+        Featured Top Region: ".region-featured-top"
+        Breadcrumb Region: ".region-breadcrumb"
+        Sidebar First Region: ".region-sidebar-first"
+        Content Region: ".region-content"
+        Sidebar Second Region: ".region-sidebar-second"
+        Featured Bottom First Region: ".region-featured-bottom-first"
+        Featured Bottom Second Region: ".region-featured-bottom-second"
+        Featured Bottom Thrid Region: ".region-featured-bottom-third"
+        Footer First: ".region-footer-first"
+        Footer Second: ".region-footer-second"
+        Footer Third: ".region-footer-third"
+        Footer Fourth: ".region-footer-fourth"
+        Footer Fifth: ".region-footer-fifth"
+        # Custom areas rendered in the template
+        Header: ".header"
+        Navbar: ".menu--main"
+        Footer: ".site-footer"
+        # Seven Theme
+        Admin Content: ".region-content"
+        # Page Elements
+        Page Title: ".page-title"
+        Breadcrumb: ".breadcrumb"
+
+# Setup for Google Chrome only tests.
+chrome:
+  suites:
+    default:
+      filters:
+        tags: "@chrome"
+  extensions:
+    Behat\MinkExtension:
+      selenium2:
+        browser: chrome
+        capabilities: {"browser": "chrome", "browserName": "chrome", "browserVersion": "ANY", "version": "ANY"}
+
+# Docker profile.
+# For use inside the CLI container in Docksal.
+docker:
+  extensions:
+    Behat\MinkExtension:
+      # URL of the site when accessed inside Docksal.
+      base_url: http://web
+      # Configure browser to be used. Browser must be available on wd_host.
+      # Stick with chrome by default. It's 2x faster than firefox or phantomjs (your results may vary).
+      browser_name: chrome
+      selenium2:
+        wd_host: http://browser:4444/wd/hub
+        capabilities: { "browser": "chrome", "version": "*" }
+    Drupal\DrupalExtension:
+      drupal:
+        # Site docroot inside Docksal.
+        drupal_root: /var/www/web
+      drush:
+        # Site docroot inside Docksal.
+        root: /var/www/web

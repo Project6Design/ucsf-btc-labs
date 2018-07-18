@@ -1,0 +1,21 @@
+#block-breadcrumbs,
+#block-btc-labs-breadcrumbs {
+  margin: $base-spacing 0 ($base-spacing * 3);
+  padding: 0 ($base-spacing * 5.5);
+  float: left;
+
+  ol {
+    li {
+      color: $dark-gray;
+
+      a {
+        font-weight: $fw-bold;
+        color: $dark-gray;
+      }
+    }
+  }
+
+  @include media($large-screen-down) {
+    padding: 0 ($base-spacing * 1.5);
+  }
+}
