@@ -26,7 +26,9 @@
         ],
         "merge-plugin": {
             "include": [
-                "core/composer.json"
+                "core/composer.json",
+                "modules/contrib/address/composer.json",
+                "modules/contrib/url_embed/composer.json"
             ],
             "recurse": true,
             "replace": false,

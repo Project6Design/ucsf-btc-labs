@@ -46,7 +46,7 @@ sites/simpletest
 .DS_Store*
 ehthumbs.db
 Icon
-
+.lando.yml
 Thumbs.db
 ._*
 
