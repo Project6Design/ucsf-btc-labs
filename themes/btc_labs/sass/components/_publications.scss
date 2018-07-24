@@ -36,7 +36,12 @@
     }
 
     .publication__link {
-      display: inline-block
+      display: inline-block;
+
+      a {
+        color: $pink;
+        font-size: 18px;
+      }
     }
 
     .publication__listing-image {
@@ -90,12 +95,12 @@ a.dl-button {
     top: 5px;
   }
 
-  color: #EB093C;
+  color: $pink;
   font-size: 18px;
 }
 
 .btn-publish {
-  background-color: #EB093C;
+  background-color: $pink;
   border-radius: 5px;
   text-align: center;
   padding: 1rem 4rem;
@@ -103,13 +108,13 @@ a.dl-button {
   font-size: 18px;
   display: inline-block;
   margin: 20px 0 4rem 5.5rem;
-  border: 2px solid #EB093C;
+  border: 2px solid $pink;
   font-family: "Helvetica Bold";
   font-weight: 500;
   text-decoration: none !important;
 
   &:hover {
-    color: #EB093C;
+    color: $pink;
     background-color: white;
   }
 

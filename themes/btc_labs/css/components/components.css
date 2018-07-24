@@ -5289,6 +5289,12 @@ button.pswp__button:hover {
   display: inline-block;
 }
 
+.block-views-block-publications-block-1 .views-row .publication__link a,
+.publications-page .views-row .publication__link a {
+  color: #EB093C;
+  font-size: 18px;
+}
+
 .block-views-block-publications-block-1 .views-row .publication__listing-image,
 .publications-page .views-row .publication__listing-image {
   float: right;
