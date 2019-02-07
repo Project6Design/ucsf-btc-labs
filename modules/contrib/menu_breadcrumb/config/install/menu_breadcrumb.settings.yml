@@ -7,6 +7,7 @@ member_page_as_link: false
 remove_home: false
 add_home: false
 home_as_site_name: false
+exclude_empty_url: false
 # as of Beta, this option is obsolete:
 # hide_on_single_item: false
 menu_breadcrumb_menus:

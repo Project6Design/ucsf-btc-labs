@@ -3,14 +3,42 @@
 /**
  * @file
  * Webform module translation hooks.
+ *
+ * @see webform_preprocess_table()
  */
 
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Drupal\webform\Entity\Webform;
 use Drupal\webform\Utility\WebformYaml;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\webform\Utility\WebformElementHelper;
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function webform_form_locale_translate_edit_form_alter(&$form, FormStateInterface $form_state) {
+  // Don't allow YAML to be validated using locale string translation.
+  foreach (Element::children($form['strings']) as $key) {
+    $element =& $form['strings'][$key];
+    if ($element['original']
+      && !empty($element['original']['#plain_text'])
+      && preg_match("/'#[^']+':/", $element['original']['#plain_text'])
+      && WebformYaml::isValid($element['original']['#plain_text'])) {
+      $element['original'] = [
+        '#theme' => 'webform_codemirror',
+        '#code' => $element['original']['#plain_text'],
+        '#type' => 'yaml',
+      ];
+      $element['translations'] = [
+        '#type' => 'webform_message',
+        '#message_type' => 'warning',
+        '#message_message' => t("Webforms can only be translated via the Webform's (Configuration) Translate tab."),
+      ];
+    }
+  }
+}
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -34,8 +62,8 @@ function webform_form_config_translation_add_form_alter(&$form, FormStateInterfa
       $translation_langcode = $form_state->get('config_translation_language')->getId();;
       $source_elements = $translation_manager->getSourceElements($webform);
       $translation_elements = $translation_manager->getTranslationElements($webform, $translation_langcode);
-      $source_value = trim(Yaml::encode($source_elements));
-      $translation_value = trim(Yaml::encode($translation_elements));
+      $source_value = WebformYaml::encode($source_elements);
+      $translation_value = WebformYaml::encode($translation_elements);
 
       _webform_form_config_translate_add_form_alter_yaml_element($config_element['elements'], $source_value, $translation_value);
 
@@ -53,6 +81,10 @@ function webform_form_config_translation_add_form_alter(&$form, FormStateInterfa
  * Validate callback; Validates and cleanups webform elements.
  */
 function _webform_form_config_translate_add_form_validate(&$form, FormStateInterface $form_state) {
+  if ($form_state::hasAnyErrors()) {
+    return;
+  }
+
   $values = $form_state->getValues();
 
   $config_name = $form_state->get('webform_config_name');
@@ -150,21 +182,12 @@ function webform_lingotek_config_entity_document_upload(array &$source_data, Con
       $translation_manager = \Drupal::service('webform.translation_manager');
 
       // Replace elements with just the translatable properties
-      // (i.e. #title, #description, #options, etc...) so that Lingotek's
+      // (i.e. #title, #description, #options, etc…) so that Lingotek's
       // translation services can correctly translate each element.
       $translation_elements = $translation_manager->getTranslationElements($entity, $entity->language()->getId());
       $source_data['elements'] = $translation_elements;
 
-      // Encode all [tokens].
-      $yaml = Yaml::encode($source_data);
-      $yaml = preg_replace_callback(
-        '/\[([a-z][^]]+)\]/',
-        function ($matches) {
-          return '[***' . base64_encode($matches[1]) . '***]';
-        },
-        $yaml
-      );
-      $source_data = Yaml::decode($yaml);
+      _webform_lingotek_decode_tokens($source_data);
       break;
 
     case 'webform_options';
@@ -180,16 +203,7 @@ function webform_lingotek_config_entity_document_upload(array &$source_data, Con
 function webform_lingotek_config_entity_translation_presave(ConfigEntityInterface &$translation, $langcode, &$data) {
   switch ($translation->getEntityTypeId()) {
     case 'webform';
-      // Decode all [tokens].
-      $yaml = Yaml::encode($data);
-      $yaml = preg_replace_callback(
-        '/\[\*\*\*([^]]+)\*\*\*\]/',
-        function ($matches) {
-          return '[' . base64_decode($matches[1]) . ']';
-        },
-        $yaml
-      );
-      $data = Yaml::decode($yaml);
+      _webform_lingotek_decode_tokens($data);
 
       /** @var \Drupal\webform\WebformInterface $translation */
       $translation->setElements($data['elements']);
@@ -206,17 +220,77 @@ function webform_lingotek_config_entity_translation_presave(ConfigEntityInterfac
 }
 
 /**
- * Implements hook_form_FORM_ID_alter().
+ * Implements hook_lingotek_config_object_document_upload()
  */
-function webform_form_lingotek_config_management_alter(&$form, FormStateInterface $form_state, $form_id) {
-  $entity_type = $form['filters']['wrapper']['bundle']['#default_value'];
-  if (!in_array($entity_type, ['webform', 'webform_options'])) {
+function webform_lingotek_config_object_document_upload(array &$data, $config_name) {
+  if ($config_name !== 'webform.settings') {
     return;
   }
 
-  $entities = \Drupal::entityTypeManager()->getStorage($entity_type)->loadMultiple(array_keys($form['table']['#options']));
-  foreach ($form['table']['#options'] as $entity_id => &$option) {
-    $entity = $entities[$entity_id];
-    $option['title'] = $entity->toLink($entity->label() . ' ' . $entity_type);
-  }
+  $data['webform.settings']['test.types'] = Yaml::decode($data['webform.settings']['test.types']);
+  $data['webform.settings']['test.names'] = Yaml::decode($data['webform.settings']['test.names']);
+
+  _webform_lingotek_encode_tokens($data);
 }
+
+
+/**
+ * Implements hook_lingotek_config_object_translation_presave()
+ */
+function webform_lingotek_config_object_translation_presave(array &$data, $config_name) {
+  if ($config_name !== 'webform.settings') {
+    return;
+  }
+
+  _webform_lingotek_decode_tokens($data);
+
+  $data['webform.settings']['test.types'] = Yaml::encode($data['webform.settings']['test.types']);
+  $data['webform.settings']['test.names'] = Yaml::encode($data['webform.settings']['test.names']);
+}
+
+/******************************************************************************/
+// Lingotek decode/encode token functions.
+/******************************************************************************/
+
+/**
+ * Encode all tokens so that they won't be translated.
+ *
+ * @param array $data
+ *   An array of data.
+ */
+function _webform_lingotek_encode_tokens(array &$data) {
+  $yaml = Yaml::encode($data);
+  $yaml = preg_replace_callback(
+    '/\[([a-z][^]]+)\]/',
+    function ($matches) {
+      // Encode all token characters to HTML entities.
+      // @see https://stackoverflow.com/questions/6720826/php-convert-all-characters-to-html-entities.
+      $replacement = mb_encode_numericentity($matches[1], array(0x000000, 0x10ffff, 0, 0xffffff), 'UTF-8');
+      return "[$replacement]";
+    },
+    $yaml
+  );
+  $data = Yaml::decode($yaml);
+}
+
+/**
+ * Decode all tokens after string have been translated.
+ *
+ * @param array $data
+ *   An array of data.
+ */
+function _webform_lingotek_decode_tokens(array &$data) {
+  $yaml = Yaml::encode($data);
+  $yaml = preg_replace_callback(
+    '/\[([^]]+?)\]/',
+    function ($matches) {
+      // Decode token HTML entities to characters.
+      // @see https://stackoverflow.com/questions/6720826/php-convert-all-characters-to-html-entities.
+      $token = mb_decode_numericentity($matches[1], array(0x000000, 0x10ffff, 0, 0xffffff), 'UTF-8');
+      return "[$token]";
+    },
+    $yaml
+  );
+  $data = Yaml::decode($yaml);
+}
+

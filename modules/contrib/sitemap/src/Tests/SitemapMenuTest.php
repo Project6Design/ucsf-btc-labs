@@ -35,7 +35,7 @@ class SitemapMenuTest extends SitemapMenuTestBase {
       // one child menu item of that menu.
       'menu[menu_parent]' => 'main:',
     );
-    $this->drupalPostForm('node/add/article', $edit, t('Save and publish'));
+    $this->drupalPostForm('node/add/article', $edit, t('Save'));
 
     // Create dummy node with disabled menu item.
     $node_2_title = $this->randomString();
@@ -45,7 +45,7 @@ class SitemapMenuTest extends SitemapMenuTestBase {
       'menu[title]' => $node_2_title,
       'menu[menu_parent]' => 'main:',
     );
-    $this->drupalPostForm('node/add/article', $edit, t('Save and publish'));
+    $this->drupalPostForm('node/add/article', $edit, t('Save'));
 
     // Disable menu item.
     $menu_links = \Drupal::entityTypeManager()->getStorage('menu_link_content')->loadByProperties(array('title' => $node_2_title));

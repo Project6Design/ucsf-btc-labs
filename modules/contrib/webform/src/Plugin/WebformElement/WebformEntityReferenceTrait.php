@@ -6,6 +6,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Url as UrlGenerator;
 use Drupal\webform\Element\WebformEntityTrait;
 use Drupal\webform\WebformInterface;
 use Drupal\webform\WebformSubmissionInterface;
@@ -40,7 +41,8 @@ trait WebformEntityReferenceTrait {
    */
   protected function formatHtmlItem(array $element, WebformSubmissionInterface $webform_submission, array $options = []) {
     $entity = $this->getTargetEntity($element, $webform_submission, $options);
-    if (!$entity) {
+
+    if (empty($entity)) {
       return '';
     }
 
@@ -55,11 +57,32 @@ trait WebformEntityReferenceTrait {
         return $this->formatTextItem($element, $webform_submission, $options);
 
       case 'link':
-        return [
-          '#type' => 'link',
-          '#title' => $entity->label(),
-          '#url' => $entity->toUrl()->setAbsolute(TRUE),
-        ];
+        if ($entity->hasLinkTemplate('canonical')) {
+          return [
+            '#type' => 'link',
+            '#title' => $entity->label(),
+            '#url' => $entity->toUrl()->setAbsolute(TRUE),
+          ];
+        }
+        else {
+          switch ($entity->getEntityTypeId()) {
+            case 'file':
+              /** @var \Drupal\file\FileInterface $entity */
+              if ($entity->access('download')) {
+                return [
+                  '#type' => 'link',
+                  '#title' => $entity->label(),
+                  '#url' => UrlGenerator::fromUri(file_create_url($entity->getFileUri())),
+                ];
+              }
+              else {
+                return $this->formatTextItem($element, $webform_submission, $options);
+              }
+
+            default:
+              return $this->formatTextItem($element, $webform_submission, $options);
+          }
+        }
 
       default:
         return \Drupal::entityTypeManager()->getViewBuilder($entity->getEntityTypeId())->view($entity, $format);
@@ -112,10 +135,10 @@ trait WebformEntityReferenceTrait {
    * {@inheritdoc}
    */
   public function getTestValues(array $element, WebformInterface $webform, array $options = []) {
-    $this->setOptions($element);
-    $target_type = $this->getTargetType($element);
+    $this->setOptions($element, ['limit' => 10, 'random' => TRUE]);
     // Exclude 'anonymous' user.
-    if ($target_type == 'user') {
+    $target_type = $this->getTargetType($element);
+    if ($target_type === 'user') {
       unset($element['#options'][0]);
     }
     return array_keys($element['#options']);
@@ -322,9 +345,11 @@ trait WebformEntityReferenceTrait {
    *
    * @param array $element
    *   An element.
+   * @param array $settings
+   *   An array of settings used to limit and randomize options.
    */
-  protected function setOptions(array &$element) {
-    WebformEntityTrait::setOptions($element);
+  protected function setOptions(array &$element, array $settings = []) {
+    WebformEntityTrait::setOptions($element, $settings);
   }
 
   /**
@@ -535,7 +560,7 @@ trait WebformEntityReferenceTrait {
       '#submit' => [[get_called_class(), 'submitEntityReferenceCallback']],
       // Refresh the entity reference details container.
       '#ajax' => [
-        'callback' => [get_called_class(), 'entityReferenceAjaxCallback'],
+        'callback' => [get_called_class(), 'ajaxEntityReferenceCallback'],
         'wrapper' => 'webform-entity-reference-selection-wrapper',
         'progress' => ['type' => 'fullscreen'],
       ],
@@ -657,7 +682,7 @@ trait WebformEntityReferenceTrait {
    * @return array
    *   The properties element.
    */
-  public static function entityReferenceAjaxCallback(array $form, FormStateInterface $form_state) {
+  public static function ajaxEntityReferenceCallback(array $form, FormStateInterface $form_state) {
     $button = $form_state->getTriggeringElement();
     $element = NestedArray::getValue($form, array_slice($button['#array_parents'], 0, -1));
     return $element;

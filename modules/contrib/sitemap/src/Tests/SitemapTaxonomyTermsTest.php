@@ -195,4 +195,42 @@ class SitemapTaxonomyTermsTest extends SitemapTaxonomyTestBase {
     }
   }
 
+  /**
+   * Tests vocabulary show link settings.
+   */
+  public function testVocabularyShowLinks() {
+    // Set to show all taxonomy terms, even if they are not assigned to any
+    // nodes. Also change the vocabulary depth to -1.
+    $edit = [
+      'term_threshold' => -1,
+      'vocabulary_depth' => -1,
+    ];
+    $this->drupalPostForm('admin/config/search/sitemap', $edit, t('Save configuration'));
+
+    // Get tags from terms.
+    $tags = array();
+    foreach ($this->terms as $term) {
+      $tags[] = $term->label();
+    }
+
+    // Assert that all tags are listed in the sitemap and do not link.
+    $this->drupalGet('sitemap');
+    foreach ($tags as $tag) {
+      $this->assertText($tag);
+      $this->assertNoLink($tag);
+    }
+
+    // Configure to show all links.
+    $edit = [
+      'vocabulary_show_links' => TRUE,
+    ];
+    $this->drupalPostForm('admin/config/search/sitemap', $edit, t('Save configuration'));
+
+    // Now assert that all terms have links on them.
+    $this->drupalGet('sitemap');
+    foreach ($tags as $tag) {
+      $this->assertLink($tag);
+    }
+  }
+
 }

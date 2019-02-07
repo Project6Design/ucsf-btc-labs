@@ -39,3 +39,19 @@
   border: none;
   margin: 10px 0.5em 10px 0;
 }
+
+/**
+ * Image select.
+ */
+html.js .form-type-webform-image-select .select-wrapper:after {
+  display: none;
+}
+
+/**
+ * Issue #3010798: Responsive confirmation modal.
+ */
+@media only screen and (max-width: 650px) {
+  .webform-confirmation-modal {
+    width: 90% !important;
+  }
+}

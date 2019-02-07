@@ -23,14 +23,18 @@ class Container extends ContainerBase {
     return [
       // Attributes.
       'attributes' => [],
+      // Randomize.
+      'randomize' => FALSE,
       // Flexbox.
       'flex' => 1,
       // Conditional logic.
       'states' => [],
+      'states_clear' => TRUE,
       // Format.
       'format' => $this->getItemDefaultFormat(),
       'format_html' => '',
       'format_text' => '',
+      'format_attributes' => [],
     ];
   }
 

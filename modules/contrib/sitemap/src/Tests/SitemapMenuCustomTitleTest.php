@@ -37,7 +37,7 @@ class SitemapMenuCustomTitleTest extends SitemapMenuTestBase {
       // one child menu item of that menu.
       'menu[menu_parent]' => 'main:',
     );
-    $this->drupalPostForm('node/add/article', $edit, t('Save and publish'));
+    $this->drupalPostForm('node/add/article', $edit, t('Save'));
   }
 
   /**

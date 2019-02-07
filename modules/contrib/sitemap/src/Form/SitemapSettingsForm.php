@@ -129,7 +129,7 @@ class SitemapSettingsForm extends ConfigFormBase {
     }
 
     // Build list of menus.
-    $menus = Menu::loadMultiple();
+    $menus = $this->getMenus();
     $menu_options = array();
     foreach ($menus as $id => $menu) {
       $menu_options[$id] = $menu->label();
@@ -146,7 +146,7 @@ class SitemapSettingsForm extends ConfigFormBase {
     // Build list of vocabularies.
     if ($this->moduleHandler->moduleExists('taxonomy')) {
       $vocab_options = array();
-      $vocabularies = Vocabulary::loadMultiple();
+      $vocabularies = $this->getVocabularies();
       foreach ($vocabularies as $vocabulary) {
         $vocab_options[$vocabulary->id()] = $vocabulary->label();
         $sitemap_ordering['vocabularies_' . $vocabulary->id()] = $vocabulary->label();
@@ -321,6 +321,12 @@ class SitemapSettingsForm extends ConfigFormBase {
         '#default_value' => $config->get('show_count'),
         '#description' => $this->t('When enabled, this option will show the number of nodes in each taxonomy term.'),
       ];
+      $form['sitemap_taxonomy_options']['vocabulary_show_links'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t("Show links for taxonomy terms even if they don't contain any nodes"),
+        '#default_value' => $config->get('vocabulary_show_links'),
+        '#description' => $this->t('When enabled, this option will turn every taxonomy term into a link.'),
+      ];
       $form['sitemap_taxonomy_options']['vocabulary_depth'] = [
         '#type' => 'textfield',
         '#title' => $this->t('Vocabulary depth'),
@@ -365,6 +371,7 @@ class SitemapSettingsForm extends ConfigFormBase {
       'show_vocabularies',
       'show_description',
       'show_count',
+      'vocabulary_show_links',
       'vocabulary_depth',
       'term_threshold',
       'forum_threshold',
@@ -404,6 +411,24 @@ class SitemapSettingsForm extends ConfigFormBase {
    */
   protected function getEditableConfigNames() {
     return ['sitemap.settings'];
+  }
+
+  /**
+   * Helper function to get all menus.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]|\Drupal\system\Entity\Menu[]
+   */
+  protected function getMenus() {
+    return Menu::loadMultiple();
+  }
+
+  /**
+   * Helper function to get all vocabularies.
+   *
+   * @return \Drupal\Core\Entity\EntityInterface[]|\Drupal\taxonomy\Entity\Vocabulary[]
+   */
+  protected function getVocabularies() {
+    return Vocabulary::loadMultiple();
   }
 
 }

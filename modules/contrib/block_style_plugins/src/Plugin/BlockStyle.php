@@ -12,7 +12,7 @@ class BlockStyle extends BlockStyleBase {
   /**
    * {@inheritdoc}
    */
-  public function defaultStyles() {
+  public function defaultConfiguration() {
     $defaults = [];
     if (isset($this->pluginDefinition['form'])) {
       foreach ($this->pluginDefinition['form'] as $field => $setting) {
@@ -27,32 +27,45 @@ class BlockStyle extends BlockStyleBase {
   /**
    * {@inheritdoc}
    */
-  public function formElements($form, FormStateInterface $form_state) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $elements = [];
 
-    // Fields that will need translations
-    $translation_fields = [
-      '#title',
-      '#description',
-    ];
-
-    // Get form fields from yaml.
+    // Get form fields from Yaml.
     foreach ($this->pluginDefinition['form'] as $field => $setting) {
       $element = [];
       foreach ($setting as $property_key => $property) {
-        if (in_array($property_key, $translation_fields)) {
-          $element[$property_key] = $this->t($property);
-        }
-        else {
-          $element[$property_key] = $property;
-        }
+        $element[$property_key] = $property;
       }
-      if (isset($this->styles[$field])) {
-        $element['#default_value'] = $this->styles[$field];
+      if (isset($this->configuration[$field])) {
+        $element['#default_value'] = $this->configuration[$field];
       }
       $elements[$field] = $element;
     }
     return $elements;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function themeSuggestion(array $suggestions, array $variables) {
+    // Ensure that a template is set in the info file.
+    if (isset($this->pluginDefinition['template'])) {
+      $template = $this->pluginDefinition['template'];
+
+      $styles = $this->getStylesFromVariables($variables);
+
+      // Only set suggestions if styles have been set for the block.
+      if ($styles) {
+        foreach ($styles as $style) {
+          if (!empty($style)) {
+            $suggestions[] = $template;
+            break;
+          }
+        }
+      }
+    }
+
+    return $suggestions;
   }
 
 }

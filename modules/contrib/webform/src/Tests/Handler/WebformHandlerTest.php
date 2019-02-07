@@ -101,7 +101,7 @@ class WebformHandlerTest extends WebformTestBase {
     $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:postLoad');
     $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:preDelete');
     $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:postDelete');
-    $this->assertRaw('Submission #' . $webform_submission->serial() . ' has been deleted.');
+    $this->assertRaw('<em class="placeholder">Test: Handler: Test invoke methods: Submission #' . $webform_submission->serial() . '</em> has been deleted.');
 
     // Check configuration settings.
     $this->drupalPostForm('admin/structure/webform/manage/test_handler_test/handlers/test/edit', ['settings[message]' => '{message}'], t('Save'));
@@ -173,11 +173,44 @@ class WebformHandlerTest extends WebformTestBase {
     $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:deleteHandler');
 
     // Check create handler.
-    $this->drupalPostForm('admin/structure/webform/manage/test_handler_test/handlers/add/test_log', ['handler_id' => 'test'], t('Save'));
+    $this->drupalPostForm('admin/structure/webform/manage/test_handler_test/handlers/add/test', ['handler_id' => 'test'], t('Save'));
     $this->assertRaw('The webform handler was successfully added.');
-    // @todo Determine why create message is not being displayed.
-    // Ajax machine name callback could be causing the issue.
-    // $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:createHandler');
+    $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:createHandler');
+
+    /**************************************************************************/
+    // Single handler.
+    /**************************************************************************/
+
+    // Check test handler is executed.
+    $this->drupalGet('webform/test_handler_test/test');
+    $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:preCreate');
+    $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:postCreate');
+    $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:alterElements');
+    $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:overrideSettings');
+    $this->assertRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:alterForm');
+
+    // Check test handler is enabled and debug handler is disabled.
+    $this->drupalPostForm('webform/test_handler_test/test', ['element' => ''], t('Submit'));
+    $this->assertRaw('One two one two this is just a test');
+    $this->assertNoRaw("element: ''");
+
+    // Check test handler is disabled.
+    $this->drupalGet('webform/test_handler_test/test', ['query' => ['_webform_handler' => 'debug']]);
+    $this->assertNoRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:preCreate');
+    $this->assertNoRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:postCreate');
+    $this->assertNoRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:alterElements');
+    $this->assertNoRaw('Invoked test: Drupal\webform_test_handler\Plugin\WebformHandler\TestWebformHandler:overrideSettings');
+    $this->assertRaw('Testing the <em class="placeholder">Test: Handler: Test invoke methods</em> webform <em class="placeholder">Debug</em> handler. <strong>All other emails/handlers are disabled.</strong>');
+
+    // Check test handler is now disabled and debug handler is enabled.
+    $this->drupalPostForm('webform/test_handler_test/test', ['element' => ''], t('Submit'), ['query' => ['_webform_handler' => 'debug']]);
+    $this->assertNoRaw('One two one two this is just a test');
+    $this->assertRaw("element: ''");
+
+    // Check 403 access denied for missing handler.
+    $this->drupalGet('webform/test_handler_test/test', ['query' => ['_webform_handler' => 'missing']]);
+    $this->assertResponse(403);
+    $this->assertRaw('The <em class="placeholder">missing</em> email/handler for the <em class="placeholder">Test: Handler: Test invoke methods</em> webform does not exist.');
   }
 
   /**

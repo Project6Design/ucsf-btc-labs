@@ -5,9 +5,8 @@ package = Mail
 core = 7.x
 files[] = tests/sendgrid_integration_reports.test
 
-; Information added by Drupal.org packaging script on 2017-10-21
-version = "8.x-1.1"
+; Information added by Drupal.org packaging script on 2018-06-14
+version = "8.x-1.2"
 core = "8.x"
 project = "sendgrid_integration"
-datestamp = "1508600948"
-
+datestamp = "1528941234"

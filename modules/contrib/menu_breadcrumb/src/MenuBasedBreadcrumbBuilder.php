@@ -18,6 +18,8 @@ use Drupal\Core\Menu\MenuLinkManagerInterface;
 use Drupal\Core\Routing\AdminContext;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
+use Drupal\menu_link_content\Plugin\Menu\MenuLinkContent;
+use Drupal\node\NodeInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
@@ -185,7 +187,7 @@ class MenuBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
       if (!empty($params['enabled'])) {
 
         // Skip over any menu that's not in the current content language,
-        //   if and only if the "language handling" option set for that menu.
+        // if and only if the "language handling" option set for that menu.
         // NOTE this menu option is added late, so we check its existence first.
         if (array_key_exists('langhandle', $params) && $params['langhandle']) {
           $menu_objects = $this->entityTypeManager->getStorage('menu')
@@ -250,8 +252,9 @@ class MenuBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     $breadcrumb = new Breadcrumb();
     // Breadcrumbs accumulate in this array, with lowest index being the root
     // (i.e., the reverse of the assigned breadcrumb trail):
-    $links = array();
-
+    $links = [];
+    // (https://www.drupal.org/docs/develop/standards/coding-standards#array)
+    //
     if ($this->languageManager->isMultilingual()) {
       $breadcrumb->addCacheContexts(['languages:language_content']);
     }
@@ -263,19 +266,26 @@ class MenuBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     // Changing any module settings will invalidate the breadcrumb:
     $breadcrumb->addCacheableDependency($this->config);
 
-    // Changing the active trail of the current path, or taxonomy-attached path,
-    // on this menu will invalidate this breadcrumb:
+    // Changing the active trail or URL, of either the current path or the
+    // taxonomy-attached path, on this menu will invalidate this breadcrumb:
     $breadcrumb->addCacheContexts(['route.menu_active_trails:' . $this->menuName]);
+    $breadcrumb->addCacheContexts(['url.path']);
 
     // Generate basic breadcrumb trail from active trail.
     // Keep same link ordering as Menu Breadcrumb (so also reverses menu trail)
     foreach (array_reverse($this->menuTrail) as $id) {
       $plugin = $this->menuLinkManager->createInstance($id);
+
+      // Skip items that have an empty URL if the option is set.
+      if ($this->config->get('exclude_empty_url') && empty($plugin->getUrlObject()->toString())) {
+        continue;
+      }
+
       $links[] = Link::fromTextAndUrl($plugin->getTitle(), $plugin->getUrlObject());
       $breadcrumb->addCacheableDependency($plugin);
-      // In the last line the MenuLinkContent plugin is not providing cache tags.
+      // In the last line, MenuLinkContent plugin is not providing cache tags.
       // Until this is fixed in core add the tags here:
-      if ($plugin instanceof \Drupal\menu_link_content\Plugin\Menu\MenuLinkContent) {
+      if ($plugin instanceof MenuLinkContent) {
         $uuid = $plugin->getDerivativeId();
         $entities = $this->entityTypeManager->getStorage('menu_link_content')->loadByProperties(['uuid' => $uuid]);
         if ($entity = reset($entities)) {
@@ -289,7 +299,8 @@ class MenuBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     $langcode = $this->contentLanguage;
     $label = $this->config->get('home_as_site_name') ?
       $this->configFactory->get('system.site')->get('name') :
-      $this->t('Home', array(), array('langcode' => $langcode));
+      $this->t('Home', [], ['langcode' => $langcode]);
+    // (https://www.drupal.org/docs/develop/standards/coding-standards#array)
     $home_link = Link::createFromRoute($label, '<front>');
 
     // The first link from the menu trail, being the root, may be the
@@ -325,7 +336,7 @@ class MenuBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
     if (!empty($links)) {
       $page_type = $this->taxonomyAttachment ? 'member_page' : 'current_page';
       // Display the last item of the breadcrumbs trail as the options indicate.
-      /** @var Link $current */
+      /** @var \Drupal\Core\Link $current */
       $current = array_pop($links);
       if ($this->config->get('append_' . $page_type)) {
         if (!$this->config->get($page_type . '_as_link')) {
@@ -367,6 +378,86 @@ class MenuBasedBreadcrumbBuilder implements BreadcrumbBuilderInterface {
       $links[] = Link::fromTextAndUrl($title,
         Url::fromRouteMatch($route_match));
     }
+  }
+
+  /**
+   * The getter function for $menuName property.
+   *
+   * @return string
+   *   The menu name.
+   */
+  public function getMenuName() {
+    return $this->menuName;
+  }
+
+  /**
+   * The setter function for $menuName property.
+   *
+   * @param string $menu_name
+   *   The menu name.
+   */
+  public function setMenuName($menu_name) {
+    $this->menuName = $menu_name;
+  }
+
+  /**
+   * The getter function for $menuTrail property.
+   *
+   * @return string
+   *   The menu trail.
+   */
+  public function getMenuTrail() {
+    return $this->menuTrail;
+  }
+
+  /**
+   * The setter function for $menuTrail property.
+   *
+   * @param string $menu_trail
+   *   The menu trail.
+   */
+  public function setMenuTrail($menu_trail) {
+    $this->menuTrail = $menu_trail;
+  }
+
+  /**
+   * The getter function for $taxonomyAttachment property.
+   *
+   * @return \Drupal\node\NodeInterface
+   *   The taxonomy attachment.
+   */
+  public function getTaxonomyAttachment() {
+    return $this->taxonomyAttachment;
+  }
+
+  /**
+   * The setter function for $taxonomyAttachment property.
+   *
+   * @param \Drupal\node\NodeInterface $taxonomy_attachment
+   *   The taxonomy attachment.
+   */
+  public function setTaxonomyAttachment(NodeInterface $taxonomy_attachment) {
+    $this->taxonomyAttachment = $taxonomy_attachment;
+  }
+
+  /**
+   * The getter function for $contentLanguage property.
+   *
+   * @return string
+   *   The content language.
+   */
+  public function getContentLanguage() {
+    return $this->contentLanguage;
+  }
+
+  /**
+   * The setter function for $contentLanguage property.
+   *
+   * @param string $contentLanguage
+   *   The content language.
+   */
+  public function setContentLanguage($contentLanguage) {
+    $this->contentLanguage = $contentLanguage;
   }
 
 }

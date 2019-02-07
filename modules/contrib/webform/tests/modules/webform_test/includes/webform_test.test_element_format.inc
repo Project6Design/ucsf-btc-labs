@@ -5,7 +5,6 @@
  * Generate test elements with formatting.
  */
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\webform\WebformInterface;
 
 /**
@@ -93,7 +92,7 @@ function webform_test_test_element_format(WebformInterface $webform, $composite 
 
     // Set default (test) value.
     if (strpos($element_type, 'date') === 0) {
-      $element['#default_value'] =  '1942-06-18';
+      $element['#default_value'] = ($multiple) ? ['1942-06-18', '1940-07-07', '1943-02-25'] : '1942-06-18';
     }
     elseif ($default_value = $submission_generate->getTestValue($webform, $element_type, $element, ['random' => FALSE])) {
       $element['#default_value'] = $default_value;
@@ -106,7 +105,7 @@ function webform_test_test_element_format(WebformInterface $webform, $composite 
 
     // Set element category.
     $category_name = (string) $webform_element->getPluginDefinition()['category'] ?: 'Other elements';
-    $category_id = preg_replace('/[^a-zA-Z0-9]+/', '_', Unicode::strtolower($category_name));
+    $category_id = preg_replace('/[^a-zA-Z0-9]+/', '_', mb_strtolower($category_name));
     if (empty($data[$category_id])) {
       $data[$category_id] = [
         '#type' => 'details',

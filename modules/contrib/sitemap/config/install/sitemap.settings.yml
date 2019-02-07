@@ -1,3 +1,4 @@
+langcode: en
 page_title: 'Sitemap'
 message:
   value: ''
@@ -11,6 +12,7 @@ show_menus_hidden: false
 show_vocabularies: []
 show_description: true
 show_count: true
+vocabulary_show_links: false
 vocabulary_depth: -1
 term_threshold: 0
 forum_threshold: -1

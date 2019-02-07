@@ -19,7 +19,7 @@ class BlockStyleManager extends DefaultPluginManager {
    * @var array
    */
   protected $defaults = [
-    'class' => 'Drupal\block_style_plugins\Plugin\BlockStyle'
+    'class' => 'Drupal\block_style_plugins\Plugin\BlockStyle',
   ];
 
   /**

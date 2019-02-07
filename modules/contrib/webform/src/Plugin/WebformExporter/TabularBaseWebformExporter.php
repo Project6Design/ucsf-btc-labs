@@ -112,7 +112,15 @@ abstract class TabularBaseWebformExporter extends WebformExporterBase {
     switch ($field_type) {
       case 'created':
       case 'changed':
-        $record[] = date('Y-m-d H:i:s', $webform_submission->get($field_name)->value);
+      case 'timestamp':
+        if (!empty($webform_submission->$field_name->value)) {
+          /** @var \Drupal\Core\Datetime\DateFormatterInterface $date_formatter */
+          $date_formatter = \Drupal::service('date.formatter');
+          $record[] = $date_formatter->format($webform_submission->$field_name->value, 'custom', 'Y-m-d H:i:s');
+        }
+        else {
+          $record[] = '';
+        }
         break;
 
       case 'entity_reference':
@@ -201,9 +209,12 @@ abstract class TabularBaseWebformExporter extends WebformExporterBase {
 
     $export_options = $this->getConfiguration();
     $this->elements = $this->getWebform()->getElementsInitializedFlattenedAndHasValue('view');
+    // Replace tokens which can be used in an element's #title.
+    $this->elements = $this->tokenManager->replace($this->elements, $this->getWebform());
     if ($export_options['excluded_columns']) {
       $this->elements = array_diff_key($this->elements, $export_options['excluded_columns']);
     }
+
     return $this->elements;
   }
 

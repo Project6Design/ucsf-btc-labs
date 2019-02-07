@@ -141,6 +141,13 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('home_as_site_name'),
     ];
 
+    $form['exclude_empty_url'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Exclude menu items with empty URLs'),
+      '#description' => $this->t('If TRUE, menu items whose Link fields resolves to an empty string (like in the case "&lt;none&gt;" was used) will not be included in the breadcrumb trail.'),
+      '#default_value' => $config->get('exclude_empty_url'),
+    ];
+
     $form['include_exclude'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Enable / Disable Menus'),
@@ -221,6 +228,7 @@ class SettingsForm extends ConfigFormBase {
       ->set('remove_home', (boolean) $form_state->getValue('remove_home'))
       ->set('add_home', (boolean) $form_state->getValue('add_home'))
       ->set('menu_breadcrumb_menus', $form_state->getValue('menu_breadcrumb_menus'))
+      ->set('exclude_empty_url', $form_state->getValue('exclude_empty_url'))
       ->save();
 
     parent::submitForm($form, $form_state);

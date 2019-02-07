@@ -5,11 +5,12 @@ namespace Drupal\Tests\block_style_plugins\Functional;
 use Drupal\Tests\block_content\Functional\BlockContentTestBase;
 
 /**
+ * Test styles showing on content block types.
+ *
  * Test the visibility of styles included or excluded from custom content block
  * types.
  *
  * @group block_style_plugins
- * @group current
  */
 class CustomBlockVisibilityTest extends BlockContentTestBase {
 
@@ -27,6 +28,8 @@ class CustomBlockVisibilityTest extends BlockContentTestBase {
   ];
 
   /**
+   * Test visibility of styles on custom block types.
+   *
    * Test that the correct styles have been included or excluded from custom
    * block content types.
    */
@@ -49,15 +52,14 @@ class CustomBlockVisibilityTest extends BlockContentTestBase {
     $this->drupalGet('block/' . $block->id());
     $assert->statusCodeEquals(200);
 
-
-    // Go to the block instance configuration page
+    // Go to the block instance configuration page.
     $this->drupalGet('admin/structure/block/manage/customblocktest');
 
-    // Check that the simple class option is visible
+    // Check that the simple class option is visible.
     $assert->responseContains('Add a custom class to this block');
-    // Check that the dropdown style options are available
+    // Check that the dropdown style options are available.
     $assert->responseContains('Choose a style from the dropdown');
-    // Check that the checkbox style options are NOT available
+    // Check that the checkbox style options are NOT available.
     $assert->pageTextNotContains('Check this box');
   }
 

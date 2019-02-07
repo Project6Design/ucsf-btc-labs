@@ -1,31 +1,30 @@
-webform.handler.*:
+'webform.handler.*':
   type: mapping
   label: 'Handler settings'
-
 webform.handler.action:
   type: mapping
-  label: 'Action'
+  label: Action
   mapping:
     states:
       type: sequence
-      label: 'States'
+      label: States
       sequence:
         type: string
-        label: 'State'
+        label: State
     notes:
-      label: 'Notes'
+      label: Notes
       type: text
     sticky:
-      label: 'Flag'
+      label: Flag
       type: boolean
     locked:
-      label: 'Locked'
+      label: Locked
       type: boolean
     data:
-      label: 'Data'
+      label: Data
       type: text
     message:
-      label: 'Message'
+      label: Message
       type: text
     message_type:
       label: 'Message type'
@@ -33,22 +32,20 @@ webform.handler.action:
     debug:
       type: boolean
       label: 'Enable debugging'
-
 webform.handler.log:
   type: mapping
-  label: 'Log'
+  label: Log
   mapping: {  }
-
 webform.handler.email:
   type: mapping
-  label: 'Email'
+  label: Email
   mapping:
     states:
       type: sequence
-      label: 'States'
+      label: States
       sequence:
         type: string
-        label: 'State'
+        label: State
     to_mail:
       label: 'Email to address'
       type: email
@@ -105,29 +102,34 @@ webform.handler.email:
       label: 'Always include private and restricted access elements.'
     exclude_empty:
       type: boolean
-      label: 'Preview exclude empty elements'
+      label: 'Exclude empty elements'
+    exclude_empty_checkbox:
+      type: boolean
+      label: 'Exclude unselected checkboxes'
     html:
       type: boolean
-      label: 'HTML'
+      label: HTML
     attachments:
       type: boolean
-      label: 'Attachments'
+      label: Attachments
     twig:
       type: boolean
-      label: 'Twig'
+      label: Twig
+    theme_name:
+      type: string
+      label: 'Theme name'
     debug:
       type: boolean
       label: 'Enable debugging'
-
 webform.handler.remote_post:
   type: mapping
   label: 'Remote Post'
   mapping:
     method:
-      label: 'Method'
+      label: Method
       type: string
     type:
-      label: 'Type'
+      label: Type
       type: string
     excluded_data:
       type: sequence
@@ -182,7 +184,7 @@ webform.handler.remote_post:
       type: sequence
       sequence:
         type: mapping
-        label: 'Message'
+        label: Message
         mapping:
           code:
             type: integer
@@ -190,18 +192,13 @@ webform.handler.remote_post:
           message:
             type: text
             label: 'Response message'
-
 webform.handler.settings:
   type: mapping
-  label: 'Settings'
+  label: Settings
   mapping:
     debug:
       type: string
       label: 'Enable debugging'
-    # Below mapping is copied from: webform.webform.*
-    # @see webform.entity.webform.schema.yml
-    # NOTE: 'type: string' is changed to 'type: string
-    # NOTE: 'type: string' is changed to 'type: string
     ajax:
       type: string
       label: 'Use Ajax'
@@ -276,19 +273,25 @@ webform.handler.settings:
       label: 'Display required indicator'
     form_autofocus:
       type: string
-      label: 'Autofocus'
+      label: Autofocus
     form_details_toggle:
       type: string
       label: 'Display collapse/expand all details link'
     form_reset:
       type: string
       label: 'Display reset button'
-    form_login:
+    form_access_denied:
       type: string
-      label: 'Redirect to login when access denied to webform'
-    form_login_message:
+      label: 'Form access denied action'
+    form_access_denied_title:
+      type: label
+      label: 'Form access denied title'
+    form_access_denied_message:
       type: text
-      label: 'Login message when access denied to webform'
+      label: 'Form access denied message'
+    form_access_denied_attributes:
+      type: ignore
+      label: 'Form access denied message attributes'
     submission_label:
       type: label
       label: 'Default submission label'
@@ -301,18 +304,80 @@ webform.handler.settings:
     submission_log:
       type: string
       label: 'Submission logging'
+    submission_views:
+      type: sequence
+      label: 'Submission views'
+      sequence:
+        type: mapping
+        label: 'Submission view'
+        mapping:
+          title:
+            type: text
+            label: Title
+          view:
+            type: string
+            label: 'View name / Display ID'
+          webform_routes:
+            type: sequence
+            label: 'Apply to webform'
+            sequence:
+              type: string
+              label: Route
+          node_routes:
+            type: sequence
+            label: 'Apply to node'
+            sequence:
+              type: string
+              label: Route
+    submission_views_replace:
+      type: mapping
+      label: 'Submission view replace'
+      mapping:
+        global_routes:
+          type: sequence
+          label: 'Replace to global'
+          sequence:
+            type: string
+            label: Route
+        webform_routes:
+          type: sequence
+          label: 'Replace to webform'
+          sequence:
+            type: string
+            label: Route
+        node_routes:
+          type: sequence
+          label: 'Replace to node'
+          sequence:
+            type: string
+            label: Route
     submission_user_columns:
       type: sequence
       label: 'Submission user columns'
       sequence:
         type: string
         label: 'Column name'
-    submission_login:
+    submission_user_duplicate:
       type: string
-      label: 'Redirect to login when access denied to submission'
-    submission_login_message:
+      label: 'Submission user duplicate'
+    submission_access_denied:
+      type: string
+      label: 'Submission access denied action'
+    submission_access_denied_title:
+      type: label
+      label: 'Submission access denied title'
+    submission_access_denied_message:
       type: text
-      label: 'Login message when access denied to submission'
+      label: 'Submission access denied message'
+    submission_access_denied_attributes:
+      type: ignore
+      label: 'Submission access denied message attributes'
+    previous_submission_message:
+      type: text
+      label: 'Previous submission message'
+    previous_submissions_message:
+      type: text
+      label: 'Previous submissions message'
     autofill:
       type: string
       label: 'Autofill with previous submission'
@@ -334,12 +399,18 @@ webform.handler.settings:
     wizard_progress_percentage:
       type: string
       label: 'Show wizard progress pages'
+    wizard_progress_link:
+      type: string
+      label: 'Link to previous pages in progress bar'
     wizard_start_label:
       type: label
       label: 'Wizard start label'
     wizard_start_attributes:
       type: ignore
       label: 'Wizard start attributes'
+    wizard_preview_link:
+      type: string
+      label: 'Link to previous pages in preview'
     wizard_confirmation:
       type: string
       label: 'Include confirmation page in progress'
@@ -373,6 +444,9 @@ webform.handler.settings:
     preview_exclude_empty:
       type: string
       label: 'Preview exclude empty elements'
+    preview_exclude_empty_checkbox:
+      type: string
+      label: 'Preview exclude unselected checkboxes'
     draft:
       type: string
       label: 'Allow users to save and finish the webform later.'
@@ -395,7 +469,7 @@ webform.handler.settings:
       type: string
       label: 'Confirmation URL'
     confirmation_title:
-      type: text
+      type: label
       label: 'Confirmation title'
     confirmation_message:
       type: text
@@ -427,6 +501,9 @@ webform.handler.settings:
     limit_total_message:
       type: text
       label: 'Limit total message'
+    limit_total_unique:
+      type: string
+      label: 'Limit total to one submission per source entity'
     limit_user:
       type: string
       label: 'Limit user submissions'
@@ -436,6 +513,9 @@ webform.handler.settings:
     limit_user_message:
       type: text
       label: 'Limit user message'
+    limit_user_unique:
+      type: string
+      label: 'Limit user to one submission per source entity'
     entity_limit_total:
       type: string
       label: 'Entity limit total submissions'

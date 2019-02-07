@@ -3,8 +3,13 @@
 namespace Drupal\sitemap;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Entity\EntityTypeRepositoryInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Link;
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 
@@ -13,6 +18,7 @@ use Drupal\Core\Url;
  */
 class SitemapHelper {
 
+  use StringTranslationTrait;
   /**
    * The configuration factory.
    *
@@ -21,13 +27,39 @@ class SitemapHelper {
   protected $configFactory;
 
   /**
-   * Constructs a SitemapHelper object.
+   * The entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The entity repository.
+   *
+   * @var \Drupal\Core\Entity\EntityRepositoryInterface
+   */
+  protected $entityRepository;
+
+  /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * SitemapHelper constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The configuration factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    */
-  public function __construct(ConfigFactoryInterface $config_factory) {
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, EntityRepositoryInterface $entity_repository, ModuleHandlerInterface $module_handler) {
     $this->configFactory = $config_factory;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->entityRepository = $entity_repository;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -64,7 +96,7 @@ class SitemapHelper {
     $output = '';
     $options = array();
 
-    if (\Drupal::moduleHandler()->moduleExists('taxonomy') && !empty($voc)) {
+    if ($this->moduleHandler->moduleExists('taxonomy') && !empty($voc)) {
       $output = $this->getTaxonomyTree($voc->get('vid'), $voc->get('name'), $voc->get('description'));
       $this->setOption($options, 'show_titles', 1, 'show_titles', TRUE);
     }
@@ -89,9 +121,9 @@ class SitemapHelper {
     $output = '';
     $options = array();
     $attributes = new Attribute();
-    $config = \Drupal::config('sitemap.settings');
+    $config = $this->configFactory->get('sitemap.settings');
 
-    if (\Drupal::service('module_handler')->moduleExists('forum') && $vid == \Drupal::config('forum.settings')->get('vocabulary')) {
+    if ($this->moduleHandler->moduleExists('forum') && $vid == $this->configFactory->get('forum.settings')->get('vocabulary')) {
       $title = Link::fromTextAndUrl($name, Url::fromRoute('forum.index'))->toString();
       $threshold = $config->get('forum_threshold');
       $forum_link = TRUE;
@@ -110,10 +142,17 @@ class SitemapHelper {
     if ($depth <= -1) {
       $depth = NULL;
     }
-    $tree = \Drupal::entityManager()->getStorage('taxonomy_term')->loadTree($vid, 0, $depth);
 
+    $tree = $this->entityTypeManager->getStorage('taxonomy_term')->loadTree($vid, 0, $depth, TRUE);
+    /** @var \Drupal\taxonomy\TermInterface $term */
     foreach ($tree as $term) {
-      $term->count = sitemap_taxonomy_term_count_nodes($term->tid);
+      // Get the term translated if exists.
+      $term = $this->entityRepository->getTranslationFromContext($term);
+      // don't render the term is no access allowed.
+      if (!$term->access('view')) {
+        continue;
+      }
+      $term->count = sitemap_taxonomy_term_count_nodes($term->id());
       if ($term->count <= $threshold) {
         continue;
       }
@@ -138,21 +177,21 @@ class SitemapHelper {
       $term_item = '';
       if ($forum_link) {
         $link_options = [
-          array('attributes' => array('title' => $term->description__value))
+          array('attributes' => array('title' => $term->description->value)),
         ];
-        $term_item .= Link::fromTextAndUrl($term->name, Url::fromRoute('forum.page', array('taxonomy_term' => $term->tid), $link_options))->toString();
+        $term_item .= Link::fromTextAndUrl($term->label(), Url::fromRoute('forum.page', array('taxonomy_term' => $term->id()), $link_options))->toString();
       }
-      elseif ($term->count) {
+      elseif ($term->count || $config->get('vocabulary_show_links')) {
         $link_options = [
-          array('attributes' => array('title' => $term->description__value))
+          array('attributes' => array('title' => $term->description->value)),
         ];
-        $term_item .= Link::fromTextAndUrl($term->name, Url::fromRoute('entity.taxonomy_term.canonical', array('taxonomy_term' => $term->tid), $link_options))->toString();
+        $term_item .= Link::fromTextAndUrl($term->label(), Url::fromRoute('entity.taxonomy_term.canonical', array('taxonomy_term' => $term->id()), $link_options))->toString();
       }
       else {
-        $term_item .= $term->name;
+        $term_item .= $term->label();
       }
       if ($config->get('show_count')) {
-        $span_title = \Drupal::translation()->formatPlural($term->count, '1 item has this term', '@count items have this term');
+        $span_title = $this->formatPlural($term->count, '1 item has this term', '@count items have this term');
         $term_item .= " <span title=\"" . $span_title . "\">(" . $term->count . ")</span>";
       }
 
@@ -161,8 +200,8 @@ class SitemapHelper {
       if ($config->get('show_rss_links') != 0 && ($rss_depth == -1 || $term->depth < $rss_depth)) {
         $feed_icon = array(
           '#theme' => 'sitemap_feed_icon',
-          '#url' => 'taxonomy/term/' . $term->tid . '/feed',
-          '#name' => $term->name,
+          '#url' => 'taxonomy/term/' . $term->id() . '/feed',
+          '#name' => $term->label(),
         );
         $rss_link = \Drupal::service('renderer')->render($feed_icon);
 
@@ -176,7 +215,7 @@ class SitemapHelper {
       }
 
       // Add an alter hook for modules to manipulate the taxonomy term output.
-      \Drupal::moduleHandler()->alter(array('sitemap_taxonomy_term', 'sitemap_taxonomy_term_' . $term->tid), $term_item, $term);
+      $this->moduleHandler->alter(array('sitemap_taxonomy_term', 'sitemap_taxonomy_term_' . $term->id()), $term_item, $term);
 
       $output .= $term_item;
 

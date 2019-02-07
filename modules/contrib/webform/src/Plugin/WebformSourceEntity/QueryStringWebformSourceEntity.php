@@ -9,6 +9,7 @@ use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\TypedData\TranslatableInterface;
 use Drupal\webform\Plugin\WebformSourceEntityInterface;
+use Drupal\webform\Plugin\WebformSourceEntityManager;
 use Drupal\webform\WebformEntityReferenceManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -60,22 +61,6 @@ class QueryStringWebformSourceEntity extends PluginBase implements WebformSource
   protected $webformEntityReferenceManager;
 
   /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_type.manager'),
-      $container->get('current_route_match'),
-      $container->get('request_stack'),
-      $container->get('language_manager'),
-      $container->get('webform.entity_reference_manager')
-    );
-  }
-
-  /**
    * QueryStringWebformSourceEntity constructor.
    *
    * @param array $configuration
@@ -108,6 +93,22 @@ class QueryStringWebformSourceEntity extends PluginBase implements WebformSource
   /**
    * {@inheritdoc}
    */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager'),
+      $container->get('current_route_match'),
+      $container->get('request_stack'),
+      $container->get('language_manager'),
+      $container->get('webform.entity_reference_manager')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSourceEntity(array $ignored_types) {
     // Note: We deliberately discard $ignored_types because through query string
     // any arbitrary entity can be injected as a source.
@@ -134,7 +135,8 @@ class QueryStringWebformSourceEntity extends PluginBase implements WebformSource
       return NULL;
     }
 
-    if (is_subclass_of($source_entity, TranslatableInterface::class) && $source_entity->hasTranslation($this->languageManager->getCurrentLanguage()->getId())) {
+    // Get translated source entity.
+    if ($source_entity instanceof TranslatableInterface && $source_entity->hasTranslation($this->languageManager->getCurrentLanguage()->getId())) {
       $source_entity = $source_entity->getTranslation($this->languageManager->getCurrentLanguage()->getId());
     }
 
@@ -146,19 +148,21 @@ class QueryStringWebformSourceEntity extends PluginBase implements WebformSource
     // Check that the webform is referenced by the source entity.
     if (!$webform->getSetting('form_prepopulate_source_entity')) {
       // Get source entity's webform field.
-      $webform_field_name = $this->webformEntityReferenceManager->getFieldName($source_entity);
-      if (!$webform_field_name) {
-        return NULL;
+      $webform_field_names = $this->webformEntityReferenceManager->getFieldNames($source_entity);
+      foreach ($webform_field_names as $webform_field_name) {
+        // Check that source entity's reference webform is the
+        // current webform.
+        foreach ($source_entity->$webform_field_name as $item) {
+          if ($item->target_id === $webform->id()) {
+            return WebformSourceEntityManager::getMainSourceEntity($source_entity);
+          }
+        }
       }
 
-      // Check that source entity's reference webform is the current YAML
-      // webform.
-      if ($source_entity->$webform_field_name->target_id != $webform->id()) {
-        return NULL;
-      }
+      return NULL;
     }
 
-    return $source_entity;
+    return WebformSourceEntityManager::getMainSourceEntity($source_entity);
   }
 
 }

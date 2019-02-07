@@ -20,3 +20,11 @@ form_fields_created_with_yaml:
       '#options':
         'style-1': 'Style 1'
         'style-2': 'Style 2'
+
+template_set_with_yaml:
+  label: 'Template Set by Yaml'
+  template: 'block__test_custom'
+  form:
+    'test_field':
+      '#type': 'textfield'
+      '#title': 'Template Title'

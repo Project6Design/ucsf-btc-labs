@@ -6,7 +6,7 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element\Select;
-use Drupal\webform\Utility\WebformArrayHelper;
+use Drupal\webform\Utility\WebformElementHelper;
 
 /**
  * Provides a webform element for a selecting an image.
@@ -66,16 +66,21 @@ class WebformImageSelect extends Select {
   public static function setOptions(array &$element) {
     // Randomize images.
     if (!empty($element['#images_randomize'])) {
-      $element['#images'] = array_values(WebformArrayHelper::shuffle($element['#images']));
+      $element['#images'] = WebformElementHelper::randomize($element['#images']);
     }
 
     // Convert #images to #options and make sure images are keyed by value.
-    if (empty($element['#options']) && !empty($element['#images'])) {
+    if (empty($element['#options'])) {
       $options = [];
       foreach ($element['#images'] as $value => &$image) {
-        // Apply XSS filter to image text.
-        $image['text'] = Xss::filter($image['text']);
-        $options[$value] = $image['text'];
+        if (isset($image['text'])) {
+          // Apply XSS filter to image text.
+          $image['text'] = Xss::filter($image['text']);
+          $options[$value] = $image['text'];
+        }
+        else {
+          $options[$value] = $value;
+        }
       }
       $element['#options'] = $options;
     }

@@ -6,8 +6,9 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\Render\Element;
+use Drupal\webform\Utility\WebformElementHelper;
 use Drupal\webform\WebformInterface;
 use Drupal\webform\WebformSubmissionConditionsValidatorInterface;
 use Drupal\webform\WebformSubmissionInterface;
@@ -29,6 +30,13 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
    * @var \Drupal\webform\WebformInterface
    */
   protected $webform = NULL;
+
+  /**
+   * The webform submission.
+   *
+   * @var \Drupal\webform\WebformSubmissionInterface
+   */
+  protected $webformSubmission = NULL;
 
   /**
    * The webform handler ID.
@@ -101,7 +109,7 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
    * webform. Make sure not include any services as a dependency injection
    * that directly connect to the database. This will prevent
    * "LogicException: The database connection is not serializable." exceptions
-   * from being thrown when a form is serialized via an Ajax callaback and/or
+   * from being thrown when a form is serialized via an Ajax callback and/or
    * form build.
    *
    * @param array $configuration
@@ -163,6 +171,21 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
   /**
    * {@inheritdoc}
    */
+  public function setWebformSubmission(WebformSubmissionInterface $webform_submission = NULL) {
+    $this->webformSubmission = $webform_submission;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getWebformSubmission() {
+    return $this->webformSubmission;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getSummary() {
     return [
       '#theme' => 'webform_handler_' . $this->pluginId . '_summary',
@@ -197,6 +220,13 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
    */
   public function supportsConditions() {
     return $this->pluginDefinition['conditions'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function supportsTokens() {
+    return $this->pluginDefinition['tokens'];
   }
 
   /**
@@ -272,6 +302,20 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
    */
   public function getWeight() {
     return $this->weight;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function enable() {
+    return $this->setStatus(TRUE);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function disable() {
+    return $this->setStatus(FALSE);
   }
 
   /**
@@ -555,7 +599,24 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
    *
    * This helper method looks looks for the handler default configuration keys
    * within a form and set a matching element's #parents property to
-   * ['settings', '{element_kye}']
+   * ['settings', '{element_key}']
+   *
+   * @param array $elements
+   *   An array of form elements.
+   *
+   * @return array
+   *   Form element with #parents set.
+   */
+  protected function setSettingsParents(array &$elements) {
+    return $this->setSettingsParentsRecursively($elements);
+  }
+
+  /**
+   * Set configuration settings parents.
+   *
+   * This helper method looks looks for the handler default configuration keys
+   * within a form and set a matching element's #parents property to
+   * ['settings', '{element_key}']
    *
    * @param array $elements
    *   An array of form elements.
@@ -567,7 +628,7 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
     $default_configuration = $this->defaultConfiguration();
     foreach ($elements as $element_key => &$element) {
       // Only a form element can have #parents.
-      if (Element::property($element_key) || !is_array($element)) {
+      if (!WebformElementHelper::isElement($element, $element_key)) {
         continue;
       }
 
@@ -577,7 +638,14 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
         continue;
       }
 
-      if (array_key_exists($element_key, $default_configuration) && isset($element['#type'])) {
+      // Only set #parents when #element has…
+      // - Default configuration.
+      // - Is an input.
+      // - #default_value or #value (aka input).
+      // - Not a container with children.
+      if (array_key_exists($element_key, $default_configuration)
+        && isset($element['#type'])
+        && !WebformElementHelper::hasChildren($element)) {
         $element['#parents'] = ['settings', $element_key];
       }
       else {
@@ -592,13 +660,16 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
   /****************************************************************************/
 
   /**
-   * Get webform logger.
+   * Get webform or webform_submission logger.
+   *
+   * @param string $channel
+   *   The logger channel. Defaults to 'webform'.
    *
    * @return \Drupal\Core\Logger\LoggerChannelInterface
    *   Webform logger
    */
-  protected function getLogger() {
-    return $this->loggerFactory->get('webform');
+  protected function getLogger($channel = 'webform') {
+    return $this->loggerFactory->get($channel);
   }
 
   /**
@@ -612,6 +683,18 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
    *   The message to be logged.
    * @param array $data
    *   The data to be saved with log record.
+   *
+   * @deprecated Instead call the 'webform_submission' logger channel directly.
+   *
+   *  $message = 'Some message with an %argument.'
+   *  $context = [
+   *    '%argument' => 'Some value'
+   *    'link' => $webform_submission->toLink($this->t('Edit'), 'edit-form')->toString(),
+   *    'webform_submission' => $webform_submission,
+   *    'handler_id' => NULL,
+   *    'data' => [],
+   *  ];
+   *  \Drupal::logger('webform_submission')->notice($message, $context);
    */
   protected function log(WebformSubmissionInterface $webform_submission, $operation, $message = '', array $data = []) {
     if ($webform_submission->getWebform()->hasSubmissionLog()) {
@@ -622,6 +705,40 @@ abstract class WebformHandlerBase extends PluginBase implements WebformHandlerIn
         'data' => $data,
       ]);
     }
+  }
+
+  /****************************************************************************/
+  // TEMP: Messenger methods to be remove once Drupal 8.6.x+ is supported version.
+  /****************************************************************************/
+
+  /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
+   * Sets the messenger.
+   *
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger.
+   */
+  public function setMessenger(MessengerInterface $messenger) {
+    $this->messenger = $messenger;
+  }
+
+  /**
+   * Gets the messenger.
+   *
+   * @return \Drupal\Core\Messenger\MessengerInterface
+   *   The messenger.
+   */
+  public function messenger() {
+    if (!isset($this->messenger)) {
+      $this->messenger = \Drupal::messenger();
+    }
+    return $this->messenger;
   }
 
 }

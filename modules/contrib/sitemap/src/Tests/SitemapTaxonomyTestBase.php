@@ -131,7 +131,7 @@ abstract class SitemapTaxonomyTestBase extends TaxonomyTestBase {
       'title[0][value]' => $title,
       $this->field_tags_name . '[target_id]' => implode(',', $values),
     );
-    $this->drupalPostForm('node/add/article', $edit, t('Save and publish'));
+    $this->drupalPostForm('node/add/article', $edit, t('Save'));
   }
 
   /**

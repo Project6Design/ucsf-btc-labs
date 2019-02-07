@@ -5,6 +5,8 @@ namespace Drupal\Tests\block_style_plugins\Functional;
 use Drupal\Tests\BrowserTestBase;
 
 /**
+ * Tests the DropdownWithInclude plugin.
+ *
  * Test a dropdown style selector for only the Powered by Drupal block any
  * "basic" custom block types.
  *
@@ -36,12 +38,12 @@ class DropdownWithIncludeTest extends BrowserTestBase {
     ]);
     $this->drupalLogin($this->adminUser);
 
-    // Place the "Powered By Drupal" block
+    // Place the "Powered By Drupal" block.
     $this->drupalPlaceBlock('system_powered_by_block', [
       'id' => 'poweredbytest',
       'region' => 'content',
     ]);
-    // Place the "Breadcrumb" block
+    // Place the "Breadcrumb" block.
     $this->drupalPlaceBlock('system_breadcrumb_block', [
       'id' => 'breadcrumbtest',
       'region' => 'content',
@@ -54,11 +56,11 @@ class DropdownWithIncludeTest extends BrowserTestBase {
   public function testBreadcrumbBlockUnstyled() {
     $assert = $this->assertSession();
 
-    // Go to the block instance configuration page
+    // Go to the block instance configuration page.
     $this->drupalGet('admin/structure/block/manage/breadcrumbtest');
     $assert->statusCodeEquals(200);
 
-    // Check that the style options are NOT available
+    // Check that the style options are NOT available.
     $assert->pageTextNotContains('Choose a style from the dropdown');
     $assert->fieldNotExists('third_party_settings[block_style_plugins][dropdown_with_include][dropdown_class]');
   }
@@ -69,31 +71,31 @@ class DropdownWithIncludeTest extends BrowserTestBase {
   public function testPoweredByBlockIncluded() {
     $assert = $this->assertSession();
 
-    // Go to the block instance configuration page
+    // Go to the block instance configuration page.
     $this->drupalGet('admin/structure/block/manage/poweredbytest');
     $assert->statusCodeEquals(200);
 
-    // Check that the style options are available
+    // Check that the style options are available.
     $assert->responseContains('Choose a style from the dropdown');
     $assert->fieldValueEquals('third_party_settings[block_style_plugins][dropdown_with_include][dropdown_class]', 'style-3');
 
-    // Submit the form
+    // Submit the form.
     $this->submitForm(
       ['third_party_settings[block_style_plugins][dropdown_with_include][dropdown_class]' => 'style-1'],
       'Save block'
     );
 
-    // Go to the home page
+    // Go to the home page.
     $this->drupalGet('<front>');
     $assert->statusCodeEquals(200);
 
-    // Assert that the block was placed and has the custom class
+    // Assert that the block was placed and has the custom class.
     $assert->responseContains('style-1');
 
-    // Go back to the block instance configuration page
+    // Go back to the block instance configuration page.
     $this->drupalGet('admin/structure/block/manage/poweredbytest');
 
-    // Check that the class is set in the style field
+    // Check that the class is set in the style field.
     $assert->fieldValueEquals('third_party_settings[block_style_plugins][dropdown_with_include][dropdown_class]', 'style-1');
   }
 

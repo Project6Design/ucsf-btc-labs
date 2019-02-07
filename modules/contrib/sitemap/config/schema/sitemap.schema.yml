@@ -1,5 +1,4 @@
 # Schema for the configuration files of the Sitemap module.
-
 sitemap.settings:
   type: config_object
   label: 'Sitemap settings'
@@ -46,6 +45,9 @@ sitemap.settings:
     show_count:
       type: boolean
       label: 'Show node count by taxonomy term flag'
+    vocabulary_show_links:
+      type: boolean
+      label: "Show links for taxonomy terms even if they don't contain any nodes"
     vocabulary_depth:
       type: integer
       label: 'Vocabulary depth'

@@ -3,9 +3,9 @@
 namespace Drupal\better_exposed_filters\Plugin\views\exposed_form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
 use Drupal\views\Plugin\views\exposed_form\InputRequired;
 use Drupal\views\Plugin\views\filter\NumericFilter;
@@ -88,6 +88,18 @@ class BetterExposedFilters extends InputRequired {
       '#default_value' => $existing['general']['autosubmit'],
     );
 
+    $bef_options['general']['autosubmit_exclude_textfield'] = array(
+      '#type' => 'checkbox',
+      '#title' => $this->t('Exclude Textfield'),
+      '#description' => $this->t('Exclude Textfield from autosubmit. User will have to press enter key or click submit.'),
+      '#default_value' => $existing['general']['autosubmit_exclude_textfield'],
+      '#states' => array(
+        'visible' => array(
+          ':input[name="exposed_form_options[bef][general][autosubmit]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+
     $bef_options['general']['autosubmit_hide'] = array(
       '#type' => 'checkbox',
       '#title' => $this->t('Hide submit button'),
@@ -104,8 +116,9 @@ class BetterExposedFilters extends InputRequired {
      * Add options for exposed sorts.
      */
     $exposed = FALSE;
+    /* @var \Drupal\views\Plugin\views\HandlerBase $sort */
     foreach ($this->view->display_handler->getHandlers('sort') as $label => $sort) {
-      if ($sort->options['exposed']) {
+      if ($sort->isExposed()) {
         $exposed = TRUE;
         break;
       }
@@ -242,8 +255,9 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
     $bef_filter_intro = FALSE;
 
     // Go through each filter and add BEF options.
+    /* @var \Drupal\views\Plugin\views\HandlerBase $filter */
     foreach ($this->view->display_handler->getHandlers('filter') as $label => $filter) {
-      if (!$filter->options['exposed']) {
+      if (!$filter->isExposed()) {
         continue;
       }
 
@@ -509,7 +523,15 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
         '#description' => $this->t('Places this element in the secondary options portion of the exposed form.'),
       );
 
-      if ($filter instanceof StringFilter) {
+      $filter_form = array();
+      $form_state = new FormState();
+      /** @var \Drupal\views\Plugin\views\filter\FilterPluginBase $filter */
+      $filter->buildExposedForm($filter_form, $form_state);
+
+      $supported_types = array('entity_autocomplete', 'textfield');
+
+      $filter_id = $filter->options['expose']['identifier'];
+      if (in_array($filter_form[$filter_id]['#type'], $supported_types) || in_array($filter_form[$filter_id]['value']['#type'], $supported_types)) {
         // Allow users to specify placeholder text.
         $bef_options[$label]['more_options']['placeholder_text'] = [
           '#type' => 'textfield',
@@ -644,6 +666,14 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
       $form['actions']['submit']['#attributes']['data-bef-auto-submit-click'] = '';
       $form['#attached']['library'][] = 'better_exposed_filters/auto_submit';
 
+      if (!empty($settings['general']['autosubmit_exclude_textfield'])) {
+        foreach ($form as &$element) {
+          if (isset($element['#type']) && $element['#type'] == 'textfield') {
+            $element['#attributes'] = ['data-bef-auto-submit-exclude' => ''];
+          }
+        }
+      }
+
       if (!empty($settings['general']['autosubmit_hide'])) {
         $form['actions']['submit']['#attributes']['class'][] = 'js-hide';
       }
@@ -719,7 +749,7 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
             // the view results appear on. This can cause problems with
             // select_as_links options as they will use the wrong path. We
             // provide a hint for theme functions to correct this.
-            $form['sort_bef_combine']['#bef_path'] = $this->displayHandler->getUrl();
+            $form['sort_bef_combine']['#bef_path'] = $this->getExposedFormActionUrl();
             break;
 
           case 'default':
@@ -747,12 +777,14 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
         // Leave sort_by and sort_order as separate elements.
         if ('bef' == $settings['sort']['bef_format']) {
           foreach (['sort_by', 'sort_order'] as $field) {
-            $form[$field]['#theme'] = 'bef_radios';
-            $form[$field]['#type'] = 'radios';
-            if (empty($form[$field]['#process'])) {
-              $form[$field]['#process'] = array();
+            if (!empty($form[$field])) {
+              $form[$field]['#theme'] = 'bef_radios';
+              $form[$field]['#type'] = 'radios';
+              if (empty($form[$field]['#process'])) {
+                $form[$field]['#process'] = array();
+              }
+              $form[$field]['#process'][] = ['\Drupal\Core\Render\Element\Radios', 'processRadios'];
             }
-            $form[$field]['#process'][] = ['\Drupal\Core\Render\Element\Radios', 'processRadios'];
           }
         }
         elseif ('bef_links' == $settings['sort']['bef_format']) {
@@ -765,9 +797,9 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
           // view results appear on. This can cause problems with
           // select_as_links options as they will use the wrong path. We provide
           // a hint for theme functions to correct this.
-          $form['sort_by']['#bef_path'] = $this->displayHandler->getUrl();
+          $form['sort_by']['#bef_path'] = $this->getExposedFormActionUrl();
           if(!empty($form['sort_order'])) {
-            $form['sort_order']['#bef_path'] = $this->displayHandler->getUrl();
+            $form['sort_order']['#bef_path'] = $this->getExposedFormActionUrl();
           }
         }
 
@@ -834,7 +866,7 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
             // the view results appear on. This can cause problems with
             // select_as_links options as they will use the wrong path. We
             // provide a hint for theme functions to correct this.
-            $form['items_per_page']['#bef_path'] = $this->displayHandler->getUrl();
+            $form['items_per_page']['#bef_path'] = $this->getExposedFormActionUrl();
           }
           break;
       }
@@ -851,13 +883,14 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
     }
 
     // Shorthand for all filters in this view.
+    /* @var \Drupal\views\Plugin\views\HandlerBase[] $filters */
     $filters = $form_state->get('view')->display_handler->handlers['filter'];
 
     // Go through each saved option looking for Better Exposed Filter settings.
     foreach ($settings as $label => $options) {
 
       // Sanity check: Ensure this filter is an exposed filter.
-      if (empty($filters[$label]) || !$filters[$label]->options['exposed']) {
+      if (empty($filters[$label]) || !$filters[$label]->isExposed()) {
         continue;
       }
 
@@ -868,7 +901,7 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
       // Check for placeholder text.
       if (!empty($settings[$label]['more_options']['placeholder_text'])) {
         // @todo: Add token replacement for placeholder text.
-        $form[$label]['#placeholder'] = $settings[$label]['more_options']['placeholder_text'];
+        $form[$field_id]['#placeholder'] = $settings[$label]['more_options']['placeholder_text'];
       }
 
       // Handle filter value rewrites.
@@ -1082,7 +1115,7 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
           // the view results appear on. This can cause problems with
           // select_as_links options as they will use the wrong path. We provide
           // a hint for theme functions to correct this.
-          $form[$field_id]['#bef_path'] = $this->displayHandler->getUrl();
+          $form[$field_id]['#bef_path'] = $this->getExposedFormActionUrl();
           break;
 
         case 'bef_single':
@@ -1090,8 +1123,36 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
 
           // Use filter label as checkbox label.
           $form[$field_id]['#title'] = $filters[$label]->options['expose']['label'];
-          $form[$field_id]['#return_value'] = 1;
           $form[$field_id]['#type'] = 'checkbox';
+          // Views populates missing values in $form_state['input'] with the
+          // defaults and a checkbox does not appear in $_GET (or $_POST) so it
+          // will appear to be missing when a user submits a form. Because of
+          // this, instead of unchecking the checkbox value will revert to the
+          // default. More, the default value for select values is reused which
+          // results in the checkbox always checked. So we need to add a form
+          // element to see whether the form is submitted or not and then we
+          // need to look at $_GET directly to see whether the checkbox is
+          // there. For security reasons, we must not copy the $_GET value.
+
+          // First, let's figure out a short name for the signal element and
+          // then add it.
+          if (empty($signal)) {
+            for ($signal = 'a'; isset($form[$signal]); $signal++);
+            // This is all the signal element needs.
+            $form[$signal]['#type'] = 'hidden';
+          }
+          $input = $form_state->getUserInput();
+          $value = \Drupal::request()->query->get($field_id);
+          $checked = isset($input[$signal]) ? isset($value) : $form[$field_id]['#default_value'];
+          // For security, we check if value is valid and exist.
+          if ($checked) {
+            if (!in_array($value, array_keys($form[$field_id]['#options']))) {
+              $checked = FALSE;
+            }
+          }
+          // Now we know whether the checkbox is checked or not, set #value
+          // accordingly.
+          $form[$field_id]['#value'] = $checked ? $value : 0;
           break;
 
         case 'bef':
@@ -1167,9 +1228,11 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
         $form['#info']["filter-$label"]['description'] = '';
 
         // Check if the operator is exposed for this filter.
-        if ($this->view->getHandlers('filter')[$field_id]['expose']['use_operator']) {
+        if (isset($this->view->getHandlers('filter')[$label])
+          && $this->view->getHandlers('filter')[$label]['expose']['use_operator']
+        ) {
           // Include the exposed operator with the filter.
-          $operator_id = $this->view->getHandlers('filter')[$field_id]['expose']['operator_id'];
+          $operator_id = $this->view->getHandlers('filter')[$label]['expose']['operator_id'];
           $form[$field_id][$operator_id] = $form[$operator_id];
           unset($form[$operator_id]);
         }
@@ -1195,6 +1258,7 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
           $secondary[$identifier] = $form[$identifier];
           unset($form[$identifier]);
           $secondary[$identifier]['#title'] = $form['#info'][$filter_info_name]['label'];
+          $secondary[$identifier]['#description'] = $form['#info'][$filter_info_name]['description'];
           unset($form['#info'][$filter_info_name]);
         }
       }
@@ -1322,7 +1386,8 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
         }
         else {
           if ($return[$index] instanceof \stdClass) {
-            list($tid, $text) = each($return[$index]->option);
+            $tid = key($return[$index]->option);
+            $text = current($return[$index]->option);
             $return[$index]->option[$tid] = $rewrites[$text];
           }
           else {
@@ -1357,7 +1422,8 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
       // need to be converted to text.
       if (is_object($value) && !is_a($value, 'Drupal\Core\StringTranslation\TranslatableMarkup')) {
         reset($value->option);
-        list($key, $val) = each($value->option);
+        $key = key($value->option);
+        $val = current($value->option);
         $clean[$key] = $val;
       }
       else {
@@ -1471,6 +1537,7 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
         'allow_secondary' => FALSE,
         'secondary_label' => $this->t('Advanced options'),
         'autosubmit' => FALSE,
+        'autosubmit_exclude_textfield' => FALSE,
         'autosubmit_hide' => FALSE,
       ),
       'sort' => array(
@@ -1525,8 +1592,9 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
     );
 
     // Go through each exposed filter and collect settings.
+    /* @var \Drupal\views\Plugin\views\HandlerBase $filter */
     foreach ($this->view->display_handler->getHandlers('filter') as $label => $filter) {
-      if (!$filter->options['exposed']) {
+      if (!$filter->isExposed()) {
         continue;
       }
 
@@ -1540,6 +1608,24 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
       }
     }
     return $settings;
+  }
+
+  /**
+   * Returns exposed form action URL object.
+   *
+   * @return \Drupal\Core\Url
+   *   Url object.
+   */
+  protected function getExposedFormActionUrl() {
+    if ($this->displayHandler->getRoutedDisplay()) {
+      return $this->displayHandler->getUrl();
+    }
+
+    $request = \Drupal::request();
+    $url = Url::createFromRequest($request);
+    $url->setAbsolute();
+
+    return $url;
   }
 
 }

@@ -29,6 +29,9 @@ menu_breadcrumb.settings:
     home_as_site_name:
       type: boolean
       label: 'Use the site name from the configuration settings.'
+    exclude_empty_url:
+      type: boolean
+      label: 'Exclude menu items with empty URLs.'
     menu_breadcrumb_menus:
       type: sequence
       label: 'Menu Breadcrumb Menu Configurations'

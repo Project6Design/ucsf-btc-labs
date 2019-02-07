@@ -18,51 +18,59 @@ use Drupal\Core\Block\BlockPluginInterface;
  * @coversDefaultClass \Drupal\block_style_plugins\Plugin\BlockStyleBase
  * @group block_style_plugins
  */
-class BlockStyleBaseTest extends UnitTestCase
-{
+class BlockStyleBaseTest extends UnitTestCase {
 
   /**
+   * Mocked entity repository service.
+   *
    * @var \Drupal\Core\Entity\EntityRepository
    */
   protected $entityRepository;
 
   /**
+   * Mocked entity type manager service.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
+   * Mocked form state.
+   *
    * @var \Drupal\Core\Form\FormStateInterface
    */
   protected $formState;
 
   /**
+   * Mocked Block Plugin.
+   *
    * @var \Drupal\Core\Block\BlockPluginInterface
    */
   protected $blockPlugin;
 
   /**
+   * Instance of the BlockStyleBase plugin.
+   *
    * @var \Drupal\block_style_plugins\Plugin\BlockStyleBase
    */
   protected $plugin;
 
   /**
-   * Create the setup for constants and configFactory stub
+   * Create the setup for constants and configFactory stub.
    */
-  protected function setUp()
-  {
+  protected function setUp() {
     parent::setUp();
 
-    // Stub the Iconset Finder Service
+    // Stub the Iconset Finder Service.
     $this->entityRepository = $this->prophesize(EntityRepositoryInterface::CLASS);
 
-    // Stub the Entity Type Manager
+    // Stub the Entity Type Manager.
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::CLASS);
 
-    // Form state double
+    // Form state double.
     $this->formState = $this->prophesize(FormStateInterface::CLASS);
 
-    // Block plugin
+    // Block plugin.
     $this->blockPlugin = $this->prophesize(BlockPluginInterface::CLASS);
     $this->blockPlugin->getBaseId()->willReturn('block_content');
     $this->blockPlugin->getDerivativeId()->willReturn('uuid-1234');
@@ -80,7 +88,7 @@ class BlockStyleBaseTest extends UnitTestCase
       $this->entityTypeManager->reveal()
     );
 
-    // Create a translation stub for the t() method
+    // Create a translation stub for the t() method.
     $translator = $this->getStringTranslationStub();
     $this->plugin->setStringTranslation($translator);
   }
@@ -109,7 +117,7 @@ class BlockStyleBaseTest extends UnitTestCase
   }
 
   /**
-   * Tests the prepareForm() method
+   * Tests the prepareForm() method.
    *
    * @see ::prepareForm()
    */
@@ -127,16 +135,16 @@ class BlockStyleBaseTest extends UnitTestCase
     $form['actions']['submit']['#submit'] = [];
     $return = $this->plugin->prepareForm($form, $this->formState->reveal());
 
-    // Check the callback function attached
+    // Check the callback function attached.
     $return_callback = $return['actions']['submit']['#submit'][0];
     $this->assertInstanceOf('Drupal\block_style_plugins\Plugin\BlockStyleBase', $return_callback[0]);
     $this->assertEquals('submitForm', $return_callback[1]);
 
-    // Check that a block_styles array is set
+    // Check that a block_styles array is set.
     $this->assertArrayHasKey('block_styles', $return);
 
-    // Check that styles were set
-    $styles = $this->plugin->getStyles();
+    // Check that styles were set.
+    $styles = $this->plugin->getConfiguration();
     $expected_styles = [
       'sample_class' => '',
       'sample_checkbox' => '',
@@ -144,7 +152,7 @@ class BlockStyleBaseTest extends UnitTestCase
     ];
     $this->assertArrayEquals($expected_styles, $styles);
 
-    // Check third party settings
+    // Check third party settings.
     $expected_third_party_settings['block_style_plugins']['block_style_plugins'] = [
       '#type' => 'container',
       '#group' => 'block_styles',
@@ -153,28 +161,28 @@ class BlockStyleBaseTest extends UnitTestCase
   }
 
   /**
-   * Tests the defaultStyles method.
+   * Tests the defaultConfiguration method.
    *
-   * @see ::defaultStyles()
+   * @see ::defaultConfiguration()
    */
-  public function testDefaultStyles() {
+  public function testDefaultConfiguration() {
     $expected = [
       'sample_class' => '',
       'sample_checkbox' => FALSE,
     ];
-    $default = $this->plugin->defaultStyles();
+    $default = $this->plugin->defaultConfiguration();
 
     $this->assertArrayEquals($expected, $default);
   }
 
   /**
-   * Tests the formElements method.
+   * Tests the buildConfigurationForm method.
    *
-   * @see ::formElements()
+   * @see ::buildConfigurationForm()
    */
-  public function testFormElements() {
+  public function testBuildConfigurationForm() {
     $form = [];
-    $return = $this->plugin->formElements($form, $this->formState->reveal());
+    $return = $this->plugin->buildConfigurationForm($form, $this->formState->reveal());
 
     $this->assertArrayEquals([], $return);
   }
@@ -192,12 +200,24 @@ class BlockStyleBaseTest extends UnitTestCase
   }
 
   /**
+   * Tests the validateForm method.
+   *
+   * @see ::validateForm()
+   */
+  public function testValidateForm() {
+    $form = ['third_party_settings' => ['block_style_plugins' => [$this->plugin->getPluginId() => []]]];
+    $return = $this->plugin->validateForm($form, $this->formState->reveal());
+
+    $this->assertNull($return);
+  }
+
+  /**
    * Tests the submitForm method.
    *
    * @see ::submitForm()
    */
   public function testSubmitForm() {
-    $form = [];
+    $form = ['third_party_settings' => ['block_style_plugins' => [$this->plugin->getPluginId() => []]]];
     $return = $this->plugin->submitForm($form, $this->formState->reveal());
 
     $this->assertNull($return);
@@ -238,14 +258,14 @@ class BlockStyleBaseTest extends UnitTestCase
     $expected = [
       'elements' => ['#id' => 1],
       'block_styles' => [
-        'block_style_plugins' => ['class1', 'class2']
+        'block_style_plugins' => ['class1', 'class2'],
       ],
       'attributes' => [
         'class' => [
           'class1',
-          'class2'
-        ]
-      ]
+          'class2',
+        ],
+      ],
     ];
     $return = $this->plugin->build($variables);
     $this->assertArrayEquals($expected, $return);
@@ -258,41 +278,41 @@ class BlockStyleBaseTest extends UnitTestCase
     $expected = [
       'elements' => ['#id' => 1],
       'block_styles' => [
-        'block_style_plugins' => ['class1', 1, 'class2', 0]
+        'block_style_plugins' => ['class1', 1, 'class2', 0],
       ],
       'attributes' => [
         'class' => [
           'class1',
-          'class2'
-        ]
-      ]
+          'class2',
+        ],
+      ],
     ];
     $return = $this->plugin->build($variables);
     $this->assertArrayEquals($expected, $return);
   }
 
   /**
-   * Tests the getStyles method.
+   * Tests the getConfiguration method.
    *
-   * @see ::getStyles()
+   * @see ::getConfiguration()
    */
-  public function testGetStyles() {
+  public function testGetConfiguration() {
     $expected = [
       'sample_class' => '',
       'sample_checkbox' => FALSE,
     ];
-    $this->plugin->setStyles([]);
-    $return = $this->plugin->getStyles();
+    $this->plugin->setConfiguration([]);
+    $return = $this->plugin->getConfiguration();
 
     $this->assertArrayEquals($expected, $return);
   }
 
   /**
-   * Tests the setStyles method.
+   * Tests the setConfiguration method.
    *
-   * @see ::setStyles()
+   * @see ::setConfiguration()
    */
-  public function testSetStyles() {
+  public function testSetConfiguration() {
     $expected = [
       'sample_class' => '',
       'sample_checkbox' => FALSE,
@@ -300,19 +320,19 @@ class BlockStyleBaseTest extends UnitTestCase
     ];
 
     $new_styles = ['new_key' => 'new_val'];
-    $this->plugin->setStyles($new_styles);
-    $return = $this->plugin->getStyles();
+    $this->plugin->setConfiguration($new_styles);
+    $return = $this->plugin->getConfiguration();
 
     $this->assertArrayEquals($expected, $return);
 
-    // Overwrite styles
+    // Overwrite styles.
     $expected = [
       'sample_class' => 'class_name',
       'sample_checkbox' => TRUE,
     ];
 
-    $this->plugin->setStyles($expected);
-    $return = $this->plugin->getStyles();
+    $this->plugin->setConfiguration($expected);
+    $return = $this->plugin->getConfiguration();
 
     $this->assertArrayEquals($expected, $return);
   }
@@ -325,7 +345,7 @@ class BlockStyleBaseTest extends UnitTestCase
    * @dataProvider excludeProvider
    */
   public function testExclude($plugin, $bundle, $expected) {
-    // stub the blockPlugin
+    // Stub the blockPlugin.
     $this->setProtectedProperty('blockPlugin', $this->blockPlugin->reveal());
 
     if ($plugin) {
@@ -345,9 +365,21 @@ class BlockStyleBaseTest extends UnitTestCase
     return [
       'No exclude options are passed' => [FALSE, NULL, FALSE],
       'Exclude basic_block' => ['basic_block', NULL, TRUE],
-      'Exclude a block that is not the current one' => ['wrong_block', NULL, FALSE],
-      'Exclude a custom content block' => ['custom_block', 'custom_block', TRUE],
-      'Exclude a custom content block that is not the current block' => ['wrong_custom_block', 'custom_block', FALSE],
+      'Exclude a block that is not the current one' => [
+        'wrong_block',
+        NULL,
+        FALSE,
+      ],
+      'Exclude a custom content block' => [
+        'custom_block',
+        'custom_block',
+        TRUE,
+      ],
+      'Exclude a custom content block that is not the current block' => [
+        'wrong_custom_block',
+        'custom_block',
+        FALSE,
+      ],
     ];
   }
 
@@ -359,7 +391,7 @@ class BlockStyleBaseTest extends UnitTestCase
    * @dataProvider includeOnlyProvider
    */
   public function testIncludeOnly($plugin, $bundle, $expected) {
-    // stub the blockPlugin
+    // Stub the blockPlugin.
     $this->setProtectedProperty('blockPlugin', $this->blockPlugin->reveal());
 
     if ($plugin) {
@@ -380,8 +412,16 @@ class BlockStyleBaseTest extends UnitTestCase
       'No include options are passed' => [NULL, NULL, TRUE],
       'Include basic_block' => ['basic_block', NULL, TRUE],
       'Include only a sample_block' => ['wrong_block', NULL, FALSE],
-      'Include a custom content block' => ['custom_block', 'custom_block', TRUE],
-      'Include a custom content block which is not the current one' => ['wrong_custom_block', 'custom_block', FALSE],
+      'Include a custom content block' => [
+        'custom_block',
+        'custom_block',
+        TRUE,
+      ],
+      'Include a custom content block which is not the current one' => [
+        'wrong_custom_block',
+        'custom_block',
+        FALSE,
+      ],
     ];
   }
 
@@ -391,7 +431,7 @@ class BlockStyleBaseTest extends UnitTestCase
    * @see ::setBlockContentBundle()
    */
   public function testSetBlockContentBundle() {
-    // stub the blockPlugin
+    // Stub the blockPlugin.
     $this->setProtectedProperty('blockPlugin', $this->blockPlugin->reveal());
 
     $entity = $this->prophesize(EntityInterface::CLASS);
@@ -407,31 +447,33 @@ class BlockStyleBaseTest extends UnitTestCase
   }
 
   /**
-   * Get a protected property on the plugin via reflection
+   * Get a protected property on the plugin via reflection.
    *
-   * @param $property - property on instance
+   * @param string $property
+   *   Property on instance.
    *
    * @return mixed
+   *   Return the value of the protected property.
    */
   public function getProtectedProperty($property) {
     $reflection = new \ReflectionClass($this->plugin);
     $reflection_property = $reflection->getProperty($property);
-    $reflection_property->setAccessible(true);
+    $reflection_property->setAccessible(TRUE);
     return $reflection_property->getValue($this->plugin);
   }
 
   /**
-   * Sets a protected property on the plugin via reflection
+   * Sets a protected property on the plugin via reflection.
    *
-   * @param $property - property on instance being modified
-   * @param $value - new value of the property being modified
-   *
-   * @return void
+   * @param string $property
+   *   Property on instance being modified.
+   * @param mixed $value
+   *   New value of the property being modified.
    */
   public function setProtectedProperty($property, $value) {
     $reflection = new \ReflectionClass($this->plugin);
     $reflection_property = $reflection->getProperty($property);
-    $reflection_property->setAccessible(true);
+    $reflection_property->setAccessible(TRUE);
     $reflection_property->setValue($this->plugin, $value);
   }
 

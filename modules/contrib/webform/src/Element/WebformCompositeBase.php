@@ -6,13 +6,14 @@ use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Element\FormElement;
-use Drupal\webform\Plugin\WebformElement\WebformManagedFileBase as WebformManagedFileBasePlugin;
 use Drupal\webform\Utility\WebformElementHelper;
 
 /**
  * Provides an base composite webform element.
  */
 abstract class WebformCompositeBase extends FormElement implements WebformCompositeInterface {
+
+  use WebformCompositeFormElementTrait;
 
   /**
    * {@inheritdoc}
@@ -27,7 +28,7 @@ abstract class WebformCompositeBase extends FormElement implements WebformCompos
         [$class, 'processAjaxForm'],
       ],
       '#pre_render' => [
-        [$class, 'preRenderCompositeFormElement'],
+        [$class, 'preRenderWebformCompositeFormElement'],
       ],
       '#title_display' => 'invisible',
       '#required' => FALSE,
@@ -213,12 +214,8 @@ abstract class WebformCompositeBase extends FormElement implements WebformCompos
    *
    * @param array $element
    *   A render array for the current element.
-   * @param array $element
+   * @param array $composite_elements
    *   A render array containing a composite's elements.
-   *
-   * @return array
-   *   A renderable array of webform elements, containing the base properties
-   *   for the composite's webform elements.
    *
    * @throws \Exception
    *   Throws exception when unsupported element type is used with a composite
@@ -242,23 +239,27 @@ abstract class WebformCompositeBase extends FormElement implements WebformCompos
         }
       }
 
-      // Make sure to remove any #options references on text fields.
-      // This prevents "An illegal choice has been detected." error.
-      // @see FormValidator::performRequiredValidation()
-      if ($composite_element['#type'] == 'textfield') {
-        unset($composite_element['#options']);
-      }
-
       // Initialize composite sub-element.
       $element_plugin = $element_manager->getElementInstance($composite_element);
 
-      // Note: File uploads are not supported because uploaded file
-      // destination save and delete callbacks are not setup.
-      // @see \Drupal\webform\Plugin\WebformElement\WebformManagedFileBase::postSave
-      // @see \Drupal\webform\Plugin\WebformElement\WebformManagedFileBase::postDelete
-      if ($element_plugin instanceof WebformManagedFileBasePlugin) {
-        throw new \Exception('File upload element is not supported within composite elements.');
+      // Make sure to remove any #options references from unsupported elements.
+      // This prevents "An illegal choice has been detected." error.
+      // @see FormValidator::performRequiredValidation()
+      if (isset($composite_element['#options']) && !$element_plugin->hasProperty('options')) {
+        unset($composite_element['#options']);
       }
+
+      // Convert #placeholder to #empty_option for select elements.
+      if (isset($composite_element['#placeholder']) && $element_plugin->hasProperty('empty_option')) {
+        $composite_element['#empty_option'] = $composite_element['#placeholder'];
+      }
+
+      // Apply #select2 and #chosen to select elements.
+      if (isset($composite_element['#type']) && strpos($composite_element['#type'], 'select') !== FALSE) {
+        $select_properties = ['#select2' => '#select2', '#chosen' => '#chosen'];
+        $composite_element += array_intersect_key($element, $select_properties);
+      }
+
       if ($element_plugin->hasMultipleValues($composite_element)) {
         throw new \Exception('Multiple elements are not supported within composite elements.');
       }

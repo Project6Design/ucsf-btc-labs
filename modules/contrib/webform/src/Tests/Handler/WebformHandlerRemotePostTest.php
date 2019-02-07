@@ -2,6 +2,7 @@
 
 namespace Drupal\webform\Tests\Handler;
 
+use Drupal\file\Entity\File;
 use Drupal\webform\Entity\Webform;
 use Drupal\webform\Entity\WebformSubmission;
 use Drupal\webform\Tests\WebformTestBase;
@@ -18,14 +19,19 @@ class WebformHandlerRemotePostTest extends WebformTestBase {
    *
    * @var array
    */
-  public static $modules = ['webform', 'webform_test_handler_remote_post'];
+  public static $modules = ['file', 'webform', 'webform_test_handler_remote_post'];
 
   /**
    * Webforms to load.
    *
    * @var array
    */
-  protected static $testWebforms = ['test_handler_remote_post'];
+  protected static $testWebforms = [
+    'test_handler_remote_post',
+    'test_handler_remote_put',
+    'test_handler_remote_get',
+    'test_handler_remote_post_file',
+  ];
 
   /**
    * Test remote post handler.
@@ -42,6 +48,22 @@ class WebformHandlerRemotePostTest extends WebformTestBase {
 
     // Check 'completed' operation.
     $sid = $this->postSubmission($webform);
+
+    // Check POST response.
+    $this->assertRaw("method: post
+status: success
+message: 'Processed completed request.'
+options:
+  headers:
+    Accept-Language: en
+    custom_header: 'true'
+  form_params:
+    custom_completed: true
+    custom_data: true
+    response_type: '200'
+    first_name: John
+    last_name: Smith");
+
     $webform_submission = WebformSubmission::load($sid);
     $this->assertRaw("form_params:
   custom_completed: true
@@ -56,7 +78,7 @@ class WebformHandlerRemotePostTest extends WebformTestBase {
     $this->assertRaw('Your confirmation number is ' . $webform_submission->getElementData('confirmation_number') . '.');
 
     // Check custom header.
-    $this->assertRaw('{&quot;custom_header&quot;:&quot;true&quot;}');
+    $this->assertRaw('{&quot;headers&quot;:{&quot;Accept-Language&quot;:&quot;en&quot;,&quot;custom_header&quot;:&quot;true&quot;}');
 
     // Sleep for 1 second to make sure submission timestamp is updated.
     sleep(1);
@@ -162,6 +184,29 @@ class WebformHandlerRemotePostTest extends WebformTestBase {
     $this->assertRaw('Your confirmation number is ' . $match[1] . '.');
 
     /**************************************************************************/
+    // PUT.
+    /**************************************************************************/
+
+    /** @var \Drupal\webform\WebformInterface $webform */
+    $webform = Webform::load('test_handler_remote_put');
+
+    $this->postSubmission($webform);
+
+    // Check PUT response.
+    $this->assertRaw("method: put
+status: success
+message: 'Processed completed request.'
+options:
+  headers:
+    custom_header: 'true'
+  form_params:
+    custom_completed: true
+    custom_data: true
+    response_type: '200'
+    first_name: John
+    last_name: Smith");
+
+    /**************************************************************************/
     // GET.
     /**************************************************************************/
 
@@ -170,15 +215,71 @@ class WebformHandlerRemotePostTest extends WebformTestBase {
 
     $this->postSubmission($webform);
 
+    // Check GET response.
+    $this->assertRaw("method: get
+status: success
+message: 'Processed completed request.'
+options:
+  headers:
+    custom_header: 'true'");
+
     // Check request URL contains query string.
-    $this->assertRaw("http://webform-test-handler-remote-post/completed?custom_completed=1&amp;custom_data=1&amp;response_type=200&amp;first_name=John&amp;last_name=Smith");
+    // @todo restore tests once the Drupal 8.6.x issue is resolved.
+    //$this->assertRaw("http://webform-test-handler-remote-post/completed?custom_completed=1&amp;custom_data=1&amp;first_name=John&amp;last_name=Smith&amp;response_type=200");
 
     // Check response data.
-    $this->assertRaw("message: 'Processed completed?custom_completed=1&amp;custom_data=1&amp;response_type=200&amp;first_name=John&amp;last_name=Smith request.'");
+    $this->assertRaw("message: 'Processed completed request.'");
 
     // Get confirmation number from JSON packet.
     preg_match('/&quot;confirmation_number&quot;:&quot;([a-zA-z0-9]+)&quot;/', $this->getRawContent(), $match);
     $this->assertRaw('Your confirmation number is ' . $match[1] . '.');
+
+    /**************************************************************************/
+    // POST File.
+    /**************************************************************************/
+
+    /** @var \Drupal\webform\WebformInterface $webform */
+    $webform = Webform::load('test_handler_remote_post_file');
+
+    $sid = $this->postSubmissionTest($webform);
+    $webform_submission = WebformSubmission::load($sid);
+
+    $file_data = $webform_submission->getElementData('file');
+    $file = File::load($file_data);
+    $file_id = $file->id();
+    $file_uuid = $file->uuid();
+
+    $files_data = $webform_submission->getElementData('files');
+    $file = File::load(reset($files_data));
+    $files_id = $file->id();
+    $files_uuid = $file->uuid();
+
+    // Check the file name, uri, and data is appended to form params.
+    $this->assertRaw("form_params:
+  file: 1
+  files:
+    - 2
+  _file:
+    id: $file_id
+    name: file.txt
+    uri: 'private://webform/test_handler_remote_post_file/$sid/file.txt'
+    mime: text/plain
+    uuid: $file_uuid
+    data: dGhpcyBpcyBhIHNhbXBsZSB0eHQgZmlsZQppdCBoYXMgdHdvIGxpbmVzCg==
+  file__id: $file_id
+  file__name: file.txt
+  file__uri: 'private://webform/test_handler_remote_post_file/$sid/file.txt'
+  file__mime: text/plain
+  file__uuid: $file_uuid
+  file__data: dGhpcyBpcyBhIHNhbXBsZSB0eHQgZmlsZQppdCBoYXMgdHdvIGxpbmVzCg==
+  _files:
+    -
+      id: $files_id
+      name: files.txt
+      uri: 'private://webform/test_handler_remote_post_file/$sid/files.txt'
+      mime: text/plain
+      uuid: $files_uuid
+      data: dGhpcyBpcyBhIHNhbXBsZSB0eHQgZmlsZQppdCBoYXMgdHdvIGxpbmVzCg==");
   }
 
 }

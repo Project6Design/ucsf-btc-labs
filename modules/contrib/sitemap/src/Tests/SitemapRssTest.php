@@ -72,7 +72,7 @@ class SitemapRssTest extends WebTestBase {
       'title[0][value]' => $title,
       $this->field_tags_name . '[target_id]' => implode(',', $tags),
     );
-    $this->drupalPostForm('node/add/article', $edit, t('Save and publish'));
+    $this->drupalPostForm('node/add/article', $edit, t('Save'));
 */
     // Assert that RSS link for front page is included in the sitemap.
     $this->drupalGet('/sitemap');
@@ -133,7 +133,7 @@ class SitemapRssTest extends WebTestBase {
       'title[0][value]' => $title,
       $this->field_tags_name . '[target_id]' => implode(',', $tags),
     );
-    $this->drupalPostForm('node/add/article', $edit, t('Save and publish'));
+    $this->drupalPostForm('node/add/article', $edit, t('Save'));
 
     // Change RSS feed depth to -1.
     $edit = array(

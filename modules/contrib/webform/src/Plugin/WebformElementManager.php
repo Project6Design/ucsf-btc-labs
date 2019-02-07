@@ -7,7 +7,6 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Extension\ThemeHandlerInterface;
-use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\CategorizingPluginManagerTrait;
 use Drupal\Core\Plugin\DefaultPluginManager;
@@ -184,6 +183,18 @@ class WebformElementManager extends DefaultPluginManager implements FallbackPlug
   /**
    * {@inheritdoc}
    */
+  public function processElement(array &$element) {
+    $element_plugin = $this->getElementInstance($element);
+    $element_plugin->initialize($element);
+    $element_plugin->prepare($element);
+    $element_plugin->finalize($element);
+    $element_plugin->setDefaultValue($element);
+    return $element;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function invokeMethod($method, array &$element, &$context1 = NULL, &$context2 = NULL) {
     // Make sure element has a #type.
     if (!isset($element['#type'])) {
@@ -304,6 +315,13 @@ class WebformElementManager extends DefaultPluginManager implements FallbackPlug
     }
     ksort($properties);
     return $properties;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isExcluded($type) {
+    return $this->configFactory->get('webform.settings')->get('element.excluded_elements.' . $type) ? TRUE : FALSE;
   }
 
 }

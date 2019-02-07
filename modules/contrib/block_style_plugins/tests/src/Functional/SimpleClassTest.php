@@ -32,10 +32,10 @@ class SimpleClassTest extends BrowserTestBase {
     $this->adminUser = $this->drupalCreateUser(['administer blocks', 'access administration pages']);
     $this->drupalLogin($this->adminUser);
 
-    // Place the "Powered By Drupal" block
+    // Place the "Powered By Drupal" block.
     $this->drupalPlaceBlock('system_powered_by_block', [
       'id' => 'poweredbytest',
-      'region' => 'content'
+      'region' => 'content',
     ]);
   }
 
@@ -45,10 +45,10 @@ class SimpleClassTest extends BrowserTestBase {
   public function testAddClassToBlock() {
     $assert = $this->assertSession();
 
-    // Go to the block instance configuration page
+    // Go to the block instance configuration page.
     $this->drupalGet('admin/structure/block/manage/poweredbytest');
 
-    // Check that the style options are available
+    // Check that the style options are available.
     $assert->responseContains('Block Styles');
     $assert->responseContains('Add a custom class to this block');
     $assert->fieldExists('third_party_settings[block_style_plugins][simple_class][simple_class]');
@@ -58,18 +58,18 @@ class SimpleClassTest extends BrowserTestBase {
       'Save block'
     );
 
-    // Go to the home page
+    // Go to the home page.
     $this->drupalGet('<front>');
     $assert->statusCodeEquals(200);
 
-    // Assert that the block was placed and has the custom class
+    // Assert that the block was placed and has the custom class.
     $assert->linkExists('Drupal');
     $assert->responseContains('sample-class');
 
-    // Go back to the block instance configuration page
+    // Go back to the block instance configuration page.
     $this->drupalGet('admin/structure/block/manage/poweredbytest');
 
-    // Check that the class is set in the style field
+    // Check that the class is set in the style field.
     $assert->fieldValueEquals('third_party_settings[block_style_plugins][simple_class][simple_class]', 'sample-class');
   }
 

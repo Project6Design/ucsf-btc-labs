@@ -2,6 +2,9 @@
 
 namespace Drupal\webform\Plugin\WebformElement;
 
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\webform\WebformSubmissionInterface;
+
 /**
  * Provides a 'checkbox' element.
  *
@@ -21,11 +24,51 @@ class Checkbox extends BooleanBase {
   public function getDefaultProperties() {
     $properties = [
       'title_display' => 'after',
+      // Checkbox.
+      'exclude_empty' => FALSE,
       // iCheck settings.
       'icheck' => '',
     ] + parent::getDefaultProperties();
     unset($properties['unique'], $properties['unique_entity'], $properties['unique_user'], $properties['unique_error']);
     return $properties;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function build($format, array &$element, WebformSubmissionInterface $webform_submission, array $options = []) {
+    if ($this->isEmptyExcluded($element, $options) && !$this->getValue($element, $webform_submission, $options)) {
+      return NULL;
+    }
+    else {
+      return parent::build($format, $element, $webform_submission, $options);
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function isEmptyExcluded(array $element, array $options) {
+    $options += [
+      'exclude_empty_checkbox' => FALSE,
+    ];
+
+    return $this->getElementProperty($element, 'exclude_empty') ?: $options['exclude_empty_checkbox'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function form(array $form, FormStateInterface $form_state) {
+    $form = parent::form($form, $form_state);
+
+    $form['display']['exclude_empty'] = [
+      '#title' => $this->t('Exclude unselected checkbox'),
+      '#type' => 'checkbox',
+      '#return_value' => TRUE,
+    ];
+
+    return $form;
   }
 
 }

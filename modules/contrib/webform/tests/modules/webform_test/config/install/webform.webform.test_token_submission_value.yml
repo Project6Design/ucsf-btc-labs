@@ -6,8 +6,10 @@ dependencies:
       - webform_test
 open: null
 close: null
+weight: 0
 uid: null
 template: false
+archive: false
 id: test_token_submission_value
 title: 'Test: Token submission value'
 description: 'Test Webform submission values tokens'
@@ -16,18 +18,18 @@ elements: |
   email:
     '#type': email
     '#title': email
-    '#default_value': 'example@example.com'
+    '#default_value': example@example.com
   emails:
     '#type': email
     '#title': emails
     '#multiple': true
     '#default_value':
-      - 'one@example.com'
-      - 'two@example.com'
-      - 'three@example.com'
+      - one@example.com
+      - two@example.com
+      - three@example.com
   user:
     '#type': webform_entity_select
-    '#title': 'user'
+    '#title': user
     '#target_type': user
     '#selection_handler': 'default:user'
     '#selection_settings':
@@ -35,7 +37,7 @@ elements: |
     '#default_value': 1
   users:
     '#type': webform_entity_select
-    '#title': 'user'
+    '#title': user
     '#multiple': true
     '#target_type': user
     '#selection_handler': 'default:user'
@@ -76,8 +78,8 @@ elements: |
     '#type': webform_contact
     '#title': contact
     '#default_value':
-      name: John Smith
-      email: 'john@example.com'
+      name: 'John Smith'
+      email: john@example.com
       address: '10 Main Street'
       city: Springfield
       state_province: Alabama
@@ -89,14 +91,14 @@ elements: |
     '#multiple': true
     '#default_value':
       - name: 'John Smith'
-        email: 'john@example.com'
+        email: john@example.com
         address: '10 Main Street'
         city: Springfield
         state_province: Alabama
         postal_code: 12345
         country: 'United States'
       - name: 'Jane Doe'
-        email: 'jane@example.com'
+        email: jane@example.com
         address: '10 Main Street'
         city: Springfield
         state_province: Alabama
@@ -113,6 +115,19 @@ elements: |
       '#type': textfield
       '#title': last_name
       '#default_value': Smith
+  url:
+    '#type': url
+    '#title': url
+    '#default_value': 'http://example.com?query=param'
+  markup:
+    '#type': textfield
+    '#title': markup
+    '#default_value': '<b>Bold</b> &amp; UPPERCASE'
+  script:
+    '#type': textfield
+    '#title': script
+    '#default_value': '<script>alert(''hi'');</script>'
+  
 css: ''
 javascript: ''
 settings:
@@ -121,6 +136,7 @@ settings:
   page: true
   page_submit_path: ''
   page_confirm_path: ''
+  form_title: source_entity_webform
   form_submit_once: false
   form_exception_message: ''
   form_open_message: ''
@@ -128,6 +144,7 @@ settings:
   form_previous_submissions: true
   form_confidential: false
   form_confidential_message: ''
+  form_remote_addr: true
   form_convert_anonymous: false
   form_prepopulate: false
   form_prepopulate_source_entity: false
@@ -143,22 +160,37 @@ settings:
   form_submit_back: false
   form_autofocus: false
   form_details_toggle: false
-  form_login: false
-  form_login_message: ''
+  form_access_denied: default
+  form_access_denied_title: ''
+  form_access_denied_message: ''
+  form_access_denied_attributes: {  }
+  form_file_limit: ''
   submission_label: ''
   submission_log: false
+  submission_views: {  }
+  submission_views_replace: {  }
   submission_user_columns: {  }
-  submission_login: false
-  submission_login_message: ''
+  submission_user_duplicate: false
+  submission_access_denied: default
+  submission_access_denied_title: ''
+  submission_access_denied_message: ''
+  submission_access_denied_attributes: {  }
   submission_exception_message: ''
   submission_locked_message: ''
+  submission_excluded_elements: {  }
+  submission_exclude_empty: false
+  submission_exclude_empty_checkbox: false
+  previous_submission_message: ''
+  previous_submissions_message: ''
   autofill: false
   autofill_message: ''
   autofill_excluded_elements: {  }
   wizard_progress_bar: true
   wizard_progress_pages: false
   wizard_progress_percentage: false
+  wizard_progress_link: false
   wizard_start_label: ''
+  wizard_preview_link: false
   wizard_confirmation: true
   wizard_confirmation_label: ''
   wizard_track: ''
@@ -169,6 +201,7 @@ settings:
   preview_attributes: {  }
   preview_excluded_elements: {  }
   preview_exclude_empty: true
+  preview_exclude_empty_checkbox: false
   draft: none
   draft_multiple: false
   draft_auto_save: false
@@ -199,6 +232,12 @@ settings:
     <tr><th width="50%">webform_submission:values:user:entity:mail</th><td width="50%">[webform_submission:values:user:entity:mail]</td></tr>
     <tr><th width="50%">webform_submission:values:users:0:entity:account-name</th><td width="50%">[webform_submission:values:users:0:entity:account-name]</td></tr>
     <tr><th width="50%">webform_submission:values:users:99:entity:account-name</th><td width="50%">[webform_submission:values:users:99:entity:account-name]</td></tr>
+    </table>
+    
+    <h3>current-user</h3>
+    <table class="table">
+    <tr><th width="50%">current-user:display-name</th><td width="50%">[current-user:display-name]</td></tr>
+    <tr><th width="50%">current-user:missing</th><td width="50%">[current-user:missing]</td></tr>
     </table>
     
     <h3>terms</h3>
@@ -256,7 +295,25 @@ settings:
     <table class="table">
     <tr><th width="50%">webform_submission:values:missing</th><td width="50%">[webform_submission:values:missing]</td></tr>
     <tr><th width="50%">webform_submission:values:missing:clear</th><td width="50%">[webform_submission:values:missing:clear]</td></tr>
+    <tr><th width="50%">webform:random:missing</th><td width="50%">[webform:random:missing]</td></tr>
+    <tr><th width="50%">webform:random:missing:clear</th><td width="50%">[webform:random:missing:clear]</td></tr>
     </table>
+    
+    <h3>urlencode</h3>
+    <table class="table">
+    <tr><th width="50%">webform_submission:values:url</th><td width="50%">[webform_submission:values:url]</td></tr>
+    <tr><th width="50%">webform_submission:values:url:urlencode</th><td width="50%">[webform_submission:values:url:urlencode]</td></tr>
+    </table>
+    
+    <h3>htmldecode</h3>
+    <table class="table">
+    <tr><th width="50%">webform_submission:values:markup</th><td width="50%">[webform_submission:values:markup]</td></tr>
+    <tr><th width="50%">webform_submission:values:markup:htmldecode</th><td width="50%">[webform_submission:values:markup:htmldecode]</td></tr>
+    <tr><th width="50%">webform_submission:values:markup:htmldecode:striptags</th><td width="50%">[webform_submission:values:markup:htmldecode:striptags]</td></tr>
+    <tr><th width="50%">webform_submission:values:script</th><td width="50%">[webform_submission:values:script]</td></tr>
+    <tr><th width="50%">webform_submission:values:script:htmldecode</th><td width="50%">[webform_submission:values:script:htmldecode]</td></tr>
+    </table>
+    
   confirmation_url: ''
   confirmation_attributes: {  }
   confirmation_back: true
@@ -267,9 +324,11 @@ settings:
   limit_total: 100
   limit_total_interval: null
   limit_total_message: ''
+  limit_total_unique: false
   limit_user: 10
   limit_user_interval: null
   limit_user_message: ''
+  limit_user_unique: false
   entity_limit_total: 50
   entity_limit_total_interval: null
   entity_limit_user: 5
@@ -319,6 +378,10 @@ access:
     users: {  }
     permissions: {  }
   test:
+    roles: {  }
+    users: {  }
+    permissions: {  }
+  configuration:
     roles: {  }
     users: {  }
     permissions: {  }

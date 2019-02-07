@@ -10,7 +10,6 @@ use Drupal\filter\Entity\FilterFormat;
 use Drupal\simpletest\WebTestBase;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\user\Entity\Role;
 use Drupal\webform\WebformInterface;
 use Drupal\webform\Entity\Webform;
 
@@ -49,146 +48,6 @@ abstract class WebformTestBase extends WebTestBase {
   public function tearDown() {
     $this->purgeSubmissions();
     parent::tearDown();
-  }
-
-  /****************************************************************************/
-  // User.
-  /****************************************************************************/
-
-  /**
-   * A normal user to submit webforms.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $normalUser;
-
-  /**
-   * A webform administrator.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $adminWebformUser;
-
-  /**
-   * A webform submission administrator.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $adminSubmissionUser;
-
-  /**
-   * A webform own access.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $ownWebformUser;
-
-  /**
-   * A webform any access.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $anyWebformUser;
-
-  /**
-   * A webform submission own access.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $ownWebformSubmissionUser;
-
-  /**
-   * A webform submission any access.
-   *
-   * @var \Drupal\user\UserInterface
-   */
-  protected $anyWebformSubmissionUser;
-
-  /**
-   * Create webform test users.
-   */
-  protected function createUsers() {
-    // Default user permissions.
-    $default_user_permissions = [];
-    $default_user_permissions[] = 'access user profiles';
-    if (in_array('webform_node', static::$modules)) {
-      $default_user_permissions[] = 'access content';
-    }
-
-    // Normal user.
-    $normal_user_permissions = $default_user_permissions;
-    $this->normalUser = $this->drupalCreateUser($normal_user_permissions);
-
-    // Admin webform user.
-    $admin_form_user_permissions = array_merge($default_user_permissions, [
-      'access site reports',
-      'administer site configuration',
-      'administer webform',
-      'access webform submission log',
-      'create webform',
-      'administer users',
-    ]);
-    if (in_array('block', static::$modules)) {
-      $admin_form_user_permissions[] = 'administer blocks';
-    }
-    if (in_array('webform_node', static::$modules)) {
-      $admin_form_user_permissions[] = 'administer nodes';
-    }
-    if (in_array('webform_test_translation', static::$modules)) {
-      $admin_form_user_permissions[] = 'translate configuration';
-    }
-    $this->adminWebformUser = $this->drupalCreateUser($admin_form_user_permissions);
-
-    // Own webform user.
-    $this->ownWebformUser = $this->drupalCreateUser(array_merge($default_user_permissions, [
-      'access webform overview',
-      'create webform',
-      'edit own webform',
-      'delete own webform',
-      'view own webform submission',
-      'edit own webform submission',
-      'delete own webform submission',
-    ]));
-
-    // Any webform user.
-    $this->anyWebformUser = $this->drupalCreateUser(array_merge($default_user_permissions, [
-      'access webform overview',
-      'create webform',
-      'edit any webform',
-      'delete any webform',
-    ]));
-
-    // Own webform submission user.
-    $this->ownWebformSubmissionUser = $this->drupalCreateUser(array_merge($default_user_permissions, [
-      'view own webform submission',
-      'edit own webform submission',
-      'delete own webform submission',
-    ]));
-
-    // Any webform submission user.
-    $this->anyWebformSubmissionUser = $this->drupalCreateUser(array_merge($default_user_permissions, [
-      'view any webform submission',
-      'edit any webform submission',
-      'delete any webform submission',
-    ]));
-
-    // Admin submission user.
-    $this->adminSubmissionUser = $this->drupalCreateUser(array_merge($default_user_permissions, [
-      'access webform submission log',
-      'administer webform submission',
-    ]));
-  }
-
-  /**
-   * Add webform submission own permissions to anonymous role.
-   */
-  protected function addWebformSubmissionOwnPermissionsToAnonymous() {
-    /** @var \Drupal\user\RoleInterface $anonymous_role */
-    $anonymous_role = Role::load('anonymous');
-    $anonymous_role->grantPermission('view own webform submission')
-      ->grantPermission('edit own webform submission')
-      ->grantPermission('delete own webform submission')
-      ->save();
   }
 
   /****************************************************************************/
@@ -365,73 +224,16 @@ abstract class WebformTestBase extends WebTestBase {
    *   Submission values.
    * @param string $submit
    *   Value of the submit button whose click is to be emulated.
+   * @param array $options
+   *   Options to be forwarded to the url generator.
    *
    * @return int
    *   The created test submission's sid.
    */
-  protected function postSubmissionTest(WebformInterface $webform, array $edit = [], $submit = NULL) {
+  protected function postSubmissionTest(WebformInterface $webform, array $edit = [], $submit = NULL, array $options = []) {
     $submit = $this->getWebformSubmitButtonLabel($webform, $submit);
-    $this->drupalPostForm('webform/' . $webform->id() . '/test', $edit, $submit);
+    $this->drupalPostForm('webform/' . $webform->id() . '/test', $edit, $submit, $options);
     return $this->getLastSubmissionId($webform);
-  }
-
-  /****************************************************************************/
-  // Log.
-  /****************************************************************************/
-
-  /**
-   * Get the last submission id.
-   *
-   * @return int
-   *   The last submission id.
-   */
-  protected function getLastSubmissionLog() {
-    $query = \Drupal::database()->select('webform_submission_log', 'l');
-    $query->leftJoin('webform_submission', 'ws', 'l.sid = ws.sid');
-    $query->fields('l', [
-      'lid',
-      'uid',
-      'sid',
-      'handler_id',
-      'operation',
-      'message',
-      'timestamp',
-    ]);
-    $query->fields('ws', [
-      'webform_id',
-      'entity_type',
-      'entity_id',
-    ]);
-    $query->orderBy('l.lid', 'DESC');
-    $query->range(0, 1);
-    return $query->execute()->fetch();
-  }
-
-  /**
-   * Get the entire submission log.
-   *
-   * @return int
-   *   The last submission id.
-   */
-  protected function getSubmissionLog() {
-    $query = \Drupal::database()->select('webform_submission_log', 'l');
-    $query->leftJoin('webform_submission', 'ws', 'l.sid = ws.sid');
-    $query->fields('l', [
-      'lid',
-      'uid',
-      'sid',
-      'handler_id',
-      'operation',
-      'message',
-      'timestamp',
-    ]);
-    $query->fields('ws', [
-      'webform_id',
-      'entity_type',
-      'entity_id',
-    ]);
-    $query->orderBy('l.lid', 'DESC');
-    return $query->execute()->fetchAll();
   }
 
   /****************************************************************************/
@@ -497,7 +299,7 @@ abstract class WebformTestBase extends WebTestBase {
   /**
    * Passes if the substring is contained within text, fails otherwise.
    */
-  protected function assertContains($haystack, $needle, $message = '', $group = 'Other') {
+  protected function assertContains($needle, $haystack, $message = '') {
     if (!$message) {
       $t_args = [
         '@haystack' => Unicode::truncate($haystack, 150, TRUE, TRUE),
@@ -509,13 +311,13 @@ abstract class WebformTestBase extends WebTestBase {
     if (!$result) {
       $this->verbose($haystack);
     }
-    return $this->assert($result, $message, $group);
+    $this->assert($result, $message);
   }
 
   /**
    * Passes if the substring is not contained within text, fails otherwise.
    */
-  protected function assertNotContains($haystack, $needle, $message = '', $group = 'Other') {
+  protected function assertNotContains($needle, $haystack, $message = '') {
     if (!$message) {
       $t_args = [
         '@haystack' => Unicode::truncate($haystack, 150, TRUE, TRUE),
@@ -528,7 +330,7 @@ abstract class WebformTestBase extends WebTestBase {
     if (!$result) {
       $this->verbose($haystack);
     }
-    return $this->assert($result, $message, $group);
+    $this->assert($result, $message);
   }
 
   /**

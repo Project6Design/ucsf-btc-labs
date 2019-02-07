@@ -1,4 +1,4 @@
 services:
   sitemap.helper:
     class: Drupal\sitemap\SitemapHelper
-    arguments: ['@config.factory']
+    arguments: ['@config.factory', '@entity_type.manager', '@entity.repository', '@module_handler']

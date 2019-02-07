@@ -5,6 +5,7 @@ namespace Drupal\webform\Plugin\WebformElement;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\webform\Element\WebformLikert as WebformLikertElement;
 use Drupal\webform\Entity\WebformOptions;
+use Drupal\webform\Utility\WebformAccessibilityHelper;
 use Drupal\webform\Utility\WebformElementHelper;
 use Drupal\webform\Utility\WebformOptionsHelper;
 use Drupal\webform\Plugin\WebformElementBase;
@@ -34,6 +35,7 @@ class WebformLikert extends WebformElementBase {
       'default_value' => [],
       // Description/Help.
       'help' => '',
+      'help_title' => '',
       'description' => '',
       'more' => '',
       'more_title' => '',
@@ -48,7 +50,9 @@ class WebformLikert extends WebformElementBase {
       'format' => $this->getItemDefaultFormat(),
       'format_html' => '',
       'format_text' => '',
+      'format_attributes' => [],
       // Likert settings.
+      'sticky' => TRUE,
       'questions' => [],
       'questions_description_display' => 'description',
       'questions_randomize' => FALSE,
@@ -59,6 +63,7 @@ class WebformLikert extends WebformElementBase {
       'na_answer_text' => $this->t('N/A'),
       // Attributes.
       'wrapper_attributes' => [],
+      'label_attributes' => [],
       // iCheck settings.
       'icheck' => '',
     ] + $this->getDefaultBaseProperties();
@@ -110,7 +115,7 @@ class WebformLikert extends WebformElementBase {
         // HTML emails.
         $header = [];
         $header['likert_question'] = [
-          'data' => '',
+          'data' => WebformAccessibilityHelper::buildVisuallyHidden(t('Questions')),
           'align' => 'left',
           'width' => '40%',
         ];
@@ -149,6 +154,7 @@ class WebformLikert extends WebformElementBase {
           '#type' => 'table',
           '#header' => $header,
           '#rows' => $rows,
+          '#sticky' => $this->getElementProperty($element, 'sticky'),
           '#attributes' => [
             'class' => ['webform-likert-table'],
           ],
@@ -383,6 +389,20 @@ class WebformLikert extends WebformElementBase {
   /**
    * {@inheritdoc}
    */
+  public function getElementSelectorSourceValues(array $element) {
+    $selector_options = $this->getElementSelectorOptions($element);
+    $selectors = reset($selector_options);
+
+    $source_values = [];
+    foreach (array_keys($selectors) as $selector) {
+      $source_values[$selector] = $element['#answers'];
+    }
+    return $source_values;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
     $form['likert'] = [
@@ -446,7 +466,8 @@ class WebformLikert extends WebformElementBase {
     $form['likert']['na_answer_text'] = [
       '#type' => 'textfield',
       '#title' => $this->t('N/A answer text'),
-      '#description' => $this->t('Text display display on webform.'),
+      '#description' => $this->t('Text displayed on the webform.'),
+      '#attributes' => ['data-webform-states-no-clear' => TRUE],
       '#states' => [
         'visible' => [
           ':input[name="properties[na_answer]"]' => ['checked' => TRUE],
@@ -455,6 +476,12 @@ class WebformLikert extends WebformElementBase {
           ':input[name="properties[na_answer]"]' => ['checked' => TRUE],
         ],
       ],
+    ];
+    $form['likert']['sticky'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Enable Drupal style "sticky" table headers (Javascript)'),
+      '#description' => $this->t('If checked, the answers will float at the top of the page as the user scrolls-thru the questions.'),
+      '#return_value' => TRUE,
     ];
     return $form;
   }

@@ -28,8 +28,8 @@ class WebformTestHandlerRemotePostClient extends Client {
       $params = (isset($options['json'])) ? $options['json'] : $options['form_params'];
     }
 
-    $response_type = $params['response_type'];
-    $operation = str_replace('http://webform-test-handler-remote-post/', '', $uri);
+    $response_type = (isset($params['response_type'])) ? $params['response_type'] : 200;
+    $operation = ltrim(parse_url($uri, PHP_URL_PATH), '/');
     $random = new Random();
     // Handle 404 errors.
     switch ($response_type) {
@@ -42,6 +42,7 @@ class WebformTestHandlerRemotePostClient extends Client {
         $status = 401;
         $headers = ['Content-Type' => ['application/json']];
         $json = [
+          'method' => $method,
           'status' => 'unauthorized',
           'message' => (string) new FormattableMarkup('Unauthorized to process @type request.', ['@type' => $operation]),
           'options' => $options,
@@ -53,6 +54,7 @@ class WebformTestHandlerRemotePostClient extends Client {
         $status = 500;
         $headers = ['Content-Type' => ['application/json']];
         $json = [
+          'method' => $method,
           'status' => 'fail',
           'message' => (string) new FormattableMarkup('Failed to process @type request.', ['@type' => $operation]),
           'options' => $options,
@@ -65,6 +67,7 @@ class WebformTestHandlerRemotePostClient extends Client {
         $status = 200;
         $headers = ['Content-Type' => ['application/json']];
         $json = [
+          'method' => $method,
           'status' => 'success',
           'message' => (string) new FormattableMarkup('Processed @type request.', ['@type' => $operation]),
           'options' => $options,

@@ -5,7 +5,6 @@ namespace Drupal\webform\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\TrustedRedirectResponse;
-use Drupal\Core\Url;
 use Drupal\webform\WebformHelpManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -87,14 +86,16 @@ class WebformHelpVideoForm extends FormBase {
     }
 
     // Related resources.
-    $form['resources'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Additional resources'),
-      'links' => [
-        '#theme' => 'links',
-        '#links' => $this->helpManager->getVideoLinks($id),
-      ],
-    ];
+    if ($video_links = $this->helpManager->getVideoLinks($this->videoId)) {
+      $form['resources'] = [
+        '#type' => 'details',
+        '#title' => $this->t('Additional resources'),
+        'links' => [
+          '#theme' => 'links',
+          '#links' => $video_links,
+        ],
+      ];
+    }
 
     // Actions.
     if (isset($video['submit_label'])) {

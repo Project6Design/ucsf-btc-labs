@@ -29,8 +29,8 @@ class WebformScheduledEmailTest extends WebformNodeTestBase {
     /** @var \Drupal\webform_scheduled_email\WebformScheduledEmailManagerInterface $scheduled_manager */
     $scheduled_manager = \Drupal::service('webform_scheduled_email.manager');
 
-    $yesterday = date('Y-m-d', strtotime('-1 days'));
-    $tomorrow = date('Y-m-d', strtotime('+1 days'));
+    $yesterday = date($scheduled_manager->getDateFormat(), strtotime('-1 days'));
+    $tomorrow = date($scheduled_manager->getDateFormat(), strtotime('+1 days'));
 
     /**************************************************************************/
     // Submission scheduling.
@@ -78,7 +78,7 @@ class WebformScheduledEmailTest extends WebformNodeTestBase {
     $this->assertEqual($scheduled_manager->total(), 0);
 
     // Check schedule email for draft.
-    $draft_reminder = date('Y-m-d', strtotime('+14 days'));
+    $draft_reminder = date($scheduled_manager->getDateFormat(), strtotime('+14 days'));
     $sid = $this->postSubmission($webform_schedule, ['send' => 'draft_reminder'], 'Save Draft');
     $this->assertText("Test: Handler: Test scheduled email: Submission #$sid: Email scheduled by Draft reminder handler to be sent on $draft_reminder.");
     $this->assertEqual($scheduled_manager->total(), 1);
@@ -92,6 +92,28 @@ class WebformScheduledEmailTest extends WebformNodeTestBase {
     $sid = $this->postSubmission($webform_schedule, ['send' => 'broken']);
     $this->assertText("Test: Handler: Test scheduled email: Submission #$sid: Email not scheduled for Broken handler because [broken] is not a valid date/token.");
     $this->assertEqual($scheduled_manager->total($webform_schedule), 0);
+
+    /**************************************************************************/
+    // Submission scheduling with date/time.
+    /**************************************************************************/
+
+    // Change schedule type to 'datetime'.
+    \Drupal::configFactory()->getEditable('webform_scheduled_email.settings')
+      ->set('schedule_type', 'datetime')
+      ->save();
+
+    // Check other +14 days with time.
+    $sid = $this->postSubmission($webform_schedule, ['send' => 'other', 'date[date]' => '2001-01-01', 'date[time]' => '02:00:00'], 'Save Draft');
+    $webform_submission = WebformSubmission::load($sid);
+    $scheduled_email = $scheduled_manager->load($webform_submission, 'other');
+    $this->assertText("Test: Handler: Test scheduled email: Submission #$sid: Email scheduled by Other handler to be sent on 2001-01-15 02:00:00.");
+    $this->assertEqual($scheduled_email->send, strtotime('2001-01-15 02:00:00'));
+    $this->assertEqual($scheduled_email->state, $scheduled_manager::SUBMISSION_SEND);
+
+    // Change schedule type back to 'date'.
+    \Drupal::configFactory()->getEditable('webform_scheduled_email.settings')
+      ->set('schedule_type', 'date')
+      ->save();
 
     /**************************************************************************/
     // Check deleting handler removes scheduled emails.
@@ -153,6 +175,63 @@ class WebformScheduledEmailTest extends WebformNodeTestBase {
     $this->assertEqual($scheduled_manager->total($webform_schedule), 6);
     $this->assertEqual($scheduled_manager->waiting($webform_schedule), 6);
     $this->assertEqual($scheduled_manager->ready($webform_schedule), 0);
+
+    /**************************************************************************/
+    // Webform scheduling with conditions.
+    /**************************************************************************/
+
+    // Purge all submissions.
+    $this->purgeSubmissions();
+
+    // Create 3 yesterday scheduled emails.
+    $this->postSubmission($webform_schedule, ['send' => 'yesterday']);
+    $this->postSubmission($webform_schedule, ['send' => 'yesterday']);
+    $this->postSubmission($webform_schedule, ['send' => 'yesterday']);
+    $this->assertEqual($scheduled_manager->total($webform_schedule), 3);
+    $this->assertEqual($scheduled_manager->stats(), [
+      'total' => 3,
+      'waiting' => 0,
+      'queued' => 0,
+      'ready' => 3,
+    ]);
+
+    // Add condition to only send yesterday email if 'value' is filled.
+    /** @var \Drupal\webform\Plugin\WebformHandlerInterface $yesterday_handler */
+    $yesterday_handler = $webform_schedule->getHandler('yesterday');
+    $conditions = ['enabled' => [':input[name="value"]' => ['filled' => TRUE]]];
+    $yesterday_handler->setConditions($conditions);
+    // NOTE: Executing $webform_schedule->save() throws the below
+    // unexplainable error.
+    //
+    // TypeError: Argument 1 passed to
+    // Drupal\webform\WebformSubmissionConditionsValidator::validateConditions()
+    // must be of the type array, null given
+    // $webform_schedule->save() ;
+    //
+    // Check that 3 yesterday scheduled emails are skipped and removed.
+    $stats = $scheduled_manager->cron();
+    $this->assertEqual($stats['skipped'], 3);
+    $this->assertEqual($scheduled_manager->stats(), [
+      'total' => 0,
+      'waiting' => 0,
+      'queued' => 0,
+      'ready' => 0,
+    ]);
+
+    // Clear yesterday conditions.
+    $yesterday_handler->setConditions([]);
+
+    /**************************************************************************/
+    // Ignore past scheduling.
+    /**************************************************************************/
+
+    // Purge all submissions.
+    $this->purgeSubmissions();
+
+    // Check last year email can't be scheduled.
+    $sid = $this->postSubmission($webform_schedule, ['send' => 'last_year']);
+    $this->assertEqual($scheduled_manager->total($webform_schedule), 0);
+    $this->assertRaw('<em class="placeholder">Test: Handler: Test scheduled email: Submission #' . $sid . '</em>: Email <b>ignored</b> by <em class="placeholder">Last year</em> handler to be sent on <em class="placeholder">2016-01-01</em>.');
 
     /**************************************************************************/
     // Source entity scheduling.
@@ -244,6 +323,25 @@ class WebformScheduledEmailTest extends WebformNodeTestBase {
     // Run cron to trigger unscheduling.
     $scheduled_manager->cron();
     $this->assertEqual($scheduled_manager->total(), 0);
+
+    // Purge all submissions.
+    $this->purgeSubmissions();
+
+    /**************************************************************************/
+    // Testing.
+    /**************************************************************************/
+
+    $this->drupalLogin($this->rootUser);
+
+    // Check 'Other' email will be sent immediately message when testing.
+    $this->drupalGet('webform/test_handler_scheduled_email/test');
+    $this->assertRaw('The <em class="placeholder">Other</em> email will be sent immediately upon submission.');
+
+    // Check 'Other' email is sent immediately via testing.
+    $this->drupalPostForm('webform/test_handler_scheduled_email/test', ['send' => 'other', 'date[date]' => '2101-01-01'], t('Submit'));
+    $this->assertEqual($scheduled_manager->total(), 0);
+    $this->assertRaw('Webform submission from: </em> sent to <em class="placeholder">simpletest@example.com</em> from <em class="placeholder">Drupal</em> [<em class="placeholder">simpletest@example.com</em>');
+    $this->assertRaw('Debug: Email: Other');
   }
 
   /**

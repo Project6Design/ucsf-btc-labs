@@ -7,48 +7,56 @@ use Drupal\block_style_plugins\Plugin\BlockStyle;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Config\Entity\ConfigEntityInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 
 /**
  * @coversDefaultClass \Drupal\block_style_plugins\Plugin\BlockStyle
  * @group block_style_plugins
  */
-class BlockStyleTest extends UnitTestCase
-{
+class BlockStyleTest extends UnitTestCase {
 
   /**
+   * Mocked entity repository service.
+   *
    * @var \Drupal\Core\Entity\EntityRepository
    */
   protected $entityRepository;
 
   /**
+   * Mocked entity type manager service.
+   *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
 
   /**
+   * Mocked form state.
+   *
    * @var \Drupal\Core\Form\FormStateInterface
    */
   protected $formState;
 
   /**
-   * @var \Drupal\block_style_plugins\Plugin\BlockStyleBase
+   * Instance of the BlockStyle plugin.
+   *
+   * @var \Drupal\block_style_plugins\Plugin\BlockStyle
    */
   protected $plugin;
 
   /**
-   * Create the setup for constants and configFactory stub
+   * Create the setup for constants and configFactory stub.
    */
-  protected function setUp()
-  {
+  protected function setUp() {
     parent::setUp();
 
-    // Stub the Iconset Finder Service
+    // Stub the Iconset Finder Service.
     $this->entityRepository = $this->prophesize(EntityRepositoryInterface::CLASS);
 
-    // Stub the Entity Type Manager
+    // Stub the Entity Type Manager.
     $this->entityTypeManager = $this->prophesize(EntityTypeManagerInterface::CLASS);
 
-    // Form state double
+    // Form state double.
     $this->formState = $this->prophesize(FormStateInterface::CLASS);
 
     $configuration = [];
@@ -69,8 +77,8 @@ class BlockStyleTest extends UnitTestCase
         'third_field' => [
           '#type' => 'textfield',
           '#title' => 'Third Box',
-        ]
-      ]
+        ],
+      ],
     ];
 
     $this->plugin = new BlockStyle(
@@ -81,32 +89,32 @@ class BlockStyleTest extends UnitTestCase
       $this->entityTypeManager->reveal()
     );
 
-    // Create a translation stub for the t() method
+    // Create a translation stub for the t() method.
     $translator = $this->getStringTranslationStub();
     $this->plugin->setStringTranslation($translator);
   }
 
   /**
-   * Tests the defaultStyles method.
+   * Tests the defaultConfiguration method.
    *
-   * @see ::defaultStyles()
+   * @see ::defaultConfiguration()
    */
-  public function testDefaultStyles() {
+  public function testDefaultConfiguration() {
     $expected = [
       'test_field' => 'default text',
       'second_field' => 1,
     ];
-    $default = $this->plugin->defaultStyles();
+    $default = $this->plugin->defaultConfiguration();
 
     $this->assertArrayEquals($expected, $default);
   }
 
   /**
-   * Tests the formElements method.
+   * Tests the buildConfigurationForm method.
    *
-   * @see ::formElements()
+   * @see ::buildConfigurationForm()
    */
-  public function testFormElements() {
+  public function testBuildConfigurationForm() {
     $expected = [
       'test_field' => [
         '#type' => 'textfield',
@@ -122,17 +130,51 @@ class BlockStyleTest extends UnitTestCase
         '#type' => 'textfield',
         '#title' => 'Third Box',
         '#default_value' => 'user set value',
-      ]
+      ],
     ];
 
-    // Use reflection to alter the protected $this->plugin->styles
+    // Use reflection to alter the protected $this->plugin->styles.
     $reflectionObject = new \ReflectionObject($this->plugin);
-    $property = $reflectionObject->getProperty('styles');
-    $property->setAccessible(true);
+    $property = $reflectionObject->getProperty('configuration');
+    $property->setAccessible(TRUE);
     $property->setValue($this->plugin, ['third_field' => 'user set value']);
 
     $form = [];
-    $return = $this->plugin->formElements($form, $this->formState->reveal());
+    $return = $this->plugin->buildConfigurationForm($form, $this->formState->reveal());
+
+    $this->assertArrayEquals($expected, $return);
+  }
+
+  /**
+   * Tests the themeSuggestion method.
+   *
+   * @see ::themeSuggestion()
+   */
+  public function testThemeSuggestion() {
+    $block = $this->prophesize(ConfigEntityInterface::CLASS);
+
+    $storage = $this->prophesize(EntityStorageInterface::CLASS);
+    $storage->load(1)->willReturn($block->reveal());
+
+    $this->entityTypeManager->getStorage('block')->willReturn($storage->reveal());
+
+    // Return the third party styles set in the plugin.
+    $block->getThirdPartySetting('block_style_plugins', 'block_style_plugins')
+      ->willReturn(['class1', 'class2']);
+
+    // Use reflection to alter the protected $this->plugin->pluginDefinition.
+    $reflectionObject = new \ReflectionObject($this->plugin);
+    $property = $reflectionObject->getProperty('pluginDefinition');
+    $property->setAccessible(TRUE);
+    $property->setValue($this->plugin, ['template' => 'custom_template']);
+
+    $suggestions = [];
+    $variables = ['elements' => ['#id' => 1]];
+    $expected = [
+      'custom_template',
+    ];
+
+    $return = $this->plugin->themeSuggestion($suggestions, $variables);
 
     $this->assertArrayEquals($expected, $return);
   }

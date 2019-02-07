@@ -2,9 +2,10 @@
 
 namespace Drupal\webform\Plugin\WebformElement;
 
-use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Element;
 use Drupal\webform\Plugin\WebformElementBase;
+use Drupal\webform\Utility\WebformElementHelper;
 use Drupal\webform\WebformInterface;
 use Drupal\webform\WebformSubmissionInterface;
 
@@ -19,16 +20,17 @@ abstract class ContainerBase extends WebformElementBase {
   public function getDefaultProperties() {
     return [
       'title' => '',
-      // General settings.
-      'description' => '',
       // Form validation.
       'required' => FALSE,
+      // Randomize.
+      'randomize' => FALSE,
       // Attributes.
       'attributes' => [],
       // Format.
       'format' => $this->getItemDefaultFormat(),
       'format_html' => '',
       'format_text' => '',
+      'format_attributes' => [],
     ] + $this->getDefaultBaseProperties();
   }
 
@@ -61,14 +63,13 @@ abstract class ContainerBase extends WebformElementBase {
   public function prepare(array &$element, WebformSubmissionInterface $webform_submission = NULL) {
     parent::prepare($element, $webform_submission);
 
-    // Containers can only hide (aka invisible) the title by removing the
-    // #title attribute.
-    // @see core/modules/system/templates/fieldset.html.twig
-    // @see core/modules/system/templates/details.html.twig
-    if (isset($element['#title_display'])
-      && $element['#title_display'] === 'invisible'
-      && ($this instanceof Fieldset || $this instanceof Details)) {
-      unset($element['#title']);
+    if (!empty($element['#randomize'])) {
+      $elements = [];
+      foreach (Element::children($element) as $child_key) {
+        $elements[$child_key] = $element[$child_key];
+        unset($element[$child_key]);
+      }
+      $element += WebformElementHelper::randomize($elements);
     }
   }
 
@@ -128,35 +129,34 @@ abstract class ContainerBase extends WebformElementBase {
       $format = 'header';
     }
 
+    // Build format attributes.
+    $attributes = (isset($element['#format_attributes'])) ? $element['#format_attributes'] : [];
+    $attributes += ['class' => []];
+
     switch ($format) {
       case 'details':
       case 'details-closed':
+        $attributes['data-webform-element-id'] = $element['#webform_id'];
+        $attributes['class'][] = 'webform-container';
+        $attributes['class'][] = 'webform-container-type-details';
         return [
           '#type' => 'details',
           '#title' => $element['#title'],
           '#id' => $element['#webform_id'],
           '#open' => ($format === 'details-closed') ? FALSE : TRUE,
-          '#attributes' => [
-            'data-webform-element-id' => $element['#webform_id'],
-            'class' => [
-              'webform-container',
-              'webform-container-type-details',
-            ],
-          ],
+          '#attributes' => $attributes,
           '#children' => $children,
         ];
 
       case 'fieldset':
+        $attributes['class'][] = 'webform-container';
+        $attributes['class'][] = 'webform-container-type-fieldset';
+
         return [
           '#type' => 'fieldset',
           '#title' => $element['#title'],
           '#id' => $element['#webform_id'],
-          '#attributes' => [
-            'class' => [
-              'webform-container',
-              'webform-container-type-fieldset',
-            ],
-          ],
+          '#attributes' => $attributes,
           '#children' => $children,
         ];
 
@@ -167,6 +167,7 @@ abstract class ContainerBase extends WebformElementBase {
           '#id' => $element['#webform_id'],
           '#title' => $element['#title'],
           '#title_tag' => \Drupal::config('webform.settings')->get('element.default_section_title_tag'),
+          '#attributes' => $attributes,
         ] + $children;
     }
   }
@@ -189,11 +190,11 @@ abstract class ContainerBase extends WebformElementBase {
         '#suffix' => PHP_EOL,
       ];
       $build['divider'] = [
-        '#markup' => str_repeat('-', Unicode::strlen($element['#title'])),
+        '#markup' => str_repeat('-', mb_strlen($element['#title'])),
         '#suffix' => PHP_EOL,
       ];
     }
-    $build += $children;
+    $build['children'] = $children;
     return $build;
   }
 
@@ -240,6 +241,15 @@ abstract class ContainerBase extends WebformElementBase {
    */
   public function form(array $form, FormStateInterface $form_state) {
     $form = parent::form($form, $form_state);
+
+    // Randomize.
+    $form['element']['randomize'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Randomize elements'),
+      '#description' => $this->t('Randomizes the order of the sub-element when they are displayed in the webform.'),
+      '#return_value' => TRUE,
+    ];
+
     // Containers are wrappers, therefore wrapper classes should be used by the
     // container element.
     $form['element_attributes']['attributes']['#classes'] = $this->configFactory->get('webform.settings')->get('element.wrapper_classes');

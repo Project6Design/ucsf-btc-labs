@@ -21,10 +21,11 @@ entity.node.webform.confirmation:
     _custom_access: '\Drupal\webform_node\Access\WebformNodeAccess::checkWebformAccess'
 
 entity.node.webform.user.submissions:
-  path: '/node/{node}/webform/submissions'
+  path: '/node/{node}/webform/submissions/{submission_view}'
   defaults:
     _entity_list: 'webform_submission'
     _title: 'Submissions'
+    submission_view: ''
     operation: ''
     entity_access: 'webform.submission_view_own'
   options:
@@ -35,10 +36,11 @@ entity.node.webform.user.submissions:
     _custom_access: '\Drupal\webform_node\Access\WebformNodeAccess::checkWebformAccess'
 
 entity.node.webform.user.drafts:
-  path: '/node/{node}/webform/drafts'
+  path: '/node/{node}/webform/drafts/{submission_view}'
   defaults:
     _entity_list: 'webform_submission'
     _title: 'Drafts'
+    submission_view: ''
     operation: view
     entity_access: 'webform.submission_create'
   options:
@@ -91,6 +93,21 @@ entity.node.webform.user.submission.delete:
   requirements:
     _custom_access: '\Drupal\webform_node\Access\WebformNodeAccess::checkWebformSubmissionAccess'
 
+entity.node.webform.user.submission.duplicate:
+  path: '/node/{node}/webform/submissions/{webform_submission}/duplicate'
+  defaults:
+    _entity_form: 'webform_submission.duplicate'
+    _title_callback: '\Drupal\webform\Controller\WebformSubmissionViewController::title'
+    duplicate: TRUE
+    operation: webform_submission_duplicate
+    entity_access: 'webform_submission.update'
+  options:
+    parameters:
+      node:
+        type: 'entity:node'
+  requirements:
+    _custom_access: '\Drupal\webform_node\Access\WebformNodeAccess::checkWebformSubmissionAccess'
+
 entity.node.webform.test_form:
   path: '/node/{node}/webform/test'
   defaults:
@@ -106,10 +123,11 @@ entity.node.webform.test_form:
     _custom_access: '\Drupal\webform_node\Access\WebformNodeAccess::checkWebformAccess'
 
 entity.node.webform.results_submissions:
-  path: '/node/{node}/webform/results/submissions'
+  path: '/node/{node}/webform/results/submissions/{submission_view}'
   defaults:
     _entity_list: 'webform_submission'
     _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
+    submission_view: ''
     operation: webform_submission_view
     entity_access: 'webform.submission_view_any'
   options:
@@ -174,22 +192,6 @@ entity.node.webform.results_clear:
         type: 'entity:node'
   requirements:
     _custom_access: '\Drupal\webform_node\Access\WebformNodeAccess::checkWebformResultsAccess'
-
-entity.node.webform.results_log:
-  path: '/node/{node}/webform/results/log'
-  defaults:
-    _controller: '\Drupal\webform_node\Controller\WebformNodeSubmissionLogController::overview'
-    _title_callback: '\Drupal\Core\Entity\Controller\EntityController::title'
-    operation: webform_submission_view
-    entity_access: 'webform.submission_view_any'
-  options:
-    _admin_route: TRUE
-    parameters:
-      node:
-        type: 'entity:node'
-  requirements:
-    _permission: 'access webform submission log'
-    _custom_access: '\Drupal\webform_node\Access\WebformNodeAccess::checkWebformLogAccess'
 
 entity.node.webform_submission.canonical:
   path: '/node/{node}/webform/submission/{webform_submission}'
@@ -345,22 +347,6 @@ entity.node.webform_submission.delete_form:
         type: 'entity:node'
   requirements:
     _custom_access: '\Drupal\webform_node\Access\WebformNodeAccess::checkWebformSubmissionAccess'
-
-entity.node.webform_submission.log:
-  path: '/node/{node}/webform/submission/{webform_submission}/log'
-  defaults:
-    _controller: '\Drupal\webform\Controller\WebformSubmissionLogController::overview'
-    _title_callback: '\Drupal\webform\Controller\WebformSubmissionViewController::title'
-    operation: webform_submission_view
-    entity_access: 'webform.submission_view_any'
-  options:
-    _admin_route: TRUE
-    parameters:
-      node:
-        type: 'entity:node'
-  requirements:
-    _permission: 'access webform submission log'
-    _custom_access: '\Drupal\webform_node\Access\WebformNodeAccess::checkWebformLogAccess'
 
 entity.node.webform.entity_reference.set:
   path: '/node/{node}/webform/change/{webform}'
