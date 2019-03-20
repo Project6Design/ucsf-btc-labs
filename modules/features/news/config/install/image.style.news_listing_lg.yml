@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies: {  }
+name: news_listing_lg
+label: 'News Listing Lg (950x600)'
+effects:
+  c63e860b-42f3-4d1c-a8fb-bfaad12c24a0:
+    uuid: c63e860b-42f3-4d1c-a8fb-bfaad12c24a0
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 950
+      height: 600

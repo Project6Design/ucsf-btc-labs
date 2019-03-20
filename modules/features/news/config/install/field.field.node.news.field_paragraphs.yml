@@ -1,0 +1,54 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_paragraphs
+    - node.type.news
+    - paragraphs.paragraphs_type.accordion
+    - paragraphs.paragraphs_type.page_link
+    - paragraphs.paragraphs_type.quote
+    - paragraphs.paragraphs_type.text_area
+  module:
+    - entity_reference_revisions
+id: node.news.field_paragraphs
+field_name: field_paragraphs
+entity_type: node
+bundle: news
+label: Paragraphs
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:paragraph'
+  handler_settings:
+    negate: 0
+    target_bundles:
+      accordion: accordion
+      page_link: page_link
+      quote: quote
+      text_area: text_area
+    target_bundles_drag_drop:
+      accordion:
+        enabled: true
+        weight: 8
+      page_link:
+        enabled: true
+        weight: 9
+      quote:
+        enabled: true
+        weight: 10
+      slide:
+        weight: 11
+        enabled: false
+      team_listing:
+        weight: 12
+        enabled: false
+      text_area:
+        enabled: true
+        weight: 13
+      two_columns:
+        weight: 14
+        enabled: false
+field_type: entity_reference_revisions

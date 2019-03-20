@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_publication_authors
+    - node.type.publication
+  module:
+    - text
+id: node.publication.field_publication_authors
+field_name: field_publication_authors
+entity_type: node
+bundle: publication
+label: 'Publication Authors'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings: {  }
+field_type: text_long

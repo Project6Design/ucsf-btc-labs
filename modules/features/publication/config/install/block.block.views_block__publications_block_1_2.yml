@@ -1,0 +1,29 @@
+langcode: en
+status: false
+dependencies:
+  config:
+    - views.view.publications
+  module:
+    - system
+    - views
+  theme:
+    - btc_labs
+id: views_block__publications_block_1_2
+theme: btc_labs
+region: content
+weight: 0
+provider: null
+plugin: 'views_block:publications-block_1'
+settings:
+  id: 'views_block:publications-block_1'
+  label: ''
+  provider: views
+  label_display: '0'
+  views_label: ''
+  items_per_page: none
+visibility:
+  request_path:
+    id: request_path
+    pages: /node/209
+    negate: false
+    context_mapping: {  }

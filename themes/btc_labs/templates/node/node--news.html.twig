@@ -28,7 +28,7 @@
           {{ content.field_date }}
 
           <div class="news__title">
-              <a href="{{ url }}" rel="bookmark">{{ label }}</a>
+                <a href="{{ content.field_link.0 ? node.field_link.0.url : url }}" target="{{ content.field_link.0 ? "_blank" : "_self" }}">{{ label }}</a>
           </div>
 
           {{ content.body }}

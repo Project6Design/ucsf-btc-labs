@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies: {  }
+name: research_listing
+label: 'Research Listing (320x200)'
+effects:
+  356bcf9c-6df7-48a9-b9fc-22176375ba92:
+    uuid: 356bcf9c-6df7-48a9-b9fc-22176375ba92
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 320
+      height: 200

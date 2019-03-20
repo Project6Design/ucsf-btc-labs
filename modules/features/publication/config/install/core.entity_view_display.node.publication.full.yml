@@ -1,0 +1,69 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.full
+    - field.field.node.publication.body
+    - field.field.node.publication.field_doi
+    - field.field.node.publication.field_epub_info
+    - field.field.node.publication.field_issue
+    - field.field.node.publication.field_journal
+    - field.field.node.publication.field_listing_image
+    - field.field.node.publication.field_pages
+    - field.field.node.publication.field_publication_authors
+    - field.field.node.publication.field_publication_date
+    - field.field.node.publication.field_publication_download
+    - field.field.node.publication.field_publication_link
+    - field.field.node.publication.field_volume
+    - field.field.node.publication.field_year
+    - image.style.research_listing
+    - node.type.publication
+  module:
+    - file
+    - image
+    - text
+    - user
+id: node.publication.full
+targetEntityType: node
+bundle: publication
+mode: full
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 2
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  field_listing_image:
+    weight: 0
+    label: hidden
+    settings:
+      image_style: research_listing
+      image_link: content
+    third_party_settings: {  }
+    type: image
+    region: content
+  field_publication_download:
+    weight: 3
+    label: hidden
+    settings: {  }
+    third_party_settings: {  }
+    type: file_url_plain
+    region: content
+  links:
+    weight: 4
+    region: content
+    settings: {  }
+    third_party_settings: {  }
+hidden:
+  field_doi: true
+  field_epub_info: true
+  field_issue: true
+  field_journal: true
+  field_pages: true
+  field_publication_authors: true
+  field_publication_date: true
+  field_publication_link: true
+  field_volume: true
+  field_year: true

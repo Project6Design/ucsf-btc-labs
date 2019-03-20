@@ -1,0 +1,70 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.news.body
+    - field.field.node.news.field_date
+    - field.field.node.news.field_featured_publications
+    - field.field.node.news.field_introduction
+    - field.field.node.news.field_link
+    - field.field.node.news.field_listing_image
+    - field.field.node.news.field_page_image
+    - field.field.node.news.field_paragraphs
+    - image.style.news_listing
+    - node.type.news
+  module:
+    - datetime
+    - image
+    - link
+    - text
+    - user
+id: node.news.teaser
+targetEntityType: node
+bundle: news
+mode: teaser
+content:
+  body:
+    label: hidden
+    type: text_summary_or_trimmed
+    weight: 1
+    settings:
+      trim_length: 300
+    third_party_settings: {  }
+    region: content
+  field_date:
+    type: datetime_default
+    weight: 0
+    region: content
+    label: hidden
+    settings:
+      format_type: medium
+      timezone_override: ''
+    third_party_settings: {  }
+  field_link:
+    type: link
+    weight: 3
+    region: content
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+    third_party_settings: {  }
+  field_listing_image:
+    type: image
+    weight: 2
+    region: content
+    label: hidden
+    settings:
+      image_style: news_listing
+      image_link: ''
+    third_party_settings: {  }
+hidden:
+  field_featured_publications: true
+  field_introduction: true
+  field_page_image: true
+  field_paragraphs: true
+  links: true

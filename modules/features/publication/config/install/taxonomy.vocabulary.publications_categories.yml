@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+name: 'Publications Categories'
+vid: publications_categories
+description: ''
+hierarchy: 0
+weight: 0

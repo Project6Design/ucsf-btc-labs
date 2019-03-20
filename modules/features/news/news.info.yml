@@ -1,0 +1,24 @@
+name: News
+description: 'Provides News content type and related configuration. '
+type: module
+core: 8.x
+dependencies:
+  - block
+  - datetime
+  - entity_reference_revisions
+  - field
+  - image
+  - imce
+  - link
+  - menu_ui
+  - node
+  - paragraphs
+  - path
+  - pathauto
+  - search
+  - simple_sitemap
+  - sitefarm_core
+  - system
+  - text
+  - user
+  - views

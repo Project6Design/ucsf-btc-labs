@@ -1,0 +1,26 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_publication_download
+    - node.type.publication
+  module:
+    - file
+id: node.publication.field_publication_download
+field_name: field_publication_download
+entity_type: node
+bundle: publication
+label: 'Publication Download'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  file_directory: '[date:custom:Y]-[date:custom:m]'
+  file_extensions: 'txt pdf ppt xls doc docx xlsx pptx'
+  max_filesize: ''
+  description_field: false
+  handler: 'default:file'
+  handler_settings: {  }
+field_type: file

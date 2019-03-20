@@ -1,0 +1,13 @@
+langcode: en
+status: true
+dependencies: {  }
+name: news_listing
+label: 'News Listing (475x300)'
+effects:
+  8d97edcf-479f-486d-95fe-00a460cd2157:
+    uuid: 8d97edcf-479f-486d-95fe-00a460cd2157
+    id: image_scale_and_crop
+    weight: 1
+    data:
+      width: 475
+      height: 300

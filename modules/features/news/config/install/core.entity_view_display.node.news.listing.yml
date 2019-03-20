@@ -1,0 +1,39 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.listing
+    - field.field.node.news.body
+    - field.field.node.news.field_date
+    - field.field.node.news.field_featured_publications
+    - field.field.node.news.field_introduction
+    - field.field.node.news.field_listing_image
+    - field.field.node.news.field_page_image
+    - field.field.node.news.field_paragraphs
+    - image.style.news_listing
+    - node.type.news
+  module:
+    - image
+    - user
+id: node.news.listing
+targetEntityType: node
+bundle: news
+mode: listing
+content:
+  field_listing_image:
+    weight: 0
+    label: hidden
+    settings:
+      image_style: news_listing
+      image_link: ''
+    third_party_settings: {  }
+    type: image
+    region: content
+hidden:
+  body: true
+  field_date: true
+  field_featured_publications: true
+  field_introduction: true
+  field_page_image: true
+  field_paragraphs: true
+  links: true
