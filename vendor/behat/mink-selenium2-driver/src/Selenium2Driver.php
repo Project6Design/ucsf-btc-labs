@@ -131,7 +131,7 @@ class Selenium2Driver extends CoreDriver
         // See https://sites.google.com/a/chromium.org/chromedriver/capabilities
         if (isset($desiredCapabilities['chrome'])) {
 
-            $chromeOptions = array();
+            $chromeOptions = (isset($desiredCapabilities['goog:chromeOptions']) && is_array($desiredCapabilities['goog:chromeOptions']))? $desiredCapabilities['goog:chromeOptions']:array();
 
             foreach ($desiredCapabilities['chrome'] as $capability => $value) {
                 if ($capability == 'switches') {
@@ -142,7 +142,7 @@ class Selenium2Driver extends CoreDriver
                 $desiredCapabilities['chrome.'.$capability] = $value;
             }
 
-            $desiredCapabilities['chromeOptions'] = $chromeOptions;
+            $desiredCapabilities['goog:chromeOptions'] = $chromeOptions;
 
             unset($desiredCapabilities['chrome']);
         }

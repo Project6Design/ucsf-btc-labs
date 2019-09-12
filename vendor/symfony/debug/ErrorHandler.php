@@ -222,7 +222,7 @@ class ErrorHandler
             }
             if (!\is_array($log)) {
                 $log = [$log];
-            } elseif (!array_key_exists(0, $log)) {
+            } elseif (!\array_key_exists(0, $log)) {
                 throw new \InvalidArgumentException('No logger provided');
             }
             if (null === $log[0]) {
@@ -382,6 +382,11 @@ class ErrorHandler
      */
     public function handleError($type, $message, $file, $line)
     {
+        // @deprecated to be removed in Symfony 5.0
+        if (\PHP_VERSION_ID >= 70300 && $message && '"' === $message[0] && 0 === strpos($message, '"continue') && preg_match('/^"continue(?: \d++)?" targeting switch is equivalent to "break(?: \d++)?"\. Did you mean to use "continue(?: \d++)?"\?$/', $message)) {
+            $type = E_DEPRECATED;
+        }
+
         // Level is the current error reporting level to manage silent error.
         $level = error_reporting();
         $silenced = 0 === ($level & $type);
@@ -445,7 +450,7 @@ class ErrorHandler
                 self::$silencedErrorCache[$id][$message] = $errorAsException;
             }
             if (null === $lightTrace) {
-                return;
+                return true;
             }
         } else {
             if ($scope) {
@@ -465,7 +470,7 @@ class ErrorHandler
         }
 
         if ($throw) {
-            if (E_USER_ERROR & $type) {
+            if (\PHP_VERSION_ID < 70400 && E_USER_ERROR & $type) {
                 for ($i = 1; isset($backtrace[$i]); ++$i) {
                     if (isset($backtrace[$i]['function'], $backtrace[$i]['type'], $backtrace[$i - 1]['function'])
                         && '__toString' === $backtrace[$i]['function']
@@ -517,6 +522,11 @@ class ErrorHandler
                 $errorAsException ? ['exception' => $errorAsException] : [],
             ];
         } else {
+            if (!\defined('HHVM_VERSION')) {
+                $currentErrorHandler = set_error_handler('var_dump');
+                restore_error_handler();
+            }
+
             try {
                 $this->isRecursive = true;
                 $level = ($type & $level) ? $this->loggers[$type][1] : LogLevel::DEBUG;
@@ -525,7 +535,7 @@ class ErrorHandler
                 $this->isRecursive = false;
 
                 if (!\defined('HHVM_VERSION')) {
-                    set_error_handler([$this, __FUNCTION__]);
+                    set_error_handler($currentErrorHandler);
                 }
             }
         }
@@ -589,7 +599,9 @@ class ErrorHandler
         $this->exceptionHandler = null;
         try {
             if (null !== $exceptionHandler) {
-                return \call_user_func($exceptionHandler, $exception);
+                $exceptionHandler($exception);
+
+                return;
             }
             $handlerException = $handlerException ?: $exception;
         } catch (\Exception $handlerException) {
