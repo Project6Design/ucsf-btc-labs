@@ -82,6 +82,7 @@ class ComposerStaticInitDrupal8
         ),
         'E' => 
         array (
+            'Embed\\' => 6,
             'Egulias\\EmailValidator\\' => 23,
         ),
         'D' => 
@@ -101,6 +102,7 @@ class ComposerStaticInitDrupal8
         array (
             'Composer\\Semver\\' => 16,
             'Composer\\Installers\\' => 20,
+            'Composer\\CaBundle\\' => 18,
         ),
         'B' => 
         array (
@@ -245,6 +247,10 @@ class ComposerStaticInitDrupal8
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
+        'Embed\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/embed/embed/src',
+        ),
         'Egulias\\EmailValidator\\' => 
         array (
             0 => __DIR__ . '/..' . '/egulias/email-validator/EmailValidator',
@@ -299,6 +305,10 @@ class ComposerStaticInitDrupal8
         'Composer\\Installers\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
+        ),
+        'Composer\\CaBundle\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/ca-bundle/src',
         ),
         'Brumann\\Polyfill\\' => 
         array (
