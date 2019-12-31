@@ -126,7 +126,7 @@ class WebformAdminConfigFormsForm extends WebformAdminConfigBaseForm {
     // Form settings.
     $form['form_settings'] = [
       '#type' => 'details',
-      '#title' => $this->t('Form settings'),
+      '#title' => $this->t('Form general settings'),
       '#open' => TRUE,
       '#tree' => TRUE,
     ];
@@ -285,7 +285,7 @@ class WebformAdminConfigFormsForm extends WebformAdminConfigBaseForm {
     // Wizard settings.
     $form['wizard_settings'] = [
       '#type' => 'details',
-      '#title' => $this->t('Wizard settings'),
+      '#title' => $this->t('Form wizard settings'),
       '#open' => TRUE,
       '#tree' => TRUE,
     ];
@@ -321,7 +321,7 @@ class WebformAdminConfigFormsForm extends WebformAdminConfigBaseForm {
     // Preview settings.
     $form['preview_settings'] = [
       '#type' => 'details',
-      '#title' => $this->t('Preview settings'),
+      '#title' => $this->t('Form preview settings'),
       '#open' => TRUE,
       '#tree' => TRUE,
     ];
@@ -365,36 +365,10 @@ class WebformAdminConfigFormsForm extends WebformAdminConfigBaseForm {
     ];
     $form['preview_settings']['token_tree_link'] = $this->tokenManager->buildTreeElement();
 
-    // Draft settings.
-    $form['draft_settings'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Draft settings'),
-      '#open' => TRUE,
-      '#tree' => TRUE,
-    ];
-    $form['draft_settings']['default_draft_button_label'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Default draft button label'),
-      '#required' => TRUE,
-      '#size' => 20,
-      '#default_value' => $settings['default_draft_button_label'],
-    ];
-    $form['draft_settings']['default_draft_saved_message'] = [
-      '#type' => 'webform_html_editor',
-      '#title' => $this->t('Default draft save message'),
-      '#default_value' => $settings['default_draft_saved_message'],
-    ];
-    $form['draft_settings']['default_draft_loaded_message'] = [
-      '#type' => 'webform_html_editor',
-      '#title' => $this->t('Default draft load message'),
-      '#default_value' => $settings['default_draft_loaded_message'],
-    ];
-    $form['draft_settings']['token_tree_link'] = $this->tokenManager->buildTreeElement();
-
     // Confirmation settings.
     $form['confirmation_settings'] = [
       '#type' => 'details',
-      '#title' => $this->t('Confirmation settings'),
+      '#title' => $this->t('Form confirmation settings'),
       '#open' => TRUE,
       '#tree' => TRUE,
     ];
@@ -423,10 +397,67 @@ class WebformAdminConfigFormsForm extends WebformAdminConfigBaseForm {
     ];
     $form['confirmation_settings']['token_tree_link'] = $this->tokenManager->buildTreeElement();
 
+    // Ajax settings.
+    $form['ajax_settings'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Ajax settings'),
+      '#open' => TRUE,
+      '#tree' => TRUE,
+    ];
+    $form['ajax_settings']['default_ajax'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Use Ajax for all webforms'),
+      '#description' => $this->t('If checked, paging, saving of drafts, previews, submissions, and confirmations will not initiate a page refresh on all webforms.'),
+      '#return_value' => TRUE,
+      '#default_value' => $settings['default_ajax'],
+    ];
+    $form['ajax_settings']['default_ajax_progress_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Default Ajax progress type'),
+      '#description' => $this->t("Select the default progress indicator displayed when Ajax is triggered."),
+      '#options' => [
+        'throbber' => $this->t('Throbber'),
+        'fullscreen' => $this->t('Full screen'),
+      ],
+      '#default_value' => $settings['default_ajax_progress_type'],
+      '#required' => TRUE,
+    ];
+    $form['ajax_settings']['default_ajax_effect'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Default Ajax effect'),
+      '#description' => $this->t("Select the default effect displayed when Ajax is triggered."),
+      '#options' => [
+        'none' => $this->t('None'),
+        'fade' => $this->t('Fade'),
+        'slide' => $this->t('Slide'),
+      ],
+      '#default_value' => $settings['default_ajax_effect'],
+      '#required' => TRUE,
+    ];
+    $form['ajax_settings']['default_ajax_speed'] = [
+      '#type' => 'webform_select_other',
+      '#title' => $this->t('Default Ajax speed'),
+      '#description' => $this->t("Select the default effect speed."),
+      '#other__type' => 'number',
+      '#other__placeholder' => '',
+      '#other__field_suffix' => $this->t('milliseconds'),
+      '#options' => [
+        '500' => $this->t('@number milliseconds', ['@number' => '500']),
+        '1000' => $this->t('@number milliseconds', ['@number' => '1000']),
+        '1500' => $this->t('@number milliseconds', ['@number' => '1500']),
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[name="ajax_settings[default_ajax_effect]"]' => ['!value' => 'none'],
+        ],
+      ],
+      '#default_value' => $settings['default_ajax_speed'],
+    ];
+
     // Dialog settings.
     $form['dialog_settings'] = [
       '#type' => 'details',
-      '#title' => $this->t('Dialog settings'),
+      '#title' => $this->t('Form dialog settings'),
       '#open' => TRUE,
       '#tree' => TRUE,
     ];
@@ -535,7 +566,7 @@ class WebformAdminConfigFormsForm extends WebformAdminConfigBaseForm {
       ];
       $form['dialog_settings']['dialog_messages']['module_message'] = [
         '#type' => 'webform_message',
-        '#message_message' => $this->t('To add the .webform-dialog class to a link\'s attributes, please use the <a href=":editor_advanced_link_href">D8 Editor Advanced link</a> or <a href=":menu_link_attributes_href">Menu Link Attributes</a> module.', $t_args),
+        '#message_message' => $this->t('To add the .webform-dialog class to a link\'s attributes, please use the <a href=":editor_advanced_link_href">D8 Editor Advanced link</a> or <a href=":menu_link_attributes_href">Menu Link Attributes</a> modules.', $t_args),
         '#message_type' => 'info',
         '#message_close' => TRUE,
         '#message_storage' => WebformMessage::STORAGE_SESSION,
@@ -588,8 +619,8 @@ class WebformAdminConfigFormsForm extends WebformAdminConfigBaseForm {
       + $form_state->getValue('form_behaviors')
       + $form_state->getValue('wizard_settings')
       + $form_state->getValue('preview_settings')
-      + $form_state->getValue('draft_settings')
       + $form_state->getValue('confirmation_settings')
+      + $form_state->getValue('ajax_settings')
       + $form_state->getValue('dialog_settings');
 
     // Track if we need to trigger an update of all webform paths

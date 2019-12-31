@@ -52,6 +52,14 @@ interface WebformExporterInterface extends PluginInspectionInterface, Configurab
   public function isArchive();
 
   /**
+   * Determine if exporter can include uploaded files (in a zipped archive).
+   *
+   * @return bool
+   *   TRUE if exporter can include uploaded files (in a zipped archive).
+   */
+  public function hasFiles();
+
+  /**
    * Determine if exporter has options.
    *
    * @return bool
@@ -166,5 +174,13 @@ interface WebformExporterInterface extends PluginInspectionInterface, Configurab
    *   Archive file name.
    */
   public function getArchiveFileName();
+
+  /**
+   * Get the number of submissions to be exported with each batch.
+   *
+   * @return int
+   *   Number of submissions to be exported with each batch.
+   */
+  public function getBatchLimit();
 
 }

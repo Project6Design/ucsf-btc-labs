@@ -5,8 +5,16 @@
     "homepage": "http://drupal.org/project/address",
     "license": "GPL-2.0+",
     "require": {
-        "commerceguys/intl": "~0.7",
-        "commerceguys/addressing": "~1.0"
+        "drupal/core": "^8.6",
+        "commerceguys/addressing": "^1.0.0"
     },
-    "minimum-stability": "dev"
+    "require-dev": {
+        "drupal/token": "^1.0"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    ]
 }

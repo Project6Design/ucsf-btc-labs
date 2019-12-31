@@ -59,7 +59,6 @@ class SettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('menu_breadcrumb.settings');
-    // Renamed from the now meaningless option "determine_menu":
     $form['determine_menu'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable the Menu Breadcrumb module'),
@@ -95,6 +94,13 @@ class SettingsForm extends ConfigFormBase {
       ],
     ];
 
+    $form['stop_on_first_match'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Stop on the first matching'),
+      '#description' => $this->t('End the breadcrumb trail when the first matching found in the menu.'),
+      '#default_value' => $config->get('stop_on_first_match'),
+    ];
+
     $form['append_member_page'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Attach taxonomy member page to breadcrumb'),
@@ -114,12 +120,6 @@ class SettingsForm extends ConfigFormBase {
       ],
     ];
 
-    // Removed option "hide_on_single_item" - makes no sense when the taxonomy
-    // attachment feature is added, especially now that this module reverts to
-    // other breadcrumb builders (e.g., the path-based system breadcrumb) when
-    // it doesn't apply (can be reconsidered if there is a valid use case).
-    // $form['hide_on_single_item'] ...
-    //
     $form['remove_home'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Remove "Home" link'),
@@ -134,11 +134,15 @@ class SettingsForm extends ConfigFormBase {
       '#description' => $this->t('If TRUE will add a link to the &lt;front&gt; page if it doesn\'t already begin the breadcrumb trail: ensuring that the first breadcrumb of every page is the site home. If both "add" and "remove" are set, when displaying the &lt;front&gt; page and its menu children the "remove" option will take precedence.'),
     ];
 
-    $form['home_as_site_name'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Use site name instead of "Home" link'),
-      '#description' => $this->t('Uses the site name from the configuration settings: if this option is not set, a translated value for "Home" will be used.'),
-      '#default_value' => $config->get('home_as_site_name'),
+    $form['front_title'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Home title'),
+      '#default_value' => $config->get('front_title'),
+      '#options' => [
+        0 => $this->t('Use "Home" as title'),
+        1 => $this->t('Uses the site name from the configuration settings: if this option is not set, a translated value for "Home" will be used.'),
+        2 => $this->t('Use title menu parent'),
+      ],
     ];
 
     $form['exclude_empty_url'] = [
@@ -146,6 +150,13 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('Exclude menu items with empty URLs'),
       '#description' => $this->t('If TRUE, menu items whose Link fields resolves to an empty string (like in the case "&lt;none&gt;" was used) will not be included in the breadcrumb trail.'),
       '#default_value' => $config->get('exclude_empty_url'),
+    ];
+
+    $form['derived_active_trail'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Derive MenuActiveTrail from RouteMatch'),
+      '#description' => $this->t('If FALSE, the injected @menu.active_trail service will be used.'),
+      '#default_value' => $config->get('derived_active_trail'),
     ];
 
     $form['include_exclude'] = [
@@ -206,10 +217,6 @@ class SettingsForm extends ConfigFormBase {
         ],
       ];
     }
-    // Removed description of a "Default setting" selection which was never
-    // implemeneted in the current D8 version of Menu Breadcrumb.
-    // TODO perhaps find out if this option would be worth preserving
-    // (applied to default tick boxes for new menus added in the future).
     return parent::buildForm($form, $form_state);
   }
 
@@ -222,13 +229,15 @@ class SettingsForm extends ConfigFormBase {
       ->set('disable_admin_page', (boolean) $form_state->getValue('disable_admin_page'))
       ->set('append_current_page', (boolean) $form_state->getValue('append_current_page'))
       ->set('current_page_as_link', (boolean) $form_state->getValue('current_page_as_link'))
+      ->set('stop_on_first_match', (boolean) $form_state->getValue('stop_on_first_match'))
       ->set('append_member_page', (boolean) $form_state->getValue('append_member_page'))
       ->set('member_page_as_link', (boolean) $form_state->getValue('member_page_as_link'))
-      ->set('home_as_site_name', (boolean) $form_state->getValue('home_as_site_name'))
+      ->set('front_title', $form_state->getValue('front_title'))
       ->set('remove_home', (boolean) $form_state->getValue('remove_home'))
       ->set('add_home', (boolean) $form_state->getValue('add_home'))
       ->set('menu_breadcrumb_menus', $form_state->getValue('menu_breadcrumb_menus'))
       ->set('exclude_empty_url', $form_state->getValue('exclude_empty_url'))
+      ->set('derived_active_trail', $form_state->getValue('derived_active_trail'))
       ->save();
 
     parent::submitForm($form, $form_state);

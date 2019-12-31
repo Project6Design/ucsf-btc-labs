@@ -3,6 +3,8 @@
 namespace Drupal\webform\Entity;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Serialization\Yaml;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
@@ -13,6 +15,10 @@ use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 use Drupal\webform\Plugin\WebformElement\WebformActions;
 use Drupal\webform\Plugin\WebformElement\WebformWizardPage;
+use Drupal\webform\Plugin\WebformElementAssetInterface;
+use Drupal\webform\Plugin\WebformElementAttachmentInterface;
+use Drupal\webform\Plugin\WebformElementComputedInterface;
+use Drupal\webform\Plugin\WebformElementWizardPageInterface;
 use Drupal\webform\Plugin\WebformHandlerMessageInterface;
 use Drupal\webform\Utility\WebformElementHelper;
 use Drupal\webform\Utility\WebformReflectionHelper;
@@ -31,6 +37,13 @@ use Drupal\webform\WebformSubmissionStorageInterface;
  * @ConfigEntityType(
  *   id = "webform",
  *   label = @Translation("Webform"),
+ *   label_collection = @Translation("Webforms"),
+ *   label_singular = @Translation("webform"),
+ *   label_plural = @Translation("webforms"),
+ *   label_count = @PluralTranslation(
+ *     singular = "@count webform",
+ *     plural = "@count webforms",
+ *   ),
  *   handlers = {
  *     "storage" = "\Drupal\webform\WebformEntityStorage",
  *     "view_builder" = "Drupal\webform\WebformEntityViewBuilder",
@@ -346,6 +359,41 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
   protected $elementsManagedFiles = [];
 
   /**
+   * Track attachment elements.
+   *
+   * @var array
+   */
+  protected $elementsAttachments = [];
+
+  /**
+   * Track computed elements.
+   *
+   * @var array
+   */
+  protected $elementsComputed = [];
+
+  /**
+   * Track elements CSS.
+   *
+   * @var array
+   */
+  protected $elementsCss = [];
+
+  /**
+   * Track elements JavaScript.
+   *
+   * @var array
+   */
+  protected $elementsJavaScript = [];
+
+  /**
+   * A webfrom default data extracted from each elements default value or value.
+   *
+   * @var array
+   */
+  protected $elementsDefaultData = [];
+
+  /**
    * The webform pages.
    *
    * @var array
@@ -392,7 +440,14 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
    *
    * @var bool
    */
-  protected $hasMessagehandler;
+  protected $hasMessageHandler;
+
+  /**
+   * Track if a webform handler requires anonymous submission tracking .
+   *
+   * @var bool
+   */
+  protected $hasAnonymousSubmissionTrackingHandler;
 
   /**
    * {@inheritdoc}
@@ -666,6 +721,22 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
   /**
    * {@inheritdoc}
    */
+  public function hasAttachments() {
+    $this->initElements();
+    return (!empty($this->elementsAttachments)) ? TRUE : FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasComputed() {
+    $this->initElements();
+    return (!empty($this->elementsComputed)) ? TRUE : FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function hasFlexboxLayout() {
     $this->initElements();
     return $this->hasFlexboxLayout;
@@ -751,15 +822,35 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
    * {@inheritdoc}
    */
   public function getAssets() {
-    $shared_css = \Drupal::config('webform.settings')->get('assets.css') ?: '';
-    $webform_css = $this->css ?: '';
+    $this->initElements();
 
+    // Css.
+    $css = [];
+    $shared_css = \Drupal::config('webform.settings')->get('assets.css') ?: '';
+    if ($shared_css) {
+      $css[] = $shared_css;
+    }
+    $webform_css = $this->css ?: '';
+    if ($webform_css) {
+      $css[] = $webform_css;
+    }
+    $css += $this->elementsCss;
+
+    // JavaScript.
+    $javascript = [];
     $shared_javascript = \Drupal::config('webform.settings')->get('assets.javascript') ?: '';
+    if ($shared_javascript) {
+      $javascript[] = $shared_javascript;
+    }
     $webform_javascript = $this->javascript ?: '';
+    if ($webform_javascript) {
+      $javascript[] = $webform_javascript;
+    }
+    $javascript += $this->elementsJavaScript;
 
     return [
-      'css' => $shared_css . (($shared_css && $webform_css) ? PHP_EOL : '') . $webform_css,
-      'javascript' => $shared_javascript . (($shared_javascript && $webform_javascript) ? PHP_EOL : '') . $webform_javascript,
+      'css' => implode(PHP_EOL, $css),
+      'javascript' => implode(PHP_EOL, $javascript),
     ];
   }
 
@@ -901,9 +992,13 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
     return [
       'ajax' => FALSE,
       'ajax_scroll_top' => 'form',
+      'ajax_progress_type' => '',
+      'ajax_effect' => '',
+      'ajax_speed' => NULL,
       'page' => TRUE,
       'page_submit_path' => '',
       'page_confirm_path' => '',
+      'page_admin_theme' => FALSE,
       'form_title' => 'both',
       'form_submit_once' => FALSE,
       'form_exception_message' => '',
@@ -957,6 +1052,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       'wizard_progress_pages' => FALSE,
       'wizard_progress_percentage' => FALSE,
       'wizard_progress_link' => FALSE,
+      'wizard_progress_states' => FALSE,
       'wizard_start_label' => '',
       'wizard_preview_link' => FALSE,
       'wizard_confirmation' => TRUE,
@@ -975,6 +1071,8 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       'draft_auto_save' => FALSE,
       'draft_saved_message' => '',
       'draft_loaded_message' => '',
+      'draft_pending_single_message' => '',
+      'draft_pending_multiple_message' => '',
       'confirmation_type' => WebformInterface::CONFIRMATION_PAGE,
       'confirmation_title' => '',
       'confirmation_message' => '',
@@ -985,6 +1083,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       'confirmation_back_attributes' => [],
       'confirmation_exclude_query' => FALSE,
       'confirmation_exclude_token' => FALSE,
+      'confirmation_update' => FALSE,
       'limit_total' => NULL,
       'limit_total_interval' => NULL,
       'limit_total_message' => '',
@@ -1001,6 +1100,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       'purge_days' => NULL,
       'results_disabled' => FALSE,
       'results_disabled_ignore' => FALSE,
+      'token_view' => FALSE,
       'token_update' => FALSE,
     ];
   }
@@ -1107,6 +1207,22 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function getElementsAttachments() {
+    $this->initElements();
+    return $this->elementsAttachments;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getElementsComputed() {
+    $this->initElements();
+    return $this->elementsComputed;
+  }
+
+  /**
    * Check operation access for each element.
    *
    * @param string $operation
@@ -1126,7 +1242,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
     /** @var \Drupal\webform\Plugin\WebformElementManagerInterface $element_manager */
     $element_manager = \Drupal::service('plugin.manager.webform.element');
     foreach ($elements as $key => $element) {
-      $element_plugin = $element_manager->getElementInstance($element);
+      $element_plugin = $element_manager->getElementInstance($element, $this);
       if (!$element_plugin->checkAccessRules($operation, $element)) {
         unset($elements[$key]);
       }
@@ -1137,14 +1253,41 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
   /**
    * {@inheritdoc}
    */
-  public function getElementsSelectorOptions() {
+  public function getElementsSelectorOptions(array $options = []) {
     /** @var \Drupal\webform\Plugin\WebformElementManagerInterface $element_manager */
     $element_manager = \Drupal::service('plugin.manager.webform.element');
+
+    // The value element is excluded because it is not available
+    // to the #states API. The value element is available to WebformHandles.
+    // @see \Drupal\webform\Form\WebformHandlerFormBase
+    $options += ['excluded_elements' => ['value']];
 
     $selectors = [];
     $elements = $this->getElementsInitializedAndFlattened();
     foreach ($elements as $element) {
-      $element_plugin = $element_manager->getElementInstance($element);
+      $element_plugin = $element_manager->getElementInstance($element, $this);
+
+      // Check excluded elements.
+      if ($options['excluded_elements'] && in_array($element_plugin->getPluginId(), $options['excluded_elements'])) {
+        continue;
+      }
+
+      $element_selectors = $element_plugin->getElementSelectorOptions($element);
+      foreach ($element_selectors as $element_selector_key => $element_selector_value) {
+        // Suffix duplicate selector optgroups with empty characters.
+        //
+        // This prevents elements with the same titles and multiple selectors
+        // from clobbering each other.
+        if (isset($selectors[$element_selector_key]) && is_array($element_selector_value)) {
+          while (isset($selectors[$element_selector_key])) {
+            $element_selector_key .= ' ';
+          }
+          $selectors[$element_selector_key] = $element_selector_value;
+        }
+        else {
+          $selectors[$element_selector_key] = $element_selector_value;
+        }
+      }
       $selectors += $element_plugin->getElementSelectorOptions($element);
     }
     return $selectors;
@@ -1160,7 +1303,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
     $source_values = [];
     $elements = $this->getElementsInitializedAndFlattened();
     foreach ($elements as $element) {
-      $element_plugin = $element_manager->getElementInstance($element);
+      $element_plugin = $element_manager->getElementInstance($element, $this);
       $source_values += $element_plugin->getElementSelectorSourceValues($element);
     }
     return $source_values;
@@ -1170,7 +1313,16 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
    * {@inheritdoc}
    */
   public function getElementsPrepopulate() {
+    $this->initElements();
     return $this->elementsPrepopulate;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getElementsDefaultData() {
+    $this->initElements();
+    return $this->elementsDefaultData;
   }
 
   /**
@@ -1203,6 +1355,11 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
     $this->elementsInitializedFlattenedAndHasValue = [];
     $this->elementsTranslations = [];
     $this->elementsManagedFiles = [];
+    $this->elementsAttachments = [];
+    $this->elementsComputed = [];
+    $this->elementsCss = [];
+    $this->elementsJavaScript = [];
+    $this->elementsDefaultData = [];
 
     try {
       $config_translation = \Drupal::moduleHandler()->moduleExists('config_translation');
@@ -1211,8 +1368,8 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       /** @var \Drupal\Core\Language\LanguageManagerInterface $language_manager */
       $language_manager = \Drupal::service('language_manager');
 
-      // If current webform is translated, load the base (default) webform and apply
-      // the translation to the elements.
+      // If current webform is translated, load the base (default) webform and
+      // apply the translation to the elements.
       if ($config_translation
         && ($this->langcode != $language_manager->getCurrentLanguage()->getId())) {
         // Always get the elements in the original language.
@@ -1231,7 +1388,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       $this->elementsDecoded = $elements;
     }
     catch (\Exception $exception) {
-      $link = $this->link($this->t('Edit'), 'edit-form');
+      $link = $this->toLink($this->t('Edit'), 'edit-form')->toString();
       \Drupal::logger('webform')
         ->notice('%title elements are not valid. @message', [
           '%title' => $this->label(),
@@ -1268,6 +1425,11 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
     $this->elementsInitializedFlattenedAndHasValue = NULL;
     $this->elementsTranslations = NULL;
     $this->elementsManagedFiles = [];
+    $this->elementsAttachments = [];
+    $this->elementsComputed = [];
+    $this->elementsCss = [];
+    $this->elementsJavaScript = [];
+    $this->elementsDefaultData = [];
   }
 
   /**
@@ -1309,7 +1471,8 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       // Copy only the element properties to decoded and flattened elements.
       $this->elementsDecodedAndFlattened[$key] = WebformElementHelper::getProperties($element);
 
-      // Set id, key, parent_key, depth, and parent children.
+      // Set webform, id, key, parent_key, depth, and parent children.
+      $element['#webform'] = $this->id();
       $element['#webform_id'] = $this->id() . '--' . $key;
       $element['#webform_key'] = $key;
       $element['#webform_parent_key'] = $parent;
@@ -1341,11 +1504,6 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
         '#admin_title' => NULL,
       ];
 
-      // If #private set #access.
-      if (!empty($element['#private'])) {
-        $element['#access'] = $this->access('submission_view_any');
-      }
-
       // Set #markup type to 'webform_markup' to trigger #display_on behavior.
       // @see https://www.drupal.org/node/2036237
       if (empty($element['#type']) && empty($element['#theme']) && isset($element['#markup'])) {
@@ -1355,7 +1513,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       $element_plugin = NULL;
       if (isset($element['#type'])) {
         // Load the element's handler.
-        $element_plugin = $element_manager->getElementInstance($element);
+        $element_plugin = $element_manager->getElementInstance($element, $this);
 
         // Initialize the element.
         // Note: Composite sub elements are initialized via
@@ -1401,6 +1559,40 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
         // Track managed files.
         if ($element_plugin->hasManagedFiles($element)) {
           $this->elementsManagedFiles[$key] = $key;
+        }
+
+        // Track attachments.
+        if ($element_plugin instanceof WebformElementAttachmentInterface) {
+          $this->elementsAttachments[$key] = $key;
+        }
+
+        // Track computed.
+        if ($element_plugin instanceof WebformElementComputedInterface) {
+          $this->elementsComputed[$key] = $key;
+        }
+
+        // Track assets (CSS and JavaScript).
+        // @see \Drupal\webform_options_custom\Plugin\WebformElement\WebformOptionsCustom
+        if ($element_plugin instanceof WebformElementAssetInterface) {
+          $asset_id = $element_plugin->getAssetId();
+          if (!isset($this->elementsCss[$asset_id])) {
+            if ($css = $element_plugin->getCss()) {
+              $this->elementsCss[$asset_id] = $css;
+            }
+          }
+          if (!isset($this->elementsJavaScript[$asset_id])) {
+            if ($javascript = $element_plugin->getJavaScript()) {
+              $this->elementsJavaScript[$asset_id] = $javascript;
+            }
+          }
+        }
+
+        // Track default data.
+        if (isset($element['#value'])) {
+          $this->elementsDefaultData[$key] = $element['#value'];
+        }
+        elseif (isset($element['#default_value'])) {
+          $this->elementsDefaultData[$key] = $element['#default_value'];
         }
 
         $element['#webform_multiple'] = $element_plugin->hasMultipleValues($element);
@@ -1589,15 +1781,33 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
   /**
    * {@inheritdoc}
    */
-  public function getPages($operation = 'default') {
+  public function getPages($operation = 'default', WebformSubmissionInterface $webform_submission = NULL) {
+    $pages = $this->buildPages($operation);
+    if ($this->getSetting('wizard_progress_states') && $webform_submission) {
+      /** @var \Drupal\webform\WebformSubmissionConditionsValidatorInterface $constraint_validator */
+      $constraint_validator = \Drupal::service('webform_submission.conditions_validator');
+      $pages = $constraint_validator->buildPages($pages, $webform_submission);
+    }
+    return $pages;
+  }
+
+  /**
+   * Build and cache a webform's wizard pages based on the current operation.
+   *
+   * @param string $operation
+   *   The webform submission operation.
+   *   Usually 'default', 'add', 'edit', 'edit_all', 'api', or 'test'.
+   *
+   * @return array
+   *   An associative array of webform wizard pages.
+   */
+  protected function buildPages($operation = 'default') {
     if (isset($this->pages[$operation])) {
       return $this->pages[$operation];
     }
 
     /** @var \Drupal\webform\Plugin\WebformElementManagerInterface $element_manager */
     $element_manager = \Drupal::service('plugin.manager.webform.element');
-    /** @var \Drupal\webform\Plugin\WebformElementInterface $element_plugin */
-    $element_plugin = $element_manager->createInstance('webform_wizard_page');
 
     $wizard_properties = [
       '#title' => '#title',
@@ -1612,7 +1822,13 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
     $elements = $this->getElementsInitialized();
     if (is_array($elements) && !in_array($operation, ['edit_all', 'api'])) {
       foreach ($elements as $key => $element) {
-        if (!isset($element['#type']) || $element['#type'] != 'webform_wizard_page') {
+        if (!isset($element['#type'])) {
+          continue;
+        }
+
+        /** @var \Drupal\webform\Plugin\WebformElementInterface $element_plugin */
+        $element_plugin = $element_manager->getElementInstance($element, $this);
+        if (!($element_plugin instanceof WebformElementWizardPageInterface)) {
           continue;
         }
 
@@ -1807,7 +2023,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
         $cache_contexts[] = 'url.query_args:entity_id';
       }
       // Add webform (secure) token query string parameter.
-      if ($this->getSetting('token_update')) {
+      if ($this->getSetting('token_view') || $this->getSetting('token_update')) {
         $cache_contexts[] = 'url.query_args:token';
       }
     }
@@ -1873,23 +2089,36 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       $elements = WebformElementHelper::getFlattened($elements);
 
       // Handle create element.
-      if ($created_elements = array_diff_key($elements, $elements_original)) {
-        foreach ($created_elements as $element_key => $element) {
-          $this->invokeHandlers('createElement', $element_key, $element);
-        }
+      $created_elements = array_diff_key($elements, $elements_original) ?: [];
+      foreach ($created_elements as $element_key => $element) {
+        $this->invokeHandlers('createElement', $element_key, $element);
       }
 
       // Handle delete element.
-      if ($deleted_elements = array_diff_key($elements_original, $elements)) {
-        foreach ($deleted_elements as $element_key => $element) {
-          $this->invokeHandlers('deleteElement', $element_key, $element);
-        }
+      $deleted_elements = array_diff_key($elements_original, $elements) ?: [];
+      foreach ($deleted_elements as $element_key => $element) {
+        $this->invokeHandlers('deleteElement', $element_key, $element);
       }
 
       // Handle update element.
       foreach ($elements as $element_key => $element) {
         if (isset($elements_original[$element_key]) && $elements_original[$element_key] != $element) {
           $this->invokeHandlers('updateElement', $element_key, $element, $elements_original[$element_key]);
+        }
+      }
+
+      // Invalidate library_info cache tag if any updated or deleted elements
+      // has assets (CSS or JavaScript).
+      // @see webform_library_info_build()
+      /** @var \Drupal\webform\Plugin\WebformElementManagerInterface $element_manager */
+      $element_manager = \Drupal::service('plugin.manager.webform.element');
+      $checked_elements = $created_elements + $deleted_elements;
+      foreach ($checked_elements as $element_key => $element) {
+        $element_plugin = $element_manager->getElementInstance($element, $this);
+        if ($element_plugin instanceof WebformElementAssetInterface
+          && $element_plugin->hasAssets()) {
+          Cache::invalidateTags(['library_info']);
+          break;
         }
       }
     }
@@ -1998,6 +2227,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
    */
   protected function resetHandlers() {
     $this->hasMessageHandler = NULL;
+    $this->hasAnonymousSubmissionTrackingHandler = NULL;
   }
 
   /**
@@ -2018,6 +2248,26 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
     }
 
     return $this->hasMessagehandler;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function hasAnonymousSubmissionTrackingHandler() {
+    if (isset($this->hasAnonymousSubmissionTrackingHandler)) {
+      $this->hasAnonymousSubmissionTrackingHandler;
+    }
+
+    $this->hasAnonymousSubmissionTrackingHandler = FALSE;
+    $handlers = $this->getHandlers();
+    foreach ($handlers as $handler) {
+      if ($handler->hasAnonymousSubmissionTracking()) {
+        $this->hasAnonymousSubmissionTrackingHandler = TRUE;
+        break;
+      }
+    }
+
+    return $this->hasAnonymousSubmissionTrackingHandler;
   }
 
   /**
@@ -2145,7 +2395,7 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
   /**
    * {@inheritdoc}
    */
-  public function invokeHandlers($method, &$data, &$context1 = NULL, &$context2 = NULL) {
+  public function invokeHandlers($method, &$data, &$context1 = NULL, &$context2 = NULL, &$context3 = NULL) {
     // Get webform submission from arguments for conditions validations.
     $webform_submission = NULL;
     $args = func_get_args();
@@ -2156,42 +2406,79 @@ class Webform extends ConfigEntityBundleBase implements WebformInterface {
       }
     }
 
-    // If webform submission and alter settings, make sure to completely
-    // reset all settings to their original values.
-    if ($method === 'overrideSettings') {
-      $this->resetSettings();
-      $settings = $this->getSettings();
-      $handlers = $this->getHandlers();
-      foreach ($handlers as $handler) {
-        $handler->setWebformSubmission($webform_submission);
-        $this->invokeHandlerAlter($handler, $method, $args);
+    // Get handlers.
+    $handlers = $this->getHandlers();
 
-        if ($handler->isEnabled() && $handler->checkConditions($webform_submission)) {
-          $handler->overrideSettings($settings, $webform_submission);
+    switch ($method) {
+      case 'overrideSettings';
+        // If webform submission and alter settings, make sure to completely
+        // reset all settings to their original values.
+        $this->resetSettings();
+        $settings = $this->getSettings();
+        foreach ($handlers as $handler) {
+          $handler->setWebformSubmission($webform_submission);
+          $this->invokeHandlerAlter($handler, $method, $args);
+          if ($this->isHandlerEnabled($handler, $webform_submission)) {
+            $handler->overrideSettings($settings, $webform_submission);
+          }
         }
-      }
-      if ($settings != $this->settingsOriginal) {
-        $this->setSettingsOverride($settings);
-      }
+        // If a handler has change some settings set override.
+        // Only look for altered original settings, which prevents issues where
+        // a webform saved settings and default settings are out-of-sync.
+        if (array_intersect_key($settings, $this->settingsOriginal) != $this->settingsOriginal) {
+          $this->setSettingsOverride($settings);
+        }
+        return NULL;
+
+      case 'access':
+      case 'accessElement':
+        // WebformHandler::access() and WebformHandler::accessElement()
+        // returns a AccessResult.
+        /** @var \Drupal\Core\Access\AccessResultInterface $result */
+        $result = AccessResult::neutral();
+        foreach ($handlers as $handler) {
+          $handler->setWebformSubmission($webform_submission);
+          $this->invokeHandlerAlter($handler, $method, $args);
+          if ($this->isHandlerEnabled($handler, $webform_submission)) {
+            $result = $result->orIf($handler->$method($data, $context1, $context2));
+          }
+        }
+        return $result;
+
+      default:
+        foreach ($handlers as $handler) {
+          $handler->setWebformSubmission($webform_submission);
+          $this->invokeHandlerAlter($handler, $method, $args);
+          if ($this->isHandlerEnabled($handler, $webform_submission)) {
+            $handler->$method($data, $context1, $context2);
+          }
+        }
+        return NULL;
+    }
+  }
+
+  /**
+   * Determine if a webform handler is enabled.
+   *
+   * @param \Drupal\webform\Plugin\WebformHandlerInterface $handler
+   *   A webform handler.
+   * @param \Drupal\webform\WebformSubmissionInterface|null $webform_submission
+   *   A webform submission.
+   *
+   * @return bool
+   *   TRUE if a webform handler is enabled.
+   */
+  protected function isHandlerEnabled(WebformHandlerInterface $handler, WebformSubmissionInterface $webform_submission = NULL) {
+    // Check if the handler is disabled.
+    if ($handler->isDisabled()) {
+      return FALSE;
+    }
+    // If webform submission defined, check the handlers conditions.
+    elseif ($webform_submission && !$handler->checkConditions($webform_submission)) {
+      return FALSE;
     }
     else {
-      $handlers = $this->getHandlers();
-      foreach ($handlers as $handler) {
-        $handler->setWebformSubmission($webform_submission);
-        $this->invokeHandlerAlter($handler, $method, $args);
-
-        // If the handler is disabled never invoke it.
-        if ($handler->isDisabled()) {
-          continue;
-        }
-
-        // If the arguments contain the webform submission check conditions.
-        if ($webform_submission && !$handler->checkConditions($webform_submission)) {
-          continue;
-        }
-
-        $handler->$method($data, $context1, $context2);
-      }
+      return TRUE;
     }
   }
 

@@ -274,6 +274,14 @@
       $('.webform-ajax-refresh').click();
     }
     else {
+      // Clear unsaved information flag so that the current webform page
+      // can be redirected.
+      // @see Drupal.behaviors.webformUnsaved.clear
+      if (Drupal.behaviors.webformUnsaved) {
+        Drupal.behaviors.webformUnsaved.clear();
+      }
+
+
       this.redirect(ajax, response, status);
     }
   };
@@ -336,6 +344,22 @@
   Drupal.AjaxCommands.prototype.webformAnnounce = function (ajax, response) {
     // Delay the announcement.
     setTimeout(function () {Drupal.announce(response.text, response.priority);}, 200);
+  };
+
+  /**
+   * Triggers confirm page reload.
+   *
+   * @param {Drupal.Ajax} [ajax]
+   *   A {@link Drupal.ajax} object.
+   * @param {object} response
+   *   Ajax response.
+   * @param {string} response.message
+   *   A message to be displayed in the confirm dialog.
+   */
+  Drupal.AjaxCommands.prototype.webformConfirmReload = function (ajax, response) {
+    if (window.confirm(response.message)) {
+      window.location.reload(true);
+    }
   };
 
   /** ********************************************************************** **/

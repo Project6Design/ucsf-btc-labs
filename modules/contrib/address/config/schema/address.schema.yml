@@ -102,14 +102,24 @@ field.field_settings.address:
       label: 'Available countries'
       sequence:
         - type: string
+    langcode_override:
+      type: string
+      label: 'Language override'
+    field_overrides:
+      type: sequence
+      label: 'Field overrides'
+      sequence:
+        type: mapping
+        mapping:
+          override:
+            type: string
+            label: 'Override'
+    # Deprecated, replaced by field_overrides.
     fields:
       type: sequence
       label: 'Used fields'
       sequence:
         - type: string
-    langcode_override:
-      type: string
-      label: 'Language override'
 
 field.field_settings.address_country:
   type: mapping
@@ -134,10 +144,6 @@ field.field_settings.address_zone:
 field.widget.settings.address_default:
   type: mapping
   label: 'Default address widget settings'
-  mapping:
-    default_country:
-      type: string
-      label: 'Default country'
 
 field.widget.settings.address_zone_default:
   type: mapping
@@ -147,9 +153,33 @@ field.widget.settings.address_zone_default:
       type: boolean
       label: 'Show the zone label field'
 
-views.filter.country_code:
+views.field.country:
+  type: views_field
+  label: 'Country'
+  mapping:
+    display_name:
+      type: boolean
+      label: 'Display the country name instead of the country code'
+
+views.field.country_code:
+  type: views.field.country
+  label: 'Country code'
+
+views.field.subdivision:
+  type: views_field
+  label: 'Subdivision'
+  mapping:
+    display_name:
+      type: boolean
+      label: 'Display the subdivision name instead of the subdivision code'
+
+views.filter.country:
   type: views.filter.in_operator
   label: 'Country'
+
+views.filter.country_code:
+  type: views.filter.country
+  label: 'Country code'
 
 views.filter.administrative_area:
   type: views.filter.in_operator
@@ -176,3 +206,11 @@ views.filter.administrative_area:
         label_type:
           type: string
           label: 'Label type'
+
+views.sort.country:
+  type: views_sort
+  label: 'Country'
+  mapping:
+    sort_by:
+      type: string
+      label: 'Sort by'

@@ -23,30 +23,30 @@ class WebformThirdPartySettingsTest extends WebformTestBase {
     $this->drupalLogin($this->rootUser);
 
     // Check 'Webform: Settings' shows no modules installed.
-    $this->drupalGet('admin/structure/webform/config');
+    $this->drupalGet('/admin/structure/webform/config');
     $this->assertRaw('There are no third party settings available.');
 
     // Check 'Contact: Settings' does not show 'Third party settings'.
-    $this->drupalGet('admin/structure/webform/manage/contact/settings');
+    $this->drupalGet('/admin/structure/webform/manage/contact/settings');
     $this->assertNoRaw('Third party settings');
 
     // Install test third party settings module.
     \Drupal::service('module_installer')->install(['webform_test_third_party_settings']);
 
     // Check 'Webform: Settings' shows no modules installed.
-    $this->drupalGet('admin/structure/webform/config');
+    $this->drupalGet('/admin/structure/webform/config');
     $this->assertNoRaw('There are no third party settings available.');
 
     // Check 'Contact: Settings' shows 'Third party settings'.
-    $this->drupalGet('admin/structure/webform/manage/contact/settings');
+    $this->drupalGet('/admin/structure/webform/manage/contact/settings');
     $this->assertRaw('Third party settings');
 
     // Check 'Webform: Settings' message.
     $edit = [
       'third_party_settings[webform_test_third_party_settings][message]' => 'Message for all webforms',
     ];
-    $this->drupalPostForm('admin/structure/webform/config', $edit, t('Save configuration'));
-    $this->drupalGet('webform/contact');
+    $this->drupalPostForm('/admin/structure/webform/config', $edit, t('Save configuration'));
+    $this->drupalGet('/webform/contact');
     $this->assertRaw('Message for all webforms');
 
     // Check that webform.settings.yml contain message.
@@ -59,13 +59,13 @@ class WebformThirdPartySettingsTest extends WebformTestBase {
     $edit = [
       'third_party_settings[webform_test_third_party_settings][message]' => 'Message for only this webform',
     ];
-    $this->drupalPostForm('admin/structure/webform/manage/contact/settings', $edit, t('Save'));
-    $this->drupalGet('webform/contact');
+    $this->drupalPostForm('/admin/structure/webform/manage/contact/settings', $edit, t('Save'));
+    $this->drupalGet('/webform/contact');
     $this->assertRaw('Message for only this webform');
 
     // Uninstall test third party settings module.
     \Drupal::service('module_installer')->uninstall(['webform_test_third_party_settings']);
-    $this->drupalGet('webform/contact');
+    $this->drupalGet('/webform/contact');
     $this->assertNoRaw('Message for only this webform');
 
     // Check that webform.settings.yml no longer contains message or
