@@ -120,6 +120,7 @@ class ComposerStaticInit258f1e727b3546c382e40ba55996f119
         ),
         'E' => 
         array (
+            'Embed\\' => 6,
             'Egulias\\EmailValidator\\' => 23,
         ),
         'D' => 
@@ -150,6 +151,7 @@ class ComposerStaticInit258f1e727b3546c382e40ba55996f119
             'Consolidation\\AnnotatedCommand\\' => 31,
             'Composer\\Semver\\' => 16,
             'Composer\\Installers\\' => 20,
+            'Composer\\CaBundle\\' => 18,
         ),
         'A' => 
         array (
@@ -362,6 +364,10 @@ class ComposerStaticInit258f1e727b3546c382e40ba55996f119
         array (
             0 => __DIR__ . '/..' . '/grasmash/expander/src',
         ),
+        'Embed\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/embed/embed/src',
+        ),
         'Egulias\\EmailValidator\\' => 
         array (
             0 => __DIR__ . '/..' . '/egulias/email-validator/EmailValidator',
@@ -457,6 +463,10 @@ class ComposerStaticInit258f1e727b3546c382e40ba55996f119
         'Composer\\Installers\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers',
+        ),
+        'Composer\\CaBundle\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/ca-bundle/src',
         ),
         'Asm89\\Stack\\' => 
         array (
