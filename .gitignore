@@ -23,9 +23,6 @@ sites/*/services.local.yml
 # Ignore SimpleTest multi-site environment.
 sites/simpletest
 
-# Make sure site-local drush is not used with Terminus
-vendor/bin/drush
-
 # Packages #
 ############
 *.7z
