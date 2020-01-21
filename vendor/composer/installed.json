@@ -54,6 +54,67 @@
         ]
     },
     {
+        "name": "commerceguys/addressing",
+        "version": "v1.0.6",
+        "version_normalized": "1.0.6.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/commerceguys/addressing.git",
+            "reference": "8aac9af11d38c1abe04a5e4a252d5a6740b2b69a"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/commerceguys/addressing/zipball/8aac9af11d38c1abe04a5e4a252d5a6740b2b69a",
+            "reference": "8aac9af11d38c1abe04a5e4a252d5a6740b2b69a",
+            "shasum": ""
+        },
+        "require": {
+            "doctrine/collections": "~1.0",
+            "php": ">=5.5.0"
+        },
+        "require-dev": {
+            "mikey179/vfsstream": "1.*",
+            "phpunit/phpunit": "~4.0",
+            "squizlabs/php_codesniffer": "2.*",
+            "symfony/validator": ">=3.2"
+        },
+        "suggest": {
+            "symfony/validator": "to validate addresses"
+        },
+        "time": "2019-10-21T14:31:17+00:00",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.x-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "CommerceGuys\\Addressing\\": "src"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Bojan Zivanovic"
+            },
+            {
+                "name": "Damien Tournoud"
+            }
+        ],
+        "description": "Addressing library powered by CLDR and Google's address data.",
+        "keywords": [
+            "address",
+            "internationalization",
+            "localization",
+            "postal"
+        ]
+    },
+    {
         "name": "composer/ca-bundle",
         "version": "1.2.6",
         "version_normalized": "1.2.6.0",

@@ -103,6 +103,7 @@ class ComposerStaticInit258f1e727b3546c382e40ba55996f119
             'Composer\\Semver\\' => 16,
             'Composer\\Installers\\' => 20,
             'Composer\\CaBundle\\' => 18,
+            'CommerceGuys\\Addressing\\' => 24,
         ),
         'A' => 
         array (
@@ -310,6 +311,10 @@ class ComposerStaticInit258f1e727b3546c382e40ba55996f119
         'Composer\\CaBundle\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/ca-bundle/src',
+        ),
+        'CommerceGuys\\Addressing\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/commerceguys/addressing/src',
         ),
         'Asm89\\Stack\\' => 
         array (
