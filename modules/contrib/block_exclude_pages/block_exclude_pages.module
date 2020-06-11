@@ -22,7 +22,7 @@ function block_exclude_pages_help($route_name, RouteMatchInterface $route_match)
       $description = block_exclude_pages_blockhelptext();
       $output .= '<p>' . t('This module adds an exclude pages filter for blocks') . '</p>';
       $output .= $description;
-    default: 
+    default:
   }
   return $output;
 }
@@ -31,10 +31,7 @@ function block_exclude_pages_help($route_name, RouteMatchInterface $route_match)
  * Doc function returns the help markup.
  */
 function block_exclude_pages_blockhelptext() {
-  $description = "<br>";
-  $description .= t("<b>To exclude Specific pages</b>, prefix the path with a '!', Example excluded path") . "<em class='placeholder'>!/user/jc</em>";
-  $description = $description;
-  return $description;
+  return t("<br><br><b>To exclude specific pages</b>, prefix the path with a '!'. Example excluded path <em class='placeholder'>!/user/jc</em>");
 }
 
 /**
@@ -47,9 +44,63 @@ function block_exclude_pages_form_block_form_alter(&$form, FormStateInterface $f
 }
 
 /**
+ * Doc function to reaplace native php fnmatch().
+ */
+function block_exclude_pages_fnmatch($pattern, $string, $flags = 0) {
+  $modifiers = NULL;
+  $transforms = [
+    '\*'    => '.*',
+    '\?'    => '.',
+    '\[\!'  => '[^',
+    '\['    => '[',
+    '\]'    => ']',
+    '\.'    => '\.',
+    '\\'    => '\\\\',
+  ];
+  // Forward slash in string must be in pattern:
+  if ($flags & FNM_PATHNAME) {
+    $transforms['\*'] = '[^/]*';
+  }
+  // Back slash should not be escaped:
+  if ($flags & FNM_NOESCAPE) {
+    unset($transforms['\\']);
+  }
+  // Perform case insensitive match:
+  if ($flags & FNM_CASEFOLD) {
+    $modifiers .= 'i';
+  }
+  // Period at start must be the same as pattern:
+  if ($flags & FNM_PERIOD) {
+    if (strpos($string, '.') === 0 && strpos($pattern, '.') !== 0) {
+      return FALSE;
+    }
+  }
+  $pattern = '#^' . strtr(preg_quote($pattern, '#'), $transforms) . '$#' . $modifiers;
+  return (boolean) preg_match($pattern, $string);
+}
+
+/**
+ * Doc function checks if path matches any restricted patterns.
+ */
+function block_exclude_pages_check_excluded_path($exclude, $path, $nodeid) {
+  if (block_exclude_pages_fnmatch($exclude, $nodeid) || block_exclude_pages_fnmatch($exclude, $path)) {
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
  * Implements hook_block_access().
  */
 function block_exclude_pages_block_access(Block $block, $operation, AccountInterface $account) {
+
+  /* ############  testing/debuggin - only: ################# */
+  $debug_output = [];
+  // $debug = block_exclude_pages_debug_check();
+  $debug = FALSE;
+  /* ------------------------------------------------------- */
 
   $nodeid = \Drupal::service('path.current')->getPath();
   $path = explode('/', trim(\Drupal::request()->query->get('q'), '/'));
@@ -67,7 +118,7 @@ function block_exclude_pages_block_access(Block $block, $operation, AccountInter
   $path = "/" . implode("/", $path);
 
   // - get block's visibility conditions.
-  $conditions = $block->getVisibilityConditions()->getConfiguration();
+  $conditions = ($debug) ? $debug : $block->getVisibilityConditions()->getConfiguration();
 
   if (count($conditions) > 0 && !empty($conditions['request_path'])) {
     $pages = explode("\n", $conditions['request_path']['pages']);
@@ -77,24 +128,91 @@ function block_exclude_pages_block_access(Block $block, $operation, AccountInter
 
       // - check if exclude conditions is set.
       if (preg_match($pttr, $p) !== 1) {
+        if ($debug) {
+          array_push($debug_output, $p . " -  SKIPPED");
+        }
         continue;
       }
 
       // - exclude item found, now test if on page path.
       $exclude = trim(preg_replace($pttr, "", $p));
-      if (fnmatch($exclude, $nodeid) || fnmatch($exclude, $path)) {
-        $config['pages'] = $exclude;
-        $config['context_mapping'] = [];
-        if (isset($conditions['request_path']['negate']) && $conditions['request_path']['negate'] == TRUE) {
-          $config['negate'] = FALSE;
-        }
-        else {
-          $config['negate'] = TRUE;
-        }
-        $block->setVisibilityConfig('request_path', $config);
-        break;
-      }
 
+      if ($debug) {
+        // Used for testing and debugging only:
+        $paths = block_exclude_pages_debug_dummy_path();
+        array_push($debug_output, "----------------------------- [ !" . $exclude . " ]------------------------------");
+        foreach ($paths as $path) {
+          if (block_exclude_pages_check_excluded_path($exclude, $path, $nodeid)) {
+            if ($exclude == $nodeid) {
+              array_push($debug_output, "!" . $exclude . " : " . $nodeid . " - BLOCKED <<<<<<<<<<<<<<<<<<<<<<<<<");
+            }
+            else {
+              array_push($debug_output, "!" . $exclude . " : " . $path . " - BLOCKED <<<<<<<<<<<<<<<<<<<<<<<<<");
+            }
+          }
+          else {
+            array_push($debug_output, "!" . $exclude . " : " . $path . " - PASSED");
+          }
+        }
+      }
+      else {
+        // - Set the visibility of the block:
+        if (block_exclude_pages_check_excluded_path($exclude, $path, $nodeid)) {
+          $config['pages'] = $exclude;
+          $config['context_mapping'] = [];
+          if (isset($conditions['request_path']['negate']) && $conditions['request_path']['negate'] == TRUE) {
+            $config['negate'] = FALSE;
+          }
+          else {
+            $config['negate'] = TRUE;
+          }
+          $block->setVisibilityConfig('request_path', $config);
+          break;
+        }
+      }
     }
+
+    // - output testing/debug info:
+    if ($debug) {
+      ksm([
+        'block_id' => $block->id(),
+        'block_data' => $block,
+        'debug_output' => $debug_output,
+      ]);
+    }
+
   }
+}
+
+/* -- DEBUGGING VARIABLES ---- */
+
+/**
+ * Doc function returns an array of dummy paths to run a test.
+ */
+function block_exclude_pages_debug_dummy_path() {
+  $dummy = [
+    "/node/28",
+    "/node/2",
+    "/user",
+    "/other",
+    "/user/mc",
+    "/user/jc",
+    "/user/jc/profile",
+    "/user/jc/profile/1",
+    "/user/jc/profile/mc",
+    "/user/jc/settings/mc",
+  ];
+  return $dummy;
+}
+
+/**
+ * Doc function returns a strign witha list of paths to check for testing.
+ */
+function block_exclude_pages_debug_check() {
+  $senario = [
+    'request_path' => [
+      'pages' => "/node/28\n!/node/2\n/user\n/user/*\n!/user/jc\n!/user/jc/*\n!/user/jc/*/mc",
+    ],
+  ];
+  return $senario;
 }

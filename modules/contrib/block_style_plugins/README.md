@@ -1,4 +1,5 @@
-## About
+INTRODUCTION
+------------
 
 Block Style Plugins is an API module that allows a module or theme to add style
 options to block configuration by creating a custom plugin. It is advisable to
@@ -7,12 +8,26 @@ theme.
 
 **Tutorial Video:** [https://youtu.be/Y0t8owlV2_4](https://youtu.be/Y0t8owlV2_4) 
 
+
+REQUIREMENTS
+------------
+
 ### Dependencies
 
-- block
-- block_content
+- drupal:block
+- drupal:block_content
 
-## Basic Setup
+
+INSTALLATION
+------------
+
+Install as you would normally install a contributed Drupal module. Visit:
+https://www.drupal.org/docs/8/extending-drupal-8/installing-drupal-8-modules
+for further information.
+
+
+CONFIGURATION
+-------------
 
 ### Creating plugins and form fields in a Yaml file
 
@@ -71,8 +86,8 @@ proper plugin Annotations such as:
  */
 ```
 
-Override the `BlockStyleBase::buildConfigurationForm` method to extend the `$form` array
-with your own custom style options using the
+Override the `BlockStyleBase::buildConfigurationForm` method to extend the
+`$form` array with your own custom style options using the
 [Form API](https://api.drupal.org/api/drupal/elements).
 
 A `block_styles` fieldset is automatically provided that can be used to do some
@@ -84,7 +99,7 @@ $styles = $this->getConfiguration();
 $form['sample_class'] = array(
   '#type' => 'textfield',
   '#title' => $this->t('Add a custom class to this block'),
-  '#description' => $this->t('Do not add the "period" to the start of the class'),
+  '#description' => $this->t('Do not add the beginning "period" to the class'),
   '#default_value' => $styles['sample_class'],
 );
 ```

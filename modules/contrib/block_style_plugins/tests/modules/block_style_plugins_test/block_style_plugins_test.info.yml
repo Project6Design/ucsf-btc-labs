@@ -2,14 +2,13 @@ name: 'Block Style Plugins - Test'
 type: module
 description: 'Provides sample plugins for tests.'
 package: Testing
-# core: 8.x
+core_version_requirement: ^8.8 || ^9
 dependencies:
-  - block_style_plugins
-  - block
-  - block_content
+  - block_style_plugins:block_style_plugins
+  - drupal:block
+  - drupal:block_content
 
-# Information added by Drupal.org packaging script on 2018-12-05
-version: '8.x-1.3'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2020-06-05
+version: '8.x-1.4'
 project: 'block_style_plugins'
-datestamp: 1544051885
+datestamp: 1591378646

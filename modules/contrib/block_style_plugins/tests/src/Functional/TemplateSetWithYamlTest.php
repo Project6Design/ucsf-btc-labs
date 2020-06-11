@@ -27,6 +27,11 @@ class TemplateSetWithYamlTest extends BrowserTestBase {
   protected $adminUser;
 
   /**
+   * Default Theme.
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp() {
@@ -55,7 +60,6 @@ class TemplateSetWithYamlTest extends BrowserTestBase {
 
     // Go to the block instance configuration page.
     $this->drupalGet('admin/structure/block/manage/templatetest');
-    $assert->statusCodeEquals(200);
 
     // Check that the style options are available.
     $assert->responseContains('Template Title');
@@ -69,7 +73,6 @@ class TemplateSetWithYamlTest extends BrowserTestBase {
 
     // Go to the home page.
     $this->drupalGet('<front>');
-    $assert->statusCodeEquals(200);
 
     // Assert that the block was placed and has the template applied.
     $assert->responseContains('This is a custom template');

@@ -16,6 +16,7 @@ use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Image\ImageFactory;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Drupal\Core\Render\RendererInterface;
 
 /**
  * Class FocalPointPreviewController.
@@ -46,6 +47,13 @@ class FocalPointPreviewController extends ControllerBase {
   protected $fileStorage;
 
   /**
+   * The renderer service.
+   *
+   * @var Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
    * {@inheritdoc}
    *
    * @param \Drupal\Core\Image\ImageFactory $image_factory
@@ -53,10 +61,11 @@ class FocalPointPreviewController extends ControllerBase {
    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
    *   The request parameter.
    */
-  public function __construct(ImageFactory $image_factory, RequestStack $request_stack) {
+  public function __construct(ImageFactory $image_factory, RequestStack $request_stack, RendererInterface $renderer) {
     $this->imageFactory = $image_factory;
     $this->request = $request_stack->getCurrentRequest();
     $this->fileStorage = $this->entityTypeManager()->getStorage('file');
+    $this->renderer = $renderer;
   }
 
   /**
@@ -65,7 +74,8 @@ class FocalPointPreviewController extends ControllerBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('image.factory'),
-      $container->get('request_stack')
+      $container->get('request_stack'),
+      $container->get('renderer')
     );
   }
 
@@ -141,7 +151,7 @@ class FocalPointPreviewController extends ControllerBase {
       '#derivative_image_note' => $derivative_image_note,
     ];
 
-    $html = render($output);
+    $html = $this->renderer->renderPlain($output);
 
     $options = [
       'dialogClass' => 'popup-dialog-class',

@@ -10,7 +10,9 @@
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\file\FileInterface;
 
 /**
  * Implements hook_help().
@@ -66,6 +68,9 @@ function focal_point_entity_update(EntityInterface $entity) {
         foreach ($entity->{$field->getName()} as $item) {
           /** @var \Drupal\focal_point\FocalPointManagerInterface $focal_point_manager */
           $focal_point_manager = \Drupal::service('focal_point.manager');
+          if (!$item->entity instanceof FileInterface) {
+            continue;
+          }
           $crop = $focal_point_manager->getCropEntity($item->entity, $crop_type);
 
           $focal_point = NULL;
@@ -76,6 +81,14 @@ function focal_point_entity_update(EntityInterface $entity) {
           // Use the focal point set over the UI.
           if (!empty($item->focal_point)) {
             $focal_point = $item->focal_point;
+
+            // Keep the original focal_point value to be able to use it during hooks.
+            if (!$crop->get('x')->isEmpty() && !$crop->get('y')->isEmpty()) {
+              $x = $crop->get('x')->value;
+              $y = $crop->get('y')->value;
+              $focal_point_original = $focal_point_manager->absoluteToRelative($x, $y, $item->width, $item->height);
+              $entity->{$field->getName()}->focal_point_original = join(',', $focal_point_original);
+            }
           }
           if ($focal_point) {
             list($x, $y) = explode(',', $focal_point);

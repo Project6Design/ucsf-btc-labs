@@ -101,7 +101,7 @@ abstract class BlockStyleBase extends PluginBase implements BlockStyleInterface,
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    // TODO: replace deprecated formElements() with an empty array before 8.x-2.x.
+    // TODO: replace deprecated formElements() with empty array before 8.x-2.x.
     return $this->formElements($form, $form_state);
   }
 
@@ -184,8 +184,13 @@ abstract class BlockStyleBase extends PluginBase implements BlockStyleInterface,
 
   /**
    * {@inheritdoc}
+   *
+   * @deprecated in 8.x-1.4 and will be removed before 8.x-2.x.
+   *   Instead, you should just use buildConfigurationForm().
    */
   public function formAlter(array $form, FormStateInterface $form_state) {
+    @trigger_error('::formAlter() is deprecated in 8.x-1.4 and will be removed before 8.x-2.x. Instead, you should just use buildConfigurationForm(). See https://www.drupal.org/project/block_style_plugins/issues/3020109.', E_USER_DEPRECATED);
+
     return $form;
   }
 
@@ -198,8 +203,13 @@ abstract class BlockStyleBase extends PluginBase implements BlockStyleInterface,
    *   The form definition array for the full block configuration form.
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
+   *
+   * @deprecated in 8.x-1.4 and will be removed before 8.x-2.x.
+   *   Instead, you should just use validateConfigurationForm().
    */
   public function validateForm(array $form, FormStateInterface $form_state) {
+    @trigger_error('::validateForm() is deprecated in 8.x-1.4 and will be removed before 8.x-2.x. Instead, you should just use validateConfigurationForm(). See https://www.drupal.org/project/block_style_plugins/issues/3020109.', E_USER_DEPRECATED);
+
     // Allow plugins to manipulate the validateForm.
     $subform_state = SubformState::createForSubform($form['third_party_settings']['block_style_plugins'][$this->pluginId], $form, $form_state);
     $this->validateConfigurationForm($form['third_party_settings']['block_style_plugins'][$this->pluginId], $subform_state);
@@ -207,8 +217,13 @@ abstract class BlockStyleBase extends PluginBase implements BlockStyleInterface,
 
   /**
    * {@inheritdoc}
+   *
+   * @deprecated in 8.x-1.4 and will be removed before 8.x-2.x.
+   *   Instead, you should just use submitConfigurationForm().
    */
   public function submitForm($form, FormStateInterface $form_state) {
+    @trigger_error('::submitForm() is deprecated in 8.x-1.4 and will be removed before 8.x-2.x. Instead, you should just use submitConfigurationForm(). See https://www.drupal.org/project/block_style_plugins/issues/3020109.', E_USER_DEPRECATED);
+
     // Allow plugins to manipulate the submitForm.
     $subform_state = SubformState::createForSubform($form['third_party_settings']['block_style_plugins'][$this->pluginId], $form, $form_state);
     $this->submitConfigurationForm($form['third_party_settings']['block_style_plugins'][$this->pluginId], $subform_state);
@@ -256,7 +271,8 @@ abstract class BlockStyleBase extends PluginBase implements BlockStyleInterface,
    * {@inheritdoc}
    */
   public function setConfiguration(array $configuration) {
-    // TODO: Replace the deprecated defaultStyles() with defaultConfiguration() before 8.x-2.x.
+    // TODO: Replace the deprecated defaultStyles() with defaultConfiguration()
+    // before 8.x-2.x.
     $this->configuration = NestedArray::mergeDeep(
       $this->defaultStyles(),
       $configuration
@@ -264,13 +280,6 @@ abstract class BlockStyleBase extends PluginBase implements BlockStyleInterface,
     // Set the deprecated $styles property.
     // TODO: Remove the deprecated $styles setting before 8.x-2.x.
     $this->styles = $this->configuration;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function calculateDependencies() {
-    return [];
   }
 
   /**

@@ -1,0 +1,11 @@
+block.settings.block_style_plugins:
+  type: sequence
+  label: 'Style settings for a block style plugin'
+  sequence:
+    type: ignore
+
+block.block.*.third_party.block_style_plugins:
+  type: sequence
+  label: 'Block Style Plugins third party settings'
+  sequence:
+    type: block.settings.block_style_plugins

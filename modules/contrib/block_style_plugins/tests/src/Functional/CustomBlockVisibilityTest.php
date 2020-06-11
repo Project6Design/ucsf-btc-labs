@@ -28,6 +28,11 @@ class CustomBlockVisibilityTest extends BlockContentTestBase {
   ];
 
   /**
+   * Default Theme.
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Test visibility of styles on custom block types.
    *
    * Test that the correct styles have been included or excluded from custom
@@ -50,7 +55,7 @@ class CustomBlockVisibilityTest extends BlockContentTestBase {
     $this->drupalGet('admin/structure/block/block-content/types');
     $this->drupalGet('admin/structure/block/block-content');
     $this->drupalGet('block/' . $block->id());
-    $assert->statusCodeEquals(200);
+    $assert->pageTextContains('Block description');
 
     // Go to the block instance configuration page.
     $this->drupalGet('admin/structure/block/manage/customblocktest');

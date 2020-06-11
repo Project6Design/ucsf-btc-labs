@@ -81,7 +81,7 @@ function block_style_plugins_themes_uninstalled(array $themes) {
   $clear_cache = FALSE;
 
   foreach ($themes as $theme_name) {
-    foreach ($style_plugins as $name => $plugin) {
+    foreach ($style_plugins as $plugin) {
       if ($plugin['provider'] == $theme_name) {
         $clear_cache = TRUE;
         break;
