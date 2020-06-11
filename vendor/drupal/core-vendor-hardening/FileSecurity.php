@@ -8,6 +8,8 @@ namespace Drupal\Composer\Plugin\VendorHardening;
  * IMPORTANT: This file is duplicated at /lib/Drupal/Component/FileSecurity.
  * If any change is made here, the same change should be made in the duplicate.
  * See https://www.drupal.org/project/drupal/issues/3079481.
+ *
+ * @internal
  */
 class FileSecurity {
 
@@ -72,9 +74,6 @@ SetHandler Drupal_Security_Do_Not_Remove_See_SA_2006_006
 </Files>
 
 # If we know how to do it safely, disable the PHP engine entirely.
-<IfModule mod_php5.c>
-  php_flag engine off
-</IfModule>
 <IfModule mod_php7.c>
   php_flag engine off
 </IfModule>

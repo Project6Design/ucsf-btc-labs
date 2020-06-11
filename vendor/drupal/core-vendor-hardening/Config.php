@@ -9,6 +9,8 @@ use Composer\Package\RootPackageInterface;
  *
  * Default configuration is merged with the root package's
  * extra:drupal-core-vendor-hardening configuration.
+ *
+ * @internal
  */
 class Config {
 
@@ -94,9 +96,6 @@ class Config {
     'symfony-cmf/routing' => ['Test', 'Tests'],
     'theseer/tokenizer' => ['tests'],
     'twig/twig' => ['doc', 'ext', 'test', 'tests'],
-    'zendframework/zend-escaper' => ['doc'],
-    'zendframework/zend-feed' => ['doc'],
-    'zendframework/zend-stdlib' => ['doc'],
   ];
 
   /**
