@@ -40,7 +40,7 @@ trait WebformBrowserTestTrait {
    */
   protected function placeWebformBlocks($module_name) {
     $config_directory = drupal_get_path('module', 'webform') . '/tests/modules/' . $module_name . '/config';
-    $config_files = file_scan_directory($config_directory, '/block\..*/');
+    $config_files = \Drupal::service('file_system')->scanDirectory($config_directory, '/block\..*/');
     foreach ($config_files as $config_file) {
       $data = Yaml::decode(file_get_contents($config_file->uri));
       $plugin_id = $data['plugin'];
@@ -214,6 +214,21 @@ trait WebformBrowserTestTrait {
     ]);
     $webform->save();
     return $webform;
+  }
+
+  /**
+   * Reload a test webform.
+   *
+   * @param string $id
+   *   Webform id.
+   *
+   * @return \Drupal\webform\WebformInterface|null
+   *   A webform.
+   */
+  protected function reloadWebform($id) {
+    $storage = \Drupal::entityTypeManager()->getStorage('webform');
+    $storage->resetCache([$id]);
+    return $storage->load($id);
   }
 
   /****************************************************************************/
@@ -410,7 +425,7 @@ trait WebformBrowserTestTrait {
     if (!$message) {
       $message = new FormattableMarkup('Found @selector', ['@selector' => $selector]);
     }
-    $this->assertTrue(!empty($element), $message);
+    $this->assertNotEmpty($element, $message);
   }
 
   /**
@@ -418,7 +433,7 @@ trait WebformBrowserTestTrait {
    */
   protected function assertNoCssSelect($selector, $message = '') {
     $element = $this->cssSelect($selector);
-    $this->assertTrue(empty($element), $message);
+    $this->assertEmpty($element, $message);
   }
 
   /****************************************************************************/

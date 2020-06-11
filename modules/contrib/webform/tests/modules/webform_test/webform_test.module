@@ -9,6 +9,28 @@ use Drupal\Core\Serialization\Yaml;
 use Drupal\Core\Url;
 use Drupal\webform\Utility\WebformElementHelper;
 
+/**
+ * Test element callback that should be ignored.
+ *
+ * @param array $element
+ *   An element.
+ *
+ * @return array
+ *   An element.
+ */
+function webform_test_ignored_element_callback($element = NULL) {
+  // Display error message when this callback is executed.
+  if (is_array($element) && isset($element['#title'])) {
+    $message = t('Callback not ignored for @title', ['@title' => $element['#title']]);
+    \Drupal::messenger()->addError($message);
+    return $element;
+  }
+  else {
+    $message = t('Callback not ignored');
+    \Drupal::messenger()->addError($message);
+  }
+}
+
 /******************************************************************************/
 // Generate elements.
 /******************************************************************************/

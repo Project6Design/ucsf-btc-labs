@@ -5,7 +5,7 @@ namespace Drupal\Tests\webform\Functional\Element;
 /**
  * Tests for webform CodeMirror element.
  *
- * @group Webform
+ * @group webform
  */
 class WebformElementCodeMirrorTest extends WebformElementBrowserTestBase {
 
@@ -44,25 +44,28 @@ class WebformElementCodeMirrorTest extends WebformElementBrowserTestBase {
     $this->assertRaw('<label for="edit-yaml-basic">yaml_basic</label>');
     $this->assertRaw('<textarea data-drupal-selector="edit-yaml-basic" class="js-webform-codemirror webform-codemirror yaml form-textarea resize-vertical" data-webform-codemirror-mode="text/x-yaml" id="edit-yaml-basic" name="yaml_basic" rows="5" cols="60">test: hello</textarea>');
 
-    // Check associative array as the #default_value.
-    $this->drupalPostForm('/webform/test_element_codemirror', [], t('Submit'));
-    $this->assertRaw('yaml_array:
+    // Check default value decoding.
+    $this->drupalPostForm('/webform/test_element_codemirror', [], 'Submit');
+    $this->assertRaw("yaml_basic: 'test: hello'
+yaml_array:
   one: One
   two: Two
-  three: Three');
+  three: Three
+yaml_decode_value:
+  test: hello");
 
     // Check invalid YAML.
     $edit = [
       'yaml_basic' => "'not: valid",
     ];
-    $this->drupalPostForm('/webform/test_element_codemirror', $edit, t('Submit'));
+    $this->drupalPostForm('/webform/test_element_codemirror', $edit, 'Submit');
     $this->assertRaw('<em class="placeholder">yaml_basic</em> is not valid.');
 
     // Check valid YAML.
     $edit = [
       'yaml_basic' => 'is: valid',
     ];
-    $this->drupalPostForm('/webform/test_element_codemirror', $edit, t('Submit'));
+    $this->drupalPostForm('/webform/test_element_codemirror', $edit, 'Submit');
     $this->assertNoRaw('<em class="placeholder">yaml_basic</em> is not valid.');
 
     /**************************************************************************/
@@ -78,7 +81,7 @@ class WebformElementCodeMirrorTest extends WebformElementBrowserTestBase {
     $edit = [
       'html_basic' => "<b>bold</bold>",
     ];
-    $this->drupalPostForm('/webform/test_element_codemirror', $edit, t('Submit'));
+    $this->drupalPostForm('/webform/test_element_codemirror', $edit, 'Submit');
     $this->assertRaw('<em class="placeholder">html_basic</em> is not valid.');
     $this->assertRaw('expected &#039;&gt;&#039;');
 
@@ -86,7 +89,7 @@ class WebformElementCodeMirrorTest extends WebformElementBrowserTestBase {
     $edit = [
       'html_basic' => '<b>bold</b>',
     ];
-    $this->drupalPostForm('/webform/test_element_codemirror', $edit, t('Submit'));
+    $this->drupalPostForm('/webform/test_element_codemirror', $edit, 'Submit');
     $this->assertNoRaw('<em class="placeholder">html_basic</em> is not valid.');
     $this->assertNoRaw('expected &#039;&gt;&#039;');
 
@@ -116,14 +119,14 @@ class WebformElementCodeMirrorTest extends WebformElementBrowserTestBase {
     $edit = [
       'twig_basic' => 'Can edit Twig template.',
     ];
-    $this->drupalPostForm('/webform/test_element_codemirror', $edit, t('Submit'));
+    $this->drupalPostForm('/webform/test_element_codemirror', $edit, 'Submit');
     $this->assertRaw('Can edit Twig template.');
 
     // Check invalid Twig syntax.
     $edit = [
       'twig_basic' => "{{ value ",
     ];
-    $this->drupalPostForm('/webform/test_element_codemirror', $edit, t('Submit'));
+    $this->drupalPostForm('/webform/test_element_codemirror', $edit, 'Submit');
     $this->assertRaw('<em class="placeholder">twig_basic</em> is not valid.');
     $this->assertRaw('Unclosed &quot;variable&quot; in');
   }

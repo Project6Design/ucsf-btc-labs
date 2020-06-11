@@ -53,6 +53,13 @@ elements: |
       one: One
       two: Two
       three: Three
+  yaml_decode_value:
+    '#type': webform_codemirror
+    '#mode': yaml
+    '#title': yaml_decode_value
+    '#decode_value': true
+    '#description': 'Always decode the value'
+    '#default_value': 'test: hello'
   html_basic:
     '#type': webform_codemirror
     '#mode': html
@@ -136,6 +143,11 @@ settings:
   form_access_denied_message: ''
   form_access_denied_attributes: {  }
   form_file_limit: ''
+  share: false
+  share_node: false
+  share_theme_name: ''
+  share_title: true
+  share_page_body_attributes: {  }
   submission_label: ''
   submission_log: false
   submission_views: {  }
@@ -208,6 +220,7 @@ settings:
   purge_days: null
   results_disabled: true
   results_disabled_ignore: false
+  results_customize: false
   token_view: false
   token_update: false
 access:
@@ -266,3 +279,4 @@ handlers:
     conditions: {  }
     weight: 1
     settings: {  }
+variants: {  }

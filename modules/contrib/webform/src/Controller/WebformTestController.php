@@ -26,7 +26,7 @@ class WebformTestController extends ControllerBase implements ContainerInjection
   protected $messenger;
 
   /**
-   * Webform request handler.
+   * The webform request handler.
    *
    * @var \Drupal\webform\WebformRequestInterface
    */
@@ -126,8 +126,6 @@ class WebformTestController extends ControllerBase implements ContainerInjection
       $values['entity_id'] = $source_entity->id();
     }
 
-    // Generate date.
-    $values['data'] = $this->generate->getData($webform);
     return $webform->getSubmissionForm($values, 'test');
   }
 

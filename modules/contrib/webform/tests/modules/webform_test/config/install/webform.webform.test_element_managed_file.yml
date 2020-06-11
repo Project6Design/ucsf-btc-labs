@@ -64,6 +64,10 @@ elements: |
     '#file_extensions': txt
     '#file_placeholder': 'This is the multiple file upload placeholder'
     '#multiple': true
+  managed_file_extensions:
+    '#type': managed_file
+    '#title': managed_file_extensions
+    '#file_extensions': 'txt, text'
   
 css: ''
 javascript: ''
@@ -106,6 +110,11 @@ settings:
   form_access_denied_message: ''
   form_access_denied_attributes: {  }
   form_file_limit: ''
+  share: false
+  share_node: false
+  share_theme_name: ''
+  share_title: true
+  share_page_body_attributes: {  }
   submission_label: ''
   submission_log: false
   submission_views: {  }
@@ -178,6 +187,7 @@ settings:
   purge_days: null
   results_disabled: false
   results_disabled_ignore: false
+  results_customize: false
   token_view: false
   token_update: false
 access:
@@ -228,3 +238,4 @@ access:
     users: {  }
     permissions: {  }
 handlers: {  }
+variants: {  }

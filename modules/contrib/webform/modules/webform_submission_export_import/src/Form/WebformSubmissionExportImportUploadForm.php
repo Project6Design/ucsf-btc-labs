@@ -31,7 +31,7 @@ class WebformSubmissionExportImportUploadForm extends ConfirmFormBase {
   protected $dateFormatter;
 
   /**
-   * Webform request handler.
+   * The webform request handler.
    *
    * @var \Drupal\webform\WebformRequestInterface
    */
@@ -275,7 +275,7 @@ class WebformSubmissionExportImportUploadForm extends ConfirmFormBase {
 
       case 'url':
         $import_url = $form_state->getValue('import_url');
-        $file_path = tempnam(file_directory_temp(), 'webform_submission_export_import_') . '.csv';
+        $file_path = tempnam(\Drupal::service('file_system')->getTempDirectory(), 'webform_submission_export_import_') . '.csv';
         file_put_contents($file_path, file_get_contents($import_url));
 
         $form_field_name = $this->t('Submission CSV (Comma Separated Values) file');
@@ -321,7 +321,7 @@ class WebformSubmissionExportImportUploadForm extends ConfirmFormBase {
    *   An associative array containing the structure of the form.
    */
   protected function buildConfirmForm(array $form, FormStateInterface $form_state) {
-    $import_options = $form_state->get('import_options');
+    $import_options = $form_state->get('import_options') ?: [];
     $form['#disable_inline_form_errors'] = TRUE;
     $form['#attributes']['class'][] = 'confirmation';
     $form['#theme'] = 'confirm_form';
@@ -344,7 +344,7 @@ class WebformSubmissionExportImportUploadForm extends ConfirmFormBase {
       $this->t('Update submissions that have a corresponding UUID.'),
       $this->t('Create new submissions.'),
     ];
-    if ($import_options['skip_validation']) {
+    if (!empty($import_options['skip_validation'])) {
       $actions[] = $this->t('Form validation will be skipped.');
     }
     else {

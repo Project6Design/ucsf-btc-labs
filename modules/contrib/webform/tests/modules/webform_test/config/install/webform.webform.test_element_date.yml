@@ -77,6 +77,11 @@ elements: |
     '#date_days':
       - '0'
       - '6'
+  date_datepicker_placeholder:
+    '#type': date
+    '#title': date_datepicker_placeholder
+    '#datepicker': true
+    '#placeholder': '{date}'
   
 css: ''
 javascript: ''
@@ -119,6 +124,11 @@ settings:
   form_access_denied_message: ''
   form_access_denied_attributes: {  }
   form_file_limit: ''
+  share: false
+  share_node: false
+  share_theme_name: ''
+  share_title: true
+  share_page_body_attributes: {  }
   submission_label: ''
   submission_log: false
   submission_views: {  }
@@ -191,6 +201,7 @@ settings:
   purge_days: null
   results_disabled: false
   results_disabled_ignore: false
+  results_customize: false
   token_view: false
   token_update: false
 access:
@@ -249,3 +260,4 @@ handlers:
     conditions: {  }
     weight: 1
     settings: {  }
+variants: {  }

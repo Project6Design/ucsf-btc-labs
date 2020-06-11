@@ -3,7 +3,7 @@
  * JavaScript behaviors for Ajax.
  */
 
-(function ($, Drupal) {
+(function ($, Drupal, drupalSettings) {
 
   'use strict';
 
@@ -268,6 +268,13 @@
     // @see https://stackoverflow.com/questions/6944744/javascript-get-portion-of-url-path
     var a = document.createElement('a');
     a.href = response.url;
+    var forceReload = (response.url.match(/\?reload=([^&]+)($|&)/)) ? RegExp.$1 : null;
+    if (forceReload) {
+      response.url = response.url.replace(/\?reload=([^&]+)($|&)/, '');
+      this.redirect(ajax, response, status);
+      return;
+    }
+
     if (a.pathname === window.location.pathname && $('.webform-ajax-refresh').length) {
       updateKey = (response.url.match(/[?|&]update=([^&]+)($|&)/)) ? RegExp.$1 : null;
       addElement = (response.url.match(/[?|&]add_element=([^&]+)($|&)/)) ? RegExp.$1 : null;
@@ -281,8 +288,16 @@
         Drupal.behaviors.webformUnsaved.clear();
       }
 
-
-      this.redirect(ajax, response, status);
+      // For webform embedded in an iframe, open all redirects in the top
+      // of the browser window.
+      // @see \Drupal\webform_share\Controller\WebformShareController::page
+      if (drupalSettings.webform_share &&
+        drupalSettings.webform_share.page) {
+        window.top.location = response.url;
+      }
+      else {
+        this.redirect(ajax, response, status);
+      }
     }
   };
 
@@ -327,26 +342,6 @@
   };
 
   /**
-   * Triggers audio UAs to read the supplied text.
-   *
-   * @param {Drupal.Ajax} [ajax]
-   *   A {@link Drupal.ajax} object.
-   * @param {object} response
-   *   Ajax response.
-   * @param {string} response.text
-   *   A string to be read by the UA.
-   * @param {string} [response.priority='polite']
-   *   A string to indicate the priority of the message. Can be either
-   *   'polite' or 'assertive'.
-   *
-   * @see Drupal.announce
-   */
-  Drupal.AjaxCommands.prototype.webformAnnounce = function (ajax, response) {
-    // Delay the announcement.
-    setTimeout(function () {Drupal.announce(response.text, response.priority);}, 200);
-  };
-
-  /**
    * Triggers confirm page reload.
    *
    * @param {Drupal.Ajax} [ajax]
@@ -387,4 +382,4 @@
     return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
   }
 
-})(jQuery, Drupal);
+})(jQuery, Drupal, drupalSettings);

@@ -2,14 +2,13 @@
 
 namespace Drupal\Tests\webform\Functional;
 
-use Drupal\Component\Utility\Html;
 use Drupal\webform\Entity\Webform;
 use Drupal\webform\Entity\WebformSubmission;
 
 /**
  * Tests for updating webform submission using tokenized URL.
  *
- * @group Webform
+ * @group webform
  */
 class WebformSubmissionTokenUpdateTest extends WebformBrowserTestBase {
 

@@ -21,6 +21,7 @@
         "drupal/core-project-message": "^8.8",
         "drupal/core-recommended": "^8.8",
         "drupal/core-vendor-hardening": "^8.8",
+        "drupal/webform": "^5.16",
         "embed/embed": "^3.4"
     },
     "conflict": {

@@ -2,6 +2,7 @@
 
 namespace Drupal\webform;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
@@ -58,21 +59,21 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
   protected $state;
 
   /**
-   * Webform submission storage.
+   * The webform submission storage.
    *
    * @var \Drupal\webform\WebformSubmissionStorageInterface
    */
   protected $submissionStorage;
 
   /**
-   * User storage.
+   * The user storage.
    *
    * @var \Drupal\user\UserStorageInterface
    */
   protected $userStorage;
 
   /**
-   * Role storage.
+   * The role storage.
    *
    * @var \Drupal\user\RoleStorageInterface
    */
@@ -91,18 +92,24 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
    *   The current user.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The configuration factory.
    */
-  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, RequestStack $request_stack, AccountInterface $current_user, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(EntityTypeInterface $entity_type, EntityStorageInterface $storage, RequestStack $request_stack, AccountInterface $current_user, EntityTypeManagerInterface $entity_type_manager, ConfigFactoryInterface $config_factory = NULL) {
     parent::__construct($entity_type, $storage);
     $this->request = $request_stack->getCurrentRequest();
     $this->currentUser = $current_user;
 
-    $this->keys = $this->request->query->get('search');
-    $this->category = $this->request->query->get('category');
-    $this->state = $this->request->query->get('state');
+    $query = $this->request->query;
+    $config = $config_factory->get('webform.settings');
+    $this->keys = ($query->has('search')) ? $query->get('search') : '';
+    $this->category = ($query->has('category')) ? $query->get('category') : $config->get('form.filter_category');
+    $this->state = ($query->has('state')) ? $query->get('state') : $config->get('form.filter_state');
+
     $this->submissionStorage = $entity_type_manager->getStorage('webform_submission');
     $this->userStorage = $entity_type_manager->getStorage('user');
     $this->roleStorage = $entity_type_manager->getStorage('user_role');
+
   }
 
   /**
@@ -114,7 +121,8 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
       $container->get('entity_type.manager')->getStorage($entity_type->id()),
       $container->get('request_stack'),
       $container->get('current_user'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('config.factory')
     );
   }
 
@@ -373,24 +381,35 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
       $operations['edit'] = [
         'title' => $this->t('Build'),
         'url' => $this->ensureDestination($entity->toUrl('edit-form')),
+        'weight' => 0,
       ];
     }
     if ($entity->access('submission_page')) {
       $operations['view'] = [
         'title' => $this->t('View'),
         'url' => $entity->toUrl('canonical'),
+        'weight' => 10,
+      ];
+    }
+    if ($entity->access('test')) {
+      $operations['test'] = [
+        'title' => $this->t('Test'),
+        'url' => $entity->toUrl('canonical'),
+        'weight' => 20,
       ];
     }
     if ($entity->access('submission_view_any') && !$entity->isResultsDisabled()) {
       $operations['results'] = [
         'title' => $this->t('Results'),
         'url' => $entity->toUrl('results-submissions'),
+        'weight' => 30,
       ];
     }
     if ($entity->access('update')) {
       $operations['settings'] = [
         'title' => $this->t('Settings'),
         'url' => $entity->toUrl('settings'),
+        'weight' => 40,
       ];
     }
     if ($entity->access('duplicate')) {
@@ -398,6 +417,7 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
         'title' => $this->t('Duplicate'),
         'url' => $entity->toUrl('duplicate-form'),
         'attributes' => WebformDialogHelper::getModalDialogAttributes(WebformDialogHelper::DIALOG_NARROW),
+        'weight' => 90,
       ];
     }
     if ($entity->access('delete') && $entity->hasLinkTemplate('delete-form')) {
@@ -405,6 +425,7 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
         'title' => $this->t('Delete'),
         'url' => $this->ensureDestination($entity->toUrl('delete-form')),
         'attributes' => WebformDialogHelper::getModalDialogAttributes(WebformDialogHelper::DIALOG_NARROW),
+        'weight' => 100,
       ];
     }
     return $operations;
@@ -438,7 +459,7 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
       $total = count($entity_ids);
       $limit = $this->getLimit();
       $start = ($page * $limit);
-      pager_default_initialize($total, $limit);
+      \Drupal::service('pager.manager')->createPager($total, $limit);
       return array_slice($entity_ids, $start, $limit, TRUE);
     }
     else {
@@ -600,7 +621,7 @@ class WebformEntityListBuilder extends ConfigEntityListBuilder {
    * {@inheritdoc}
    */
   protected function ensureDestination(Url $url) {
-    // Never add add a destination to operation URLs.
+    // Never add a destination to operation URLs.
     return $url;
   }
 

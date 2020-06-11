@@ -249,6 +249,21 @@ class WebformSubmission extends ContentEntityBase implements WebformSubmissionIn
   /**
    * {@inheritdoc}
    */
+  public function getLangcode() {
+    return $this->get('langcode')->value;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setLangcode($langcode) {
+    $this->set('langcode', $langcode);
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getCreatedTime() {
     if (isset($this->get('created')->value)) {
       return $this->get('created')->value;
@@ -680,7 +695,10 @@ class WebformSubmission extends ContentEntityBase implements WebformSubmissionIn
    */
   protected function urlRouteParameters($rel) {
     $uri_route_parameters = parent::urlRouteParameters($rel);
-    $uri_route_parameters['webform'] = $this->getWebform()->id();
+    $webform = $this->getWebform();
+    if ($webform) {
+      $uri_route_parameters['webform'] = $webform->id();
+    }
     return $uri_route_parameters;
   }
 
