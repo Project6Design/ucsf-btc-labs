@@ -326,7 +326,7 @@ abstract class BlockStyleBase extends PluginBase implements BlockStyleInterface,
 
     $block_plugin_id = $this->blockPlugin->getPluginId();
 
-    if (!empty($list) && (in_array($block_plugin_id, $list) || in_array($this->blockContentBundle, $list))) {
+    if (!empty($list) && (in_array($block_plugin_id, $list) || $this->baseIdMatch($block_plugin_id, $list) || in_array($this->blockContentBundle, $list))) {
       return TRUE;
     }
     return FALSE;
@@ -344,7 +344,27 @@ abstract class BlockStyleBase extends PluginBase implements BlockStyleInterface,
 
     $block_plugin_id = $this->blockPlugin->getPluginId();
 
-    if (empty($list) || (in_array($block_plugin_id, $list) || in_array($this->blockContentBundle, $list))) {
+    if (empty($list) || (in_array($block_plugin_id, $list) || $this->baseIdMatch($block_plugin_id, $list) || in_array($this->blockContentBundle, $list))) {
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Determine if a plugin ID matches a Base ID in a list of include/exclude.
+   *
+   * @param string $plugin_id
+   *   Plugin ID of a block.
+   * @param array $list
+   *   List of include/exclude blocks.
+   *
+   * @return bool
+   *   True if a plugin matches a base ID.
+   */
+  protected function baseIdMatch($plugin_id, array $list) {
+    // Now check to see if this ID is a derivative on something in the list.
+    preg_match('/^([^:]+):?/', $plugin_id, $matches);
+    if ($matches && in_array($matches[1] . ':*', $list)) {
       return TRUE;
     }
     return FALSE;

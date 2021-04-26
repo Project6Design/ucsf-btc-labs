@@ -39,7 +39,7 @@ class ResizeTest extends KernelTestBasePlugin {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'config',
     'file',
@@ -50,7 +50,7 @@ class ResizeTest extends KernelTestBasePlugin {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp() : void {
     parent::setUp();
     $this->imceFM = $this->getImceFM();
     $this->getTestFileUri();
@@ -141,7 +141,7 @@ class ResizeTest extends KernelTestBasePlugin {
    */
   public function testPermissiomInfo() {
     $permissionInfo = $this->resize->permissionInfo();
-    $this->assertTrue(is_array($permissionInfo));
+    $this->assertIsArray($permissionInfo);
     $this->assertTrue(in_array($this->t('Resize images'), $permissionInfo));
   }
 
@@ -152,8 +152,8 @@ class ResizeTest extends KernelTestBasePlugin {
     $this->setParameterCopy(1);
     $this->resize->opResize($this->imceFM);
     list($width, $height) = getimagesize(PublicStream::basePath() . '/ciandt_0.jpg');
-    $this->assertEqual($width, 315);
-    $this->assertEqual($height, 210);
+    $this->assertEquals($width, 315);
+    $this->assertEquals($height, 210);
   }
 
   /**
@@ -163,8 +163,8 @@ class ResizeTest extends KernelTestBasePlugin {
     $this->setParameterCopy(0);
     $this->resize->opResize($this->imceFM);
     list($width, $height) = getimagesize(PublicStream::basePath() . '/ciandt.jpg');
-    $this->assertEqual($width, 315);
-    $this->assertEqual($height, 210);
+    $this->assertEquals($width, 315);
+    $this->assertEquals($height, 210);
   }
 
   /**
@@ -172,7 +172,7 @@ class ResizeTest extends KernelTestBasePlugin {
    */
   public function testMessages() {
     $messages = $this->imceFM->getMessages();
-    $this->assertTrue(is_array($messages));
+    $this->assertIsArray($messages);
     $this->assertEquals([], $messages);
   }
 

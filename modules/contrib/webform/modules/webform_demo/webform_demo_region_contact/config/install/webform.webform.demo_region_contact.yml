@@ -1,3 +1,4 @@
+uuid: null
 langcode: en
 status: open
 dependencies:
@@ -51,7 +52,7 @@ settings:
   page: true
   page_submit_path: ''
   page_confirm_path: ''
-  page_admin_theme: false
+  page_theme_name: ''
   form_title: source_entity_webform
   form_submit_once: false
   form_exception_message: ''
@@ -111,11 +112,19 @@ settings:
   wizard_progress_percentage: false
   wizard_progress_link: false
   wizard_progress_states: false
+  wizard_auto_forward: true
+  wizard_auto_forward_hide_next_button: false
+  wizard_keyboard: true
   wizard_start_label: ''
   wizard_preview_link: false
   wizard_confirmation: true
   wizard_confirmation_label: ''
   wizard_track: ''
+  wizard_prev_button_label: ''
+  wizard_next_button_label: ''
+  wizard_toggle: false
+  wizard_toggle_show_label: ''
+  wizard_toggle_hide_label: ''
   preview: 0
   preview_label: ''
   preview_title: ''
@@ -161,6 +170,8 @@ settings:
   results_customize: false
   token_view: false
   token_update: false
+  token_delete: false
+  serial_disabled: false
 access:
   create:
     roles:
@@ -212,6 +223,7 @@ handlers:
   employee_email:
     id: email
     label: 'Employee: Email'
+    notes: ''
     handler_id: employee_email
     status: true
     conditions: {  }
@@ -248,6 +260,7 @@ handlers:
   manager_email:
     id: email
     label: 'Manager: Email'
+    notes: ''
     handler_id: manager_email
     status: true
     conditions: {  }
@@ -284,6 +297,7 @@ handlers:
   manager_admins_email:
     id: email
     label: 'Manager: Admins: Email'
+    notes: ''
     handler_id: manager_admins_email
     status: true
     conditions: {  }
@@ -320,6 +334,7 @@ handlers:
   manager_users_email:
     id: email
     label: 'Manager: Users: Email'
+    notes: ''
     handler_id: manager_users_email
     status: true
     conditions: {  }
@@ -356,6 +371,7 @@ handlers:
   manager_email_addresses_email:
     id: email
     label: 'Manager: Email addresses: Email'
+    notes: ''
     handler_id: manager_email_addresses_email
     status: true
     conditions: {  }
@@ -392,6 +408,7 @@ handlers:
   everyone_email:
     id: email
     label: 'Everyone: Email'
+    notes: ''
     handler_id: everyone_email
     status: true
     conditions: {  }

@@ -1,6 +1,6 @@
 /**
  * @file
- * JavaScript behaviors for webform wizard.
+ * JavaScript behaviors for webform wizard pages.
  */
 
 (function ($, Drupal) {
@@ -36,14 +36,15 @@
               .attr({
                 'role': 'link',
                 'title': title,
-                'aria-label': title
+                'aria-label': title,
+                'tabindex': '0'
               })
-              .click(function () {
-                $button.click();
+              .on('click', function () {
+                $button.trigger('click');
               })
-              .keydown(function (event) {
+              .on('keydown', function (event) {
                 if (event.which === 13) {
-                  $button.click();
+                  $button.trigger('click');
                 }
               });
             // Only allow the marker to be tabbable.

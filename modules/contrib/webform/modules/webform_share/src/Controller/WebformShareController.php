@@ -137,8 +137,17 @@ class WebformShareController extends ControllerBase {
     ];
     $iframe = $this->renderer->renderPlain($build);
 
-    $content = 'document.write(' . json_encode($iframe) . ');';
-    return new CacheableResponse($content, 200, ['Content-Type' => 'text/javascript']);
+    $iframe_script = json_encode($iframe);
+    $iframe_script = str_replace('src=\\"\/\/', 'src=\\"' . $request->getScheme() . ':\/\/', $iframe_script);
+    $content = 'document.write(' . $iframe_script . ');';
+    $response = new CacheableResponse($content, 200, ['Content-Type' => 'text/javascript']);
+
+    $response->addCacheableDependency($webform);
+    if ($source_entity) {
+      $response->addCacheableDependency($source_entity);
+    }
+
+    return $response;
   }
 
   /**

@@ -31,7 +31,7 @@ class ImceTest extends KernelTestBase {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'system',
     'imce',
@@ -40,7 +40,7 @@ class ImceTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp() : void {
     parent::setUp();
     $this->imce = new Imce([], "text_textarea_with_summary", $this->getPluginDefinations());
   }
@@ -50,8 +50,9 @@ class ImceTest extends KernelTestBase {
    */
   public function testGetDependencies() {
     $dependencies = $this->imce->getDependencies($this->createMock(Editor::class));
-    $this->assertTrue(is_array($dependencies));
-    $this->assertArraySubset(['drupalimage', 'drupalimagecaption'], $dependencies);;
+    $this->assertIsArray($dependencies);
+    $this->assertTrue(in_array('drupalimage', $dependencies));
+    $this->assertTrue(in_array('drupalimagecaption', $dependencies));
   }
 
   /**
@@ -78,7 +79,7 @@ class ImceTest extends KernelTestBase {
    */
   public function testGetButtons() {
     $buttons = $this->imce->getButtons();
-    $this->assertTrue(is_array($buttons));
+    $this->assertIsArray($buttons);
   }
 
   /**
@@ -86,7 +87,7 @@ class ImceTest extends KernelTestBase {
    */
   public function testGetFile() {
     $pathFile = $this->imce->getFile();
-    $this->assertTrue(is_string($pathFile));
+    $this->assertIsString($pathFile);
   }
 
   /**
@@ -94,7 +95,7 @@ class ImceTest extends KernelTestBase {
    */
   public function testGetConfig() {
     $config = $this->imce->getConfig($this->createMock(Editor::class));
-    $this->assertTrue(is_array($config));
+    $this->assertIsArray($config);
     $this->assertCount(2, $config);
   }
 
@@ -103,7 +104,7 @@ class ImceTest extends KernelTestBase {
    */
   public function testImageIcon() {
     $imageIcon = $this->imce->imageIcon();
-    $this->assertTrue(is_string($imageIcon));
+    $this->assertIsString($imageIcon);
     $this->assertTrue(file_exists($imageIcon));
   }
 
@@ -112,7 +113,7 @@ class ImceTest extends KernelTestBase {
    */
   public function testLinkIcon() {
     $linkIcon = $this->imce->linkIcon();
-    $this->assertTrue(is_string($linkIcon));
+    $this->assertIsString($linkIcon);
     $this->assertTrue(file_exists($linkIcon));
   }
 

@@ -35,7 +35,7 @@ class NewFolderTest extends KernelTestBasePlugin {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'config',
     'file',
@@ -46,7 +46,7 @@ class NewFolderTest extends KernelTestBasePlugin {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp() : void {
     parent::setUp();
 
     $this->imceFM = $this->getImceFM();
@@ -105,7 +105,7 @@ class NewFolderTest extends KernelTestBasePlugin {
    */
   public function testPermissiomInfo() {
     $permissionInfo = $this->newFolder->permissionInfo();
-    $this->assertTrue(is_array($permissionInfo));
+    $this->assertIsArray($permissionInfo);
     $this->assertTrue(in_array('Create subfolders', $permissionInfo));
   }
 
@@ -117,7 +117,7 @@ class NewFolderTest extends KernelTestBasePlugin {
       $this->imceFM->activeFolder->getUri(), $this->imceFM->getPost('newfolder')
     );
 
-    $this->assertTrue(is_string($uriFolder));
+    $this->assertIsString($uriFolder);
     $this->assertTrue(file_exists($uriFolder));
   }
 
@@ -126,7 +126,7 @@ class NewFolderTest extends KernelTestBasePlugin {
    */
   public function testMessages() {
     $messages = $this->imceFM->getMessages();
-    $this->assertTrue(is_array($messages));
+    $this->assertIsArray($messages);
     $this->assertEquals([], $messages);
   }
 

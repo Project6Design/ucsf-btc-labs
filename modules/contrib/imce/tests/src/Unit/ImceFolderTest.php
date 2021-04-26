@@ -22,7 +22,7 @@ class ImceFolderTest extends UnitTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp() : void {
     parent::setUp();
     $this->imceFolder = $this->createMock(ImceFolder::class);
   }
@@ -32,7 +32,7 @@ class ImceFolderTest extends UnitTestCase {
    */
   public function testType() {
     $this->assertNotEmpty($this->imceFolder->type);
-    $this->assertTrue(is_string($this->imceFolder->type));
+    $this->assertIsString($this->imceFolder->type);
     $this->assertEquals('folder', $this->imceFolder->type);
   }
 

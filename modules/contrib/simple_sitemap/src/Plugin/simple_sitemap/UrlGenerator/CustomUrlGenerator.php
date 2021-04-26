@@ -113,15 +113,16 @@ class CustomUrlGenerator extends EntityUrlGeneratorBase {
       return FALSE;
     }
 
-    $url_object = Url::fromUserInput($data_set['path'], ['absolute' => TRUE]);
+    $url_object = Url::fromUserInput($data_set['path'])->setAbsolute();
     $path = $url_object->getInternalPath();
 
     $entity = $this->entityHelper->getEntityFromUrlObject($url_object);
 
     $path_data = [
       'url' => $url_object,
-      'lastmod' => method_exists($entity, 'getChangedTime')
-        ? date('c', $entity->getChangedTime()) : NULL,
+      'lastmod' => !empty($entity) && method_exists($entity, 'getChangedTime')
+        ? date('c', $entity->getChangedTime())
+        : NULL,
       'priority' => isset($data_set['priority']) ? $data_set['priority'] : NULL,
       'changefreq' => !empty($data_set['changefreq']) ? $data_set['changefreq'] : NULL,
       'images' => $this->includeImages && !empty($entity)
@@ -133,7 +134,7 @@ class CustomUrlGenerator extends EntityUrlGeneratorBase {
     ];
 
     // Additional info useful in hooks.
-    if (NULL !== $entity) {
+    if (!empty($entity)) {
       $path_data['meta']['entity_info'] = [
         'entity_type' => $entity->getEntityTypeId(),
         'id' => $entity->id(),

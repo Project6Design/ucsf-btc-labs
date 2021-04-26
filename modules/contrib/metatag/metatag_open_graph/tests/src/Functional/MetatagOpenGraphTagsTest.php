@@ -14,6 +14,11 @@ class MetatagOpenGraphTagsTest extends MetatagTagsTestBase {
   /**
    * {@inheritdoc}
    */
+  protected static $modules = ['metatag_open_graph'];
+
+  /**
+   * {@inheritdoc}
+   */
   protected $tags = [
     'article_author',
     'article_expiration_time',
@@ -26,6 +31,9 @@ class MetatagOpenGraphTagsTest extends MetatagTagsTestBase {
     'book_isbn',
     'book_release_date',
     'book_tag',
+    'og_audio',
+    'og_audio_secure_url',
+    'og_audio_type',
     'og_country_name',
     'og_description',
     'og_determiner',
@@ -53,6 +61,17 @@ class MetatagOpenGraphTagsTest extends MetatagTagsTestBase {
     'og_video_type',
     'og_video_width',
     'og_video_duration',
+    'profile_first_name',
+    'profile_gender',
+    'profile_last_name',
+    'profile_username',
+    'video_actor',
+    'video_actor_role',
+    'video_director',
+    'video_release_date',
+    'video_series',
+    'video_tag',
+    'video_writer',
     // @todo Fix these.
     // 'og_image',
     // 'og_image_secure_url',
@@ -73,25 +92,28 @@ class MetatagOpenGraphTagsTest extends MetatagTagsTestBase {
   protected $testNameAttribute = 'property';
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp() {
-    parent::$modules[] = 'metatag_open_graph';
-    parent::setUp();
-  }
-
-  /**
    * Each of these meta tags has a different tag name vs its internal name.
    */
   protected function getTestTagName($tag_name) {
+    if ($tag_name == 'og_latitude') {
+      $tag_name = 'place:location:latitude';
+    }
+    elseif ($tag_name == 'og_longitude') {
+      $tag_name = 'place:location:longitude';
+    }
+
     // Replace the first underline with a colon.
     $tag_name = str_replace('og_', 'og:', $tag_name);
     $tag_name = str_replace('article_', 'article:', $tag_name);
     $tag_name = str_replace('book_', 'book:', $tag_name);
+    $tag_name = str_replace('profile_', 'profile:', $tag_name);
+    $tag_name = str_replace('video_', 'video:', $tag_name);
 
     // Some tags have an additional underline that turns into a colon.
+    $tag_name = str_replace('og:audio_', 'og:audio:', $tag_name);
     $tag_name = str_replace('og:image_', 'og:image:', $tag_name);
     $tag_name = str_replace('og:video_', 'og:video:', $tag_name);
+    $tag_name = str_replace('video:actor_', 'video:actor:', $tag_name);
 
     // Additional fixes.
     if ($tag_name == 'og:locale_alternative') {

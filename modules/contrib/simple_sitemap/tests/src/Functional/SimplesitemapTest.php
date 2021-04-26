@@ -84,6 +84,28 @@ class SimplesitemapTest extends SimplesitemapTestBase {
   }
 
   /**
+   * Tests locks
+   */
+  public function testLocking() {
+    $this->generator->removeCustomLinks()
+      ->addCustomLink('/node/' . $this->node->id())
+      ->generateSitemap(QueueWorker::GENERATE_TYPE_BACKEND);
+    $this->drupalLogin($this->createUser(['administer sitemap settings']));
+
+    $this->drupalGet('/admin/config/search/simplesitemap/settings');
+    $this->submitForm(['simple_sitemap_regenerate_now' => TRUE], 'Save configuration');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains('The configuration options have been saved.');
+    $this->assertSession()->pageTextNotContains('Unable to acquire a lock for sitemap generation.');
+
+    \Drupal::lock()->acquire(QueueWorker::LOCK_ID);
+    $this->submitForm(['simple_sitemap_regenerate_now' => TRUE], 'Save configuration');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->pageTextContains('The configuration options have been saved.');
+    $this->assertSession()->pageTextContainsOnce('Unable to acquire a lock for sitemap generation.');
+  }
+
+  /**
    * Test removing custom paths from the sitemap settings.
    *
    * @throws \Drupal\Component\Plugin\Exception\PluginException
@@ -205,6 +227,43 @@ class SimplesitemapTest extends SimplesitemapTestBase {
     $this->assertSession()->responseContains('node/' . $this->node->id());
     $this->assertSession()->responseContains('0.5');
     $this->assertSession()->responseNotContains('changefreq');
+  }
+
+  /**
+   * Test link count.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  public function testLinkCount() {
+    $this->generator->setBundleSettings('node', 'page')
+      ->removeCustomLinks()
+      ->generateSitemap(QueueWorker::GENERATE_TYPE_BACKEND);
+
+    $this->drupalLogin($this->createUser(['administer sitemap settings']));
+    $this->drupalGet('admin/config/search/simplesitemap');
+    $link_count_elements = $this->xpath('//*[@id="simple-sitemap-sitemaps-form"]//table/tbody/tr/td[3]');
+    $this->assertSame('2', $link_count_elements[0]->getText());
+
+    $this->createNode(['title' => 'Another node', 'type' => 'page']);
+    $this->generator->setBundleSettings('node', 'page')
+      ->removeCustomLinks()
+      ->generateSitemap(QueueWorker::GENERATE_TYPE_BACKEND);
+    $this->drupalLogin($this->createUser(['administer sitemap settings']));
+    $this->drupalGet('admin/config/search/simplesitemap');
+    $link_count_elements = $this->xpath('//*[@id="simple-sitemap-sitemaps-form"]//table/tbody/tr/td[3]');
+    $this->assertSame('3', $link_count_elements[0]->getText());
+
+    // Pretend that we've just run the simple_sitemap_update_8305() update on a
+    // site with existing sitemaps.
+    \Drupal::database()->update('simple_sitemap')
+      ->fields(['link_count' => 0])
+      ->execute();
+    $this->drupalGet('admin/config/search/simplesitemap');
+    $link_count_elements = $this->xpath('//*[@id="simple-sitemap-sitemaps-form"]//table/tbody/tr/td[3]');
+    $this->assertSame('unavailable', $link_count_elements[0]->getText());
   }
 
   /**
@@ -344,13 +403,7 @@ class SimplesitemapTest extends SimplesitemapTestBase {
     $this->assertSession()->responseContains('<option value="never" selected="selected">never</option>');
 
     // Test database changes.
-    $result = $this->database->select('simple_sitemap_entity_overrides', 'o')
-      ->fields('o', ['inclusion_settings'])
-      ->condition('o.entity_type', 'node')
-      ->condition('o.entity_id', $this->node->id())
-      ->execute()
-      ->fetchField();
-    $this->assertFalse(empty($result));
+    $this->assertEquals(1, $this->getOverridesCount('node', $this->node->id()));
 
     $this->generator->setBundleSettings('node', 'page', ['priority' => 0.1, 'changefreq' => 'never'])
       ->generateSitemap(QueueWorker::GENERATE_TYPE_BACKEND);
@@ -370,13 +423,47 @@ class SimplesitemapTest extends SimplesitemapTestBase {
 
     // Test if entity override has been removed from database after its equal to
     // its bundle settings.
-    $result = $this->database->select('simple_sitemap_entity_overrides', 'o')
+    $this->assertEquals(0, $this->getOverridesCount('node', $this->node->id()));
+
+    // Assert that creating a new content type doesn't remove the overrides.
+    $this->drupalGet('node/' . $this->node->id() . '/edit');
+    $this->submitForm(['index_default_node_settings' => 0], 'Save');
+    $this->assertEquals(1, $this->getOverridesCount('node', $this->node->id()));
+    // Create a new content type.
+    $this->drupalGet('admin/structure/types/add');
+    $this->submitForm([
+      'name' => 'simple_sitemap_type',
+      'type' => 'simple_sitemap_type',
+      'index_default_node_settings' => 0,
+    ], 'Save content type');
+    // The entity override from the other content type should not be affected.
+    $this->assertEquals(1, $this->getOverridesCount('node', $this->node->id()));
+
+    // Assert that removing the other content type doesn't remove the overrides.
+    $this->drupalGet('admin/structure/types/manage/simple_sitemap_type/delete');
+    $this->submitForm([], 'Delete');
+    $this->assertEquals(1, $this->getOverridesCount('node', $this->node->id()));
+  }
+
+  /**
+   * Returns the number of entity overrides for the given entity type/ID.
+   *
+   * @param string $entity_type_id
+   *   The entity type ID.
+   * @param string $entity_id
+   *   The entity ID.
+   *
+   * @return int
+   *   The number of overrides for the given entity type ID and entity ID.
+   */
+  protected function getOverridesCount($entity_type_id, $entity_id) {
+    return $this->database->select('simple_sitemap_entity_overrides', 'o')
       ->fields('o', ['inclusion_settings'])
-      ->condition('o.entity_type', 'node')
-      ->condition('o.entity_id', $this->node->id())
+      ->condition('o.entity_type', $entity_type_id)
+      ->condition('o.entity_id', $entity_id)
+      ->countQuery()
       ->execute()
       ->fetchField();
-    $this->assertTrue(empty($result));
   }
 
   /**
@@ -384,7 +471,7 @@ class SimplesitemapTest extends SimplesitemapTestBase {
    */
   public function testNewEntityWithIdSet() {
     $new_node = Node::create([
-      'nid' => rand(5, 10),
+      'nid' => mt_rand(5, 10),
       'type' => 'page',
     ]);
     // Assert that the form does not break if an entity has an id but is not
@@ -488,7 +575,7 @@ class SimplesitemapTest extends SimplesitemapTestBase {
       ->generateSitemap(QueueWorker::GENERATE_TYPE_BACKEND);
 
     $variants = $this->generator->getSitemapManager()->getSitemapVariants();
-    $this->assertTrue(isset($variants['test']));
+    $this->assertArrayHasKey('test', $variants);
 
     $this->drupalGet($this->defaultSitemapUrl);
     $this->assertSession()->responseContains('node/' . $this->node->id());
@@ -509,7 +596,7 @@ class SimplesitemapTest extends SimplesitemapTestBase {
     $this->generator->getSitemapManager()->removeSitemapVariants('test');
 
     $variants = $this->generator->getSitemapManager()->getSitemapVariants();
-    $this->assertFalse(isset($variants['test']));
+    $this->assertArrayNotHasKey('test', $variants);
 
     // Test if sitemap has been removed along with the variant.
     $this->drupalGet('test/sitemap.xml');
@@ -569,7 +656,7 @@ class SimplesitemapTest extends SimplesitemapTestBase {
     $chunks = $this->database->query('SELECT id FROM {simple_sitemap} WHERE delta != 0 AND status = 1');
     $chunks->allowRowCount = TRUE;
     $chunk_count = $chunks->rowCount();
-    $this->assertTrue($chunk_count === $expected_sitemap_count);
+    $this->assertSame($chunk_count, $expected_sitemap_count);
 
     // Test if index has been created when necessary.
     $index = $this->database->query('SELECT id FROM {simple_sitemap} WHERE delta = 0 AND status = 1')

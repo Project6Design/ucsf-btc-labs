@@ -37,7 +37,7 @@ class DeleteTest extends KernelTestBasePlugin {
    *
    * @var array
    */
-  public static $modules = [
+  protected static $modules = [
     'user',
     'config',
     'file',
@@ -48,7 +48,7 @@ class DeleteTest extends KernelTestBasePlugin {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp() : void {
     parent::setUp();
     $this->imceFM = $this->getImceFM();
     $this->delete = new Delete([], "delete", []);
@@ -115,7 +115,7 @@ class DeleteTest extends KernelTestBasePlugin {
    */
   public function testPermissiomInfo() {
     $permissionInfo = $this->delete->permissionInfo();
-    $this->assertTrue(is_array($permissionInfo));
+    $this->assertIsArray($permissionInfo);
     $this->assertTrue(in_array('Delete files', $permissionInfo));
     $this->assertTrue(in_array('Delete subfolders', $permissionInfo));
   }
@@ -125,7 +125,7 @@ class DeleteTest extends KernelTestBasePlugin {
    */
   public function testMessages() {
     $messages = $this->imceFM->getMessages();
-    $this->assertTrue(is_array($messages));
+    $this->assertIsArray($messages);
     $this->assertEquals([], $messages);
   }
 

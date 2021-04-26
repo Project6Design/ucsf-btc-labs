@@ -135,6 +135,21 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
   const ACCESS_DENIED_LOGIN = 'login';
 
   /**
+   * Wizard start page.
+   */
+  const PAGE_START = 'webform_start';
+
+  /**
+   * Wizard preview page.
+   */
+  const PAGE_PREVIEW = 'webform_preview';
+
+  /**
+   * Wizard confirmation page.
+   */
+  const PAGE_CONFIRMATION = 'webform_confirmation';
+
+  /**
    * Returns the webform's (original) langcode.
    *
    * @return string
@@ -1196,5 +1211,17 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    *   TRUE if the stored value for a given key exists.
    */
   public function hasUserData($key);
+
+  /****************************************************************************/
+  // Third party settings.
+  /****************************************************************************/
+
+  /**
+   * Unsets all third-party settings of a given module.
+   *
+   * @param string $module
+   *   The module providing the third-party settings.
+   */
+  public function unsetThirdPartySettings($module);
 
 }

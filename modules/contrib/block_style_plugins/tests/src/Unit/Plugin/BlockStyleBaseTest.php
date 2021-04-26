@@ -380,6 +380,11 @@ class BlockStyleBaseTest extends UnitTestCase {
         'custom_block',
         FALSE,
       ],
+      'Exclude all derivatives of a base_plugin_id' => [
+        'basic_block:*',
+        NULL,
+        TRUE,
+      ],
     ];
   }
 
@@ -421,6 +426,11 @@ class BlockStyleBaseTest extends UnitTestCase {
         'wrong_custom_block',
         'custom_block',
         FALSE,
+      ],
+      'Include all derivatives of a base_plugin_id' => [
+        'basic_block:*',
+        NULL,
+        TRUE,
       ],
     ];
   }
