@@ -5,11 +5,12 @@ namespace CommerceGuys\Addressing\Tests\Country;
 use CommerceGuys\Addressing\Country\Country;
 use CommerceGuys\Addressing\Country\CountryRepository;
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \CommerceGuys\Addressing\Country\CountryRepository
  */
-class CountryRepositoryTest extends \PHPUnit_Framework_TestCase
+final class CountryRepositoryTest extends TestCase
 {
     /**
      * Country definitions.
@@ -45,7 +46,10 @@ class CountryRepositoryTest extends \PHPUnit_Framework_TestCase
         // Instantiate the country repository and confirm that the definition path
         // was properly set.
         $countryRepository = new CountryRepository('de', 'en', 'vfs://resources/country/');
-        $definitionPath = $this->getObjectAttribute($countryRepository, 'definitionPath');
+
+        $reflected_constraint = (new \ReflectionObject($countryRepository))->getProperty('definitionPath');
+        $reflected_constraint->setAccessible(TRUE);
+        $definitionPath = $reflected_constraint->getValue($countryRepository);
         $this->assertEquals('vfs://resources/country/', $definitionPath);
 
         return $countryRepository;
@@ -91,11 +95,12 @@ class CountryRepositoryTest extends \PHPUnit_Framework_TestCase
      * @covers ::loadDefinitions
      *
      * @uses \CommerceGuys\Addressing\Locale
-     * @expectedException \CommerceGuys\Addressing\Exception\UnknownCountryException
+     *
      * @depends testConstructor
      */
     public function testGetInvalidCountry($countryRepository)
     {
+        $this->expectException(\CommerceGuys\Addressing\Exception\UnknownCountryException::class);
         $countryRepository->get('INVALID');
     }
 

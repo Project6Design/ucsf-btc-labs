@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 /**
  * @coversDefaultClass \CommerceGuys\Addressing\Validator\Constraints\AddressFormatConstraintValidator
  */
-class AddressFormatConstraintValidatorTest extends ConstraintValidatorTestCase
+final class AddressFormatConstraintValidatorTest extends ConstraintValidatorTestCase
 {
     /**
      * @var AddressFormatConstraint
@@ -23,7 +23,7 @@ class AddressFormatConstraintValidatorTest extends ConstraintValidatorTestCase
     /**
      * {@inheritdoc}
      */
-    public function setUp()
+    protected function setUp(): void
     {
         $this->constraint = new AddressFormatConstraint();
 
@@ -48,11 +48,10 @@ class AddressFormatConstraintValidatorTest extends ConstraintValidatorTestCase
 
     /**
      * @covers \CommerceGuys\Addressing\Validator\Constraints\AddressFormatConstraintValidator
-     *
-     * @expectedException \Symfony\Component\Validator\Exception\UnexpectedTypeException
      */
     public function testInvalidValueType()
     {
+        $this->expectException(\Symfony\Component\Validator\Exception\UnexpectedTypeException::class);
         $this->validator->validate(new \stdClass(), $this->constraint);
     }
 
@@ -157,6 +156,9 @@ class AddressFormatConstraintValidatorTest extends ConstraintValidatorTestCase
      */
     public function testUnitedStatesSubdivisionPostcodePattern()
     {
+        // Test with subdivision-level postal code validation disabled.
+        $this->constraint->extendedPostalCodeValidation = false;
+
         $address = new Address();
         $address = $address
             ->withCountryCode('US')
@@ -168,6 +170,11 @@ class AddressFormatConstraintValidatorTest extends ConstraintValidatorTestCase
             ->withGivenName('John')
             ->withFamilyName('Smith');
 
+        $this->validator->validate($address, $this->constraint);
+        $this->assertNoViolation();
+
+        // Now test with the subdivision-level postal code validation enabled.
+        $this->constraint->extendedPostalCodeValidation = true;
         $this->validator->validate($address, $this->constraint);
         $this->buildViolation($this->constraint->invalidMessage)
             ->atPath('[postalCode]')
@@ -371,7 +378,7 @@ class AddressFormatConstraintValidatorTest extends ConstraintValidatorTestCase
     }
 
     /**
-     * @covers CommerceGuys\Addressing\Validator\Constraints\AddressFormatConstraintValidator
+     * @covers \CommerceGuys\Addressing\Validator\Constraints\AddressFormatConstraintValidator
      */
     public function testJapan()
     {
