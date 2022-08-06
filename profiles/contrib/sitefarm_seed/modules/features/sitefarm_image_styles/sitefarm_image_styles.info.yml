@@ -1,7 +1,7 @@
 name: 'Image Styles'
 description: 'Base Image styles for SiteFarm features.'
 type: module
-core: 8.x
+core_version_requirement: ^8.8 || ^9
 dependencies:
   - focal_point
   - image
