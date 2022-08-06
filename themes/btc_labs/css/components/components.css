@@ -4268,6 +4268,10 @@ figure figcaption {
   margin-left: 2rem;
 }
 
+#header-top-menu ul.right a:hover {
+  text-decoration: underline;
+}
+
 @media screen and (max-width: 924px) {
   #header-top-menu ul.right {
     display: none;
