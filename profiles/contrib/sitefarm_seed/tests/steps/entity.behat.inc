@@ -147,7 +147,7 @@ class EntitySubContext extends DrupalSubContextBase implements DrupalSubContextI
       foreach ($entities as $entity) {
         // Clean up the entity's alias, if there is one.
         $path = '/' . $entity->toUrl()->getInternalPath();
-        $alias = \Drupal::service('path.alias_manager')->getAliasByPath($path);
+        $alias = \Drupal::service('path_alias.manager')->getAliasByPath($path);
         if ($alias != $path) {
           \Drupal::service('path.alias_storage')->delete(['alias' => $alias]);
         }

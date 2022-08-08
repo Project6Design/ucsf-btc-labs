@@ -43,7 +43,7 @@ class FilterMediaLink extends FilterBase implements ContainerFactoryPluginInterf
    * @param \Drupal\Core\Path\AliasManager $aliasManager
    *   Alias Manager service.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, PathValidator $pathValidator, AliasManager $aliasManager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, PathValidator $pathValidator, $aliasManager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->pathValidator = $pathValidator;
     $this->aliasManager = $aliasManager;
@@ -58,7 +58,7 @@ class FilterMediaLink extends FilterBase implements ContainerFactoryPluginInterf
       $plugin_id,
       $plugin_definition,
       $container->get('path.validator'),
-      $container->get('path.alias_manager')
+      $container->get('path_alias.manager')
     );
   }
 

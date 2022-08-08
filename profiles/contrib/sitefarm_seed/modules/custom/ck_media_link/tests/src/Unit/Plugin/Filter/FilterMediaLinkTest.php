@@ -71,7 +71,7 @@ class FilterMediaLinkTest extends UnitTestCase {
 
     $container = $this->prophesize(ContainerInterface::CLASS);
     $container->get('path.validator')->willReturn($this->pathValidator);
-    $container->get('path.alias_manager')->willReturn($this->aliasManager);
+    $container->get('path_alias.manager')->willReturn($this->aliasManager);
 
     $instance = FilterMediaLink::create($container->reveal(), $configuration, $plugin_id, $plugin_definition);
     $this->assertInstanceOf(FilterMediaLink::CLASS, $instance);

@@ -25,6 +25,12 @@
       li {
         display: inline-block;
         margin-left: $large-spacing;
+
+        a {
+          &:hover {
+            text-decoration: underline;
+          }
+        }
       }
 
       @media screen and (max-width: 924px) {
