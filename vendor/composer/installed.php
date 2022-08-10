@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'f42c03d54b3e10ee9b464379aa2bce95c98fe204',
+        'reference' => '6e0b1f495faa2ed1f2c41b0e547cf57e48a5fd5c',
         'name' => 'drupal/legacy-project',
         'dev' => true,
     ),
@@ -427,7 +427,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'f42c03d54b3e10ee9b464379aa2bce95c98fe204',
+            'reference' => '6e0b1f495faa2ed1f2c41b0e547cf57e48a5fd5c',
             'dev_requirement' => false,
         ),
         'drupal/mailsystem' => array(
@@ -494,12 +494,14 @@
             'dev_requirement' => false,
         ),
         'drupal/simple_sitemap' => array(
-            'pretty_version' => '4.1.2',
-            'version' => '4.1.2.0',
+            'pretty_version' => 'dev-4.x',
+            'version' => 'dev-4.x',
             'type' => 'drupal-module',
             'install_path' => __DIR__ . '/../../modules/contrib/simple_sitemap',
-            'aliases' => array(),
-            'reference' => '4.1.2',
+            'aliases' => array(
+                0 => '4.x-dev',
+            ),
+            'reference' => '83c8c4aa803a601b1903980d8f8c02f34a7d3bf4',
             'dev_requirement' => false,
         ),
         'drupal/token' => array(
