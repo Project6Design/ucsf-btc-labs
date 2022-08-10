@@ -6,8 +6,3 @@ package: SEO
 core_version_requirement: ^9.3 || ^10
 dependencies:
   - simple_sitemap:simple_sitemap
-
-# Information added by Drupal.org packaging script on 2022-06-15
-version: '4.1.2'
-project: 'simple_sitemap'
-datestamp: 1655334533
