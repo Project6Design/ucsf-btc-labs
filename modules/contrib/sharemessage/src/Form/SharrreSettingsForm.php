@@ -123,11 +123,11 @@ class SharrreSettingsForm extends ConfigFormBase {
     if (!empty($url) && parse_url($url, PHP_URL_HOST) && parse_url($url, PHP_URL_PATH)) {
       $js = pathinfo($url, PATHINFO_BASENAME);
       if (!preg_match('/^jquery\.sharrre-[\d.]*\.min\.js$/', $js)) {
-        drupal_set_message(t('The naming of the library is unexpected. Double check that this is the real Sharrre library. The URL for the minimized version of the library can be found on <a href=":url">Sharrre CDN</a>.', [':url' => $sharrre_cdn_url]), 'warning');
+        $this->messenger()->addWarning(t('The naming of the library is unexpected. Double check that this is the real Sharrre library. The URL for the minimized version of the library can be found on <a href=":url">Sharrre CDN</a>.', [':url' => $sharrre_cdn_url]), 'warning');
       }
     }
     elseif (!empty($url)) {
-      drupal_set_message(t('The remote URL is unexpected. Please, provide the correct URL to the minimized version of the library found on <a href=":url">Sharrre CDN</a>.', [':url' => $sharrre_cdn_url]), 'error');
+      $this->messenger()->addError(t('The remote URL is unexpected. Please, provide the correct URL to the minimized version of the library found on <a href=":url">Sharrre CDN</a>.', [':url' => $sharrre_cdn_url]), 'error');
     }
 
     // If the profile id changes then we need to rebuild the library cache.

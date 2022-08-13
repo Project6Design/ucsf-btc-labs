@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\roleassign\Form\RoleAssignAdminForm.
- */
-
 namespace Drupal\roleassign\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
@@ -42,13 +37,13 @@ class RoleAssignAdminForm extends ConfigFormBase {
     // Show checkboxes with roles that can be delegated if any.
     if ($roles) {
       $config = $this->config('roleassign.settings');
-      $form['roleassign_roles'] = array(
+      $form['roleassign_roles'] = [
         '#type' => 'checkboxes',
         '#title' => $this->t('Roles'),
         '#default_value' => $config->get('roleassign_roles'),
         '#options' => $roles,
         '#description' => $this->t('Select roles that should be available for assignment.'),
-      );
+      ];
     }
 
     return parent::buildForm($form, $form_state);

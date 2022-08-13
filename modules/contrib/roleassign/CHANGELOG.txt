@@ -5,10 +5,22 @@ CHANGELOG for RoleAssign for Drupal 8
 roleassign 8.x-1.x-dev:
 
 
+roleassign 8.x-1.0-beta1 (2020-02-20):
+  Issue #2882158 by Munavijayalakshmi, salvis, amit.drupal: Convert module to use short array syntax (new coding standard).
+  Issue #3114240 by emek: Restrict roles when adding users with the CAS module.
+  Issue #3042823 by franskuipers, Berdir: Drupal 9 Deprecated Code Report.
+  Issue #3065871 by AkashkumarOSL, AmandeepKaur, Berdir: Adding Composer.json File.
+  Issue #2964630 by salvis: Move the Role Assign settings from "Configuration" to "People" where it's more easily found.
+  Issue #2935117 by idebr: Can't uninstall with Drush.
+  Issue by salvis: Add self-evident warning to the README.txt file.
+  Issue #2766347 by Vinay15, Dane Powell: Remove @file tag docblock from all the .php files.
+  Issue #2661864 by heykarthikwithu: Remove unused imports in the code base.
+  Issue #2758855 by Alan-H: Fix Hard-sets the Authenticated User role.
+
+
 roleassign 8.x-1.0-alpha2 (2016-02-02):
   Issue #2657668 by salvis, svendecabooter: Avoid uninitialized $assigned_roles variable.
   Issue #2658028 by svendecabooter: Provide default values for config entity.
-
 
 roleassign 8.x-1.0-alpha1 (2015-11-25):
   Issue #2405341 by svendecabooter, tkuldeep17, salvis: Initial port to D8.

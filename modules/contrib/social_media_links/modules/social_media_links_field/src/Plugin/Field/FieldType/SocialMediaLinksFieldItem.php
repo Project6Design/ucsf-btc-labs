@@ -97,17 +97,18 @@ class SocialMediaLinksFieldItem extends FieldItemBase {
         $this->t('Weight'),
       ],
       '#prefix' => '<h5>' . $this->t('Platforms') . '</h5>',
-      '#suffix' => '<div class="description">' . $this->t('The platforms that are allowed to be used in this field. Select none to allow all platforms.') .'</div>',
+      '#suffix' => '<div class="description">' . $this->t('The platforms that are allowed to be used in this field. Select none to allow all platforms.') . '</div>',
       '#tabledrag' => [[
         'action' => 'order',
-        'relationship' => 'silbing',
+        'relationship' => 'sibling',
         'group' => 'platform-order-weight',
-      ]],
+      ],
+      ],
     ];
 
     // Keep a note of the highest weight.
     $max_weight = 10;
-    $platforms = \Drupal::service('plugin.manager.social_media_links.platform')->getPlatformsSortedByWeight($this->getSetting('platforms'));
+    $platforms = \Drupal::service('plugin.manager.social_media_links.platform')->getPlatformsSortedByWeight(['platforms' => $this->getSetting('platforms')]);
     foreach ($platforms as $platform_id => $platform) {
       $element['platforms'][$platform_id]['#attributes']['class'][] = 'draggable';
       $element['platforms'][$platform_id]['#weight'] = $platform['weight'];
@@ -138,7 +139,10 @@ class SocialMediaLinksFieldItem extends FieldItemBase {
         '#title_display' => 'invisible',
         '#default_value' => $platform['weight'],
         '#attributes' => [
-          'class' => ['platform-order-weight', 'platform-order-weight-' . $platform_id],
+          'class' => [
+            'platform-order-weight',
+            'platform-order-weight-' . $platform_id,
+          ],
         ],
         // Delta: We need to use the max weight + number of platforms,
         // because if they get re-ordered it could start the count again from

@@ -82,3 +82,13 @@ permissions.
 assignable roles and change them as necessary.
 
 
+BEWARE
+------
+
+'Administer users' is and remains a security-critical permission that must NOT
+be given to untrusted users! RoleAssign will keep your assistant admins within
+their limits, but if you introduce alternative ways to edit users, assign roles,
+or give permissions (like the "Administration: Users" view in the popular
+Administration Views module), then you may be opening up ways for your
+assistant admins to gain additional privileges.
+

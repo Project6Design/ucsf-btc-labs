@@ -76,16 +76,23 @@ class CustomLinksForm extends SimpleSitemapFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $custom_link_settings = $this->generator->setVariants()->customLinkManager()->get();
 
-    $form['custom_links'] = [
+    $form['simple_sitemap_custom'] = [
+      '#title' => $this->t('Custom links'),
+      '#type' => 'fieldset',
+      '#markup' => '<div class="description">' . $this->t('Add custom internal drupal paths to the XML sitemap.') . '</div>',
+      '#prefix' => FormHelper::getDonationText(),
+    ];
+
+    $custom_link_settings = $this->generator->setVariants()->customLinkManager()->get();
+    $form['simple_sitemap_custom']['custom_links'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Relative Drupal paths'),
       '#default_value' => $custom_link_settings ? $this->customLinksToString(reset($custom_link_settings)) : '',
       '#description' => $this->t("Please specify drupal internal (relative) paths, one per line. Do not forget to prepend the paths with a '/'.<br>Optionally link priority <em>(0.0 - 1.0)</em> can be added by appending it after a space.<br> Optionally link change frequency <em>(always / hourly / daily / weekly / monthly / yearly / never)</em> can be added by appending it after a space.<br/<br><strong>Examples:</strong><br><em>/ 1.0 daily</em> -> home page with the highest priority and daily change frequency<br><em>/contact</em> -> contact page with the default priority and no change frequency information"),
     ];
 
-    $form['variants'] = [
+    $form['simple_sitemap_custom']['variants'] = [
       '#type' => 'select',
       '#multiple' => TRUE,
       '#title' => $this->t('Sitemaps'),
@@ -104,7 +111,7 @@ class CustomLinksForm extends SimpleSitemapFormBase {
       ),
     ];
 
-    $form['include_images'] = [
+    $form['simple_sitemap_custom']['include_images'] = [
       '#type' => 'select',
       '#title' => $this->t('Include images'),
       '#description' => $this->t('If a custom link points to an entity, include its referenced images in the sitemap.'),
@@ -112,7 +119,8 @@ class CustomLinksForm extends SimpleSitemapFormBase {
       '#options' => [0 => $this->t('No'), 1 => $this->t('Yes')],
     ];
 
-    $form = $this->formHelper->regenerateNowForm($form);
+    $form['simple_sitemap_custom'] = $this->formHelper
+      ->regenerateNowForm($form['simple_sitemap_custom']);
 
     return parent::buildForm($form, $form_state);
   }

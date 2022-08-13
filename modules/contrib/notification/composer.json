@@ -16,5 +16,9 @@
   "support": {
     "issues": "http://drupal.org/project/issues/notification",
     "source": "http://cgit.drupalcode.org/notification"
-  }
+  },
+  "require": {
+    "drupal-ckeditor-libraries-group/notification": "^4.5.11"
+  },
+  "prefer-stable": true
 }

@@ -8,25 +8,21 @@
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
- * The minimum PhotoSwipe version we support.
- */
-const PHOTOSWIPE_MIN_PLUGIN_VERSION = '4.0.0';
-
-/**
  * Implements hook_libraries_info().
  */
 function photoswipe_libraries_info() {
-  $libraries['photoswipe'] = array(
+  $libraries['photoswipe'] = [
     'name' => 'Photoswipe',
     'vendor url' => 'https://github.com/dimsemenov/PhotoSwipe',
     'download url' => 'https://github.com/dimsemenov/PhotoSwipe/archive/master.zip',
-    'version arguments' => array(
+    'version arguments' => [
       'file' => 'dist/photoswipe.min.js',
-      'pattern' => '/v([\d.]+)/', // PhotoSwipe - v4.1.1 - 2015-12-24
+      // PhotoSwipe - v4.1.1 - 2015-12-24.
+      'pattern' => '/v([\d.]+)/',
       'lines' => 1,
       'cols' => 30,
-    ),
-  );
+    ],
+  ];
   return $libraries;
 }
 
@@ -34,18 +30,30 @@ function photoswipe_libraries_info() {
  * Implements hook_theme().
  */
 function photoswipe_theme() {
-  return array(
-    'photoswipe_image_formatter' => array(
-      'variables' => array(
+  return [
+    'photoswipe_image_formatter' => [
+      'variables' => [
         'item' => NULL,
-        'display_settings' => array(),
-      ),
+        'entity' => NULL,
+        'display_settings' => [],
+        'delta' => NULL,
+      ],
       'file' => 'photoswipe.theme.inc',
-    ),
-    'photoswipe_container' => array(
-      'variables' => array(),
-    ),
-  );
+    ],
+    'photoswipe_responsive_image_formatter' => [
+      'variables' => [
+        'item' => NULL,
+        'entity' => NULL,
+        'display_settings' => [],
+        'delta' => NULL,
+      ],
+      'template' => 'photoswipe-image-formatter',
+      'file' => 'photoswipe.theme.inc',
+    ],
+    'photoswipe_container' => [
+      'variables' => [],
+    ],
+  ];
 }
 
 /**
@@ -53,12 +61,13 @@ function photoswipe_theme() {
  */
 function photoswipe_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
-    // Main module help for the photoswipe module
+    // Main module help for the photoswipe module.
     case 'help.page.photoswipe':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('<a href=":url">Photoswipe</a> provides a nice javascript-based display for photo galleries, very sleek on mobile browsers.', array(
-        ':url' => 'http://www.photoswipe.com/')) . '</p>';
+      $output .= '<p>' . t('<a href=":url">Photoswipe</a> provides a nice javascript-based display for photo galleries, very sleek on mobile browsers.', [
+        ':url' => 'http://www.photoswipe.com/',
+      ]) . '</p>';
       return $output;
   }
 }
@@ -67,10 +76,81 @@ function photoswipe_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_page_attachments().
  */
 function photoswipe_page_attachments(array &$attachments) {
-  // Conditionally load on an admin page
+  // Conditionally load on non-admin pages.
   $is_admin = \Drupal::service('router.admin_context')->isAdminRoute();
 
-  if (\Drupal::config('photoswipe.settings')->get('photoswipe_always_load_non_admin') && $is_admin) {
+  if (\Drupal::config('photoswipe.settings')->get('photoswipe_always_load_non_admin') && !$is_admin) {
     \Drupal::service('photoswipe.assets_manager')->attach($attachments);
+  }
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function photoswipe_library_info_alter(&$libraries, $module) {
+  if ($module == 'photoswipe') {
+    // In case that the libraries are included locally, use those instead of the
+    // CDN.
+    // @see https://www.drupal.org/node/3099614
+    $library_file_finder = \Drupal::service('library.libraries_directory_file_finder');
+    $current_libraries = [
+      'photoswipe' => [
+        'js' => [
+          'photoswipe/dist/photoswipe.min.js',
+          'photoswipe/dist/photoswipe-ui-default.min.js',
+        ],
+        'css' => [
+          'photoswipe/dist/photoswipe.css',
+          'photoswipe/dist/default-skin/default-skin.css',
+        ],
+      ],
+      'photoswipe.dev' => [
+        'js' => [
+          'photoswipe/dist/photoswipe.js',
+          'photoswipe/dist/photoswipe-ui-default.js',
+        ],
+        'css' => [
+          'photoswipe/dist/photoswipe.css',
+          'photoswipe/dist/default-skin/default-skin.css',
+        ],
+      ],
+    ];
+    foreach ($current_libraries as $current_library_id => $current_library_type) {
+      if (isset($libraries[$current_library_id])) {
+        foreach ($current_library_type as $library_type_id => $current_library_files) {
+
+          // @todo it needs to be refactored.
+          if ($library_file_finder->find('photoswipe/dist/photoswipe.min.js')) {
+            if ($library_type_id === 'css') {
+              $libraries[$current_library_id][$library_type_id]['component'] = [];
+            }
+            else {
+              $libraries[$current_library_id][$library_type_id] = [];
+            }
+          }
+
+          foreach ($current_library_files as $current_library_file) {
+            $path = $library_file_finder->find($current_library_file);
+            if ($path) {
+              if ($library_type_id === 'css') {
+                $libraries[$current_library_id][$library_type_id]['component'] = array_merge(
+                  [
+                    '/' . $path => [],
+                  ], $libraries[$current_library_id][$library_type_id]['component']);
+              }
+              else {
+                $libraries[$current_library_id][$library_type_id] = array_merge(
+                  [
+                    '/' . $path =>
+                    ($current_library_id === 'photoswipe.dev')
+                    ? []
+                    : ['minified' => TRUE],
+                  ], $libraries[$current_library_id][$library_type_id]);
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

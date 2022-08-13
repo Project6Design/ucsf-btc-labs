@@ -1,6 +1,6 @@
 CONTENTS OF THIS FILE
 ---------------------
-   
+
  * Introduction
  * Features
  * Requirements
@@ -54,6 +54,30 @@ REQUIREMENTS
 
 Just Colorbox plugin in "libraries".
 
+OPTIONAL HTML CAPTIONS
+----------------------
+Colorbox allows you to place a caption at the bottom of the lightbox.
+If you wish to use HTML in your captions, you must install the DOMPurify
+library. In your libraries folder, you will need
+DOMPurify/dist/purify.min.js.
+
+You can install DOMPurify using drush:
+ drush colorbox:dompurify
+
+Or, if you prefer, you can download DOMPurify directly from:
+https://github.com/cure53/DOMPurify/releases/latest
+
+From the above link, you can download a zip or tar.gz archive file.
+To avoid security issues, please only install the dist directory, and
+nothing else from the archive. The drush command above only installs
+the dist directory.
+
+
+
+The DOMPurify library is optional. Without DOMPurify, the Colorbox module
+will convert all captions to plain text.
+
+
 
 INSTALLATION
 ------------
@@ -61,13 +85,17 @@ INSTALLATION
 1. Install the module as normal, see link for instructions.
    Link: https://www.drupal.org/documentation/install/modules-themes/modules-8
 
-2. Download and unpack the Colorbox plugin in "libraries".
+2. Download and unpack the Colorbox plugin in "libraries" inside root folder.
     Make sure the path to the plugin file becomes:
     "libraries/colorbox/jquery.colorbox-min.js"
    Link: https://github.com/jackmoore/colorbox/archive/master.zip
    Drush users can use the command "drush colorbox-plugin".
 
-3. Go to "Administer" -> "Extend" and enable the Colorbox module.
+3. Change the permission of colorbox plugin inside 'libraries' folder.
+    Right click on 'libraries' folder -> properties -> "permissions"
+    and change to full permission.
+
+4. Go to "Administer" -> "Extend" and enable the Colorbox module.
 
 
 CONFIGURATION
@@ -106,12 +134,5 @@ It is possible to add another path as an option to the command, but not
 recommended unless you know what you are doing.
 
 
-MAINTAINERS
------------
-
-Current maintainers:
-
- * Fredrik Jonsson (frjo) - https://www.drupal.org/user/5546
-
-Requires - Drupal 8
+Requires - Drupal 8.8+ or 9
 License - GPL (see LICENSE)

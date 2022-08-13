@@ -112,6 +112,8 @@ class EntityBundlesForm extends SimpleSitemapFormBase {
       throw new NotFoundHttpException();
     }
 
+    $form['#prefix'] = FormHelper::getDonationText();
+
     $form['#title'] = $this->t('Configure %label entity type', [
       '%label' => $entity_type->getLabel() ?: $entity_type_id,
     ]);

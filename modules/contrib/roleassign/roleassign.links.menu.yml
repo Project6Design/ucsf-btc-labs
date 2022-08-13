@@ -1,7 +1,6 @@
 roleassign.settings:
-  title: 'RoleAssign settings'
-  parent: user.admin_index
-  description: "Configuration settings to further delegate the task of managing user's roles."
-  weight: -8
+  title: 'Role assign'
+  parent: entity.user.collection
+  description: "Define the roles that can be assigned via the 'Assign roles' permission."
+  weight: 10
   route_name: roleassign.settings
-  menu_name: admin

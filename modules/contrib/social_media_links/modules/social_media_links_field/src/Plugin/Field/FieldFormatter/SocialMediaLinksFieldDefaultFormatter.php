@@ -5,9 +5,9 @@ namespace Drupal\social_media_links_field\Plugin\Field\FieldFormatter;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\social_media_links\IconsetBase;
 use Drupal\Core\Template\Attribute;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Plugin implementation of the 'social_media_links_field_default' formatter.
@@ -22,6 +22,8 @@ use Drupal\Core\Template\Attribute;
  */
 class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
 
+  use StringTranslationTrait;
+
   /**
    * {@inheritdoc}
    */
@@ -34,9 +36,17 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
     $iconset_style = IconsetBase::explodeStyle($items->getSetting('iconset'));
     $iconset = $this->getIconset($iconset_style['iconset']);
 
+    $link_attributes = $this->getSetting('link_attributes');
+
+    foreach ($link_attributes as $key => $value) {
+      if ($value === '<none>') {
+        unset($link_attributes[$key]);
+      }
+    }
+
     foreach ($platforms as $platform_id => $platform) {
       $platforms[$platform_id]['element'] = (array) $iconset['instance']->getIconElement($platform['instance'], $iconset_style['style']);
-      $platforms[$platform_id]['attributes'] = new Attribute();
+      $platforms[$platform_id]['attributes'] = new Attribute($link_attributes);
 
       if (!empty($platform['instance']->getDescription())) {
         $platforms[$platform_id]['attributes']->setAttribute('aria-label', $platform['instance']->getDescription());
@@ -64,10 +74,10 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
    * {@inheritdoc}
    */
   public static function defaultSettings() {
-    return array(
+    return [
       'appearance' => [],
       'link_attributes' => [],
-    ) + parent::defaultSettings();
+    ] + parent::defaultSettings();
   }
 
   /**
@@ -142,11 +152,11 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
       $config['appearance']['show_name'] = 0;
     }
 
-    $orientation = $config['appearance']['orientation'] == 'v' ? t('vertical') : t('horizontal');
-    $summary[] = t('Orientation: @orientation', ['@orientation' => $orientation]);
+    $orientation = $config['appearance']['orientation'] == 'v' ? $this->t('vertical') : $this->t('horizontal');
+    $summary[] = $this->t('Orientation: @orientation', ['@orientation' => $orientation]);
 
-    $show_name = (isset($config['appearance']['show_name']) && $config['appearance']['show_name']) ? t('Yes') : t('No');
-    $summary[] = t('Show name: @show_name', ['@show_name' => $show_name]);
+    $show_name = (isset($config['appearance']['show_name']) && $config['appearance']['show_name']) ? $this->t('Yes') : $this->t('No');
+    $summary[] = $this->t('Show name: @show_name', ['@show_name' => $show_name]);
 
     return $summary;
   }
@@ -155,6 +165,7 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
    * Get the platforms that have values.
    *
    * @return array
+   *   $platforms.
    */
   protected function getPlatformsWithValues(FieldItemListInterface $items) {
     $platform_settings = $items->getSetting('platforms');
@@ -168,12 +179,13 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
     }
 
     $platforms = [];
-    foreach ($items as $delta => $item) {
-      // We have two possible structures where the platform values can be stored.
+    foreach ($items as $item) {
+      // We have two possible structures where the platform values can be
+      // stored.
       // * If the select widget was used the values are saved in two fields
-      //   (platform and value).
+      // (platform and value).
       // * If the default list widget was used the values are saved in a
-      //   multidimensional array structure (platform_values).
+      // multidimensional array structure (platform_values).
       if (empty($item->platform_values)) {
         // Select widget fields handling.
         if ($all_platforms_available || isset($platform_settings[$item->platform]['enabled']) && $platform_settings[$item->platform]['enabled']) {
@@ -206,10 +218,11 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
   /**
    * Get the iconset.
    *
-   * @param string
+   * @param string $iconset
    *   The iconset id.
    *
    * @return array
+   *   $iconsets
    */
   protected function getIconset($iconset) {
     $iconsets = \Drupal::service('plugin.manager.social_media_links.iconset')->getIconsets();

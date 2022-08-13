@@ -2,7 +2,7 @@ name: Share Message Demo
 type: module
 description: All elements for a functioning demo.
 package: Sharemessage
-# core: 8.x
+core_version_requirement: ^8.8 || ^9
 hidden: FALSE
 
 dependencies:
@@ -12,8 +12,7 @@ dependencies:
  - drupal:text
  - drupal:path
 
-# Information added by Drupal.org packaging script on 2016-12-14
-version: '8.x-1.0-beta2'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2020-12-09
+version: '8.x-1.0-beta4'
 project: 'sharemessage'
-datestamp: 1481758985
+datestamp: 1607549482

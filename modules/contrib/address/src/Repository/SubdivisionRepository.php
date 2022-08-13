@@ -50,7 +50,7 @@ class SubdivisionRepository extends ExternalSubdivisionRepository {
   /**
    * {@inheritdoc}
    */
-  protected function loadDefinitions(array $parents) {
+  protected function loadDefinitions(array $parents): array {
     $group = $this->buildGroup($parents);
     if (isset($this->definitions[$group])) {
       return $this->definitions[$group];
@@ -63,7 +63,7 @@ class SubdivisionRepository extends ExternalSubdivisionRepository {
       $filename = $this->definitionPath . $group . '.json';
       // Loading priority: event -> cache -> filesystem.
       $event = new SubdivisionsEvent($parents);
-      $this->eventDispatcher->dispatch(AddressEvents::SUBDIVISIONS, $event);
+      $this->eventDispatcher->dispatch($event, AddressEvents::SUBDIVISIONS);
       if ($definitions = $event->getDefinitions()) {
         $this->definitions[$group] = $this->processDefinitions($definitions);
       }

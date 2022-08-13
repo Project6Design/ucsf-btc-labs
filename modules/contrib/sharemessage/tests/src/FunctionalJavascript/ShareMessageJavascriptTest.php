@@ -2,17 +2,19 @@
 
 namespace Drupal\Tests\sharemessage\FunctionalJavascript;
 
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
-use Drupal\simpletest\AssertContentTrait;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 
 /**
  * Sharemessage javascript tests.
  *
  * @group sharemessage
  */
-class ShareMessageJavascriptTest extends JavascriptTestBase {
+class ShareMessageJavascriptTest extends WebDriverTestBase {
 
-  use AssertContentTrait;
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * {@inheritdoc}
@@ -21,7 +23,7 @@ class ShareMessageJavascriptTest extends JavascriptTestBase {
     parent::setUp();
 
     // Install bartik theme.
-    \Drupal::service('theme_handler')->install(['bartik']);
+    \Drupal::service('theme_installer')->install(['bartik']);
     $theme_settings = $this->config('system.theme');
     $theme_settings->set('default', 'bartik')->save();
     \Drupal::service('module_installer')->install(['sharemessage', 'sharemessage_demo']);

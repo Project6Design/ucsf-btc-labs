@@ -3,8 +3,8 @@
   "type": "drupal-module",
   "description": "Adds the ability to count words and/or characters to CKEditor.",
   "keywords": ["Drupal"],
-  "license": "GPL-2.0+",
-  "homepage": "http://drupal.org/project/ckwordcount",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://www.drupal.org/project/ckwordcount",
   "minimum-stability": "dev",
   "authors": [
     {
@@ -14,11 +14,13 @@
     }
   ],
   "support": {
-    "issues": "http://drupal.org/project/issues/ckwordcount",
-    "source": "http://cgit.drupalcode.org/ckwordcount"
+    "issues": "https://www.drupal.org/project/issues/ckwordcount",
+    "source": "https://git.drupalcode.org/project/ckwordcount"
   },
   "require": {
-    "drupal/ckeditor": "*",
-    "drupal/notification": "*"
+    "drupal/notification": "^1.0"
+  },
+  "suggest": {
+    "w8tcha/ckeditor-wordcount-plugin": "Required to use drupal/ckwordcount. WordCount Plugin for CKEditor v4 (or above) that counts the words/characters and shows the word count and/or char count in the footer of the editor."
   }
 }

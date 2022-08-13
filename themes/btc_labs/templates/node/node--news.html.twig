@@ -106,8 +106,8 @@
 
         <aside class="sidebar">
             {{ content.field_sidebar }}
-            
-            {{ drupal_block('views_block__news_categories_block_list') }}
+
+            {{ drupal_entity('block', 'views_block__news_categories_block_list') }}
         </aside>
 
     {% endif %}

@@ -27,10 +27,29 @@ use Psr\Log\LoggerInterface;
  */
 class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
+  /**
+   * {@inheritdoc}
+   */
   protected $platformManager;
+
+  /**
+   * {@inheritdoc}
+   */
   protected $iconsetManager;
+
+  /**
+   * {@inheritdoc}
+   */
   protected $iconsetFinderService;
+
+  /**
+   * {@inheritdoc}
+   */
   protected $renderer;
+
+  /**
+   * {@inheritdoc}
+   */
   protected $logger;
 
   /**
@@ -109,7 +128,12 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
         '#default_value' => isset($config['platforms'][$platform_id]['value']) ? $config['platforms'][$platform_id]['value'] : '',
         '#field_prefix' => $platform['instance']->getUrlPrefix(),
         '#field_suffix' => $platform['instance']->getUrlSuffix(),
-        '#element_validate' => [[get_class($platform['instance']), 'validateValue']],
+        '#element_validate' => [
+          [
+            get_class($platform['instance']),
+            'validateValue',
+          ],
+        ],
       ];
       if (!empty($platform['instance']->getFieldDescription())) {
         $form['platforms'][$platform_id]['value']['#description'] = $platform['instance']->getFieldDescription();
@@ -158,6 +182,18 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
       '#description' => $this->t('Show the platform name next to the icon.'),
       '#default_value' => isset($config['appearance']['show_name']) ? $config['appearance']['show_name'] : 0,
     ];
+    $form['appearance']['suggestion'] = [
+      '#type' => 'machine_name',
+      '#title' => $this->t('Theme hook suggestion'),
+      '#default_value' => isset($config['appearance']['suggestion']) ? $config['appearance']['suggestion'] : '',
+      '#required' => FALSE,
+      '#field_prefix' => '<code>social_media_links_platforms__</code>',
+      '#description' => $this->t('A theme hook suggestion can be used to override the default HTML and CSS found in <code>social-media-links-platforms.html</code>.'),
+      '#machine_name' => [
+        'error' => $this->t('The theme hook suggestion must contain only lowercase letters, numbers, and underscores.'),
+        'exists' => [$this, 'suggestionExists'],
+      ],
+    ];
 
     // Link Attributes.
     $form['link_attributes'] = [
@@ -194,6 +230,7 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
       '#type' => 'details',
       '#title' => $this->t('Icon Sets'),
       '#open' => TRUE,
+      '#attributes' => ['class' => ['iconsets-wrapper']],
     ];
     $form['iconset']['style'] = [
       '#type' => 'select',
@@ -271,7 +308,7 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
         foreach ($installDirs as $dir) {
           $installDirsIconset[] = $dir . '/' . $iconset_id;
         }
-        $examples .= '<br /><code>' . preg_replace('/,([^,]+) ?$/', " " . $this->t('or') . " $1", implode(',<br />', $installDirsIconset), 1) . '</code>';
+        $examples .= '<br /><code>' . preg_replace('/,([^,]+) ?$/', " " . 'or' . " $1", implode(',<br />', $installDirsIconset), 1) . '</code>';
 
         $installedIconsets[$iconset_id]['examples'] = [
           '#markup' => $examples,
@@ -283,7 +320,10 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
     }
 
     // Sort the array so that installed iconsets shown first.
-    uasort($installedIconsets, ['Drupal\Component\Utility\SortArray', 'sortByWeightProperty']);
+    uasort($installedIconsets, [
+      'Drupal\Component\Utility\SortArray',
+      'sortByWeightProperty',
+    ]);
 
     $form['iconset']['installed_iconsets'] = [
       '#type' => 'table',
@@ -368,6 +408,16 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
     }
 
     return [$output];
+  }
+
+  /**
+   * Checks for an existing theme hook suggestion.
+   *
+   * @return bool
+   *   Returns FALSE because there is no need of validation by unique value.
+   */
+  public function suggestionExists() {
+    return FALSE;
   }
 
 }

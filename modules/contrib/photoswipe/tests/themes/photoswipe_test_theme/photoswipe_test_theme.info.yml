@@ -1,0 +1,13 @@
+name: Photoswipe test theme
+type: theme
+description: 'Theme for testing the photoswipe module'
+base theme: classy
+core_version_requirement: ^8.8 || ^9
+
+regions:
+  content: Content
+
+# Information added by Drupal.org packaging script on 2022-08-08
+version: '3.2.0'
+project: 'photoswipe'
+datestamp: 1659950849

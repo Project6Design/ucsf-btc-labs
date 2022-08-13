@@ -5,7 +5,6 @@ namespace Drupal\social_media_links_field\Element;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Element\FormElement;
 
 /**
@@ -61,7 +60,7 @@ class SocialMediaLinksPlatforms extends FormElement {
 
     $element = [
       '#tree' => TRUE,
-      '#prefix' => '<div id="' .  $wrapper_id . '">',
+      '#prefix' => '<div id="' . $wrapper_id . '">',
       '#suffix' => '</div>',
       '#wrapper_id' => $wrapper_id,
     ] + $element;
@@ -110,7 +109,12 @@ class SocialMediaLinksPlatforms extends FormElement {
       '#default_value' => isset($value['value']) ? $value['value'] : '',
       '#field_prefix' => $selected_platform['instance']->getUrlPrefix(),
       '#field_suffix' => $selected_platform['instance']->getUrlSuffix(),
-      '#element_validate' => [[get_class($selected_platform['instance']), 'validateValue']],
+      '#element_validate' => [
+        [
+          get_class($selected_platform['instance']),
+          'validateValue',
+        ],
+      ],
     ];
     if (!empty($selected_platform['instance']->getFieldDescription())) {
       $element['value']['#description'] = $selected_platform['instance']->getFieldDescription();
@@ -128,6 +132,7 @@ class SocialMediaLinksPlatforms extends FormElement {
    *   The current state of the form.
    *
    * @return array
+   *   $platform_field_element
    */
   public static function ajaxRefresh(array $form, FormStateInterface $form_state) {
     $platform_element = $form_state->getTriggeringElement();

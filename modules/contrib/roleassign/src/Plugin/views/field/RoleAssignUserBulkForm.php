@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\roleassign\Plugin\views\field\RoleAssignUserBulkForm.
- */
-
 namespace Drupal\roleassign\Plugin\views\field;
 
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
@@ -27,7 +22,7 @@ class RoleAssignUserBulkForm extends UserBulkForm {
       // Remove actions that are not allowed based on RoleAssign settings.
       $assignable_roles = array_filter(\Drupal::config('roleassign.settings')->get('roleassign_roles'));
       foreach ($this->actions as $action_key => $action) {
-        if (in_array($action->get('plugin'), array('user_add_role_action', 'user_remove_role_action'))) {
+        if (in_array($action->get('plugin'), ['user_add_role_action', 'user_remove_role_action'])) {
           $config = $action->get('configuration');
           if (!in_array($config['rid'], $assignable_roles)) {
             unset($this->actions[$action_key]);

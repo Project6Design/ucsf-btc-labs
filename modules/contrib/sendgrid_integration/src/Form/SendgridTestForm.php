@@ -6,6 +6,7 @@ use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Mail\MailManagerInterface;
+use Drupal\Core\Messenger\MessengerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,6 +24,13 @@ class SendGridTestForm extends FormBase {
   protected $mailManager;
 
   /**
+   * The messenger.
+   *
+   * @var \Drupal\Core\Messenger\MessengerInterface
+   */
+  protected $messenger;
+
+  /**
    * The language manager service.
    *
    * @var \Drupal\Core\Language\LanguageManagerInterface
@@ -36,10 +44,13 @@ class SendGridTestForm extends FormBase {
    *   The mail manager service.
    * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
    *   The language manager service.
+   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
+   *   The messenger service.
    */
-  public function __construct(MailManagerInterface $mailManager, LanguageManagerInterface $languageManager) {
+  public function __construct(MailManagerInterface $mailManager, LanguageManagerInterface $languageManager, MessengerInterface $messenger) {
     $this->mailManager = $mailManager;
     $this->languageManager = $languageManager;
+    $this->messenger = $messenger;
   }
 
   /**
@@ -48,7 +59,8 @@ class SendGridTestForm extends FormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('plugin.manager.mail'),
-      $container->get('language_manager')
+      $container->get('language_manager'),
+      $container->get('messenger')
     );
   }
 
@@ -153,10 +165,10 @@ class SendGridTestForm extends FormBase {
     else {
       $from = $site_settings->get('mail');
     }
-    $result = $this->mailManager->mail('sendgrid_integration', 'test', $config->get('test_defaults.to'), $this->languageManager->getDefaultLanguage()
+    $result = $this->mailManager->mail('sendgrid_integration', 'sengrid_integration_troubleshooting_test', $config->get('test_defaults.to'), $this->languageManager->getDefaultLanguage()
       ->getId(), $params, $from);
     if (isset($result['result']) && $result['result'] == TRUE) {
-      drupal_set_message($this->t('SendGrid test email sent from %from to %to.', [
+      $this->messenger->addMessage($this->t('SendGrid test email sent from %from to %to.', [
         '%from' => $from,
         '%to' => $config->get('test_defaults.to'),
       ]));

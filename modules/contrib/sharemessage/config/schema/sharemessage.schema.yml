@@ -109,6 +109,12 @@ sharemessage.sharemessage.*:
     image_url:
       type: string
       label: 'Image URL'
+    image_width:
+      type: string
+      label: 'Image Width'
+    image_height:
+      type: string
+      label: 'Image Height'
     fallback_image:
       type: string
       label: 'Fallback image UUID'

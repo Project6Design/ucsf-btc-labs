@@ -1,7 +1,5 @@
 <?php
 
-use Drupal\simple_sitemap\Entity\SimpleSitemapInterface;
-
 /**
  * @file
  * Hooks provided by the Simple XML Sitemap module.
@@ -22,7 +20,7 @@ use Drupal\simple_sitemap\Entity\SimpleSitemapInterface;
  * @param \Drupal\simple_sitemap\Entity\SimpleSitemapInterface $sitemap
  *   Sitemap entity.
  */
-function hook_simple_sitemap_links_alter(array &$links, SimpleSitemapInterface $sitemap) {
+function hook_simple_sitemap_links_alter(array &$links, \Drupal\simple_sitemap\Entity\SimpleSitemapInterface $sitemap) {
 
   // Remove German URL for a certain path in the hreflang sitemap.
   foreach ($links as $key => $link) {
@@ -50,7 +48,7 @@ function hook_simple_sitemap_links_alter(array &$links, SimpleSitemapInterface $
  * @param \Drupal\simple_sitemap\Entity\SimpleSitemapInterface $sitemap
  *   Sitemap entity.
  */
-function hook_simple_sitemap_arbitrary_links_alter(array &$arbitrary_links, SimpleSitemapInterface $sitemap) {
+function hook_simple_sitemap_arbitrary_links_alter(array &$arbitrary_links, \Drupal\simple_sitemap\Entity\SimpleSitemapInterface $sitemap) {
 
   // Add an arbitrary link to all sitemaps.
   $arbitrary_links[] = [
@@ -93,7 +91,7 @@ function hook_simple_sitemap_arbitrary_links_alter(array &$arbitrary_links, Simp
  * @param \Drupal\simple_sitemap\Entity\SimpleSitemapInterface $sitemap
  *   Sitemap entity.
  */
-function hook_simple_sitemap_attributes_alter(array &$attributes, SimpleSitemapInterface $sitemap) {
+function hook_simple_sitemap_attributes_alter(array &$attributes, \Drupal\simple_sitemap\Entity\SimpleSitemapInterface $sitemap) {
 
   // Remove the xhtml attribute e.g. if no xhtml sitemap elements are present.
   unset($attributes['xmlns:xhtml']);
@@ -109,7 +107,7 @@ function hook_simple_sitemap_attributes_alter(array &$attributes, SimpleSitemapI
  * @param \Drupal\simple_sitemap\Entity\SimpleSitemapInterface $sitemap
  *   Sitemap entity.
  */
-function hook_simple_sitemap_index_attributes_alter(array &$index_attributes, SimpleSitemapInterface $sitemap) {
+function hook_simple_sitemap_index_attributes_alter(array &$index_attributes, \Drupal\simple_sitemap\Entity\SimpleSitemapInterface $sitemap) {
 
   // Add some attribute to the sitemap index.
   $index_attributes['name'] = 'value';

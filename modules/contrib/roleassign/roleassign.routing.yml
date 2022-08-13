@@ -1,5 +1,5 @@
 roleassign.settings:
-  path: '/admin/config/people/roleassign'
+  path: '/admin/people/roleassign'
   defaults:
     _form: '\Drupal\roleassign\Form\RoleAssignAdminForm'
     _title: 'Role assign'
