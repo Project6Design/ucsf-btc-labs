@@ -5,6 +5,7 @@ namespace Drupal\sharemessage\Entity;
 use Drupal\Component\Render\PlainTextOutput;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
 use Drupal\Core\Url;
+use Drupal\file\FileInterface;
 use Drupal\node\NodeInterface;
 use Drupal\sharemessage\ShareMessageInterface;
 
@@ -35,6 +36,8 @@ use Drupal\sharemessage\ShareMessageInterface;
  *     "message_long",
  *     "message_short",
  *     "image_url",
+ *     "image_width",
+ *     "image_height",
  *     "fallback_image",
  *     "video_url",
  *     "share_url",
@@ -108,6 +111,20 @@ class ShareMessage extends ConfigEntityBase implements ShareMessageInterface {
    * @var string
    */
   public $image_url;
+
+  /**
+   * The width of the image that will be used for sharing.
+   *
+   * @var string
+   */
+  public $image_width;
+
+  /**
+   * The height of the image that will be used for sharing.
+   *
+   * @var string
+   */
+  public $image_height;
 
   /**
    * An optional fallback image as file UUID if the image URL does not resolve.
@@ -272,7 +289,7 @@ class ShareMessage extends ConfigEntityBase implements ShareMessageInterface {
     ];
 
     // OG: Image, also used for video thumbnail.
-    if ($image_url = $this->getImageUrl($context)) {
+    if ($image_url = $this->getImageUrl($context, $fallback_image)) {
       $tags[] = [
         '#type' => 'html_tag',
         '#tag' => 'meta',
@@ -281,6 +298,41 @@ class ShareMessage extends ConfigEntityBase implements ShareMessageInterface {
           'content' => $image_url,
         ],
       ];
+
+      $image_width = NULL;
+      $image_height = NULL;
+      if ($fallback_image instanceof FileInterface) {
+        if (file_exists($fallback_image->getFileUri())) {
+          $image = \Drupal::service('image.factory')->get($fallback_image->getFileUri());
+          if ($image->isValid()) {
+            $image_width = $image->getWidth();
+            $image_height = $image->getHeight();
+          }
+        }
+      }
+      else {
+        $image_width = $this->getTokenizedField($this->image_width, $context);
+        $image_height = $this->getTokenizedField($this->image_height, $context);
+      }
+      if ($image_width && $image_height) {
+        $tags[] = [
+          '#type' => 'html_tag',
+          '#tag' => 'meta',
+          '#attributes' => [
+            'property' => 'og:image:width',
+            'content' => $image_width,
+          ],
+        ];
+        $tags[] = [
+          '#type' => 'html_tag',
+          '#tag' => 'meta',
+          '#attributes' => [
+            'property' => 'og:image:height',
+            'content' => $image_height,
+          ],
+        ];
+      }
+
     }
 
     // OG: Video.
@@ -368,7 +420,7 @@ class ShareMessage extends ConfigEntityBase implements ShareMessageInterface {
       '#type' => 'html_tag',
       '#tag' => 'meta',
       '#attributes' => [
-        'property' => 'twitter:card',
+        'name' => 'twitter:card',
         'content' => 'summary_large_image',
       ],
     ];
@@ -378,7 +430,7 @@ class ShareMessage extends ConfigEntityBase implements ShareMessageInterface {
       '#type' => 'html_tag',
       '#tag' => 'meta',
       '#attributes' => [
-        'property' => 'twitter:site',
+        'name' => 'twitter:site',
         'content' => \Drupal::config('sharemessage.settings')->get('twitter_user'),
       ],
     ];
@@ -388,7 +440,7 @@ class ShareMessage extends ConfigEntityBase implements ShareMessageInterface {
       '#type' => 'html_tag',
       '#tag' => 'meta',
       '#attributes' => [
-        'property' => 'twitter:description',
+        'name' => 'twitter:description',
         'content' => $this->getTokenizedField($this->message_long, $context),
       ],
     ];
@@ -399,7 +451,7 @@ class ShareMessage extends ConfigEntityBase implements ShareMessageInterface {
         '#type' => 'html_tag',
         '#tag' => 'meta',
         '#attributes' => [
-          'property' => 'twitter:image',
+          'name' => 'twitter:image',
           'content' => $image_url,
         ],
       ];
@@ -473,11 +525,14 @@ class ShareMessage extends ConfigEntityBase implements ShareMessageInterface {
    *
    * @param array $context
    *   The context for the token replacements.
+   * @param \Drupal\file\FileInterface|null $fallback_image
+   *   By-reference argument that holds the fallback image reference if that
+   *   was used.
    *
    * @return bool|string
    *   The found URL or FALSE.
    */
-  protected function getImageUrl($context) {
+  protected function getImageUrl($context, &$fallback_image = NULL) {
     // Get image url either from dedicated file field or by resolving token.
     $image_url = $this->getTokenizedField($this->image_url, $context);
     // If the returned image URl is empty, try to use the fallback image if
@@ -485,9 +540,9 @@ class ShareMessage extends ConfigEntityBase implements ShareMessageInterface {
     if (!$image_url && !empty($this->fallback_image)) {
       $entity_repository = \Drupal::getContainer()->get('entity.repository');
       /** @var \Drupal\file\FileInterface $image */
-      $image = $entity_repository->loadEntityByUuid('file', $this->fallback_image);
-      if ($image) {
-        $image_url = file_create_url($image->getFileUri());
+      $fallback_image = $entity_repository->loadEntityByUuid('file', $this->fallback_image);
+      if ($fallback_image) {
+        $image_url = file_create_url($fallback_image->getFileUri());
       }
     }
     return $image_url;

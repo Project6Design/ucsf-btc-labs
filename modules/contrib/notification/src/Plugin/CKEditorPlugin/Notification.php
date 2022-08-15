@@ -14,6 +14,7 @@ use Drupal\editor\Entity\Editor;
  * )
  */
 class Notification extends CKEditorPluginBase {
+
   /**
    * {@inheritdoc}
    */
@@ -34,4 +35,5 @@ class Notification extends CKEditorPluginBase {
   public function getButtons() {
     return [];
   }
+
 }

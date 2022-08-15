@@ -97,6 +97,24 @@ class SendGridSettingsForm extends ConfigFormBase {
         '#description' => $this->t('The secret key of your key pair. These are only generated once by Sendgrid. Your existing key is hidden. If you need to change this, provide a new key here.'),
       ];
     }
+    $form['settings'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Settings'),
+    ];
+
+    $form['settings']['sendgrig_intergration_trackopens'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Track Opens'),
+      '#description' => $this->t('Track opening of emails. This will include a small image in each email. Set to off by default.'),
+      '#default_value' => !empty($config->get('trackopens')) ? $config->get('trackopens') : 0
+    ];
+
+    $form['settings']['sendgrig_intergration_trackclicks'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Track Clicks'),
+      '#description' => $this->t('Track the clicking of links in email. Set to off by default.'),
+      '#default_value' => !empty($config->get('trackclicks')) ? $config->get('trackclicks') : 0
+    ];
 
     return parent::buildForm($form, $form_state);
   }
@@ -132,6 +150,20 @@ class SendGridSettingsForm extends ConfigFormBase {
       if ($form_state->hasValue('sendgrid_integration_apikey') && !empty($form_state->getValue('sendgrid_integration_apikey'))) {
         $config->set('apikey', $form_state->getValue('sendgrid_integration_apikey'));
       }
+    }
+
+    if ($form_state->hasValue('sendgrig_intergration_trackopens') && !empty($form_state->getValue('sendgrig_intergration_trackopens'))) {
+      $config->set('trackopens', 1);
+    }
+    elseif (empty($form_state->getValue('sendgrig_intergration_trackopens'))) {
+      $config->set('trackopens', 0);
+    }
+
+    if ($form_state->hasValue('sendgrig_intergration_trackclicks') && !empty($form_state->getValue('sendgrig_intergration_trackclicks'))) {
+      $config->set('trackclicks', 1);
+    }
+    elseif (empty($form_state->getValue('sendgrig_intergration_trackclicks'))) {
+      $config->set('trackclicks', 0);
     }
 
     $config->save();

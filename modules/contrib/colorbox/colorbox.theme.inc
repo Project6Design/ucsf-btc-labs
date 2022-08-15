@@ -5,11 +5,9 @@
  * Colorbox theme functions.
  */
 
-use Drupal\Component\Utility\Crypt;
-use Drupal\Component\Utility\Unicode;
 use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
-
+use Drupal\Component\Utility\Xss;
 /**
  * Prepares variables for colorbox formatter templates.
  *
@@ -22,12 +20,14 @@ use Drupal\image\Entity\ImageStyle;
  *     placed in the img tag.
  *   - entity: An entity object.
  *   - settings: Formatter settings array.
+ *
+ * @codingStandardsIgnoreStart
  */
 function template_preprocess_colorbox_formatter(&$variables) {
-  static $gallery_token = NULL;
+  // @codingStandardsIgnoreEnd
 
   $item = $variables['item'];
-  $item_attributes = isset($variables['item_attributes']) ? $variables['item_attributes'] : [];
+  $item_attributes = $variables['item_attributes'] ?? [];
   $entity = $variables['entity'];
   $settings = $variables['settings'];
   $image_uri = $item->entity->getFileUri();
@@ -37,7 +37,6 @@ function template_preprocess_colorbox_formatter(&$variables) {
   // Build the caption.
   $entity_title = $entity->label();
   $entity_type = $entity->getEntityTypeId();
-  $entity_bundle = $entity->bundle();
 
   switch ($settings['colorbox_caption']) {
     case 'auto':
@@ -70,7 +69,11 @@ function template_preprocess_colorbox_formatter(&$variables) {
 
     case 'custom':
       $token_service = \Drupal::token();
-      $caption = $token_service->replace($settings['colorbox_caption_custom'], [$entity_type => $entity, 'file' => $item], ['clear' => TRUE]);
+      $caption = $token_service->replace(
+        $settings['colorbox_caption_custom'],
+        [$entity_type => $entity, 'file' => $item],
+        ['clear' => TRUE]
+      );
       break;
 
     default:
@@ -80,54 +83,13 @@ function template_preprocess_colorbox_formatter(&$variables) {
   // Shorten the caption for the example styles or when caption
   // shortening is active.
   $config = \Drupal::config('colorbox.settings');
-  $colorbox_style = $config->get('colorbox_style');
+  $colorbox_style = !empty($config->get('colorbox_style')) ? $config->get('colorbox_style') : '';
   $trim_length = $config->get('colorbox_caption_trim_length');
-  if (((strpos($colorbox_style, 'colorbox/example') !== FALSE) || $config->get('colorbox_caption_trim')) && (Unicode::strlen($caption) > $trim_length)) {
-    $caption = Unicode::substr($caption, 0, $trim_length - 5) . '...';
+  if (((strpos($colorbox_style, 'colorbox/example') !== FALSE) || $config->get('colorbox_caption_trim')) && (strlen($caption) > $trim_length)) {
+    $caption = substr($caption, 0, $trim_length - 5) . '...';
   }
 
-  // Build the gallery id.
-  $id = $entity->id();
-  $entity_id = !empty($id) ? $entity_bundle . '-' . $id : 'entity-id';
-  $field_name = $item->getParent()->getName();
-
-  switch ($settings['colorbox_gallery']) {
-    case 'post':
-      $gallery_id = 'gallery-' . $entity_id;
-      break;
-
-    case 'page':
-      $gallery_id = 'gallery-all';
-      break;
-
-    case 'field_post':
-      $gallery_id = 'gallery-' . $entity_id . '-' . $field_name;
-      break;
-
-    case 'field_page':
-      $gallery_id = 'gallery-' . $field_name;
-      break;
-
-    case 'custom':
-      $token_service = \Drupal::token();
-      $gallery_id = $token_service->replace($settings['colorbox_gallery_custom'], [$entity_type => $entity, 'file' => $item], ['clear' => TRUE]);
-      break;
-
-    default:
-      $gallery_id = '';
-  }
-
-  // If gallery id is not empty add unique per-request token to avoid
-  // images being added manually to galleries.
-  if (!empty($gallery_id) && $config->get('advanced.unique_token')) {
-    // Check if gallery token has already been set, we need to reuse
-    // the token for the whole request.
-    if (is_null($gallery_token)) {
-      // We use a short token since randomness is not critical.
-      $gallery_token = Crypt::randomBytesBase64(8);
-    }
-    $gallery_id = $gallery_id . '-' . $gallery_token;
-  }
+  $gallery_id = \Drupal::service('colorbox.gallery_id_generator')->generateId($entity, $item, $settings);
 
   // Set up the $variables['image'] parameter.
   if ($settings['style_name'] == 'hide') {
@@ -150,7 +112,7 @@ function template_preprocess_colorbox_formatter(&$variables) {
     $variables['image']['#attributes'] = $item_attributes;
 
     // Do not output an empty 'title' attribute.
-    if (Unicode::strlen($item->title) != 0) {
+    if (!empty($item->title)) {
       $variables['image']['#title'] = $item->title;
       $data_cbox_img_attrs['title'] = '"title":"' . $item->title . '"';
     }
@@ -190,7 +152,7 @@ function template_preprocess_colorbox_formatter(&$variables) {
     }
   }
 
-  $variables['attributes']['title'] = $caption;
+  $variables['attributes']['title'] = Xss::filter($caption);
   $variables['attributes']['data-colorbox-gallery'] = $gallery_id;
   $variables['attributes']['class'] = $classes_array;
   if (!empty($data_cbox_img_attrs)) {

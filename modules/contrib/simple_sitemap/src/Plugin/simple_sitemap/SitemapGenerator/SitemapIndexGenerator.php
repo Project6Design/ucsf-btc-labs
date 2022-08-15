@@ -46,15 +46,8 @@ class SitemapIndexGenerator extends DefaultSitemapGenerator {
   protected function addLinks(array $links): void {
     foreach ($links as $url_data) {
       $this->writer->startElement('sitemap');
-
-      if (isset($url_data['url'])) {
-        $this->writer->writeElement('loc', $url_data['url']);
-      }
-
-      if (isset($url_data['lastmod'])) {
-        $this->writer->writeElement('lastmod', $url_data['lastmod']);
-      }
-
+      $this->writer->writeElement('loc', $url_data['loc']);
+      $this->writer->writeElement('lastmod', $url_data['lastmod']);
       $this->writer->endElement();
     }
   }

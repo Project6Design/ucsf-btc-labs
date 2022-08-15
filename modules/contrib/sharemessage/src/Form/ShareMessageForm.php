@@ -148,6 +148,22 @@ class ShareMessageForm extends EntityForm {
       '#weight' => 20,
     ];
 
+    $form['image_width'] = [
+      '#type' => 'textfield',
+      '#title' => t('Image Width'),
+      '#default_value' => $sharemessage->image_width,
+      '#description' => t('The width of the image that will be used for sharing.'),
+      '#weight' => 21,
+    ];
+
+    $form['image_height'] = [
+      '#type' => 'textfield',
+      '#title' => t('Image Height'),
+      '#default_value' => $sharemessage->image_height,
+      '#description' => t('The height of the image that will be used for sharing.'),
+      '#weight' => 22,
+    ];
+
     // @todo: Convert this to a file upload/selection widget.
     $form['fallback_image'] = [
       '#type' => 'textfield',
@@ -438,10 +454,10 @@ class ShareMessageForm extends EntityForm {
     $status = $sharemessage->save();
 
     if ($status == SAVED_UPDATED) {
-      drupal_set_message(t('Share Message %label has been updated.', ['%label' => $sharemessage->label()]));
+      $this->messenger()->addMessage(t('Share Message %label has been updated.', ['%label' => $sharemessage->label()]));
     }
     else {
-      drupal_set_message(t('Share Message %label has been added.', ['%label' => $sharemessage->label()]));
+      $this->messenger()->addMessage(t('Share Message %label has been added.', ['%label' => $sharemessage->label()]));
     }
     // Share Message settings might have changed, but it is not immediately
     // updated for the view display. Thus clear the entity extra field caches.

@@ -2,7 +2,7 @@
 
 namespace Drupal\sharemessage;
 
-use Drupal\Component\Plugin\ConfigurablePluginInterface;
+use Drupal\Component\Plugin\ConfigurableInterface;
 use Drupal\Core\Plugin\PluginFormInterface;
 
 /**
@@ -10,7 +10,7 @@ use Drupal\Core\Plugin\PluginFormInterface;
  *
  * @ingroup sharemessage
  */
-interface SharePluginInterface extends ConfigurablePluginInterface, PluginFormInterface {
+interface SharePluginInterface extends ConfigurableInterface, PluginFormInterface {
 
   /**
    * Creates the AddThis toolbar.

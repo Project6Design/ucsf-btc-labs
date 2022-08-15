@@ -2,19 +2,19 @@
 
 namespace Drupal\sitemap\Tests;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Test the display of menus based on sitemap settings.
  */
-abstract class SitemapMenuTestBase extends WebTestBase {
+abstract class SitemapMenuTestBase extends SitemapBrowserTestBase {
+
+  use StringTranslationTrait;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
-  public static $modules = array('sitemap', 'node', 'menu_ui');
+  public static $modules = ['sitemap', 'node', 'menu_ui'];
 
   /**
    * Admin user.
@@ -38,23 +38,40 @@ abstract class SitemapMenuTestBase extends WebTestBase {
 
     // Create an Article node type.
     if ($this->profile != 'standard') {
-      $this->drupalCreateContentType(array('type' => 'article', 'name' => 'Article'));
+      $this->drupalCreateContentType(['type' => 'article', 'name' => 'Article']);
     }
 
     // Create user then login.
-    $this->adminUser = $this->drupalCreateUser(array(
+    $this->adminUser = $this->drupalCreateUser([
       'administer sitemap',
       'access sitemap',
       'administer menu',
       'administer nodes',
       'create article content',
-    ));
+    ]);
     $this->drupalLogin($this->adminUser);
 
     // Create anonymous user for use too.
-    $this->anonUser = $this->drupalCreateUser(array(
+    $this->anonUser = $this->drupalCreateUser([
       'access sitemap',
-    ));
+    ]);
+  }
+
+  /**
+   * Creates a node and adds it to the menu.
+   *
+   * @param string $menu_id
+   *   The menu id.
+   */
+  protected function createNodeInMenu($menu_id) {
+    // Create test node with enabled menu item.
+    $edit = [
+      'title[0][value]' => $this->randomString(),
+      'menu[enabled]' => TRUE,
+      'menu[title]' => $this->randomString(),
+      'menu[menu_parent]' => $menu_id . ':',
+    ];
+    $this->drupalPostForm('node/add/article', $edit, $this->t('Save'));
   }
 
 }

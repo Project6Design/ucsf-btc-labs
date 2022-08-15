@@ -20,7 +20,7 @@
             </div>
         {% endif %}
 
-        {{ drupal_block('btc_labs_breadcrumbs') }}
+        {{ drupal_entity('block', 'btc_labs_breadcrumbs') }}
 
         {% if not node.published %}
             <p class="node--unpublished">{{ 'Unpublished'|t }}</p>

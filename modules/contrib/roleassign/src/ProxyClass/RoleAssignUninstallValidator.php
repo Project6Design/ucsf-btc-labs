@@ -1,9 +1,5 @@
 <?php
-
-/**
- * @file
- * Contains \Drupal\roleassign\ProxyClass\RoleAssignUninstallValidator.
- */
+// @codingStandardsIgnoreFile
 
 /**
  * This file was generated via php core/scripts/generate-proxy-class.php 'Drupal\roleassign\RoleAssignUninstallValidator' "modules/roleassign/src".

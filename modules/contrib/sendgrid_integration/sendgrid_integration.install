@@ -5,8 +5,8 @@
  * Contains install and update functions for SendGrid Integration
  */
 
-use Drupal\mailsystem\MailsystemManager;
 use Drupal\Core\Url;
+use Drupal\mailsystem\MailsystemManager;
 
 /**
  * Implements hook_install().

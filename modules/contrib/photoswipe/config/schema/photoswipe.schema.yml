@@ -1,70 +1,127 @@
 photoswipe.settings:
-  type: mapping
+  type: config_object
   label: Settings
   mapping:
     photoswipe_always_load_non_admin:
       type: boolean
     options:
+      type: mapping
+      label: Options
+      mapping:
 #      index: integer
-      showAnimationDuration:
-        type: integer
-        label: 'Show Animation Duration'
-      hideAnimationDuration:
-        type: integer
-        label: 'Hide Animation Duration'
-      showHideOpacity:
-        type: boolean
-        label: 'Show Hide Opacity'
-      bgOpacity:
-        type: float
-        label: 'Background Opacity'
-      spacing:
-        type: float
-        label: 'Spacing'
-      allowPanToNext:
-        type: boolean
-        label: 'Allow Pan to Next'
-      maxSpreadZoom:
-        type: integer
-        label: 'Max Spread Zoom'
-      loop:
-        type: boolean
-        label: 'Loop'
-      pinchToClose:
-        type: boolean
-        label: 'Pinch to Close'
-      closeOnScroll:
-        type: boolean
-        label: 'Close on Scroll'
-      closeOnVerticalDrag:
-        type: boolean
-        label: 'Close on Vertical Drag'
-      mouseUsed:
-        type: boolean
-        label: 'Mouse Used'
-      escKey:
-        type: boolean
-        label: 'Escape Key'
-      arrowKeys:
-        type: boolean
-        label: 'Arrow Keys'
-      history:
-        type: boolean
-        label: 'History'
-#      galleryUID: Integer
-#      galleryPIDs: Boolean
-      errorMsg:
-        type: string
-        label: 'Error Message'
-      preload:
-        type: array
-        label: 'Preload'
-      mainClass:
-        type: string
-        label: 'Main Class'
-      focus:
-        type: boolean
-        label: 'Focus'
-      modal:
-        type: boolean
-        label: 'Modal'
+        showAnimationDuration:
+          type: integer
+          label: 'Show Animation Duration'
+        hideAnimationDuration:
+          type: integer
+          label: 'Hide Animation Duration'
+        showHideOpacity:
+          type: boolean
+          label: 'Show Hide Opacity'
+        bgOpacity:
+          type: float
+          label: 'Background Opacity'
+        spacing:
+          type: float
+          label: 'Spacing'
+        allowPanToNext:
+          type: boolean
+          label: 'Allow Pan to Next'
+        maxSpreadZoom:
+          type: integer
+          label: 'Max Spread Zoom'
+        loop:
+          type: boolean
+          label: 'Loop'
+        pinchToClose:
+          type: boolean
+          label: 'Pinch to Close'
+        closeOnScroll:
+          type: boolean
+          label: 'Close on Scroll'
+        closeOnVerticalDrag:
+          type: boolean
+          label: 'Close on Vertical Drag'
+        mouseUsed:
+          type: boolean
+          label: 'Mouse Used'
+        escKey:
+          type: boolean
+          label: 'Escape Key'
+        arrowKeys:
+          type: boolean
+          label: 'Arrow Keys'
+        history:
+          type: boolean
+          label: 'History'
+  #      galleryUID: Integer
+  #      galleryPIDs: Boolean
+        errorMsg:
+          type: string
+          label: 'Error Message'
+        preload:
+          type: sequence
+          label: 'Preload'
+          sequence:
+            - type: integer
+        mainClass:
+          type: string
+          label: 'Main Class'
+        focus:
+          type: boolean
+          label: 'Focus'
+        modal:
+          type: boolean
+          label: 'Modal'
+
+field.formatter.settings.photoswipe_field_formatter:
+  type: mapping
+  label: 'Photoswipe display format settings'
+  mapping:
+    photoswipe_node_style_first:
+      type: string
+      label: 'Photoswipe Node Style First'
+    photoswipe_node_style:
+      type: string
+      label: 'Photoswipe Node Style'
+    photoswipe_image_style:
+      type: string
+      label: 'Photoswipe Image Style'
+    photoswipe_reference_image_field:
+      type: string
+      label: 'Photoswipe Reference Image Field'
+    photoswipe_caption:
+      type: string
+      label: 'Photoswipe Caption'
+    photoswipe_caption_custom:
+      type: string
+      label: 'Photoswipe Caption Custom'
+    photoswipe_view_mode:
+      type: string
+      label: 'Photoswipe View Mode'
+
+field.formatter.settings.photoswipe_responsive_field_formatter:
+  type: mapping
+  label: 'Photoswipe responsive display format settings'
+  mapping:
+    photoswipe_node_style_first:
+      type: string
+      label: 'Photoswipe Node Style First'
+    photoswipe_node_style:
+      type: string
+      label: 'Photoswipe Node Style'
+    photoswipe_image_style:
+      type: string
+      label: 'Photoswipe Image Style'
+    photoswipe_reference_image_field:
+      type: string
+      label: 'Photoswipe Reference Image Field'
+    photoswipe_caption:
+      type: string
+      label: 'Photoswipe Caption'
+    photoswipe_caption_custom:
+      type: string
+      label: 'Photoswipe Caption Custom'
+    photoswipe_view_mode:
+      type: string
+      label: 'Photoswipe View Mode'

@@ -14,9 +14,9 @@ use Drupal\KernelTests\KernelTestBase;
 abstract class FormatterTestBase extends KernelTestBase {
 
   /**
-   * @var array
+   * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'system',
     'field',
     'language',
@@ -43,9 +43,12 @@ abstract class FormatterTestBase extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
+    if (\Drupal::entityTypeManager()->hasDefinition('path_alias')) {
+      $this->installEntitySchema('path_alias');
+    }
     $this->installConfig(['system']);
     $this->installConfig(['field']);
     $this->installConfig(['text']);
@@ -78,7 +81,7 @@ abstract class FormatterTestBase extends KernelTestBase {
     ]);
     $field->save();
 
-    $this->display = entity_get_display('entity_test', 'entity_test', 'default');
+    $this->display = \Drupal::service('entity_display.repository')->getViewDisplay('entity_test', 'entity_test', 'default');
     $this->display->setComponent($this->fieldName, [
       'type' => $formatter_id,
       'settings' => [],

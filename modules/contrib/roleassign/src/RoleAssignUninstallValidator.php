@@ -1,13 +1,7 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\roleassign\RoleAssignUninstallValidator.
- */
-
 namespace Drupal\roleassign;
 
-use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Extension\ModuleUninstallValidatorInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
@@ -34,12 +28,26 @@ class RoleAssignUninstallValidator implements ModuleUninstallValidatorInterface 
    */
   public function validate($module) {
     $reasons = [];
+    if ($this->isCli()) {
+      return $reasons;
+    }
+
     if ($module == "roleassign") {
       if (!\Drupal::currentUser()->hasPermission('administer roles')) {
         $reasons[] = $this->t('You are not allowed to disable this module.');
       }
     }
     return $reasons;
+  }
+
+  /**
+   * Indicates whether this is a CLI request.
+   *
+   * @return bool
+   *   TRUE for a cli request, or FALSE.
+   */
+  public function isCli() {
+    return PHP_SAPI === 'cli';
   }
 
 }

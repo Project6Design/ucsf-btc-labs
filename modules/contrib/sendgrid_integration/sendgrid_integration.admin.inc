@@ -1,7 +1,12 @@
 <?php
 
 /**
+ * @file
  * Provides a form to send a test email through Sendgrid.
+ */
+
+/**
+ * {@inheritdoc}
  */
 function sendgrid_integration_test() {
   $form = [];
@@ -118,9 +123,10 @@ function sendgrid_integration_test_submit($form, &$form_state) {
   }
   $result = drupal_mail('sendgrid_integration', 'test', $sendto, language_default(), $params, $senderfrom);
   if (isset($result['result']) && $result['result'] == 'true') {
-    drupal_set_message(t('SendGrid test email sent from %from to %to.', [
-      '%from' => $senderfrom,
-      '%to' => $sendto,
-    ]), 'status');
+    \Drupal::messenger()
+      ->addStatus(t('SendGrid test email sent from %from to %to.', [
+        '%from' => $senderfrom,
+        '%to' => $sendto,
+      ]));
   }
 }

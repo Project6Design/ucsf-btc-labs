@@ -51,8 +51,9 @@ class SocialMediaLinksPlatformManager extends DefaultPluginManager {
   }
 
   /**
-   * Get all platform plugins and sort it by weight from
-   * platform settings (e.g. block configuration, field settings).
+   * Get all platform plugins and sort it by weight from.
+   *
+   * Platform settings (e.g. block configuration, field settings).
    *
    * @param array $settings
    *   The configuration with the 'weight'.
@@ -60,7 +61,7 @@ class SocialMediaLinksPlatformManager extends DefaultPluginManager {
    * @return array
    *   The platform plugins sorted by weight setting.
    */
-  public function getPlatformsSortedByWeight($settings) {
+  public function getPlatformsSortedByWeight(array $settings) {
     $default_weight = -10;
 
     $platforms = $this->getPlatforms();
@@ -68,7 +69,10 @@ class SocialMediaLinksPlatformManager extends DefaultPluginManager {
       $platforms[$platform_id]['weight'] = isset($settings['platforms'][$platform_id]['weight']) ? $settings['platforms'][$platform_id]['weight'] : $default_weight++;
     }
 
-    uasort($platforms, ['Drupal\Component\Utility\SortArray', 'sortByWeightElement']);
+    uasort($platforms, [
+      'Drupal\Component\Utility\SortArray',
+      'sortByWeightElement',
+    ]);
     return $platforms;
   }
 
@@ -85,9 +89,9 @@ class SocialMediaLinksPlatformManager extends DefaultPluginManager {
       if (!empty($platforms[$platform_id]['value'])) {
         $platform['instance']->setValue($platforms[$platform_id]['value']);
 
-          if (!empty($platforms[$platform_id]['description'])) {
-              $platform['instance']->setDescription($platforms[$platform_id]['description']);
-          }
+        if (!empty($platforms[$platform_id]['description'])) {
+          $platform['instance']->setDescription($platforms[$platform_id]['description']);
+        }
 
         $usedPlatforms[$platform_id] = $platform;
 
@@ -97,7 +101,10 @@ class SocialMediaLinksPlatformManager extends DefaultPluginManager {
     }
 
     if ($sort) {
-      uasort($usedPlatforms, ['Drupal\Component\Utility\SortArray', 'sortByWeightElement']);
+      uasort($usedPlatforms, [
+        'Drupal\Component\Utility\SortArray',
+        'sortByWeightElement',
+      ]);
     }
 
     return $usedPlatforms;

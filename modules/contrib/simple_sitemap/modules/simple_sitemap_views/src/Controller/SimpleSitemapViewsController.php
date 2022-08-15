@@ -46,8 +46,6 @@ class SimpleSitemapViewsController extends ControllerBase {
    *   A render array.
    */
   public function content(): array {
-    $table = &$build['simple_sitemap_views'];
-
     $table = [
       '#type' => 'table',
       '#header' => [
@@ -90,6 +88,14 @@ class SimpleSitemapViewsController extends ControllerBase {
         ],
       ];
     }
+
+    // Show information about indexed displays.
+    $build['simple_sitemap_views'] = [
+      '#prefix' => FormHelper::getDonationText(),
+      '#title' => $this->t('Indexed view displays'),
+      '#type' => 'fieldset',
+      'table' => $table,
+    ];
 
     return $build;
   }

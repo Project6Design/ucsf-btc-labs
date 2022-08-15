@@ -8,6 +8,7 @@
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
 use Drupal\user\RoleInterface;
 
 /**
@@ -37,12 +38,12 @@ function roleassign_help($route_name, RouteMatchInterface $route_match) {
       <ol>
         <li>Log in as a user with both the Assign roles and the Administer users permissions.</li>
         <li>To change the roles of a user, go to the user\'s account and review the assignable roles and change them as necessary.</li>
-      </ol>', array(
+      </ol>', [
         ':user_protect' => 'http://drupal.org/project/userprotect',
-      )
+      ]
     );
     case 'roleassign.settings':
-      return t('Users with both %administer_users and %assign_roles permissions are allowed to assign the roles selected below. For more information, see the <a href=":help">help page</a>.', array('%administer_users' => $permissions['administer users']['title'], '%assign_roles' => $permissions['assign roles']['title'], ':help' => \Drupal::url('help.page', array ('name' => 'roleassign'))));
+      return t('Users with both %administer_users and %assign_roles permissions are allowed to assign the roles selected below. For more information, see the <a href=":help">help page</a>.', ['%administer_users' => $permissions['administer users']['title'], '%assign_roles' => $permissions['assign roles']['title'], ':help' => Url::fromRoute('help.page', ['name' => 'roleassign'])->toString()]);
   }
 }
 
@@ -99,16 +100,16 @@ function roleassign_form_alter(&$form, FormStateInterface $form_state, $form_id)
       $sticky_roles[RoleInterface::AUTHENTICATED_ID] = $roles[RoleInterface::AUTHENTICATED_ID];
 
       // Store sticky roles in form values.
-      $form['sticky_roles'] = array('#type' => 'value', '#value' => $sticky_roles);
+      $form['sticky_roles'] = ['#type' => 'value', '#value' => $sticky_roles];
 
       // Build the assign roles checkboxes.
-      $roles_field = array(
+      $roles_field = [
         '#type' => 'checkboxes',
         '#title' => t('Assignable roles'),
         '#options' => $assignable_roles,
-        '#default_value' => empty($assigned_roles) ? array() : array_keys($assigned_roles),
-        '#description' => t('The user receives the combined permissions of all roles selected here and the following roles: %roles.', array('%roles' => implode(', ', $sticky_roles))),
-      );
+        '#default_value' => empty($assigned_roles) ? [] : array_keys($assigned_roles),
+        '#description' => t('The user receives the combined permissions of all roles selected here and the following roles: %roles.', ['%roles' => implode(', ', $sticky_roles)]),
+      ];
       // The user form is sometimes within an 'account' fieldset.
       if (isset($form['account'])) {
         $user_form =&$form['account'];
@@ -128,6 +129,15 @@ function roleassign_form_alter(&$form, FormStateInterface $form_state, $form_id)
       else {
         $user_form['roles'] = $roles_field;
       }
+    }
+    elseif (\Drupal::moduleHandler()->moduleExists('cas') && $form_id == 'bulk_add_cas_users') {
+      // Get all roles that are available.
+      $roles = user_role_names(TRUE);
+
+      // Get roles that are available for assignment.
+      $assignable_roles = array_intersect_key($roles, array_filter(\Drupal::config('roleassign.settings')->get('roleassign_roles')));
+
+      $form['roles']['#options'] = $assignable_roles;
     }
   }
 }
@@ -181,6 +191,8 @@ function roleassign_user_presave($account) {
  */
 function roleassign_get_unassignable_roles() {
   $all_roles = user_role_names(TRUE);
+  // Ignore Authenticated user as this is not required.
+  unset($all_roles[RoleInterface::AUTHENTICATED_ID]);
   $assignable_roles = array_filter(\Drupal::config('roleassign.settings')->get('roleassign_roles'));
   $unassignable_roles = array_diff(array_keys($all_roles), $assignable_roles);
   return $unassignable_roles;

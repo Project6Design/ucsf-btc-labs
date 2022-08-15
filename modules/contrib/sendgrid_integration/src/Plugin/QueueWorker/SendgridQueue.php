@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   cron = {"time" = 60}
  * )
  */
-class SendgridQueue extends QueueWorkerBase implements ContainerFactoryPluginInterface {
+class SendGridQueue extends QueueWorkerBase implements ContainerFactoryPluginInterface {
 
   /**
    * The mail manager service.

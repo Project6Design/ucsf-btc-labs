@@ -9,6 +9,7 @@
  * Test case.
  */
 class SendgridIntegrationTestCase extends DrupalWebTestCase {
+
   /**
    * Administrative user.
    *

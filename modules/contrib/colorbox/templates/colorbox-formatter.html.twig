@@ -13,4 +13,5 @@
  * @ingroup themeable
  */
 #}
-<a href="{{ url }}"{{ attributes }}>{{ image }}</a>
+
+<a href="{{ url }}" aria-controls="colorbox" aria-label="{{ attributes['data-cbox-img-attrs']|raw }}" role="button" {{ attributes }}>{{ image }}</a>

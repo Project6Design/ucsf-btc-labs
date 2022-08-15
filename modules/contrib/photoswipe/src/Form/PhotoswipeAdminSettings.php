@@ -6,6 +6,9 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 
+/**
+ * {@inheritdoc}
+ */
 class PhotoswipeAdminSettings extends ConfigFormBase {
 
   /**
@@ -40,11 +43,14 @@ class PhotoswipeAdminSettings extends ConfigFormBase {
     return ['photoswipe.settings'];
   }
 
-  public function buildForm(array $form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state) {
     $form['photoswipe_always_load_non_admin'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Load PhotoSwipe on all non-admin pages'),
-      '#default_value' => \Drupal::config('photoswipe.settings')->get('photoswipe_always_load_non_admin'),
+      '#default_value' => $this->configFactory->get('photoswipe.settings')->get('photoswipe_always_load_non_admin'),
       '#description' => $this->t('Useful if you want to use photoswipe elsewhere by just adding the <code>.photoswipe</code> CSS class.'),
     ];
 
