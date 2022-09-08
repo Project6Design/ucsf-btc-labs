@@ -65,7 +65,6 @@ dependencies:
   - redirect
   - redirect_404
   - roleassign
-  - simple_sitemap
   - token
   - webform
   - webform_ui
