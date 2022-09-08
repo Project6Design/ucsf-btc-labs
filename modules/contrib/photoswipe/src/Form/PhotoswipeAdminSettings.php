@@ -18,29 +18,22 @@ class PhotoswipeAdminSettings extends ConfigFormBase {
     return 'photoswipe_admin_settings';
   }
 
-  /**
+    /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = $this->config('photoswipe.settings');
-
-    foreach (Element::children($form) as $variable) {
-      $config->set($variable, $form_state->getValue($form[$variable]['#parents']));
-    }
-    $config->save();
-
-    if (method_exists($this, '_submitForm')) {
-      $this->_submitForm($form, $form_state);
-    }
-
-    parent::submitForm($form, $form_state);
+  protected function getEditableConfigNames() {
+    return ['photoswipe.settings'];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
-    return ['photoswipe.settings'];
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    $this->config('photoswipe.settings')
+    ->set('photoswipe_always_load_non_admin', $form_state->getValue('photoswipe_always_load_non_admin'))
+    ->save();
+
+    parent::submitForm($form, $form_state);
   }
 
   /**

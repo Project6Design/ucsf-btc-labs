@@ -10,7 +10,7 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * The PhotoSwipe plugin URI.
  */
-define('PHOTOSWIPE_DOWNLOAD_URL', 'https://github.com/dimsemenov/PhotoSwipe/archive/v4.1.0.zip');
+define('PHOTOSWIPE_DOWNLOAD_URL', 'https://github.com/dimsemenov/PhotoSwipe/archive/v4.1.3.zip');
 define('PHOTOSWIPE_DOWNLOAD_PREFIX', 'PhotoSwipe-');
 
 /**

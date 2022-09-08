@@ -37,6 +37,7 @@
         "drupal/editor_file": "^1.6",
         "drupal/embed": "^1.5",
         "drupal/entity_reference_revisions": "^1.9",
+        "drupal/fakeobjects": "^1.1",
         "drupal/features": "^3.12",
         "drupal/field_group": "^3.2",
         "drupal/focal_point": "^1.5",

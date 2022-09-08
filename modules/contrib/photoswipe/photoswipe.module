@@ -115,7 +115,21 @@ function photoswipe_library_info_alter(&$libraries, $module) {
         ],
       ],
     ];
-    foreach ($current_libraries as $current_library_id => $current_library_type) {
+    $is_local = (bool) $library_file_finder->find('photoswipe');
+    if ($is_local) {
+      $photoswipe_json_content = file_get_contents(DRUPAL_ROOT . '/libraries/photoswipe/photoswipe.json');
+      $photoswipe_json = json_decode($photoswipe_json_content, TRUE);
+      // If package.json is empty return and use cdn instead:
+      if (empty($photoswipe_json)) {
+        return;
+      }
+      foreach ($current_libraries as $current_library_id => $current_library_type) {
+        // We also update the version to match the local library.
+        if (isset($libraries[$current_library_id]['version'])) {
+          $version = $photoswipe_json['version'];
+          $libraries[$current_library_id]['version'] = $photoswipe_json_content ? $version : $libraries[$current_library_id]['version'];
+        }
+      }
       if (isset($libraries[$current_library_id])) {
         foreach ($current_library_type as $library_type_id => $current_library_files) {
 
