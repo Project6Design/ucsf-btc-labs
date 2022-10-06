@@ -9,57 +9,81 @@
  * Implements hook_requirements().
  */
 function photoswipe_requirements($phase) {
-
   $requirements = [];
+  // If we are not in runtime phase, there is nothing to do. So bail out early.
+  if ($phase !== 'runtime') {
+    return [];
+  }
 
-  if ($phase == 'runtime') {
-    $library_definition = \Drupal::service('library.discovery')->getLibraryByName('photoswipe', 'photoswipe');
-    $assets_manager = \Drupal::service('photoswipe.assets_manager');
-    $library = [];
-    if (!file_exists(DRUPAL_ROOT . '/' . $library_definition['css'][0]['data'])) {
-      $error_type = t('Missing Photoswipe library');
-      $error_message = t('Library not found in the "libraries" directory.');
-      if (empty($library['installed'])) {
-        $requirements['photoswipe_plugin'] = [
-          'title' => t('Photoswipe plugin'),
-          'value' => t('@e: At least @a', [
-            '@e' => $error_type,
-            '@a' => $assets_manager->photoswipeMinPluginVersion,
-          ]),
-          'severity' => REQUIREMENT_ERROR,
-          'description' => t('@error You need to download the <a href=":url">Photoswipe plugin</a>, extract the archive and place the photoswipe directory in the %path directory on your server. Keep package.json file inside directory to be able to check version of the library using Drupal tools.', [
-            '@error' => $error_message,
-            ':url' => $library_definition['remote'],
-            '%path' => 'libraries',
-          ]),
-        ];
+  /** @var \Drupal\Core\Asset\LibrariesDirectoryFileFinder $library_file_finder */
+  $library_file_finder = \Drupal::service('library.libraries_directory_file_finder');
+  /** @var \Drupal\Core\Asset\LibraryDiscoveryInterface $library_discovery */
+  $library_discovery = \Drupal::service('library.discovery');
+  /** @var \Drupal\photoswipe\PhotoswipeAssetsManager $assets_manager */
+  $assets_manager = \Drupal::service('photoswipe.assets_manager');
+
+  // Init.
+  $library_definition = $library_discovery->getLibraryByName('photoswipe', 'photoswipe');
+  $min_req_version = $assets_manager->photoswipeMinPluginVersion;
+  $max_req_version = $assets_manager->photoswipeMaxPluginVersion;
+  $library_req = REQUIREMENT_OK;
+  $library_version = '';
+  $message = '';
+  $description = '';
+  $help_text = t('Download the <a href="@url">Photoswipe plugin</a>, extract the archive and place the
+  photoswipe directory in the "libraries" directory on your server. <b>Keep photoswipe.json
+  file inside directory</b> to be able to check version of the library using Drupal tools.', [
+    '@url' => $library_definition['remote'],
+  ]);
+
+  // Library from CDN. Show a warning.
+  if (!$library_file_finder->find('photoswipe')) {
+    $library_version = $library_definition['version'];
+    $library_req = REQUIREMENT_WARNING;
+    $message = t('Missing local library. CDN version: @version', ['@version' => $library_version]);
+    $description = t('Library not found in the "libraries" directory.
+    You are using the library from the fallback CDN defined in libraries.yml,
+    but local libraries are preferred over CDN. @helptext', ['@helptext' => $help_text]);
+  }
+  elseif (!file_exists($library_file_finder->find('photoswipe/photoswipe.json'))) {
+    $library_req = REQUIREMENT_ERROR;
+    $message = t('<strong>Photoswipe library found, but missing photoswipe.json detected!</strong>');
+    $description = t('Local library folder found, but library seems to be corrupted, please require the photoswipe library correctly!<br><br>@helptext', ['@helptext' => $help_text]);
+  }
+  // Library detected and local. Check version requirements.
+  else {
+    // We get the json content as an array here:
+    $photoswipe_json_content = file_get_contents(DRUPAL_ROOT . '/libraries/photoswipe/photoswipe.json');
+    $photoswipe_json = json_decode($photoswipe_json_content, TRUE);
+    // If the photswipe.json is not empty get version and check if the
+    // installed version does not match version min requirements:
+    if (!empty($photoswipe_json)) {
+      $library_version = $photoswipe_json['version'];
+      if (version_compare($library_version, $min_req_version, '<') || version_compare($library_version, $max_req_version, '>')) {
+        $library_req = REQUIREMENT_ERROR;
+        $message = t('Current version supports ^4.x: At least @min and at most @max', [
+          '@min' => $min_req_version,
+          '@max' => $max_req_version,
+        ]);
+        $description = t('<strong>You need to install a compatible version!</strong><br><br>@helptext', ['@helptext' => $help_text]);
       }
     }
+    // If the photoswipe.json is empty we use cdn instead and show a warning:
     else {
-      $library['installed'] = TRUE;
-      $package_json_content = file_get_contents(DRUPAL_ROOT . '/libraries/photoswipe/package.json');
-      $package_json = json_decode($package_json_content);
-      $library['version'] = $package_json->version;
-      if (version_compare($library['version'], $assets_manager->photoswipeMinPluginVersion, '>=')) {
-        $requirements['photoswipe_plugin'] = [
-          'title' => t('Photoswipe plugin'),
-          'severity' => REQUIREMENT_OK,
-          'value' => $library['version'],
-        ];
-      }
-      else {
-        $requirements['photoswipe_plugin'] = [
-          'title' => t('Photoswipe plugin'),
-          'value' => t('At least @a', ['@a' => $assets_manager->photoswipeMinPluginVersion]),
-          'severity' => REQUIREMENT_ERROR,
-          'description' => t('You need to download a later version of the <a href=":url">Photoswipe plugin</a> and replace the old version located in the %path directory on your server. Keep package.json file inside directory to be able to check version of the library using Drupal tools.', [
-            ':url' => $library_definition['remote'],
-            '%path' => '/libraries/photoswipe',
-          ]),
-        ];
-      }
+      $library_req = REQUIREMENT_WARNING;
+      $message = t('<strong>Photoswipe library found, but empty photoswipe.json detected!</strong>');
+      $description = t('You are using the library from the fallback CDN defined
+      in libraries.yml, but local libraries are preferred over CDN. @helptext', ['@helptext' => $help_text]);
     }
   }
+
+  // Requirements.
+  $requirements['photoswipe_plugin'] = [
+    'title' => t('Photoswipe plugin'),
+    'severity' => $library_req,
+    'value' => $message ?: $library_version,
+    'description' => $description ?: '',
+  ];
 
   return $requirements;
 }
@@ -74,4 +98,17 @@ function photoswipe_requirements($phase) {
  */
 function photoswipe_update_8313() {
   \Drupal::messenger()->addStatus('IMPORTANT: If you\'re already using the newly introduced "Photoswipe RESPONSIVE" field formatter, you have to set them manually AGAIN after this update. Regular photoswipe formatter is NOT affected. For details see #3271648.');
+}
+
+/**
+ * Remove unwanted config value from settings form: actions, form_build_id,
+ * form_token, form_id.
+ */
+function photoswipe_update_8314() {
+  \Drupal::configFactory()->getEditable('photoswipe.settings')
+      ->clear('actions')
+      ->clear('form_build_id')
+      ->clear('form_token')
+      ->clear('form_id')
+      ->save();
 }

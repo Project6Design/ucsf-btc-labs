@@ -196,10 +196,10 @@ class ImageFileTest extends WebDriverTestBase {
     $this->drupalGet('/node/1');
     // $this->getSession()->wait(5000, "document.readyState === 'complete'");
     // Check if all necessary js and css files are loaded:
-    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe.css"]');
-    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/default-skin/default-skin.css"]');
-    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe.min.js"]');
-    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe-ui-default.min.js"]');
+    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.css"]');
+    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/default-skin/default-skin.css"]');
+    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.min.js"]');
+    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe-ui-default.min.js"]');
     // Check if the fallback wrapper is loaded with the correct
     // classes and attributes:
     // Wait for the JavaScript to initialize the fallback wrapper:
@@ -318,10 +318,10 @@ class ImageFileTest extends WebDriverTestBase {
     $session->pageTextContains("Article {$title} has been created.");
     $this->drupalGet('/node/1');
     // Check if all necessary js and css files are loaded:
-    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe.css"]');
-    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/default-skin/default-skin.css"]');
-    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe.min.js"]');
-    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe-ui-default.min.js"]');
+    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.css"]');
+    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/default-skin/default-skin.css"]');
+    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.min.js"]');
+    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe-ui-default.min.js"]');
     // Check if the fallback wrapper is loaded with the correct
     // classes and attributes:
     // Wait for the JavaScript to initialize the fallback wrapper:
@@ -387,10 +387,10 @@ class ImageFileTest extends WebDriverTestBase {
     $session->pageTextContains("Article {$title} has been created.");
     $this->drupalGet('/node/1');
     // Check if all necessary js and css files are loaded:
-    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe.css"]');
-    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/default-skin/default-skin.css"]');
-    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe.min.js"]');
-    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe-ui-default.min.js"]');
+    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.css"]');
+    $session->elementExists('css', 'link[href*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/default-skin/default-skin.css"]');
+    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.min.js"]');
+    $session->elementExists('css', 'script[src*="//cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe-ui-default.min.js"]');
     // Check if the fallback wrapper is loaded with the correct
     // classes and attributes:
     $session->elementExists('css', '.photoswipe-gallery');

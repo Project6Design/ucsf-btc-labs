@@ -200,6 +200,11 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       'entity_label' => $this->t('Entity label'),
       'custom' => $this->t('Custom (with tokens)'),
     ];
+    // Add media entity name if the target is a media entity:
+    $field_settings = $this->getFieldSettings();
+    if (isset($field_settings['target_type']) && $field_settings['target_type'] === 'media') {
+      $caption_options['media_name'] = $this->t('Media entity name');
+    }
 
     $element = $this->addEntityReferenceSettings($element);
 
@@ -386,6 +391,7 @@ class PhotoswipeFieldFormatter extends FormatterBase {
         'alt' => $this->t('Image alt tag'),
         'title' => $this->t('Image title tag'),
         'entity_label' => $this->t('Entity label'),
+        'media_name' => $this->t('Media entity name'),
         'custom' => $this->t('Custom (with tokens)'),
       ];
       if (array_key_exists($this->getSetting('photoswipe_caption'), $caption_options)) {

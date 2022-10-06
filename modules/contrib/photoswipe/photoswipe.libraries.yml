@@ -1,29 +1,31 @@
 photoswipe:
-  remote: https://github.com/dimsemenov/PhotoSwipe/archive/v4.1.0.zip
+  remote: https://github.com/dimsemenov/PhotoSwipe/archive/v4.1.3.zip
+  version: 4.1.3
   license:
     name: MIT
     gpl-compatible: false
   css:
     component:
-      //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe.css: {}
-      //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/default-skin/default-skin.css: {}
+      //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.css: {}
+      //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/default-skin/default-skin.css: {}
   js:
-    //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe.min.js: { minified: true }
-    //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe-ui-default.min.js: { minified: true }
+    //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.min.js: { minified: true }
+    //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe-ui-default.min.js: { minified: true }
 
 # Development Version
 photoswipe.dev:
-  remote: https://github.com/dimsemenov/PhotoSwipe/archive/v4.1.0.zip
+  remote: https://github.com/dimsemenov/PhotoSwipe/archive/v4.1.3.zip
+  version: 4.1.3
   license:
     name: MIT
     gpl-compatible: false
   css:
     component:
-      //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe.css: {}
-      //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/default-skin/default-skin.css: {}
+      //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.css: {}
+      //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/default-skin/default-skin.css: {}
   js:
-    //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe.js: {}
-    //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.0/photoswipe-ui-default.js: {}
+    //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.js: {}
+    //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe-ui-default.js: {}
 
 photoswipe.init:
   js:

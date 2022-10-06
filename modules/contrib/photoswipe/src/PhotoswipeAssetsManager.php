@@ -20,6 +20,13 @@ class PhotoswipeAssetsManager implements PhotoswipeAssetsManagerInterface {
   public $photoswipeMinPluginVersion = '4.0.0';
 
   /**
+   * The maximum PhotoSwipe version we support.
+   *
+   * @var string
+   */
+  public $photoswipeMaxPluginVersion = '4.1.3';
+
+  /**
    * Whether the assets were attached somewhere in this request or not.
    *
    * @var bool
