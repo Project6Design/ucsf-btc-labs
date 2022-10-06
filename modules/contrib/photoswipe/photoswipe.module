@@ -129,37 +129,38 @@ function photoswipe_library_info_alter(&$libraries, $module) {
           $version = $photoswipe_json['version'];
           $libraries[$current_library_id]['version'] = $photoswipe_json_content ? $version : $libraries[$current_library_id]['version'];
         }
-      }
-      if (isset($libraries[$current_library_id])) {
-        foreach ($current_library_type as $library_type_id => $current_library_files) {
 
-          // @todo it needs to be refactored.
-          if ($library_file_finder->find('photoswipe/dist/photoswipe.min.js')) {
-            if ($library_type_id === 'css') {
-              $libraries[$current_library_id][$library_type_id]['component'] = [];
-            }
-            else {
-              $libraries[$current_library_id][$library_type_id] = [];
-            }
-          }
+        if (isset($libraries[$current_library_id])) {
+          foreach ($current_library_type as $library_type_id => $current_library_files) {
 
-          foreach ($current_library_files as $current_library_file) {
-            $path = $library_file_finder->find($current_library_file);
-            if ($path) {
+            // @todo it needs to be refactored.
+            if ($library_file_finder->find('photoswipe/dist/photoswipe.min.js')) {
               if ($library_type_id === 'css') {
-                $libraries[$current_library_id][$library_type_id]['component'] = array_merge(
-                  [
-                    '/' . $path => [],
-                  ], $libraries[$current_library_id][$library_type_id]['component']);
+                $libraries[$current_library_id][$library_type_id]['component'] = [];
               }
               else {
-                $libraries[$current_library_id][$library_type_id] = array_merge(
-                  [
-                    '/' . $path =>
-                    ($current_library_id === 'photoswipe.dev')
-                    ? []
-                    : ['minified' => TRUE],
-                  ], $libraries[$current_library_id][$library_type_id]);
+                $libraries[$current_library_id][$library_type_id] = [];
+              }
+            }
+
+            foreach ($current_library_files as $current_library_file) {
+              $path = $library_file_finder->find($current_library_file);
+              if ($path) {
+                if ($library_type_id === 'css') {
+                  $libraries[$current_library_id][$library_type_id]['component'] = array_merge(
+                    [
+                      '/' . $path => [],
+                    ], $libraries[$current_library_id][$library_type_id]['component']);
+                }
+                else {
+                  $libraries[$current_library_id][$library_type_id] = array_merge(
+                    [
+                      '/' . $path =>
+                      ($current_library_id === 'photoswipe.dev')
+                      ? []
+                      : ['minified' => TRUE],
+                    ], $libraries[$current_library_id][$library_type_id]);
+                }
               }
             }
           }

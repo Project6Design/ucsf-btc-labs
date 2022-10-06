@@ -155,6 +155,10 @@ class PhotoswipePreprocessProcessor implements ContainerInjectionInterface {
           $caption = $this->imageDTO->getEntity()->label() ?: $this->imageDTO->getAlt();
           break;
 
+        case 'media_name':
+          $caption = $this->imageDTO->getItem()->getParent()->getEntity()->label();
+          break;
+
         case 'custom':
           $entity_type = $this->imageDTO->getEntity()->getEntityTypeId();
           $caption = $this->token->replace($settings['photoswipe_caption_custom'],
