@@ -16,8 +16,6 @@ dependencies:
   - path
   - pathauto
   - search
-  - simple_sitemap
-  - sitefarm_core
   - system
   - text
   - user
