@@ -1,0 +1,5 @@
+name: kint
+type: module
+description: Delete this module once it was unistalled on drupal
+package: Custom
+core_version_requirement: ^9 || ^10
