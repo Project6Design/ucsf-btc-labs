@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @file
  * A JavaScript file for the theme.
@@ -16,23 +14,19 @@
   'use strict';
 
   // To understand behaviors, see https://www.drupal.org/node/2269515
-
   Drupal.behaviors.btc_labs = {
-    attach: function attach(context, settings) {
-
+    attach: function (context, settings) {
       // Enable Photoswipe.
       $('.node-type-gallery .gallery-item').click(function (e) {
         e.preventDefault();
-
         var item_index = $(this).parents('.field__value').index();
-
         openPhotoswipe('.node-type-gallery .field--name-field-photos', item_index);
       });
 
       // Handle page sidebar for desktop
       if ($(window).width() > 1024) {
         if ($('.sf-page .sidebar').length > 0) {
-          var sidebar = $('.sf-page .sidebar').detach();
+          let sidebar = $('.sf-page .sidebar').detach();
           sidebar.insertBefore($('.sf-page section.content'));
         }
       }
@@ -56,7 +50,7 @@
       });
 
       //Stay informed bar
-      var stayInformed = document.querySelector("#block-stayinformed");
+      const stayInformed = document.querySelector("#block-stayinformed");
       if (stayInformed) {
         $(".subscribe", context).click(function (e) {
           //click on hidden submit button
@@ -66,7 +60,7 @@
       }
 
       //video links
-      var videoLink = document.querySelector(".video-link");
+      const videoLink = document.querySelector(".video-link");
       if (videoLink) {
         $(".video-link", context).click(function (e) {
           e.preventDefault();
@@ -75,7 +69,7 @@
       }
 
       //form filters
-      var form = document.querySelector(".views-exposed-form");
+      const form = document.querySelector(".views-exposed-form");
       if (form) {
         //select inputs
         $("select").change(function () {
@@ -85,7 +79,7 @@
 
         //text inputs
         form.addEventListener("click", function (e) {
-          var target = e.target;
+          let target = e.target;
           if (target.classList.contains('js-form-type-textfield')) {
             $(".views-exposed-form .js-form-submit", context).trigger("click");
             $(".views-exposed-form .js-form-submit", context).trigger("touchstart");
@@ -122,17 +116,14 @@
               gfHasValue = true;
             }
           });
-
           if ((!gfHasValue || !ptHasValue) && $(".group-bottom", context).hasClass("open")) {
             $errorInner.prepend('<h3>Please Complete Required Questions</h3>');
             $errorInner.append('Please provide an answer to both the Prior Treatments and Genetic Features questions.');
             $errorInner.append('<a class="btn--primary">Return To Advanced Search</a>');
             $errorContainer.first().addClass("open");
-
             $errorContainer.find('.btn--primary').click(function () {
               $(this).parent().parent().remove();
             });
-
             $errorContainer.find('.inner').click(function () {
               $(this).parent().remove();
             });
@@ -141,23 +132,21 @@
             window.location.hash = "block-views-block-clinical-trials-block-listing";
           }
         }
-
         e.preventDefault();
       });
 
       //search modal
-      var searchForm = document.querySelector(".block-search");
+      const searchForm = document.querySelector(".block-search");
       if (searchForm) {
-
         //search inputs
-        var searchInput = document.querySelector(".search-action__search");
+        let searchInput = document.querySelector(".search-action__search");
         searchInput.addEventListener("click", function () {
           $(".block-search .form-submit").trigger("click");
           $(".block-search .form-submit").trigger("touchstart");
         });
 
         //open modal
-        var triggerSearch = document.querySelector("#trigger-search");
+        let triggerSearch = document.querySelector("#trigger-search");
         triggerSearch.addEventListener("click", function (e) {
           e.preventDefault();
           document.querySelector("body").classList.add("modal-open");
@@ -165,7 +154,7 @@
         });
 
         //close modal
-        var searchClose = document.querySelector(".search-action__close");
+        let searchClose = document.querySelector(".search-action__close");
         searchClose.addEventListener("click", function () {
           document.querySelector("body").classList.remove("modal-open");
           searchForm.classList.remove("open");
@@ -211,16 +200,15 @@
       });
 
       //mobile menu
-      var triggerMobileMenu = document.querySelector("#trigger-mobile-menu");
-      var mobileMenu = document.querySelector("#mobile-menu");
-
+      const triggerMobileMenu = document.querySelector("#trigger-mobile-menu");
+      const mobileMenu = document.querySelector("#mobile-menu");
       triggerMobileMenu.addEventListener("click", function (e) {
         e.preventDefault();
-
         if (!mobileMenu.classList.contains("open")) {
-          $("html, body").animate({ scrollTop: 0 }, "slow");
+          $("html, body").animate({
+            scrollTop: 0
+          }, "slow");
         }
-
         mobileMenu.classList.toggle("open");
         this.classList.toggle("open");
         document.querySelector("body").classList.toggle("menu-active");
@@ -235,40 +223,32 @@
       });
 
       //main menu dropdowns
-      var mainMenu = document.querySelector("#main-menu");
-      var mainContent = document.querySelector("body");
-
+      const mainMenu = document.querySelector("#main-menu");
+      const mainContent = document.querySelector("body");
       mainMenu.addEventListener("mouseenter", function (e) {
         mainContent.classList.add("menu-active");
       });
-
       mainMenu.addEventListener("mouseleave", function (e) {
         mainContent.classList.remove("menu-active");
       });
-
       function openPhotoswipe(selector, index) {
         var items = [];
         var pswpElement = document.querySelectorAll('.pswp')[0];
-
         $(selector).find('.gallery-item').each(function () {
           var source = $(this).find('a').attr('href');
           var width = $(this).attr('data-width');
           var height = $(this).attr('data-height');
           var caption = $(this).find('.gallery-item__caption').html();
-
           var item = {
             src: source,
             w: width,
             h: height
           };
-
           if (caption !== undefined) {
             item.title = caption;
           }
-
           items.push(item);
         });
-
         var options = {
           // galleryUID: $(selector).attr('data-pswp-uid'),
           index: index
