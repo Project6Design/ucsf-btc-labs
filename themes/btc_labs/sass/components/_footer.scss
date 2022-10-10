@@ -14,9 +14,11 @@
 
   a {
     color: #FFF;
+    text-decoration: underline;
 
     &:hover {
       color: $dark-blue;
+      text-decoration: none;
     }
   }
 }
@@ -154,6 +156,11 @@
 
   p {
     font-size: 14px;
+    color: #000000;
+  }
+
+  a {
+    color: #000000 !important;
   }
 
   @include media($large-screen-down) {
@@ -175,7 +182,6 @@
     @include span-columns(12 of 12);
   }
 
-
   margin-bottom: 30px;
   font-size: 20px;
   font-weight: 300;
@@ -190,7 +196,6 @@
       width: 30%;
       float: left;
     }
-
 
     @include media($medium-screen-down) {
       width: 100%;

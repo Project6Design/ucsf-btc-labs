@@ -1,0 +1,14 @@
+<?php
+
+/**
+ * @file
+ * Requirements and update functions for the btc_helper module.
+ */
+
+
+/**
+ * Install Fakeobjects module.
+ */
+function btc_helper_update_9100() {
+  \Drupal::service('module_installer')->install(['fakeobjects']);
+}

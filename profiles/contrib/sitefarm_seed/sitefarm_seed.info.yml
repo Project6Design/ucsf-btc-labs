@@ -20,7 +20,6 @@ dependencies:
   - datetime_range
   - dynamic_page_cache
   - editor
-  - entity_reference
   - field_ui
   - file
   - focal_point
