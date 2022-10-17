@@ -32,6 +32,11 @@
 
   a {
     color: $red;
+    text-decoration: underline;
+
+    &:hover {
+      text-decoration: none;
+    }
   }
 
   p {
