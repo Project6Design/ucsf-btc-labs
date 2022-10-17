@@ -30,6 +30,11 @@
 
       a {
         color: $red;
+        text-decoration: underline;
+
+        &:hover {
+          text-decoration: none;
+        }
       }
 
       @include media($larger-screen-down) {
