@@ -52,7 +52,7 @@
       <figure class="gallery-item" data-width="{{ paragraph.field_image.width }}"
               data-height="{{ paragraph.field_image.height }}" itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
         <a href="{{ paragraph.field_image.0.entity.uri.value|image_style('sf_gallery_full') }}" itemprop="contentUrl">
-          <img src="{{ paragraph.field_image.0.entity.uri.value|image_style('gallery_listing') }}" alt="{{ paragraph.field_image.alt }}" />
+          <img src="{{ paragraph.field_image.0.entity.uri.value|image_style('gallery_listing') }}" alt="{{ paragraph.field_image.alt }}">
         </a>
         {% if paragraph.field_caption %}
           <figcaption itemprop="caption description" class="gallery-item__caption">{{ content.field_caption }}</figcaption>

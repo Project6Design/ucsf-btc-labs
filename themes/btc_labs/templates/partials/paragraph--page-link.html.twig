@@ -61,16 +61,16 @@
                         <source media="(min-width: 400px)"
                             srcset="{{ paragraph.field_image.0.entity.uri.value|image_style('page_link') }} 1x,
                                   {{ paragraph.field_image.0.entity.uri.value|image_style('page_link_lg') }} 2x"
-                            sizes="100vw" />
-                        <img src="{{ paragraph.field_image.0.entity.uri.value|image_style('page_link_sm') }}" alt="{{ paragraph.field_image.alt }}" />
+                            sizes="100vw">
+                        <img src="{{ paragraph.field_image.0.entity.uri.value|image_style('page_link_sm') }}" alt="{{ paragraph.field_image.alt }}">
                     </picture>
                 {% elseif paragraph.field_image_large is not empty %}
                     <picture>
                         <source media="(min-width: 400px)"
                             srcset="{{ paragraph.field_image_large.0.entity.uri.value|image_style('page_link_large') }} 1x,
                                   {{ paragraph.field_image_large.0.entity.uri.value|image_style('page_link_large_lg') }} 2x"
-                            sizes="100vw" />
-                        <img src="{{ paragraph.field_image_large.0.entity.uri.value|image_style('page_link_large_sm') }}" alt="{{ paragraph.field_image_large.alt }}" />
+                            sizes="100vw">
+                        <img src="{{ paragraph.field_image_large.0.entity.uri.value|image_style('page_link_large_sm') }}" alt="{{ paragraph.field_image_large.alt }}">
                     </picture>
                 {% else %}
                     <img src="http://dummyimage.com/800x500.jpg" alt="Placeholder">

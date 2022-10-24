@@ -14,8 +14,8 @@
                     <source media="(min-width: 100vw)"
                             srcset="{{ node.field_listing_image.0.entity.uri.value|image_style('news_listing') }} 1x,
                                     {{ node.field_listing_image.0.entity.uri.value|image_style('news_listing_lg') }} 2x"
-                            sizes="100vw" />
-                    <img src="{{ node.field_listing_image.0.entity.uri.value|image_style('news_listing') }}" alt="{{ node.field_listing_image.alt }}" />
+                            sizes="100vw">
+                    <img src="{{ node.field_listing_image.0.entity.uri.value|image_style('news_listing') }}" alt="{{ node.field_listing_image.alt }}">
                 </picture>
             </div>
         {% else %}
@@ -46,8 +46,8 @@
                     <source media="(min-width: 400px)"
                             srcset="{{ node.field_listing_image.0.entity.uri.value|image_style('news_listing') }} 1x,
                                     {{ node.field_listing_image.0.entity.uri.value|image_style('news_listing_lg') }} 2x"
-                            sizes="100vw" />
-                    <img src="{{ node.field_listing_image.0.entity.uri.value|image_style('news_listing') }}" alt="{{ node.field_listing_image.alt }}" />
+                            sizes="100vw">
+                    <img src="{{ node.field_listing_image.0.entity.uri.value|image_style('news_listing') }}" alt="{{ node.field_listing_image.alt }}">
                 </picture>
             </div>
         {% else %}
@@ -66,8 +66,8 @@
                         <source media="(min-width: 400px)"
                                 srcset="{{ node.field_page_image.0.entity.uri.value|image_style('page_header') }} 1x,
                                         {{ node.field_page_image.0.entity.uri.value|image_style('page_header_lg') }} 2x"
-                                sizes="100vw" />
-                        <img src="{{ node.field_page_image.0.entity.uri.value|image_style('page_header_sm') }}" alt="{{ node.field_page_image.alt }}" />
+                                sizes="100vw">
+                        <img src="{{ node.field_page_image.0.entity.uri.value|image_style('page_header_sm') }}" alt="{{ node.field_page_image.alt }}">
                     </picture>
                 </div>
             {% endif %}

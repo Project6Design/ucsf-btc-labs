@@ -1,4 +1,4 @@
-<header id="header" role="banner">
+<header id="header">
         <nav class="container" id="header-top-menu">
             <ul class="left">
               <li><a href="http://www.ucsf.edu/">University of California San Francisco</a></li>
@@ -21,7 +21,7 @@
                     <use xlink:href="/{{ directory }}/images/optimized/store.svg#close" />
                 </svg>
             </a>
-            <nav role="navigation" id="meta-menu">
+            <nav id="meta-menu">
                 {{ drupal_menu('meta-menu', 1, 2) }}
             </nav>
 
@@ -33,7 +33,7 @@
             </a>
         </div>
 
-        <nav role="navigation" id="main-menu">
+        <nav id="main-menu">
             {{ drupal_menu('main', 1, 2) }}
         </nav>
         {{ page.header }}
