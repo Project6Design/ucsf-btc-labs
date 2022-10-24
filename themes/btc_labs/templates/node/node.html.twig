@@ -42,12 +42,15 @@
 
   <div{{ content_attributes.addClass('content') }}>
     {{ content|without('links') }}
-  </div><!-- /.content -->
+  </div>
+  <!-- /.content -->
 
   {% if content.links %}
     <div class="links">
       {{ content.links }}
-    </div><!-- /.links -->
+    </div>
+    <!-- /.links -->
   {% endif %}
 
-</article><!-- /.node -->
+</article>
+<!-- /.node -->

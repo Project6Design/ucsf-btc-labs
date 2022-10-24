@@ -54,8 +54,8 @@
                     <source media="(min-width: 400px)"
                         srcset="{{ paragraph.field_image.0.entity.uri.value|image_style('home_slider') }} 1x,
                               {{ paragraph.field_image.0.entity.uri.value|image_style('home_slider_lg') }} 2x"
-                        sizes="100vw" />
-                    <img src="{{ paragraph.field_image.0.entity.uri.value|image_style('home_slider_sm') }}" alt="{{ paragraph.field_image.alt }}" />
+                        sizes="100vw">
+                    <img src="{{ paragraph.field_image.0.entity.uri.value|image_style('home_slider_sm') }}" alt="{{ paragraph.field_image.alt }}">
                 </picture>
             {% else %}
                 <img src="http://dummyimage.com/1600x925.jpg" alt="Placeholder">

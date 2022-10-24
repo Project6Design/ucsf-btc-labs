@@ -24,8 +24,8 @@
           <source media="(min-width: 100vw)"
                   srcset="{{ node.field_listing_image.0.entity.uri.value|image_style('research_listing') }} 1x,
                           {{ node.field_listing_image.0.entity.uri.value|image_style('research_listing_lg') }} 2x"
-                  sizes="100vw" />
-          <img src="{{ node.field_listing_image.0.entity.uri.value|image_style('resource_listing') }}" alt="{{ node.field_listing_image.alt }}" />
+                  sizes="100vw">
+          <img src="{{ node.field_listing_image.0.entity.uri.value|image_style('resource_listing') }}" alt="{{ node.field_listing_image.alt }}">
         </picture>
       </div>
     {% endif %}

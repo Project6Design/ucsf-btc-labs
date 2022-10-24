@@ -23,22 +23,24 @@
           <div class="container">
             {{ page.content }}
           </div>
-        </div>
-
-      </section><!-- /#content -->
+      </section>
+    <!-- /#content -->
 
       {% if page.sidebar_first|render %}
         <aside id="sidebar-first" class="column sidebar first">
           {{ page.sidebar_first }}
-        </aside><!-- /#sidebar-first -->
+        </aside>
+        <!-- /#sidebar-first -->
       {% endif %}
 
       {% if page.sidebar_second|render %}
         <aside id="sidebar-second" class="column sidebar second">
           {{ page.sidebar_second }}
-        </aside><!-- /#sidebar-second -->
+        </aside>
+        <!-- /#sidebar-second -->
       {% endif %}
-  </div><!-- /#main -->
+  </div>
+  <!-- /#main -->
 
   <!-- ______________________ FOOTER _______________________ -->
 
@@ -46,4 +48,5 @@
 
   <div id="mobile-menu">{{ mobile_menu }}</div>
 
-</div><!-- /.layout-container -->
+</div>
+<!-- /.layout-container -->
