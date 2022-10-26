@@ -14,15 +14,17 @@
 ] %}
 #}
 
-<article{{ attributes.addClass(classes) }}>
+<article{{ attributes.addClass(classes).removeAttribute('role') }}>
 
   {% if title_prefix or title_suffix or display_submitted or unpublished or page is empty and label %}
     <header>
       {{ title_prefix }}
       {# {% if not page and label %} #}
+      {% if not is_front %}
         <h1{{ title_attributes.addClass(title_classes) }}>
           {# <a href="{{ url }}" rel="bookmark"> #}{{ label }}{# </a> #}
         </h1>
+      {% endif %}
       {# {% endif %} #}
       {{ title_suffix }}
 

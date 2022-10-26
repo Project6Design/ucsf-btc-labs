@@ -118,6 +118,7 @@ function btc_labs_preprocess_node(&$vars)
     $view_mode = $vars['view_mode'];
     $term_storage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
     $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+    $vars['is_front'] = \Drupal::service('path.matcher')->isFrontPage();
 
     switch ($node->getType()) {
       case 'sf_person':
