@@ -8,7 +8,7 @@
 
 {{ attach_library('btc_labs/slick-slider') }}
 
-<article{{ attributes.addClass(classes) }}>
+<article{{ attributes.addClass(classes).removeAttribute('role') }}>
 
     <header>
         {% if node.field_page_image is not empty %}
@@ -25,7 +25,9 @@
 
         {{ drupal_entity('block', 'breadcrumbs') }}
 
+        {% if not is_front %}
         <h1{{ title_attributes.addClass(title_classes) }}>{{ label }}</h1>
+        {% endif %}
 
         {% if not node.published %}
             <p class="node--unpublished">{{ 'Unpublished'|t }}</p>
