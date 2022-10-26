@@ -52,8 +52,8 @@
             {% if paragraph.field_image is not empty %}
                 <picture>
                     <source media="(min-width: 400px)"
-                        srcset="{{ paragraph.field_image.0.entity.uri.value|image_style('home_slider') }} 1x,
-                              {{ paragraph.field_image.0.entity.uri.value|image_style('home_slider_lg') }} 2x"
+                        srcset="{{ paragraph.field_image.0.entity.uri.value|image_style('home_slider') }},
+                              {{ paragraph.field_image.0.entity.uri.value|image_style('home_slider_lg') }}"
                         sizes="100vw">
                     <img src="{{ paragraph.field_image.0.entity.uri.value|image_style('home_slider_sm') }}" alt="{{ paragraph.field_image.alt }}">
                 </picture>

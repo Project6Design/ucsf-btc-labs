@@ -16,8 +16,8 @@
                 <a href="{{ url }}" rel="bookmark">
                     <picture>
                         <source media="(min-width: 400px)"
-                                srcset="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }} 1x,
-                                        {{ node.field_person_photo.0.entity.uri.value|image_style('person_lg') }} 2x"
+                                srcset="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }},
+                                        {{ node.field_person_photo.0.entity.uri.value|image_style('person_lg') }}"
                                 sizes="100vw">
                         <img src="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }}" alt="{{ node.field_person_photo.alt }}">
                     </picture>
@@ -45,8 +45,8 @@
                 <a href="{{ url }}" rel="bookmark">
                     <picture>
                         <source media="(min-width: 400px)"
-                                srcset="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }} 1x,
-                                        {{ node.field_person_photo.0.entity.uri.value|image_style('person_lg') }} 2x"
+                                srcset="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }},
+                                        {{ node.field_person_photo.0.entity.uri.value|image_style('person_lg') }}"
                                 sizes="100vw">
                         <img src="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }}" alt="{{ node.field_person_photo.alt }}">
                     </picture>
@@ -71,8 +71,8 @@
                 <div class="person__photo">
                     <picture>
                         <source media="(min-width: 400px)"
-                                srcset="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }} 1x,
-                                        {{ node.field_person_photo.0.entity.uri.value|image_style('person_lg') }} 2x"
+                                srcset="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }},
+                                        {{ node.field_person_photo.0.entity.uri.value|image_style('person_lg') }}"
                                 sizes="100vw">
                         <img src="{{ node.field_person_photo.0.entity.uri.value|image_style('person') }}" alt="{{ node.field_person_photo.alt }}">
                     </picture>
