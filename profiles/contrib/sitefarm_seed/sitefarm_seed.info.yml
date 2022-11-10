@@ -12,7 +12,6 @@ dependencies:
   - block_content
   - block_place
   - breakpoint
-  - ckeditor
   - config
   - contextual
   - contact
@@ -46,11 +45,9 @@ dependencies:
   - views
   - views_ui
   # contrib
-  - anchor_link
   - better_normalizers
   - block_style_plugins
   - ctools
-  - ckwordcount
   - default_content
   - editor_file
   - features
@@ -59,7 +56,6 @@ dependencies:
   - menu_block
   - menu_breadcrumb
   - metatag
-  - notification
   - pathauto
   - redirect
   - redirect_404
@@ -69,9 +65,6 @@ dependencies:
   - webform_ui
   # Custom
   - site_credits
-  - ck_autosave
-  - ck_media_link
-  - ck_feature_block
   - external_media_embed
   - rss_feed_block
   # SiteFarm
