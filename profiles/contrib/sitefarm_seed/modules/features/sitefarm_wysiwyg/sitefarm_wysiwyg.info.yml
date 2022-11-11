@@ -3,7 +3,6 @@ description: 'A WYSIWYG Editor config for CKEditor'
 type: module
 core_version_requirement: ^8.8 || ^9
 dependencies:
-  - ck_media_link
   - editor
   - editor_file
   - filter
