@@ -18,7 +18,6 @@ dependencies:
   - crop
   - datetime_range
   - dynamic_page_cache
-  - editor
   - field_ui
   - file
   - focal_point
