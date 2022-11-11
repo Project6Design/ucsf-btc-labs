@@ -48,7 +48,6 @@ dependencies:
   - block_style_plugins
   - ctools
   - default_content
-  - editor_file
   - features
   - google_analytics
   - honeypot
