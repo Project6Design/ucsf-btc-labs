@@ -356,3 +356,12 @@ body[class*='page-physicians-']:not(.page-physician-tools) .block-btc-labs-conte
     background-color: #F8F8F9;
   }
 }
+
+.page-user-login, .page-user-password  {
+  .content-wrapper {
+    max-width: 500px;
+    margin: auto;
+    width: 100%;
+    padding: 20px;
+  }
+}
