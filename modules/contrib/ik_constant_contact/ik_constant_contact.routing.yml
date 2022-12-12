@@ -1,0 +1,34 @@
+ik_constant_contact.config:
+  path: '/admin/config/services/ik-constant-contact'
+  defaults:
+    _form: '\Drupal\ik_constant_contact\Form\ConstantContactConfig'
+    _title: 'Constant Contact'
+  requirements:
+    _permission: 'administer constant contact configuration'
+  options:
+    _admin_route: TRUE
+ik_constant_contact.lists:
+  path: '/admin/config/services/ik-constant-contact/lists'
+  defaults:
+    _form: '\Drupal\ik_constant_contact\Form\ConstantContactLists'
+    _title: 'Constant Contact Available Lists'
+  requirements:
+    _permission: 'administer constant contact configuration'
+  options:
+    _admin_route: TRUE
+ik_constant_contact.fields:
+  path: '/admin/config/services/ik-constant-contact/fields'
+  defaults:
+    _controller: '\Drupal\ik_constant_contact\Controller\CustomFieldsController::content'
+    _title: 'Constant Contact Available Custom Fields'
+  requirements:
+    _permission: 'administer constant contact configuration'
+  options:
+    _admin_route: TRUE
+ik_constant_contact.authentication_callback:
+  path: '/admin/config/services/ik-constant-contact/callback'
+  defaults:
+    _controller: '\Drupal\ik_constant_contact\Controller\AuthenticationCallback::callbackUrl'
+  methods: [GET]
+  requirements:
+    _permission: 'administer constant contact configuration'

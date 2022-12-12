@@ -1,0 +1,13 @@
+webform.handler.ik_constant_contact:
+  type: mapping
+  label: 'Constant Contact'
+  mapping:
+    list:
+      type: string
+      label: 'List'
+    email:
+      type: string
+      label: 'Email'
+    mergevars:
+      type: text
+      label: 'Merge fields (YAML)'

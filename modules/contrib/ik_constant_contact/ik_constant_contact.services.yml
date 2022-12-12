@@ -1,0 +1,4 @@
+services:
+  ik_constant_contact:
+    class: Drupal\ik_constant_contact\Service\ConstantContact
+    arguments: ['@cache.default', '@config.factory', '@logger.factory', '@messenger', '@settings', '@http_client', '@module_handler']

@@ -1,0 +1,6 @@
+ik_constant_contact.config:
+  title: 'Constant Contact'
+  route_name: ik_constant_contact.config
+  description: 'Constant contact API integration settings'
+  parent: system.admin_config_services
+  weight: 99

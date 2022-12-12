@@ -1,0 +1,12 @@
+ik_constant_contact.config:
+  route_name: ik_constant_contact.config  
+  title: 'Config'
+  base_route: ik_constant_contact.config
+ik_constant_contact.lists:
+  route_name: ik_constant_contact.lists
+  title: 'Lists'
+  base_route: ik_constant_contact.config
+ik_constant_contact.fields:
+  route_name: ik_constant_contact.fields
+  title: 'Custom Fields'
+  base_route: ik_constant_contact.config

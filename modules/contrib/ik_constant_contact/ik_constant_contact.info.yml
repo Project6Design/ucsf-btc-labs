@@ -1,0 +1,15 @@
+name: Constant Contact Module
+description: Integrates Constant Contact API v3.
+package: IK
+type: module
+configure: ik_constant_contact.config
+core_version_requirement: ^8.9 || ^9 || ^10
+depencencies:
+  - drupal:block
+  - drupal:rest
+
+
+# Information added by Drupal.org packaging script on 2022-07-26
+version: '3.0.9'
+project: 'ik_constant_contact'
+datestamp: 1658841501

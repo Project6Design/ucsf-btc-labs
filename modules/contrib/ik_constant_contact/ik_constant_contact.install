@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the ik_constant_contact module.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function ik_constant_contact_uninstall() {
+  Drupal::configFactory()->getEditable('ik_constant_contact')->delete();
+}

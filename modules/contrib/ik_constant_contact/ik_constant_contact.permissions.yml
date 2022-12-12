@@ -1,0 +1,3 @@
+'administer constant contact configuration':
+  title: 'Administer Constant Contact Configuration'
+  restrict access: TRUE

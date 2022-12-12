@@ -1,0 +1,28 @@
+{
+    "name": "drupal/ik_constant_contact",
+    "description": "Drupal 8 Module for Constant Contact",
+    "type": "drupal-module",
+    "keywords": ["Drupal", "Third-Party Services", "Constant Contact", "Rest"],
+    "homepage": "https://www.drupal.org/project/ik_constant_contact",
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/ik_constant_contact",
+        "source": "https://www.drupal.org/project/ik_constant_contact"
+    },
+    "authors": [
+        {
+          "name": "Rosemary Stanley (rosemarystanley)",
+          "homepage": "https://www.drupal.org/u/rosemarystanley",
+          "role": "Maintainer"
+        },
+        {
+            "name": "Philip Curley (ikphilip)",
+            "homepage": "https://www.drupal.org/u/ikphilip",
+            "role": "Maintainer"
+        }
+    ],
+    "require-dev": {
+        "drupal/coder": "^8.2.12",
+        "squizlabs/php_codesniffer": "^2.9",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4"
+    }
+}
