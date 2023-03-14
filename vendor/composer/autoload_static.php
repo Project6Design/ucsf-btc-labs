@@ -46,11 +46,6 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
     );
 
     public static $prefixLengthsPsr4 = array (
-        'W' => 
-        array (
-            'Webmozart\\PathUtil\\' => 19,
-            'Webmozart\\Assert\\' => 17,
-        ),
         'T' => 
         array (
             'Twig\\' => 5,
@@ -178,14 +173,6 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
     );
 
     public static $prefixDirsPsr4 = array (
-        'Webmozart\\PathUtil\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/webmozart/path-util/src',
-        ),
-        'Webmozart\\Assert\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/webmozart/assert/src',
-        ),
         'Twig\\' => 
         array (
             0 => __DIR__ . '/..' . '/twig/twig/src',
@@ -487,9 +474,9 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         'Doctrine\\Common\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/common/lib/Doctrine/Common',
-            1 => __DIR__ . '/..' . '/doctrine/event-manager/lib/Doctrine/Common',
-            2 => __DIR__ . '/..' . '/doctrine/persistence/lib/Doctrine/Common',
-            3 => __DIR__ . '/..' . '/doctrine/reflection/lib/Doctrine/Common',
+            1 => __DIR__ . '/..' . '/doctrine/persistence/lib/Doctrine/Common',
+            2 => __DIR__ . '/..' . '/doctrine/reflection/lib/Doctrine/Common',
+            3 => __DIR__ . '/..' . '/doctrine/event-manager/src',
         ),
         'Dflydev\\DotAccessData\\' => 
         array (

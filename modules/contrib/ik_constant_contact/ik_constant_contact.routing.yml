@@ -16,6 +16,7 @@ ik_constant_contact.lists:
     _permission: 'administer constant contact configuration'
   options:
     _admin_route: TRUE
+
 ik_constant_contact.fields:
   path: '/admin/config/services/ik-constant-contact/fields'
   defaults:
@@ -25,6 +26,7 @@ ik_constant_contact.fields:
     _permission: 'administer constant contact configuration'
   options:
     _admin_route: TRUE
+
 ik_constant_contact.authentication_callback:
   path: '/admin/config/services/ik-constant-contact/callback'
   defaults:

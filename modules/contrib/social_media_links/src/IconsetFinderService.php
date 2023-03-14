@@ -71,7 +71,7 @@ class IconsetFinderService {
     // 'libraries' directory.
     $profile = \Drupal::installProfile();
     if ($profile && strpos($profile, "core") === FALSE) {
-      $profile_path = drupal_get_path('profile', $profile);
+      $profile_path = \Drupal::service('extension.list.profile')->getPath($profile);
       $searchdirs[] = "$profile_path/libraries";
     }
 
@@ -86,7 +86,7 @@ class IconsetFinderService {
     $searchdirs[] = "$site_path/libraries";
 
     // Add the social_media_links module directory.
-    $searchdirs[] = drupal_get_path('module', 'social_media_links') . '/libraries';
+    $searchdirs[] = \Drupal::service('extension.list.module')->getPath('social_media_links') . '/libraries';
 
     $this->searchDirs = $searchdirs;
   }

@@ -243,7 +243,8 @@ class PhotoswipePreprocessProcessor implements ContainerInjectionInterface {
       // Load the image style.
       $style = $this->entityTypeManager->getStorage('image_style')->load($style_name);
 
-      // Set the dimensions.
+      /** @var \Drupal\image\ImageStyleInterface $style */
+      // Set the dimensions:
       $style->transformDimensions($dimensions, $this->imageDTO->getUri());
       $this->imageDTO->setDimensions($dimensions);
 

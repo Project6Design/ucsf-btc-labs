@@ -56,7 +56,7 @@ function sitemap_update_8200(&$sandbox) {
   // Update to the frontpage plugin.
   $plugins['frontpage'] = [
     'enabled' => (bool) $config->get('show_front'),
-    'weight' => isset($order['front']) ? $order['front'] : 0,
+    'weight' => $order['front'] ?? 0,
     'settings' => [
       'title' => $show_titles ? 'Front page' : '',
       'rss' => $config->get('rss_front') && $show_rss ? '/' . $config->get('rss_front') : '',
@@ -70,7 +70,7 @@ function sitemap_update_8200(&$sandbox) {
     foreach ($books as $bid => $enabled) {
       $plugins['book:' . $bid] = [
         'enabled' => (bool) $enabled,
-        'weight' => isset($order['books_' . $bid]) ? $order['books_' . $bid] : 0,
+        'weight' => $order['books_' . $bid] ?? 0,
         'settings' => [
           'title' => sitemap_book_title_update($bid, $show_titles),
           'show_expanded' => $config->get('books_expanded'),
@@ -86,7 +86,7 @@ function sitemap_update_8200(&$sandbox) {
     foreach ($menus as $menu_id => $enabled) {
       $plugins['menu:' . $menu_id] = [
         'enabled' => (bool) $enabled,
-        'weight' => isset($order['menus_' . $menu_id]) ? $order['menus_' . $menu_id] : 0,
+        'weight' => $order['menus_' . $menu_id] ?? 0,
         'settings' => [
           'title' => sitemap_menu_title_update($menu_id, $show_titles),
           'show_disabled' => $config->get('show_menus_hidden'),
@@ -105,7 +105,7 @@ function sitemap_update_8200(&$sandbox) {
     foreach ($vocabs as $vid => $enabled) {
       $plugins['vocabulary:' . $vid] = [
         'enabled' => (bool) $enabled,
-        'weight' => isset($order['vocabularies_' . $vid]) ? $order['vocabularies_' . $vid] : 0,
+        'weight' => $order['vocabularies_' . $vid] ?? 0,
         'settings' => [
           'title' => $show_titles ? sitemap_vocab_title_update($vid) : '',
           'show_description' => $config->get('show_description'),

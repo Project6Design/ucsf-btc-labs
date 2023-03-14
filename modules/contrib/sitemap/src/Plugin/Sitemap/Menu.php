@@ -39,7 +39,7 @@ class Menu extends SitemapBase {
     $form['show_disabled'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show disabled menu items'),
-      '#default_value' => isset($this->settings['show_disabled']) ? $this->settings['show_disabled'] : FALSE,
+      '#default_value' => $this->settings['show_disabled'] ?? FALSE,
       '#description' => $this->t('When selected, disabled menu links will also be shown.'),
     ];
 
@@ -76,12 +76,12 @@ class Menu extends SitemapBase {
 
     $menu_display = $menuLinkTree->build($tree);
 
-    return [
+    return ($tree) ? [
       '#theme' => 'sitemap_item',
       '#title' => $this->settings['title'],
       '#content' => $menu_display,
       '#sitemap' => $this,
-    ];
+    ] : [];
   }
 
 }

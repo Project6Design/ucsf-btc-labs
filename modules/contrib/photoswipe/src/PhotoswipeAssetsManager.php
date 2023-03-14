@@ -94,9 +94,7 @@ class PhotoswipeAssetsManager implements PhotoswipeAssetsManagerInterface {
     // if ($this->isAttached()) {
     // return;
     // }.
-    // Add the library of Photoswipe assets.
-    $element['#attached']['library'][] = 'photoswipe/photoswipe';
-    // Load initialization file.
+    // Add the library of Photoswipe library and init:
     $element['#attached']['library'][] = 'photoswipe/photoswipe.init';
 
     // Add photoswipe js settings.

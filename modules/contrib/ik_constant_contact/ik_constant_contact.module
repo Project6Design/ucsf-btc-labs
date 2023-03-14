@@ -5,6 +5,13 @@
  * Contains ik_constant_contact.module.
  */
 
+use Drupal\Core\Entity\ContentEntityFormInterface;
+use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Entity\ContentEntityType;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\FieldConfigInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -40,5 +47,201 @@ function ik_constant_contact_help($route_name, RouteMatchInterface $arg) {
       $output .= '<br/><br/>';
 
       return $output;
+  }
+}
+
+/**
+ * Implements hook_entity_delete()
+ */
+function ik_constant_contact_entity_delete(EntityInterface $entity) {
+  if ($entity->getEntityType() instanceof ContentEntityType) {
+    _ik_constant_contact_entity_subscribe_on_save($entity, 'delete');
+  }
+}
+
+/**
+ * Implements hook_entity_insert()
+ */
+function ik_constant_contact_entity_insert(EntityInterface $entity) {
+  if ($entity->getEntityType() instanceof ContentEntityType) {
+    _ik_constant_contact_entity_subscribe_on_save($entity, 'insert');
+  }
+}
+
+/**
+ * Implements hook_entity_update()
+ */
+function ik_constant_contact_entity_update(EntityInterface $entity) {
+  if ($entity->getEntityType() instanceof ContentEntityType) {
+    _ik_constant_contact_entity_subscribe_on_save($entity, 'update');
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * - Add list options to entity field for constant_contact_list field types
+ * - Add additional validation for fields that are mapped to subscribe on save settings.
+ */
+function ik_constant_contact_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  if (
+    $form_state->getFormObject() instanceof ContentEntityFormInterface && 
+    // Skip delete forms
+    (
+      strpos($form_id, '_cancel_form') === false &&
+      strpos($form_id, '_delete_form') === false
+    )
+   ) {
+    /** @var \Drupal\Core\Entity\EntityForm $entity_form */
+    $entity_form = $form_state->getFormObject();
+    /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
+    $entity = $entity_form->getEntity();
+
+    foreach ($entity->getFields() as $field_name => $field) {
+      $fieldDefinition = $field->getFieldDefinition();
+
+      if ( $fieldDefinition->getType() === 'constant_contact_lists') {
+        $fieldDefinition = $field->getFieldDefinition();
+        $cc = \Drupal::service('ik_constant_contact');
+
+        // Add validation and submit handler if subscribe_on_save is true.
+        if ($fieldDefinition->getSetting('subscribe_on_save') === 1) {
+          $form_state->set('constant_contact_service', $cc);
+          $form['#validate'][] = '_ik_constant_contact_subscribe_on_save_validate';
+        }
+
+        // Add our list options.
+        if ($fieldDefinition->getSetting('enabled_lists_only') === 1) {
+          $lists = $cc->getEnabledContactLists();
+        } else {
+          $lists = $cc->getContactLists();
+        }
+
+        foreach ($lists as $id => $list) {
+          $form[$field_name]['widget']['#options'][$id] = $list->name;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_webform_options_WEBFORM_OPTIONS_ID_alter() for CC List options.
+ */
+function ik_constant_contact_webform_options_constant_contact_lists_alter(array &$options, array $element = []) {
+  /** @var \Drupal\ik_constant_contact\Service\ConstantContact $constantContact */
+  $constantContact = \Drupal::service('ik_constant_contact');
+  $lists = $constantContact->getEnabledContactLists();
+  $options = [];
+
+  if ($lists && count($lists) > 0) {
+    foreach ($lists as $list) {
+      $options[$list->list_id] = $list->name;
+    }
+  }
+}
+
+/**
+ * Validate entity forms that have constant_contact_list field type with subscribe_on_save setting checked.
+ *
+ * Make sure we have the required fields if a list value is popuplated
+ *
+ * @param [type] $form
+ * @param [type] $form_state
+ * @return void
+ */
+function _ik_constant_contact_subscribe_on_save_validate($form, &$form_state) {
+  $entityForm = $form_state->getFormObject();
+  $entity = $entityForm->getEntity();
+  $entityFields = $entity->getFields();
+  $cc = $form_state->get('constant_contact_service');
+
+  foreach ($entityFields as $field_name => $field) {
+    $fieldDefinition = $field->getFieldDefinition();
+      
+    if ($fieldDefinition->getType() === 'constant_contact_lists') {
+      $listValues = $form_state->getValue($field_name);
+
+      if ($fieldDefinition->getSetting('subscribe_on_save') === 1 && !empty($listValues)) {
+        $fieldMapping = $fieldDefinition->getSetting('field_mapping');
+
+        foreach ($fieldMapping as $ccFieldName => $entityFieldName) {
+          if ($ccFieldName === 'email_address') {
+            $value = $form_state->getValue($entityFieldName);
+            $isEmpty = false;
+
+            if (empty($value) && !is_array($value)) {
+              $isEmpty = true;
+            } else if (is_array($value) && (!isset($value[0]) || !isset($value[0]['value']) || empty($value[0]['value']) || $value[0]['value'] === '')) {
+              $isEmpty = true;
+            }
+
+            if ($isEmpty) {
+              $form_state->setErrorByName($entityFieldName, t('The %field field is required to subscribe to lists in field %source', [
+                '%field' => $entityFields[$entityFieldName]->getFieldDefinition()->getLabel(), 
+                '%source' => $fieldDefinition->getLabel()
+              ]));
+            }
+          }
+        } 
+      }
+    }
+  }
+  
+}
+
+
+/**
+ * Subscribe on save of entity
+ */
+function _ik_constant_contact_entity_subscribe_on_save($entity, $op = 'update') {
+  $entityFields = $entity->getFields();
+  $data = $lists = [];
+
+  foreach ($entityFields as $field_name => $field) {
+    $fieldDefinition = $field->getFieldDefinition();
+      
+    if ($fieldDefinition->getType() === 'constant_contact_lists' && $fieldDefinition->getSetting('subscribe_on_save') === 1) {
+      $cc = \Drupal::service('ik_constant_contact');
+      $hasChanged = false;
+
+      if (
+        // If it is new and we need to subscribe
+        ($op === 'insert' && $entity->{$field_name}->count() > 0) ||
+         // If it is delete and we need to unsubscribe
+        ($op === 'delete' && $entity->{$field_name}->count() > 0 && $fieldDefinition->getSetting('unsubscribe_on_delete') === 1) ||
+         // If it is update and counts don't match
+        ($op === 'update')
+      ) {
+        $hasChanged = true;
+      }
+     
+      if ($hasChanged) {
+        foreach ($entity->{$field_name}->getValue() as $delta => $value) {
+          if (isset($value['value']) && !empty($value['value'])) {
+            $lists[] = $value['value'];
+          }
+        }
+
+        $fieldMapping = $fieldDefinition->getSetting('field_mapping');
+
+        foreach ($fieldMapping as $ccFieldName => $entityFieldName) {
+          $value = $entity->{$entityFieldName}->getValue();
+
+          if (is_array($value)) {
+            $value = $value[0]['value'];
+          }
+
+          $data[$ccFieldName] = $value;
+        }
+
+        if ($op === 'delete') {
+          $response = $cc->unsubscribeContact($data, $lists);
+        }
+        else {
+          $response = $cc->submitContactForm($data, $lists);
+        }
+      }
+    }
   }
 }

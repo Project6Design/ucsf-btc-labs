@@ -39,6 +39,7 @@ class SocialMediaLinksFieldDefaultWidget extends SocialMediaLinksFieldBaseWidget
         '#default_value' => isset($value['platform_values'][$platform_id]['value']) ? $value['platform_values'][$platform_id]['value'] : '',
         '#field_prefix' => $platform['instance']->getUrlPrefix(),
         '#field_suffix' => $platform['instance']->getUrlSuffix(),
+        '#required' => $element['#required'] ?? FALSE,
         '#element_validate' => [
           [
             get_class($platform['instance']),

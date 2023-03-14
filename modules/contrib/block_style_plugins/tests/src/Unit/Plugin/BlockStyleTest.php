@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\block_style_plugins\Unit\Plugin;
 
+use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Tests\UnitTestCase;
 use Drupal\block_style_plugins\Plugin\BlockStyle;
 use Drupal\Core\Form\FormStateInterface;
@@ -16,6 +17,7 @@ use Drupal\Core\Entity\EntityStorageInterface;
  */
 class BlockStyleTest extends UnitTestCase {
 
+  use ProphecyTrait;
   /**
    * Mocked entity repository service.
    *
@@ -47,7 +49,7 @@ class BlockStyleTest extends UnitTestCase {
   /**
    * Create the setup for constants and configFactory stub.
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Stub the Iconset Finder Service.
@@ -106,7 +108,7 @@ class BlockStyleTest extends UnitTestCase {
     ];
     $default = $this->plugin->defaultConfiguration();
 
-    $this->assertArrayEquals($expected, $default);
+    $this->assertEquals($expected, $default);
   }
 
   /**
@@ -142,7 +144,7 @@ class BlockStyleTest extends UnitTestCase {
     $form = [];
     $return = $this->plugin->buildConfigurationForm($form, $this->formState->reveal());
 
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
   }
 
   /**
@@ -176,7 +178,7 @@ class BlockStyleTest extends UnitTestCase {
 
     $return = $this->plugin->themeSuggestion($suggestions, $variables);
 
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
   }
 
 }

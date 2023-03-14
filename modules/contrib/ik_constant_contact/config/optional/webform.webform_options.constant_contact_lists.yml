@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - ik_constant_contact
+id: constant_contact_lists
+label: 'Constant Contact List(s)'
+category: General
+likert: false
+options: ''

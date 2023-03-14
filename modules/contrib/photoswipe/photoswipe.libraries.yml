@@ -13,6 +13,7 @@ photoswipe:
     //cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe-ui-default.min.js: { minified: true }
 
 # Development Version
+# Currently unused, see https://www.drupal.org/project/photoswipe/issues/3345238
 photoswipe.dev:
   remote: https://github.com/dimsemenov/PhotoSwipe/archive/v4.1.3.zip
   version: 4.1.3
@@ -35,3 +36,4 @@ photoswipe.init:
     - core/drupal
     - core/once
     - core/drupalSettings
+    - photoswipe/photoswipe

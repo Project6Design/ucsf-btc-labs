@@ -99,3 +99,9 @@ sitemap.settings.plugins.*:
           type: integer
           label: 'RSS depth'
           nullable: true
+    id:
+      type: string
+      label: 'Plugin ID'
+    provider:
+      type: string
+      label: 'Provider name'

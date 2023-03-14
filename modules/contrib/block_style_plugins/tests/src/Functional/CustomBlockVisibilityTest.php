@@ -17,7 +17,7 @@ class CustomBlockVisibilityTest extends BlockContentTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['block_style_plugins', 'block_style_plugins_test'];
+  protected static $modules = ['block_style_plugins', 'block_style_plugins_test'];
 
   /**
    * {@inheritdoc}

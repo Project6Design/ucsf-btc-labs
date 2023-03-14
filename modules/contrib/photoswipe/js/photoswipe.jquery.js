@@ -30,7 +30,7 @@
       var $galleries = $('.photoswipe-gallery', context);
       if ($galleries.length) {
         // if body haven't special container for show photoswipe gallery append it.
-        if ('container' in settings.photoswipe && !$('.pswp').length) {
+        if (settings.photoswipe && 'container' in settings.photoswipe && !$('.pswp').length) {
           $('body').append(settings.photoswipe.container);
         }
 
@@ -83,7 +83,10 @@
      * and adjusted accordingly.
      */
     openPhotoSwipe: function (index, galleryElement, options) {
-      var pswpElement = $('.pswp')[0];
+      var pswpContainer = $('.pswp')[0];
+      if (!pswpContainer) {
+        throw "The photoswipe container is required, but missing on this page. Can not open photoswipe.";
+      }
       var items = [];
       options = options || Drupal.behaviors.photoswipe.photoSwipeOptions;
 
@@ -126,7 +129,7 @@
       // PhotoSwipe so to make PhotoSwipe get along with Blazy, Slick, etc.
       if (items.length > 0) {
         // Pass data to PhotoSwipe and initialize it
-        var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
+        var gallery = new PhotoSwipe(pswpContainer, PhotoSwipeUI_Default, items, options);
         gallery.init();
         this.galleries.push(gallery);
       }

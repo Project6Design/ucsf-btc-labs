@@ -17,7 +17,7 @@ class FormFieldsCreatedWithYamlTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['block_style_plugins', 'block_style_plugins_test'];
+  protected static $modules = ['block_style_plugins', 'block_style_plugins_test'];
 
   /**
    * A user that can edit content types.
@@ -29,7 +29,7 @@ class FormFieldsCreatedWithYamlTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->adminUser = $this->drupalCreateUser([

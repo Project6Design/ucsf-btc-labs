@@ -2,11 +2,11 @@
 
 namespace Drupal\ik_constant_contact\Form;
 
+use Drupal\ik_constant_contact\Service\ConstantContact;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\ik_constant_contact\Service\ConstantContact;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -83,29 +83,35 @@ class ConstantContactLists extends ConfigFormBase {
     $config = $this->constantContact->getConfig();
     $enabled = $this->config('ik_constant_contact.enabled_lists')->getRawData();
 
-    $form['lists'] = [
-      '#type' => 'fieldset',
-      '#title' => $this->t('Your Constant Contact Lists'),
-      '#description' => $this->t('Check the lists you would like to enable as a block or as a REST endpoint.'),
+    $header = [
+      'name' => $this->t('List Name'),
+      'list_id' => $this->t('List UUID'),
     ];
+
+    $output = $defaultValue = [];
 
     if (isset($config['access_token']) && isset($config['refresh_token'])) {
       $lists = $this->constantContact->getContactLists();
 
       if ($lists && count($lists) > 0) {
         foreach ($lists as $list) {
-          $form['lists'][$list->list_id] = [
-            '#type' => 'checkbox',
-            '#title' => $list->name,
-            '#default_value' => isset($enabled[$list->list_id]) ? $enabled[$list->list_id] : NULL,
-            '#description' => $this->t('List ID: @listID', ['@listID' => $list->list_id]),
+          $output[$list->list_id] = [
+            'name' => $list->name,
+            'list_id' => $list->list_id,
           ];
+
+          $defaultValue[$list->list_id] = isset($enabled[$list->list_id]) && $enabled[$list->list_id] === 1 ? $list->list_id : NULL;
         }
       }
     }
-    else {
-      $form['lists']['#descriptions'] = $this->t('You must authorize Constant Contact before enabling a list.');
-    }
+
+    $form['lists'] = [
+      '#type' => 'tableselect',
+      '#header' => $header,
+      '#options' => $output,
+      '#default_value' => $defaultValue,
+      '#empty' => $this->t('You must authorize Constant Contact before enabling a list or there are no lists available on your account.'),
+    ];
 
     return parent::buildForm($form, $form_state);
   }
@@ -116,14 +122,16 @@ class ConstantContactLists extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('ik_constant_contact.enabled_lists');
     $config->clear('ik_constant_contact.enabled_lists');
+    $enabled = $form_state->getValues()['lists'];
+    $lists = $this->constantContact->getContactLists();
 
-    foreach ($form_state->getValues() as $key => $value) {
-      if (is_int($value)) {
-        $config->set($key, $value);
-      }
+    foreach ($enabled as $key => $value) {
+      $config->set($key, ($value === 0 ? 0 : 1));
     }
 
     $config->save();
+
+    $this->constantContact->saveContactLists($lists);
 
     $this->messenger->addMessage($this->t('Your configuration has been saved'));
   }

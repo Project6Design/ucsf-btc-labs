@@ -39,7 +39,7 @@ class SendGridReportsController extends ControllerBase {
   /**
    * SendGridReportsController constructor.
    *
-   * @param \Drupal\sengrid_integration_reports\Api $api
+   * @param \Drupal\sendgrid_integration_reports\Api $api
    *   The sendgrid api service.
    */
   public function __construct(Api $api) {

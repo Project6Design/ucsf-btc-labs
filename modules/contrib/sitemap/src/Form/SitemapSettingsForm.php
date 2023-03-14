@@ -76,7 +76,7 @@ class SitemapSettingsForm extends ConfigFormBase {
     $sitemap_message = $config->get('message');
     $form['message'] = [
       '#type' => 'text_format',
-      '#format' => isset($sitemap_message['format']) ? $sitemap_message['format'] : NULL,
+      '#format' => $sitemap_message['format'] ?? NULL,
       '#title' => $this->t('Sitemap message'),
       '#default_value' => $sitemap_message['value'],
       '#description' => $this->t('Define a message to be displayed above the sitemap.'),

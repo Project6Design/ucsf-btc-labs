@@ -96,7 +96,7 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
    *   The plugin implementation definition.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
    *   The configuration factory service.
-   * @param \Drupal\Core\logger\LoggerChannelFactoryInterface $loggerChannelFactory
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
    *   The logger channel factory service.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   The module handler service.
@@ -138,10 +138,34 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
 
   /**
    * {@inheritdoc}
-   * @throws \SendGrid\Exception\SendgridException
    */
   public function mail(array $message): bool {
-    # Begin by creating instances of objects needed.
+    // Set mail to false by default.
+    $mail = FALSE;
+    try {
+      // The doMail function returns a boolean.
+      $mail = $this->doMail($message);
+    }
+    // Log the exception.
+    catch (SendgridException $e) {
+      $this->logger->error($e->getMessage());
+    }
+    return $mail;
+  }
+
+  /**
+   * Worker method for ::mail.
+   *
+   * @param array $message
+   *   The message array.
+   *
+   * @return bool
+   *   True if the message is sent.
+   *
+   * @throws \SendGrid\Exception\SendgridException
+   */
+  protected function doMail(array $message): bool {
+    // Begin by creating instances of objects needed.
     $sendgrid_message = new Mail();
     $personalization0 = $sendgrid_message->getPersonalization();
     $sandbox_mode = new SandBoxMode();
@@ -183,6 +207,9 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
     $client = new Client($key_secret, $options);
 
     $sitename = $site_config->get('name');
+    if (!mb_check_encoding($sitename, 'ASCII')) {
+      $sitename = urlencode($sitename);
+    }
 
     // If this is a password reset. Bypass spam filters.
     if (strpos($message['id'], 'password')) {
@@ -197,6 +224,7 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
 
     # Add UID metadata to the message that matches the drupal user ID.
     if (isset($message['params']['account']->uid)) {
+      /** @var \Drupal\user\Entity\User $mailuser */
       $mailuser = $message['params']['account'];
       $uid = $mailuser->get('uid')->value;
       $sendgrid_message->addCustomArg("uid", strval($uid));
@@ -251,6 +279,8 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
     if (strpos($message['to'], ',')) {
       $sendtosarry = explode(',', $message['to']);
       foreach ($sendtosarry as $value) {
+        // Remove unnecessary spaces.
+        $value = trim($value);
         $sendtoarrayparsed = $this->parseAddress($value);
         $personalization0->addTo(new To($sendtoarrayparsed[0], isset($sendtoarrayparsed[1]) ? $sendtoarrayparsed[1] : NULL));
       }
@@ -265,6 +295,9 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
       }
       $personalization0->addTo(new To($toaddrarray[0], $toname));
     }
+
+    // Empty array to process addresses from mail headers.
+    $address_cc_bcc = [];
 
     // Beginning of consolidated header parsing.
     foreach ($message['headers'] as $key => $value) {
@@ -419,14 +452,16 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
       // -----------------------
       // Array to use for processing bcc and cc options.
       $cc_bcc_keys = ['cc', 'bcc'];
-      // Empty array to process addresses.
-      $address_cc_bcc = [];
 
       // Handle latter case issue for cc and bcc key.
       if (in_array(mb_strtolower($key), $cc_bcc_keys)) {
         $mail_ids = explode(',', $value);
         foreach ($mail_ids as $mail_id) {
-          [$mail_cc_address, $cc_name] = $this->parseAddress($mail_id);
+          $email_components = $this->parseAddress($mail_id);
+          $mail_cc_address = $email_components[0];
+          // If there was a name with the mail,
+          // use it otherwise, use the email address as the name.
+          $cc_name = $email_components[1] ?? $email_components[0];
           $address_cc_bcc[mb_strtolower($key)][] = [
             'mail' => $mail_cc_address,
             'name' => $cc_name,
@@ -765,7 +800,7 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
     }
     $filename = basename($path);
     $file_content = base64_encode(file_get_contents($path));
-    $mime_type = $this->mimeTypeGuesser->guess($path);
+    $mime_type = $this->mimeTypeGuesser->guessMimeType($path);
     if (!$this->isValidContentType($mime_type)) {
       throw new \Exception($mime_type . ' is not a valid content type.');
     }

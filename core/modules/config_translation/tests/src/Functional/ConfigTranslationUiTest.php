@@ -13,6 +13,8 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\BrowserTestBase;
 
+// cspell:ignore viewsviewfiles
+
 /**
  * Translate settings and entities to various languages.
  *
@@ -78,6 +80,9 @@ class ConfigTranslationUiTest extends BrowserTestBase {
    */
   protected $localeStorage;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     $translator_permissions = [

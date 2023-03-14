@@ -26,7 +26,7 @@
             .closest('tr');
           // Retrieve the vertical tab belonging to this filter.
           const $filterSettings = $context.find(
-            `#${$checkbox.attr('id').replace(/-enabled$/, '-settings')}`,
+            `#${$checkbox.attr('id').replace(/-enabled$/, '-settings')}`
           );
           const filterSettingsTab = $filterSettings.data('verticalTab');
 
@@ -59,7 +59,7 @@
             filterSettingsTab.details.drupalSetSummary(() =>
               $checkbox.is(':checked')
                 ? Drupal.t('Enabled')
-                : Drupal.t('Disabled'),
+                : Drupal.t('Disabled')
             );
           }
 

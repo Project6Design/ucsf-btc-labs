@@ -14,7 +14,7 @@ class PluginDiscoveryTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['block_style_plugins', 'block_style_plugins_test'];
+  protected static $modules = ['block_style_plugins', 'block_style_plugins_test'];
 
   /**
    * Make sure that plugins are discovered.

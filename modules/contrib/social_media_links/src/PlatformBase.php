@@ -27,7 +27,7 @@ class PlatformBase extends PluginBase implements PlatformInterface {
    * {@inheritdoc}
    */
   public function getValue() {
-    return Html::escape($this->value);
+    return Html::escape($this->value ?? '');
   }
 
   /**
@@ -90,7 +90,7 @@ class PlatformBase extends PluginBase implements PlatformInterface {
    * {@inheritdoc}
    */
   public function getDescription() {
-    return Html::escape($this->description);
+    return Html::escape($this->description ?? '');
   }
 
   /**

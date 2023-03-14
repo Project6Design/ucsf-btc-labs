@@ -169,3 +169,14 @@ function photoswipe_library_info_alter(&$libraries, $module) {
     }
   }
 }
+
+/**
+ * Implements hook_field_migration_field_formatter_info().
+ */
+function photoswipe_field_migration_field_formatter_info() {
+  return [
+    'image' => ['photoswipe_image_formatter' => 'photoswipe_field_formatter'],
+    'media_image' => ['photoswipe_image_formatter' => 'photoswipe_field_formatter'],
+    'entity_reference' => ['photoswipe_image_formatter' => 'photoswipe_field_formatter'],
+  ];
+}

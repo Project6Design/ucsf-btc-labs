@@ -37,7 +37,7 @@ class CustomFieldsController extends ControllerBase {
    *   Return markup array.
    */
   public function content() {
-    $fields = $this->constantContact->getCustomFields();
+    $fields = $this->constantContact->getCustomFields(false);
     $header = ['Custom Field Name', 'Field Type', 'Custom Field ID'];
     $rows = [];
 

@@ -88,10 +88,7 @@ class SocialMediaLinksPlatformManager extends DefaultPluginManager {
     foreach ($this->getPlatforms() as $platform_id => $platform) {
       if (!empty($platforms[$platform_id]['value'])) {
         $platform['instance']->setValue($platforms[$platform_id]['value']);
-
-        if (!empty($platforms[$platform_id]['description'])) {
-          $platform['instance']->setDescription($platforms[$platform_id]['description']);
-        }
+        $platform['instance']->setDescription($platforms[$platform_id]['description'] ?? '');
 
         $usedPlatforms[$platform_id] = $platform;
 

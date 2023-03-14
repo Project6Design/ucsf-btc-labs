@@ -10,6 +10,7 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\RendererInterface;
 
 /**
@@ -21,7 +22,7 @@ use Drupal\Core\Render\RendererInterface;
  *   admin_label = @Translation("Syndicate (sitemap)")
  * )
  */
-class SitemapSyndicateBlock extends BlockBase {
+class SitemapSyndicateBlock extends BlockBase implements ContainerFactoryPluginInterface {
   use StringTranslationTrait;
 
   /**

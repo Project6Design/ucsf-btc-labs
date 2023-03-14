@@ -62,12 +62,32 @@ class FontAwesome extends IconsetBase implements IconsetInterface {
       case 'website':
         $icon_name = 'home';
         break;
+
+      case 'googleplay':
+        $icon_name = 'google-play';
+        break;
+
+      case 'meetup':
+        $icon_name = 'meetup';
+        break;
+
+      case 'patreon':
+        $icon_name = 'patreon';
+        break;
     }
 
-    $icon = [
-      '#type' => 'markup',
-      '#markup' => "<span class='fa fa-$icon_name fa-$style'></span>",
-    ];
+    if ($icon_name == 'envelope' || $icon_name == 'home' || $icon_name == 'rss') {
+      $icon = [
+        '#type' => 'markup',
+        '#markup' => "<span class='fa fa-$icon_name fa-$style'></span>",
+      ];
+    }
+    else {
+      $icon = [
+        '#type' => 'markup',
+        '#markup' => "<span class='fab fa-$icon_name fa-$style'></span>",
+      ];
+    }
 
     return $icon;
   }

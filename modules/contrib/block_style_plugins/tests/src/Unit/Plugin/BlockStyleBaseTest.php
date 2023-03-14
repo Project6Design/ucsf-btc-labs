@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\block_style_plugins\Unit\Plugin;
 
+use Prophecy\PhpUnit\ProphecyTrait;
 use Drupal\Tests\UnitTestCase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
@@ -20,6 +21,7 @@ use Drupal\Core\Block\BlockPluginInterface;
  */
 class BlockStyleBaseTest extends UnitTestCase {
 
+  use ProphecyTrait;
   /**
    * Mocked entity repository service.
    *
@@ -58,7 +60,7 @@ class BlockStyleBaseTest extends UnitTestCase {
   /**
    * Create the setup for constants and configFactory stub.
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Stub the Iconset Finder Service.
@@ -150,14 +152,14 @@ class BlockStyleBaseTest extends UnitTestCase {
       'sample_checkbox' => '',
       'test_style' => TRUE,
     ];
-    $this->assertArrayEquals($expected_styles, $styles);
+    $this->assertEquals($expected_styles, $styles);
 
     // Check third party settings.
     $expected_third_party_settings['block_style_plugins']['block_style_plugins'] = [
       '#type' => 'container',
       '#group' => 'block_styles',
     ];
-    $this->assertArrayEquals($expected_third_party_settings, $return['third_party_settings']);
+    $this->assertEquals($expected_third_party_settings, $return['third_party_settings']);
   }
 
   /**
@@ -172,7 +174,7 @@ class BlockStyleBaseTest extends UnitTestCase {
     ];
     $default = $this->plugin->defaultConfiguration();
 
-    $this->assertArrayEquals($expected, $default);
+    $this->assertEquals($expected, $default);
   }
 
   /**
@@ -184,7 +186,7 @@ class BlockStyleBaseTest extends UnitTestCase {
     $form = [];
     $return = $this->plugin->buildConfigurationForm($form, $this->formState->reveal());
 
-    $this->assertArrayEquals([], $return);
+    $this->assertEquals([], $return);
   }
 
   /**
@@ -196,7 +198,7 @@ class BlockStyleBaseTest extends UnitTestCase {
     $form = ['test'];
     $return = $this->plugin->formAlter($form, $this->formState->reveal());
 
-    $this->assertArrayEquals($form, $return);
+    $this->assertEquals($form, $return);
   }
 
   /**
@@ -240,7 +242,7 @@ class BlockStyleBaseTest extends UnitTestCase {
     // No element ID is passed through the variables.
     $variables = [];
     $return = $this->plugin->build($variables);
-    $this->assertArrayEquals($variables, $return);
+    $this->assertEquals($variables, $return);
 
     // No styles attached to the block.
     $block->getThirdPartySetting('block_style_plugins', 'block_style_plugins')
@@ -248,7 +250,7 @@ class BlockStyleBaseTest extends UnitTestCase {
 
     $variables = ['elements' => ['#id' => 1]];
     $return = $this->plugin->build($variables);
-    $this->assertArrayEquals($variables, $return);
+    $this->assertEquals($variables, $return);
 
     // Return the third party styles set in the plugin.
     $block->getThirdPartySetting('block_style_plugins', 'block_style_plugins')
@@ -268,7 +270,7 @@ class BlockStyleBaseTest extends UnitTestCase {
       ],
     ];
     $return = $this->plugin->build($variables);
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
 
     // Don't set a class for integers.
     $block->getThirdPartySetting('block_style_plugins', 'block_style_plugins')
@@ -288,7 +290,7 @@ class BlockStyleBaseTest extends UnitTestCase {
       ],
     ];
     $return = $this->plugin->build($variables);
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
   }
 
   /**
@@ -304,7 +306,7 @@ class BlockStyleBaseTest extends UnitTestCase {
     $this->plugin->setConfiguration([]);
     $return = $this->plugin->getConfiguration();
 
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
   }
 
   /**
@@ -323,7 +325,7 @@ class BlockStyleBaseTest extends UnitTestCase {
     $this->plugin->setConfiguration($new_styles);
     $return = $this->plugin->getConfiguration();
 
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
 
     // Overwrite styles.
     $expected = [
@@ -334,7 +336,7 @@ class BlockStyleBaseTest extends UnitTestCase {
     $this->plugin->setConfiguration($expected);
     $return = $this->plugin->getConfiguration();
 
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
   }
 
   /**

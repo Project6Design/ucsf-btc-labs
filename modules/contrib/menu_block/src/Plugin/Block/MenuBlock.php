@@ -231,7 +231,7 @@ class MenuBlock extends SystemMenuBlock {
     // 'expand' config property in case the menu block's configuration has not
     // yet been updated.
     $expand_all_items = $this->configuration['expand'] ?? $this->configuration['expand_all_items'];
-    $parent = $this->configuration['parent'];
+    $parent = $this->configuration['parent'] ?? '';
     $follow = $this->configuration['follow'];
     $follow_parent = $this->configuration['follow_parent'];
     $following = FALSE;
@@ -438,6 +438,7 @@ class MenuBlock extends SystemMenuBlock {
       $fixed_menu_link_id = str_replace($this->getDerivativeId() . ':', '', $parent);
       return $this->getLinkTitleFromLink($fixed_menu_link_id);
     }
+    return NULL;
   }
 
   /**
@@ -452,6 +453,7 @@ class MenuBlock extends SystemMenuBlock {
     if ($active_trail_ids) {
       return $this->getLinkTitleFromLink(reset($active_trail_ids));
     }
+    return NULL;
   }
 
   /**
@@ -470,6 +472,7 @@ class MenuBlock extends SystemMenuBlock {
       }
       return $this->getLinkTitleFromLink(next($active_trail_ids));
     }
+    return NULL;
   }
 
   /**
@@ -485,6 +488,7 @@ class MenuBlock extends SystemMenuBlock {
     if ($active_trail_ids) {
       return $this->getLinkTitleFromLink(end($active_trail_ids));
     }
+    return NULL;
   }
 
   /**
@@ -507,7 +511,7 @@ class MenuBlock extends SystemMenuBlock {
    * @return string|null
    *   The menu item title or NULL if the given menu item can't be found.
    */
-  protected function getLinkTitleFromLink($link_id) {
+  protected function getLinkTitleFromLink(string $link_id) {
     $parameters = new MenuTreeParameters();
     $menu = $this->menuTree->load($this->getDerivativeId(), $parameters);
     $link = $this->findLinkInTree($menu, $link_id);
@@ -518,6 +522,7 @@ class MenuBlock extends SystemMenuBlock {
       }
       return $link->link->getTitle();
     }
+    return NULL;
   }
 
   /**
@@ -542,6 +547,7 @@ class MenuBlock extends SystemMenuBlock {
         return $link;
       }
     }
+    return NULL;
   }
 
 }

@@ -262,13 +262,13 @@ class Vocabulary extends SitemapBase {
       '#items' => $list,
     ];
 
-    return [
+    return ($list) ? [
       '#theme' => 'sitemap_item',
       '#title' => $this->settings['title'],
       '#content' => $content,
       '#sitemap' => $this,
       // @todo Does a vocabulary cache tag exist?
-    ];
+    ] : [];
   }
 
   /**
@@ -290,7 +290,7 @@ class Vocabulary extends SitemapBase {
         '#url' => $this->buildTermLink($term) ?: '',
         '#show_link' => $this->determineLinkVisibility($term),
         '#show_count' => $this->determineCountVisibility($term),
-        '#count' => isset($term->count) ? $term->count : '',
+        '#count' => $term->count ?? '',
         '#show_feed' => $this->settings['enable_rss'],
         '#feed' => $this->buildFeedLink($term) ?: '',
       ];

@@ -57,13 +57,11 @@ class ConstantContactBlockDerivative extends DeriverBase implements ContainerDer
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
-    $lists = $this->constantContact->getContactLists();
-    $enabledLists = $this->configFactory->get('ik_constant_contact.enabled_lists')
-      ->getRawData();
+    $lists = $this->constantContact->getEnabledContactLists(false);
 
-    if ($lists && $enabledLists && count($lists) > 0 && count($enabledLists) > 0) {
-      foreach ($enabledLists as $id => $value) {
-        if ($value === 1) {
+    if ($lists) {
+      foreach ($lists as $id => $value) {
+        if ($value->enabled === true) {
           $this->derivatives[$id] = $base_plugin_definition;
           $this->derivatives[$id]['admin_label'] = $lists[$id]->name . '  Signup Block';
         }

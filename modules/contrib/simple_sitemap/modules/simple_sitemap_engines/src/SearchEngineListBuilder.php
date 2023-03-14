@@ -9,7 +9,6 @@ use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\simple_sitemap_engines\Entity\SimpleSitemapEngine;
-use Drupal\simple_sitemap_engines\Form\FormHelper;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -81,7 +80,6 @@ class SearchEngineListBuilder extends ConfigEntityListBuilder {
    */
   public function render(): array {
     return [
-      '#prefix' => FormHelper::getDonationText(),
       'sitemap_submission_engines' => $this->renderSitemapSubmissionEngines(),
       'index_now_engines' => $this->renderIndexNowEngines(),
     ];

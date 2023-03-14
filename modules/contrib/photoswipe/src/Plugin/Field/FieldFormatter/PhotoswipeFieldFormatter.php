@@ -128,7 +128,7 @@ class PhotoswipeFieldFormatter extends FormatterBase {
     PhotoswipeAssetsManagerInterface $assets_manager,
     EntityStorageInterface $image_style_storage
   ) {
-    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings, $image_style_storage);
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
     $this->fieldDefinition = $field_definition;
     $this->settings = $settings;
     $this->label = $label;
@@ -474,8 +474,8 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       $style_ids[] = $this->getSetting('photoswipe_node_style_first');
     }
     $style_ids[] = $this->getSetting('photoswipe_image_style');
-    /** @var \Drupal\image\ImageStyleInterface $style */
     foreach ($style_ids as $style_id) {
+      /** @var \Drupal\image\ImageStyleInterface $style */
       if ($style_id && $style = $this->imageStyleStorage->load($style_id)) {
         // If this formatter uses a valid image style to display the image, add
         // the image style configuration entity as dependency of this formatter.
@@ -496,8 +496,8 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       $style_ids['photoswipe_node_style_first'] = $this->getSetting('photoswipe_node_style_first');
     }
     $style_ids['photoswipe_image_style'] = $this->getSetting('photoswipe_image_style');
-    /** @var \Drupal\image\ImageStyleInterface $style */
     foreach ($style_ids as $name => $style_id) {
+      /** @var \Drupal\image\ImageStyleInterface $style */
       if (!empty($style_id) && $style = $this->imageStyleStorage->load($style_id)) {
         if (!empty($dependencies[$style->getConfigDependencyKey()][$style->getConfigDependencyName()])) {
           $replacement_id = $this->imageStyleStorage->getReplacementId($style_id);

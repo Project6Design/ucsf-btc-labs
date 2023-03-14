@@ -58,12 +58,12 @@ class Book extends SitemapBase {
     $tree = $book_manager->bookTreeAllData($book_id, NULL, $max_depth);
     $content = $book_manager->bookTreeOutput($tree);
 
-    return [
+    return ($tree) ? [
       '#theme' => 'sitemap_item',
       '#title' => $this->settings['title'],
       '#content' => $content,
       '#sitemap' => $this,
-    ];
+    ] : [];
   }
 
 }

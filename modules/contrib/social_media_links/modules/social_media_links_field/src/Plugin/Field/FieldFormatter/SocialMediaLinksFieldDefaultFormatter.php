@@ -49,8 +49,8 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
       $platforms[$platform_id]['attributes'] = new Attribute($link_attributes);
 
       if (!empty($platform['instance']->getDescription())) {
-        $platforms[$platform_id]['attributes']->setAttribute('aria-label', $platform['instance']->getDescription());
-        $platforms[$platform_id]['attributes']->setAttribute('title', $platform['instance']->getDescription());
+        $platforms[$platform_id]['attributes']->setAttribute('aria-label', $this->t($platform['instance']->getDescription()));
+        $platforms[$platform_id]['attributes']->setAttribute('title', $this->t($platform['instance']->getDescription()));
       }
     }
 

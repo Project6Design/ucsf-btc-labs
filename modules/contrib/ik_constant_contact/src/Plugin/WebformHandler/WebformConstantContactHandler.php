@@ -245,6 +245,21 @@ class WebformConstantContactHandler extends WebformHandlerBase {
 
     $configuration = $this->tokenManager->replace($this->configuration, $webform_submission);
 
+    // Check if we are using a token for the list field & replace value.
+    if (isset($this->configuration['list']) && strpos($this->configuration['list'], '[webform_submission:values:') !== false) {
+      $configuration['list'] = null;
+      $fieldToken = str_replace(['[webform_submission:values:', ']'], '', $this->configuration['list']);
+
+      if (isset($fields['data'][$fieldToken])) {
+        if (is_string($fields['data'][$fieldToken])) {
+          $configuration['list'] = [$fields['data'][$fieldToken]];
+        }
+        else if (is_array($fields['data'][$fieldToken])) {
+          $configuration['list'] = $fields['data'][$fieldToken];
+        }
+      }
+    }
+
     // Email could be a webform element or a string/token.
     if (!empty($fields['data'][$configuration['email']])) {
       $email = $fields['data'][$configuration['email']];
@@ -280,7 +295,7 @@ class WebformConstantContactHandler extends WebformHandlerBase {
 
     if (!empty($configuration['list']) && !empty($email)) {
       $data = array_merge(['email_address' => $email], $mergevars);
-      $this->constantContact->submitContactForm($data , [$configuration['list']]);
+      $this->constantContact->submitContactForm($data , $configuration['list']);
     }
     else {
       if (empty($configuration['list'])) {

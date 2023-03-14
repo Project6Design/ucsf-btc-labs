@@ -39,8 +39,8 @@ a module with Drush. All downloading of modules now resides with composer.
 
 1. Start at the root of your Drupal 8 installation and issue the command
    <code>composer require drupal/sendgrid_integration</code>.
-   
-2. The module will be downloaded from Drupal.org, the dependency API wrapper will 
+
+2. The module will be downloaded from Drupal.org, the dependency API wrapper will
    be downloaded from Github, and your main composer.json will be updated.
 
 3. Navigate to Modules and enable SendGrid Integration in the Mail category.
@@ -60,27 +60,14 @@ manual installation of the API wrapper.
 HTML Email
 --------------------------------------------------------------------------------
 In order to send HTML email. Your installation of Drupal must generate an email
-with the proper headers. Sendgrid Integration modules looks for the content type
-of the email to be set to "text/html" in the header (i.e. "Content-Type"="text/html").
-A text version of the email is also sent at the same time.
+with the proper headers.
 
-If the message does not have the content type set to "text/html" the message
-will be stripped of any tags and converted to text.
+We recommend using the module [Mimemail](https://www.drupal.org/project/mimemail)
+for HTML formatting of emails.
 
-We recommend using the module [HTMLmail](https://www.drupal.org/project/htmlmail)
-for HTML formatting of emails. This module allows for easy templating of emails
-and it sets the correct header on emails (text/html).
-
-We do not recommend MIMEmail module because it sets the content-type header of a
-message to "multipart/mixed" instead of strictly "text/html". In addition, the
-MIMEmail module attempts to template emails and include inline CSS that is not
-compatible with SendGrid template system. If you want to use
-MIMEmail, we suggest using the [SMTP module](https://www.drupal.org/project/smtp)
-and not this module.
-
-If you want to work on a solution for MIMEmail and contribute it back to the
-module, we gladly accept community contributions!
-
+NOTE: Please note that SendGrid Integration also adds a "per module" setting for\
+the mail formatter/sender below where the site default is defined. The formatter 
+there needs to be changed to Mimemail.
 
 OPTIONAL
 --------------------------------------------------------------------------------

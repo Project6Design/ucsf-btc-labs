@@ -8,6 +8,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Session\AccountProxy;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use GuzzleHttp\Client;
@@ -39,6 +40,14 @@ class ConstantContact {
    *   Drupal config.
    */
   protected $config;
+
+  /**
+   * Drupal\Core\Session\AccountProxy.
+   *
+   * @var \Drupal\Core\Session\AccountProxy
+   *   Drupal current user.
+   */
+  protected $currentUser;
 
   /**
    * Drupal\Core\Logger\LoggerChannelFactoryInterface.
@@ -119,9 +128,10 @@ class ConstantContact {
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   The module handler service.
    */
-  public function __construct(CacheBackendInterface $cache, ConfigFactory $config, LoggerChannelFactoryInterface $loggerFactory, MessengerInterface $messenger, Settings $settings, Client $httpClient, ModuleHandlerInterface $moduleHandler) {
+  public function __construct(CacheBackendInterface $cache, ConfigFactory $config, AccountProxy $currentUser, LoggerChannelFactoryInterface $loggerFactory, MessengerInterface $messenger, Settings $settings, Client $httpClient, ModuleHandlerInterface $moduleHandler) {
     $this->cache = $cache;
     $this->config = $config;
+    $this->currentUser = $currentUser;
     $this->loggerFactory = $loggerFactory->get('ik_constant_contact');
     $this->messenger = $messenger;
     $this->settings = $settings;
@@ -152,6 +162,10 @@ class ConstantContact {
     }
 
     $code_verifier = $this->config->get('ik_constant_contact.pkce')->get('code_verifier');
+
+    if (!$this->moduleHandler->moduleExists('automated_cron') && !$this->moduleHandler->moduleExists('ultimate_cron') && (int)$this->currentUser->id() !== 0 && $this->currentUser->hasPermission('administer constant contact configuration')) {
+      $this->messenger->addMessage($this->t('It is recommended to install automated_cron or make sure that cron is run regularly to refresh access tokens from Constant Contact API.'), 'warning');
+    }
 
     return [
       'client_id' => $clientId,
@@ -584,38 +598,53 @@ class ConstantContact {
 
   /**
    * Returns custom fields available
-   *
+   * 
+   * @param $cached 
+   *  Whether to return a cached response or not. 
+   * 
    * @return mixed
    *   A stdClass of custom fields.
    * 
    * @see https://v3.developer.constantcontact.com/api_guide/get_custom_fields.html
    */
-  public function getCustomFields() {
+  public function getCustomFields($cached = true) {
     $config = $this->getConfig();
-    $url = $this->apiUrl . '/contact_custom_fields';
+    $cid = 'ik_constant_contact.custom_fields';
+    $cache = ($cached === true ? $this->cache->get($cid) : null);
 
-    try {
-      $response = $this->httpClient->request('GET', $url, [
-        'headers' => [
-          'Authorization' => 'Bearer ' . $config['access_token'],
-          'cache-control' => 'no-cache',
-          'content-type' => 'application/json',
-          'accept' => 'application/json',
-        ],
-      ]);
+    if ($cache && !is_null($cache) && $cache->data && property_exists($cache->data, 'custom_fields')) {
+      return $cache->data;
+    }
+    else {
+    
+      $url = $this->apiUrl . '/contact_custom_fields';
 
-      $this->updateTokenExpiration();
-      $json = json_decode($response->getBody()->getContents());
-      return $json;
-    }
-    catch (RequestException $e) {
-      $this->handleRequestException($e);
-    }
-    catch (ClientException $e) {
-      $this->handleRequestException($e);
-    }
-    catch (\Exception $e) {
-      $this->loggerFactory->error($e);
+      try {
+        $response = $this->httpClient->request('GET', $url, [
+          'headers' => [
+            'Authorization' => 'Bearer ' . $config['access_token'],
+            'cache-control' => 'no-cache',
+            'content-type' => 'application/json',
+            'accept' => 'application/json',
+          ],
+        ]);
+
+        $this->updateTokenExpiration();
+        $json = json_decode($response->getBody()->getContents());
+
+        $this->cache->set($cid, $json);
+
+        return $json;
+      }
+      catch (RequestException $e) {
+        $this->handleRequestException($e);
+      }
+      catch (ClientException $e) {
+        $this->handleRequestException($e);
+      }
+      catch (\Exception $e) {
+        $this->loggerFactory->error($e);
+      }
     }
   }
 
@@ -666,6 +695,27 @@ class ConstantContact {
   }
 
   /**
+   * Get Enabled Contact Lists 
+   *
+   * @param boolean $cached
+   * @return array $lists of enabled lists
+   * 
+   * @see /Drupal/Form/ConstantContactLists.php
+   */
+  public function getEnabledContactLists($cached = true) {
+    $lists = $this->getContactLists($cached);
+    $enabled = $this->config->get('ik_constant_contact.enabled_lists')->getRawData();
+
+    foreach ($lists as $id => $list) {
+      if (!isset($enabled[$id]) || $enabled[$id] !== 1) {
+        unset($lists[$id]);
+      }
+    }
+
+    return $lists;
+  }
+
+  /**
    * Get the permanent link of a campaign.
    *
    * @param string $id
@@ -691,6 +741,50 @@ class ConstantContact {
       }
     }
     return NULL;
+  }
+
+  /**
+   * Handles an error
+   *
+   * @param [object] $error
+   * @return [array] $return
+   */
+  protected function handleRequestException(object $e) {
+    $response = $e->getResponse();
+    $error = is_null($response) ? FALSE : json_decode($response->getBody());
+
+    $message = 'RequestException: ';
+
+    $errorInfo = [];
+
+    if ($error && is_object($error)) {
+      if (property_exists($error, 'error')) {
+        $errorInfo[] = $error->error;
+      }
+
+      if (property_exists($error, 'message')) {
+        $errorInfo[] = $error->message;
+      }
+  
+      if (property_exists($error, 'error_description')) {
+        $errorInfo[] = $error->error_description;
+      }
+  
+      if (property_exists($error, 'errorCode')) {
+        $errorInfo[] = $error->errorSummary;
+      }
+  
+      if (property_exists($error, 'errorCode')) {
+        $errorInfo[] = $error->errorCode;
+      }
+    }
+
+    $message .= implode(', ', $errorInfo);
+
+    $this->loggerFactory->error($message);
+
+    // Return the error to show an error on form submission
+    return ['error' => $message];
   }
 
   /**
@@ -938,8 +1032,16 @@ class ConstantContact {
    * @param array $data
    *   An array of lists and list UUIDs from $this->getContactLists.
    */
-  private function saveContactLists(array $data) {
+  public function saveContactLists(array $data) {
     $cid = 'ik_constant_contact.lists';
+    $enabled = $this->config->get('ik_constant_contact.enabled_lists')->getRawData();
+    
+    // Add an enabled flag to the list data.
+    foreach ($data as $key => $value) {
+      $data[$key]->enabled = (isset($enabled[$key]) && $enabled[$key] === 1);
+      $data[$key]->cached_on = strtotime('now'); 
+    }
+
     $this->cache->set($cid, $data);
   }
 
@@ -1064,24 +1166,86 @@ class ConstantContact {
 
     }
     catch (RequestException $e) {
-      $error = json_decode($e->getResponse()->getBody());
-      $message = 'RequestException: ' . $error->error . ', ' . $error->error_description;
-      $this->loggerFactory->error($message);
-
       // Return the error to show an error on form submission
-      return ['error' => $message];
+      return $this->handleRequestException($e);
     }
     catch (ClientException $e) {
-      $error = json_decode($e->getResponse()->getBody());
-      $message = 'ClientException: ' . $error->error . ', ' . $error->error_description;
-      $this->loggerFactory->error($message);
+      $this->handleRequestException($e);
     }
     catch (\Exception $e) {
       $this->loggerFactory->error($e);
-      
+
       // Return the error to show an error on form submission
       return ['error' => $e];
     }
+  }
+
+
+  /**
+   *  Unsubscribes a contact from all lists.
+   *
+   * @param array $contact
+   *   The response from $this->getDeleted.
+   * @param array $data
+   *   The $data provided
+   *
+   * @see https://v3.developer.constantcontact.com/api_reference/index.html#!/Contacts/putContact
+   *
+   */
+  public function unsubscribeContact(array $data) {
+    $config = $this->getConfig();
+    // Check if contact already exists.
+    $exists = (array) $this->getContact($data);
+    $body = null;
+
+    if (isset($exists['contacts']) && count($exists['contacts']) > 0) {
+      $body = (object) $exists['contacts'][0];
+      $exists = $exists['contacts'][0];
+    }
+    elseif ($exists && isset($exists['deleted_at'])) {
+      $body = (object) $exists;
+    }
+
+    if ($body) {
+      $body = $this->buildResponseBody($data, $body);
+
+      $body->email_address->permission_to_send = 'unsubscribed';
+      // To resubscribe a contact after an unsubscribe update_source must equal Contact. 
+      // @see https://v3.developer.constantcontact.com/api_guide/contacts_re-subscribe.html#re-subscribing-contacts
+      $body->update_source = 'Contact';
+
+      $this->moduleHandler->invokeAll('ik_constant_contact_contact_data_alter', [$data, &$body]);
+      $this->moduleHandler->invokeAll('ik_constant_contact_contact_unsubscribe_data_alter', [$data, &$body]);
+
+      try {
+        $response = $this->httpClient->request('PUT', $config['contact_url'] . '/' . $exists->contact_id, [
+          'headers' => [
+            'Authorization' => 'Bearer ' . $config['access_token'],
+            'cache-control' => 'no-cache',
+            'content-type' => 'application/json',
+            'accept' => 'application/json',
+          ],
+          'body' => json_encode($body),
+        ]);
+
+        $this->handleResponse($response, 'unsubscribeContact');
+
+      }
+      catch (RequestException $e) {
+        // Return the error to show an error on form submission
+        return $this->handleRequestException($e);
+      }
+      catch (ClientException $e) {
+        return $this->handleRequestException($e);
+      }
+      catch (\Exception $e) {
+        $this->loggerFactory->error($e);
+
+        // Return the error to show an error on form submission
+        return ['error' => $e];
+      }
+    }
+
   }
 
   /**
@@ -1128,24 +1292,15 @@ class ConstantContact {
 
       }
       catch (RequestException $e) {
-        $error = json_decode($e->getResponse()->getBody());
-        $message = 'RequestException: ' . $error->error . ', ' . $error->error_description;
-        $this->loggerFactory->error($message);
-  
         // Return the error to show an error on form submission
-        return ['error' => $message];
+        return $this->handleRequestException($e);
       }
       catch (ClientException $e) {
-        $error = json_decode($e->getResponse()->getBody());
-        $message = 'ClientException: ' . $error->error . ', ' . $error->error_description;
-        $this->loggerFactory->error($message);
-  
-        // Return the error to show an error on form submission
-        return ['error' => $message];
+        $this->handleRequestException($e);
       }
       catch (\Exception $e) {
         $this->loggerFactory->error($e);
-        
+  
         // Return the error to show an error on form submission
         return ['error' => $e];
       }
@@ -1162,41 +1317,4 @@ class ConstantContact {
     $tokens->save();
   }
 
-  /**
-   * Handles an error
-   *
-   * @param [object] $error
-   * @return [array] $return
-   */
-  protected function handleRequestException(object $e) {
-    $error = json_decode($e->getResponse()->getBody());
-    $message = 'RequestException: ';
-
-    $errorInfo = [];
-
-    if ($error && is_object($error)) {
-      if (property_exists($error, 'error')) {
-        $errorInfo[] = $error->error;
-      }
-  
-      if (property_exists($error, 'error_description')) {
-        $errorInfo[] = $error->error_description;
-      }
-  
-      if (property_exists($error, 'errorCode')) {
-        $errorInfo[] = $error->errorSummary;
-      }
-  
-      if (property_exists($error, 'errorCode')) {
-        $errorInfo[] = $error->errorCode;
-      }
-    }
-
-    $message .= implode(', ', $errorInfo);
-
-    $this->loggerFactory->error($message);
-
-    // Return the error to show an error on form submission
-    return ['error' => $message];
-  }
 }
