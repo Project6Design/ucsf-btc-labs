@@ -1,3 +1,4 @@
 services:
   url_embed:
     class: Drupal\url_embed\UrlEmbed
+    arguments: [['config'], '@?config.factory']

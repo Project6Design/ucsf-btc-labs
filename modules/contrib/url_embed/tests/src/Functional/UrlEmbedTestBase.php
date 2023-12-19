@@ -21,7 +21,7 @@ abstract class UrlEmbedTestBase extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = array('url_embed', 'node', 'ckeditor');
+  protected static $modules = array('url_embed', 'node', 'ckeditor');
 
   /**
    * {@inheritdoc}
@@ -58,7 +58,7 @@ abstract class UrlEmbedTestBase extends BrowserTestBase {
   /**
    * A set up for all tests.
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     // Create a page content type.

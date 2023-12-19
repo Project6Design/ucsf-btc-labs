@@ -112,60 +112,6 @@ class Api {
   }
 
   /**
-   * Sets the cache to sendgrid_integration_reports bin.
-   *
-   * @param string $cid
-   *   Cache Id.
-   * @param array $data
-   *   The data should be cached.
-   */
-  protected function setCache($cid, array $data) {
-    if (!empty($data)) {
-      $this->cacheFactory->get($this->bin)->set($cid, $data);
-    }
-  }
-
-  /**
-   * Returns response from SendGrid.
-   *
-   * @param string $path
-   *   Part of SendGrid endpoint.
-   * @param array $query
-   *   Query params to the request.
-   * @param string $onBehalfOf
-   *   Subuser to peform this request on behalf of.
-   *
-   * @return bool|mixed
-   *   Decoded json or FALSE.
-   */
-  protected function getResponse($path, array $query, string $onBehalfOf = '') {
-    // Set headers and create a Guzzle client to communicate with Sendgrid.
-    $headers['Authorization'] = 'Bearer ' . $this->apiKey;
-    if ($onBehalfOf) {
-      $headers['on-behalf-of'] = $onBehalfOf;
-    }
-    $clienttest = new Client([
-      'base_uri' => 'https://api.sendgrid.com/v3/',
-      'headers' => $headers,
-    ]);
-
-    // Lets attempt the request and catch an error if it fails.
-    try {
-      $response = $clienttest->get($path, ['query' => $query]);
-    }
-    catch (ClientException $e) {
-      $code = Xss::filter($e->getCode());
-      $this->loggerFactory->get('sendgrid_integration_reports')
-        ->error(t('SendGrid Reports module failed to receive data. HTTP Error Code @errno', ['@errno' => $code]));
-      $this->messenger->addError(t('SendGrid Reports module failed to receive data. See logs.'));
-      return FALSE;
-    }
-    // Sanitize return before using in Drupal.
-    $body = Xss::filter($response->getBody());
-    return json_decode($body);
-  }
-
-  /**
    * Returns stats.
    *
    * @param string $cid
@@ -262,6 +208,60 @@ class Api {
     $this->setCache($cid, $data);
 
     return $data;
+  }
+
+  /**
+   * Returns response from SendGrid.
+   *
+   * @param string $path
+   *   Part of SendGrid endpoint.
+   * @param array $query
+   *   Query params to the request.
+   * @param string $onBehalfOf
+   *   Subuser to peform this request on behalf of.
+   *
+   * @return bool|mixed
+   *   Decoded json or FALSE.
+   */
+  protected function getResponse($path, array $query, string $onBehalfOf = '') {
+    // Set headers and create a Guzzle client to communicate with Sendgrid.
+    $headers['Authorization'] = 'Bearer ' . $this->apiKey;
+    if ($onBehalfOf) {
+      $headers['on-behalf-of'] = $onBehalfOf;
+    }
+    $clienttest = new Client([
+      'base_uri' => 'https://api.sendgrid.com/v3/',
+      'headers' => $headers,
+    ]);
+
+    // Lets attempt the request and catch an error if it fails.
+    try {
+      $response = $clienttest->get($path, ['query' => $query]);
+    }
+    catch (ClientException $e) {
+      $code = Xss::filter($e->getCode());
+      $this->loggerFactory->get('sendgrid_integration_reports')
+        ->error(t('SendGrid Reports module failed to receive data. HTTP Error Code @errno', ['@errno' => $code]));
+      $this->messenger->addError(t('SendGrid Reports module failed to receive data. See logs.'));
+      return FALSE;
+    }
+    // Sanitize return before using in Drupal.
+    $body = Xss::filter($response->getBody());
+    return json_decode($body);
+  }
+
+  /**
+   * Sets the cache to sendgrid_integration_reports bin.
+   *
+   * @param string $cid
+   *   Cache Id.
+   * @param array $data
+   *   The data should be cached.
+   */
+  protected function setCache($cid, array $data) {
+    if (!empty($data)) {
+      $this->cacheFactory->get($this->bin)->set($cid, $data);
+    }
   }
 
   /**
@@ -373,29 +373,6 @@ class Api {
   }
 
   /**
-   * Get list of subusers.
-   */
-  public function getSubusers() {
-    $cid = 'sendgrid_reports_subusers';
-    if ($cache = $this->cacheFactory->get($this->bin)->get($cid)) {
-      return $cache->data;
-    }
-    $path = 'subusers';
-    $query = [
-      'limit' => 500,
-      'offset' => 0,
-    ];
-    $subusers = [];
-    do {
-      $response = $this->getResponse($path, $query);
-      $query['offset'] += 500;
-      $subusers = array_merge($subusers, $response);
-    } while (!empty($response));
-    $this->setCache($cid, $subusers);
-    return $subusers;
-  }
-
-  /**
    * Get bounces by subuser.
    */
   public function getBouncesBySubuser($startTime = 0, $endTime = 0, $subuser = '') {
@@ -419,6 +396,29 @@ class Api {
     }
     $this->setCache($cid, $bounces);
     return $bounces;
+  }
+
+  /**
+   * Get list of subusers.
+   */
+  public function getSubusers() {
+    $cid = 'sendgrid_reports_subusers';
+    if ($cache = $this->cacheFactory->get($this->bin)->get($cid)) {
+      return $cache->data;
+    }
+    $path = 'subusers';
+    $query = [
+      'limit' => 500,
+      'offset' => 0,
+    ];
+    $subusers = [];
+    do {
+      $response = $this->getResponse($path, $query);
+      $query['offset'] += 500;
+      $subusers = array_merge($subusers, $response);
+    } while (!empty($response));
+    $this->setCache($cid, $subusers);
+    return $subusers;
   }
 
 }

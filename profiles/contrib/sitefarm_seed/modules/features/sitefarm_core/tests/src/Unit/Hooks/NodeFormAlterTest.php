@@ -70,7 +70,7 @@ class NodeFormAlterTest extends UnitTestCase {
         ]
       ]
     ];
-    $this->assertArrayEquals($expected, $form);
+    $this->assertEquals($expected, $form);
   }
 
   /**
@@ -86,7 +86,7 @@ class NodeFormAlterTest extends UnitTestCase {
         '#prefix' => '<h2>' . $title . '</h2>'
       ]
     ];
-    $this->assertArrayEquals($expected, $form);
+    $this->assertEquals($expected, $form);
   }
 
 }

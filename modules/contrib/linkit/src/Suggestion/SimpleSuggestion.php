@@ -22,6 +22,14 @@ class SimpleSuggestion implements SuggestionInterface {
   protected $path;
 
   /**
+   * The suggestion status.
+   *
+   * @var string
+   */
+  protected $status;
+
+
+  /**
    * The suggestion group.
    *
    * @var string
@@ -61,6 +69,21 @@ class SimpleSuggestion implements SuggestionInterface {
   /**
    * {@inheritdoc}
    */
+  public function getStatus() {
+    return $this->status;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setStatus($status) {
+    $this->status = $status;
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getGroup() {
     return $this->group;
   }
@@ -81,6 +104,7 @@ class SimpleSuggestion implements SuggestionInterface {
     return [
       'label' => $this->getLabel(),
       'path' => $this->getPath(),
+      'status' => $this->getStatus(),
       'group' => $this->getGroup(),
     ];
   }

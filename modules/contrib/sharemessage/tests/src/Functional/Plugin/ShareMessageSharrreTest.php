@@ -28,7 +28,7 @@ class ShareMessageSharrreTest extends ShareMessageTestBase {
       'enable_counter' => FALSE,
       'enable_tracking' => FALSE,
     ];
-    $this->drupalPostForm(NULL, $default_settings, t('Save configuration'));
+    $this->submitForm($default_settings, t('Save configuration'));
 
     // Set a new Share Message.
     $sharemessage = [
@@ -37,16 +37,17 @@ class ShareMessageSharrreTest extends ShareMessageTestBase {
       'plugin' => 'sharrre',
       'title' => 'Sharrre test',
     ];
-    $this->drupalPostForm('admin/config/services/sharemessage/add', $sharemessage, t('Save'));
+    $this->drupalGet('admin/config/services/sharemessage/add');
+    $this->submitForm($sharemessage, t('Save'));
     $this->drupalGet('admin/config/services/sharemessage/manage/sharemessage_test_sharrre_label');
     $override_settings = '//details[starts-with(@data-drupal-selector, "edit-settings")]';
-    $this->assertFieldByXPath($override_settings);
-    $this->assertText('Sharrre is a jQuery plugin that allows you to create nice widgets sharing for Facebook, Twitter, Google Plus (with PHP script) and more.');
+    $this->xpath($override_settings);
+    $this->assertSession()->pageTextContains('Sharrre is a jQuery plugin that allows you to create nice widgets sharing for Facebook, Twitter, Google Plus (with PHP script) and more.');
 
     // Assert that the initial settings are saved correctly.
     $this->drupalGet('sharemessage-test/sharemessage_test_sharrre_label');
-    $this->assertRaw('"services":{"googlePlus":"googlePlus","facebook":"facebook"}');
-    $this->assertRaw('"shorter_total":false,"enable_hover":false,"enable_counter":false,"enable_tracking":false');
+    $this->assertSession()->responseContains('"services":{"googlePlus":"googlePlus","facebook":"facebook"}');
+    $this->assertSession()->responseContains('"shorter_total":false,"enable_hover":false,"enable_counter":false,"enable_tracking":false');
 
     // Set new Sharrre settings.
     $this->drupalGet('admin/config/services/sharemessage/sharrre-settings');
@@ -64,13 +65,13 @@ class ShareMessageSharrreTest extends ShareMessageTestBase {
       'enable_counter' => TRUE,
       'enable_tracking' => FALSE,
     ];
-    $this->drupalPostForm(NULL, $default_settings, t('Save configuration'));
+    $this->submitForm($default_settings, t('Save configuration'));
 
     // Check that the saving of the new Sharrre settings works correctly.
     $this->drupalGet('sharemessage-test/sharemessage_test_sharrre_label');
-    $this->assertRaw('"services":{"googlePlus":"googlePlus","facebook":"facebook","twitter":"twitter","linkedin":"linkedin","pinterest":"pinterest"}');
-    $this->assertNoRaw('"services":{"googlePlus":"googlePlus","facebook":"facebook"}');
-    $this->assertRaw('"shorter_total":true,"enable_hover":true,"enable_counter":true,"enable_tracking":false');
-    $this->assertNoRaw('"shorter_total":false,"enable_hover":false,"enable_counter":false,"enable_tracking":false');
+    $this->assertSession()->responseContains('"services":{"googlePlus":"googlePlus","facebook":"facebook","twitter":"twitter","linkedin":"linkedin","pinterest":"pinterest"}');
+    $this->assertSession()->responseNotContains('"services":{"googlePlus":"googlePlus","facebook":"facebook"}');
+    $this->assertSession()->responseContains('"shorter_total":true,"enable_hover":true,"enable_counter":true,"enable_tracking":false');
+    $this->assertSession()->responseNotContains('"shorter_total":false,"enable_hover":false,"enable_counter":false,"enable_tracking":false');
   }
 }

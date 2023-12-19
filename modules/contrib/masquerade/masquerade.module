@@ -9,7 +9,6 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
-use Drupal\user\Entity\User;
 use Drupal\user\UserInterface;
 
 /**
@@ -24,7 +23,7 @@ function masquerade_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Granting masquerade access') . '</dt>';
-      $output .= '<dd>' . t('Users with the <a href=":permission_link">Masquerade as any user</a> permission are able to masquerade as someone else. Users may only masquerade if they have the same or more permissions as the user they want to switch to. Users are never able to escalate their privileges by masquerading as someone else.', [
+      $output .= '<dd>' . t('Users may only masquerade as another user if they have the <a href=":permission_link">Masquerade as any user</a> permission or if they have all the <a href=":permission_link">Masquerade as ROLE</a> permissions for all the target account\'s roles.', [
         ':permission_link' => Url::fromRoute('user.admin_permissions', [], ['fragment' => 'module-masquerade'])->toString(),
       ]) . '</dd>';
       $output .= '<dt>' . t('Masquerading as another user') . '</dt>';
@@ -52,9 +51,15 @@ function masquerade_help($route_name, RouteMatchInterface $route_match) {
  *   links under the username tab.
  */
 function masquerade_toolbar() {
-  $items = [];
+  $items = [
+    'masquerade_switch_back' => [
+      '#cache' => [
+        'contexts' => ['session.is_masquerading'],
+      ],
+    ],
+  ];
   if (\Drupal::service('masquerade')->isMasquerading()) {
-    $items['masquerade_switch_back'] = [
+    $items['masquerade_switch_back'] += [
       '#type' => 'toolbar_item',
       'tab' => [
         '#type' => 'link',
@@ -89,25 +94,20 @@ function masquerade_target_user_access(UserInterface $target_account) {
   }
 
   // Invoke hook_masquerade_access() implementations.
-  $access = NULL;
-  foreach (\Drupal::moduleHandler()->getImplementations('masquerade_access') as $module) {
-    $function = $module . '_masquerade_access';
-    $result = $function($user, $target_account);
-    // If an implementation explicitly denies access, then there is nothing else
-    // to check.
-    if ($result === FALSE) {
-      $access = FALSE;
-      break;
-    }
-    elseif ($result === TRUE) {
-      $access = TRUE;
-    }
-  }
-  // If no module granted access, then access is denied.
-  if (!isset($access) || !$access) {
+  $results = \Drupal::moduleHandler()->invokeAll('masquerade_access', [
+    $user,
+    $target_account,
+  ]);
+
+  // If an implementation explicitly denies access, then there is nothing else
+  // to check.
+  if (in_array(FALSE, $results, TRUE)) {
     return FALSE;
   }
-  return TRUE;
+
+  // If access is not explicitly denied, allow access if at least one hook
+  // implementation allowed access.
+  return in_array(TRUE, $results, TRUE);
 }
 
 /**
@@ -127,7 +127,7 @@ function masquerade_masquerade_access($user, UserInterface $target_account) {
       return TRUE;
     }
     else {
-      return;
+      return NULL;
     }
   }
   // The current user must be allowed to masquerade.
@@ -137,19 +137,13 @@ function masquerade_masquerade_access($user, UserInterface $target_account) {
   // Permissions may be granted on a per-role basis.
   $target_account_roles = $target_account->getRoles();
   foreach ($target_account_roles as $role_id) {
-    if ($user->hasPermission('masquerade as ' . $role_id)) {
-      if ($role_id === UserInterface::AUTHENTICATED_ROLE) {
-        // Make sure that this is the only role user has to prevent collision
-        // with 'masquerade as any user' permission.
-        if (count($target_account_roles) == 1) {
-          return TRUE;
-        }
-      }
-      else {
-        return TRUE;
-      }
+    if (!$user->hasPermission("masquerade as $role_id")) {
+      return NULL;
     }
   }
+
+  // Only allow masquerade if a user has access to all the target account roles.
+  return TRUE;
 }
 
 /**
@@ -172,41 +166,13 @@ function masquerade_user_view(array &$build, UserInterface $account, EntityViewD
     // Use post render to allow caching.
     $build['masquerade'] = [
       '#lazy_builder' => [
-        'masquerade_render_cache_link', [
+        'masquerade.callbacks:renderCacheLink', [
           $account->id(),
         ],
       ],
       '#create_placeholder' => TRUE,
     ];
   }
-}
-
-/**
- * #post_render_cache callback; replaces placeholder with masquerade link.
- *
- * @param int $account_id
- *   The account ID.
- *
- * @return array
- *   A renderable array containing the comment form.
- *
- * @todo Move to service.
- */
-function masquerade_render_cache_link($account_id) {
-  /** @var \Drupal\user\UserInterface $account */
-  $account = User::load($account_id);
-  $markup = '';
-  if (masquerade_target_user_access($account)) {
-    // @todo Attaching a CSS class to this would be nice.
-    $markup = [
-      '#type' => 'link',
-      '#title' => t('Masquerade as @name', ['@name' => $account->getDisplayName()]),
-      '#url' => $account->toUrl('masquerade'),
-    ];
-    $markup = \Drupal::service('renderer')->render($markup);
-  }
-  $element['#markup'] = $markup;
-  return $element;
 }
 
 /**
@@ -271,5 +237,20 @@ function masquerade_switch_user_validate(UserInterface $target_account) {
     return t('You are not allowed to masquerade as %name.', [
       '%name' => $target_account->getDisplayName(),
     ]);
+  }
+}
+
+/**
+ * Implements hook_migration_plugins_alter().
+ *
+ * Names of masquerade permissions changed between Drupal 7 and 8|9. Map the
+ * permission names respectively.
+ */
+function masquerade_migration_plugins_alter(array &$migrations) {
+  if (
+    !empty($migrations['d7_user_role']['process']['permissions'][0]) &&
+    $migrations['d7_user_role']['process']['permissions'][0]['plugin'] === 'static_map'
+  ) {
+    $migrations['d7_user_role']['process']['permissions'][0]['map']['masquerade as admin'] = 'masquerade as super user';
   }
 }

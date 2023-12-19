@@ -131,10 +131,16 @@ can be submitted to specific search engines, the time interval is configurable.
 
 The module also supports the IndexNow service provided by Bing and Yandex. The
 two search engines are preconfigured and new engines can be added
-programmatically via simple_sitemap_engine entities. For the submission to work,
-a key needs to be generated under
-admin/config/search/simplesitemap/engines/settings and entities need to be
-included under admin/config/search/simplesitemap/entities.
+programmatically via simple_sitemap_engine entities.
+
+For the submission to work, a key needs to be generated under
+admin/config/search/simplesitemap/engines/settings. This key will be saved to
+Drupal's state, but it is recommended to store it in the `settings.php` or
+`settings.local.php` file by adding the line
+`$settings['simple_sitemap_engines.index_now.key'] = xxx;`
+
+Do not forget to include entities under
+admin/config/search/simplesitemap/entities.
 
 ### PERFORMANCE ###
 
@@ -202,7 +208,9 @@ to generation:
 There are API methods for altering stored inclusion settings, status queries and
 programmatic sitemap generation. These include:
  * simple_sitemap.generator
-   * setVariants
+   * setSitemaps
+   * getSitemaps
+   * getDefaultSitemap
    * getSetting
    * saveSetting
    * getContent
@@ -210,6 +218,8 @@ programmatic sitemap generation. These include:
    * queue
    * rebuildQueue
    * entityManager
+     * setSitemaps
+     * getSitemaps
      * enableEntityType
      * disableEntityType
      * setBundleSettings
@@ -222,6 +232,8 @@ programmatic sitemap generation. These include:
      * bundleIsIndexed
      * entityTypeIsEnabled
    * customLinkManager
+     * setSitemaps
+     * getSitemaps
      * add
      * get
      * remove

@@ -17,6 +17,7 @@ class WebformNumericViews extends WebformDefaultViews {
 
     $views_data['field']['id'] = 'webform_submission_field_numeric';
     $views_data['sort']['id'] = 'webform_submission_field_numeric_sort';
+    $views_data['argument']['id'] = 'numeric';
 
     $views_data['filter'] = [
       'id' => 'webform_submission_numeric_filter',

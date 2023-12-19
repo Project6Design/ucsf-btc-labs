@@ -1,7 +1,7 @@
 name: Sitefarm Summary
 type: module
 description: Provides a formatter option for "Summary Only"
-core_version_requirement: ^8.8 || ^9
+core_version_requirement: ^9 || ^10
 dependencies:
   - text
 package: SiteFarm

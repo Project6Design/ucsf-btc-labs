@@ -1,0 +1,29 @@
+anchor_link_ckeditor5_anchor:
+  # Use the provider: property for this plugin to depend on another module.
+
+  # Configuration that will be sent to CKEditor 5 JavaScript plugins.
+  ckeditor5:
+    plugins:
+      - anchorDrupal.Anchor
+    # *Additional configuration properties*
+    # config: data sent to the constructor of any CKEditor 5 plugin
+    #   editorPluginName:
+    #     editorPluginProperty: editorPluginValue
+
+  # Configuration that will be used directly by Drupal.
+  drupal:
+    label: Anchor link
+    library: anchor_link/cke5_anchor_link
+    # The library loaded when configuring the text format using this plugin.
+    admin_library: anchor_link/admin.cke5_anchor_link
+    toolbar_items:
+      # This should match the name of the corresponding plugin exported in the
+      # plugin's index.js.
+      anchor:
+        label: Anchor link
+    elements:
+      - <a>
+      - <a id="">
+      - <a target="">
+      - <a rel="">
+      - <a class="ck-anchor">

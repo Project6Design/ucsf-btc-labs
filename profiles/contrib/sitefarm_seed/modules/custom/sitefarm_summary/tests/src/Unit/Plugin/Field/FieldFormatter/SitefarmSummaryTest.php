@@ -56,7 +56,7 @@ class SitefarmSummaryTest extends UnitTestCase
   {
     $expected = ['Displays the summary only for text fields that have a summary.'];
 
-    $this->assertArrayEquals($expected, $this->plugin->settingsSummary());
+    $this->assertEquals($expected, $this->plugin->settingsSummary());
   }
 
   /**
@@ -84,7 +84,7 @@ class SitefarmSummaryTest extends UnitTestCase
     $property->setValue($items, ['test_field' => $item]);
 
     $return = $this->plugin->viewElements($items, 'en');
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
   }
 
 }

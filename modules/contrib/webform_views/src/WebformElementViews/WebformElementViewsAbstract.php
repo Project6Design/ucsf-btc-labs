@@ -5,6 +5,7 @@ namespace Drupal\webform_views\WebformElementViews;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\webform\Plugin\WebformElementInterface;
 use Drupal\webform\Plugin\WebformElementManagerInterface;
@@ -35,7 +36,7 @@ abstract class WebformElementViewsAbstract implements WebformElementViewsInterfa
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_type.manager')->getDefinition('webform_submission'),
+      $container->get('entity_type.manager'),
       $container->get('plugin.manager.webform.element')
     );
   }
@@ -43,10 +44,13 @@ abstract class WebformElementViewsAbstract implements WebformElementViewsInterfa
   /**
    * WebformElementViewsAbstract constructor.
    *
-   * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   Entity type manager service
+   * @param \Drupal\webform\Plugin\WebformElementManagerInterface $webform_element_manager
+   *   Webform element manager service
    */
-  public function __construct(EntityTypeInterface $entity_type, WebformElementManagerInterface $webform_element_manager) {
-    $this->entityType = $entity_type;
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, WebformElementManagerInterface $webform_element_manager) {
+    $this->entityType = $entity_type_manager->getDefinition('webform_submission');
     $this->webformElementManager = $webform_element_manager;
   }
 
@@ -54,7 +58,7 @@ abstract class WebformElementViewsAbstract implements WebformElementViewsInterfa
    * {@inheritdoc}
    */
   public function getViewsData($element, WebformInterface $webform) {
-    $table_alias = 'webform_submission_field_' . $webform->id() . '_' . $element['#webform_key'];
+    $table_alias = $this->tableName($element, $webform);
     $element_title = (isset($element['#title']) && $element['#title']) ? $element['#title'] : $element['#webform_key'];
     $element_plugin = $this->webformElementManager->getElementInstance($element);
 
@@ -67,8 +71,8 @@ abstract class WebformElementViewsAbstract implements WebformElementViewsInterfa
     // {webform_submission}.
     $data[$table_alias]['table']['join'][$this->entityType->getBaseTable()] = [
       'table' => 'webform_submission_data',
-      'field' => 'sid',
-      'left_field' => 'sid',
+      'field' => $this->entityType->getKey('id'),
+      'left_field' => $this->entityType->getKey('id'),
       'extra' => [
         ['field' => 'name', 'value' => $element['#webform_key']],
       ],
@@ -100,11 +104,27 @@ abstract class WebformElementViewsAbstract implements WebformElementViewsInterfa
     return [
       'field' => [
         'id' => 'webform_submission_field',
-        'real field' => $this->entityType->getKey('id'),
+        'real field' => 'value',
         'click sortable' => !$element_plugin->isContainer($element) && !$element_plugin->hasMultipleValues($element),
         'multiple' => $element_plugin->hasMultipleValues($element),
       ],
     ];
+  }
+
+  /**
+   * Generate views table name that represents a given element within a webform.
+   *
+   * @param array $element
+   *   Webform element for which to generate views table name.
+   * @param \Drupal\webform\WebformInterface $webform
+   *   Webform for which to generate views table name.
+   *
+   * @return string
+   *   Views table name that represents provided webform element within provided
+   *   webform.
+   */
+  protected function tableName($element, WebformInterface $webform) {
+    return 'webform_submission_field_' . $webform->id() . '_' . $element['#webform_key'];
   }
 
 }

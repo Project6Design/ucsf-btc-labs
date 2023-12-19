@@ -44,6 +44,24 @@ interface SuggestionInterface extends \JsonSerializable {
   public function setPath($path);
 
   /**
+   * Gets the suggestion status.
+   *
+   * @return string
+   *   The suggestion status.
+   */
+  public function getStatus();
+
+  /**
+   * Sets the suggestion status.
+   *
+   * @param string $status
+   *   The suggestion status to set.
+   *
+   * @return $this
+   */
+  public function setStatus($status);
+
+  /**
    * Gets the suggestion group.
    *
    * @return string

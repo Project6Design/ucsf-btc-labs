@@ -4,6 +4,7 @@ namespace Drupal\ik_constant_contact\Service;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
@@ -90,6 +91,14 @@ class ConstantContact {
   protected $moduleHandler;
 
   /**
+   * \Drupal\Core\Database\Connection
+   *
+   * @var \Drupal\Core\Database\Connection
+   *    Database connection
+   */
+  protected $database;
+
+  /**
    * The Constant Contact v3 API endpoint.
    *
    * @var string
@@ -127,8 +136,10 @@ class ConstantContact {
    *   The client for sending HTTP requests.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   The module handler service.
+   * @param \Drupal\Core\Database\Connection $database
+   *   The database connection
    */
-  public function __construct(CacheBackendInterface $cache, ConfigFactory $config, AccountProxy $currentUser, LoggerChannelFactoryInterface $loggerFactory, MessengerInterface $messenger, Settings $settings, Client $httpClient, ModuleHandlerInterface $moduleHandler) {
+  public function __construct(CacheBackendInterface $cache, ConfigFactory $config, AccountProxy $currentUser, LoggerChannelFactoryInterface $loggerFactory, MessengerInterface $messenger, Settings $settings, Client $httpClient, ModuleHandlerInterface $moduleHandler, Connection $database) {
     $this->cache = $cache;
     $this->config = $config;
     $this->currentUser = $currentUser;
@@ -137,6 +148,7 @@ class ConstantContact {
     $this->settings = $settings;
     $this->httpClient = $httpClient;
     $this->moduleHandler = $moduleHandler;
+    $this->database = $database;
   }
 
   /**
@@ -152,6 +164,7 @@ class ConstantContact {
     $secret = isset($settings['client_secret']) ? $settings['client_secret'] : NULL;
     $authType = isset($settings['auth_type']) ? $settings['auth_type'] : NULL;
     $configType = 'settings.php';
+    $tokens = $this->getTokens();
 
     // If nothing is in settings.php, let's check our config files.
     if (!$settings) {
@@ -163,17 +176,16 @@ class ConstantContact {
 
     $code_verifier = $this->config->get('ik_constant_contact.pkce')->get('code_verifier');
 
-    if (!$this->moduleHandler->moduleExists('automated_cron') && !$this->moduleHandler->moduleExists('ultimate_cron') && (int)$this->currentUser->id() !== 0 && $this->currentUser->hasPermission('administer constant contact configuration')) {
-      $this->messenger->addMessage($this->t('It is recommended to install automated_cron or make sure that cron is run regularly to refresh access tokens from Constant Contact API.'), 'warning');
-    }
-
     return [
       'client_id' => $clientId,
       'client_secret' => $secret,
       'auth_type' => $authType,
       'config_type' => $configType, // Application client_id and other info found in settings.php or via config
-      'access_token' => $this->config->get('ik_constant_contact.tokens')->get('access_token'),
-      'refresh_token' => $this->config->get('ik_constant_contact.tokens')->get('refresh_token'),
+      'access_token' => isset($tokens['access_token']) ? $tokens['access_token'] : null,
+      'refresh_token' => isset($tokens['refresh_token']) ? $tokens['refresh_token'] : null,
+      'token_timestamp' => isset($tokens['timestamp']) ? $tokens['timestamp'] : null,
+      'token_expires' => isset($tokens['expires_in']) && isset($tokens['timestamp']) ? ($tokens['timestamp'] + $tokens['expires_in']) : null,
+      'token_source' => isset($tokens['source']) ? $tokens['source'] : 'config',
       'code_verifier' => $code_verifier,
       'authentication_url' => $this->authUrl,
       'token_url' => $this->tokenUrl,
@@ -237,6 +249,43 @@ class ConstantContact {
    */
   public function getCodeChallenge($codeVerifier) {
     return $this->base64UrlEncode(pack('H*', hash('sha256', $codeVerifier)));
+  }
+
+  /**
+   * Get token data.
+   * 
+   * Checks to see if ik_constant_contact_tokens table exists and pulls from there. 
+   * Otherwise pull from config. 
+   * @see https://www.drupal.org/project/ik_constant_contact/issues/3215168
+   *
+   * @return array
+   */
+  protected function getTokens() {
+    $schema = $this->database->schema();
+    $tokens = null;
+
+    if ($schema->tableExists('ik_constant_contact_tokens')) {
+      $tokens = $this->database->select('ik_constant_contact_tokens', 'cct')->fields('cct')->range(0,1)->orderBy('timestamp', 'DESC')->execute()->fetchAssoc();
+      
+      if ($tokens) {
+        $tokens['source'] = 'database';
+      }
+    }
+
+    // This is temporary so that those who haven't updated yet don't lose tokens that are in active config.
+    if (!$schema->tableExists('ik_constant_contact_tokens') || !$tokens) {
+      $config = $this->config->get('ik_constant_contact.tokens');
+
+      $tokens = [
+        'access_token' => $config->get('access_token'),
+        'refresh_token' => $config->get('refresh_token'),
+        'expires_in' => $config->get('expires', 86400) - $config->get('timestamp'), // Remove timestamp since we used to add the timestamp. Instead we'll add to getConfig
+        'timestamp' => $config->get('timestamp'),
+        'source' => 'config'
+      ];
+    }
+
+    return $tokens;
   }
 
   /**
@@ -343,6 +392,26 @@ class ConstantContact {
     }
   }
 
+  /**
+   * Deletes old tokens out of our database so it doesn't get too unruley
+   *
+   * @return void
+   */
+  public function deleteExpiredTokens() {
+    $schema = $this->database->schema();
+    $tokens = $this->getTokens();
+
+    // Temporarily check if database exists before trying to delete things from it
+    if ($schema->tableExists('ik_constant_contact_tokens')) {
+      if (isset($tokens['access_token']) && isset($tokens['refresh_token']) && $tokens['source'] === 'database') {
+        $this->database->delete('ik_constant_contact_tokens')
+          ->condition('access_token', $tokens['access_token'], '!=')
+          ->condition('refresh_token', $tokens['refresh_token'], '!=')
+          ->condition('timestamp', strtotime('now') - 86400, '<') // Make sure the expiration has past
+          ->execute();
+      }
+    }
+  }
 
   /**
    * Fetch the details of a single campaign.
@@ -368,7 +437,6 @@ class ConstantContact {
         ],
       ]);
 
-      $this->updateTokenExpiration();
       $json = json_decode($response->getBody()->getContents());
       return $json;
     }
@@ -409,7 +477,6 @@ class ConstantContact {
         ],
       ]);
 
-      $this->updateTokenExpiration();
       $json = json_decode($response->getBody()->getContents());
       return $json;
     }
@@ -448,7 +515,6 @@ class ConstantContact {
         ],
       ]);
 
-      $this->updateTokenExpiration();
       $json = json_decode($response->getBody()->getContents());
       $list = [];
 
@@ -499,7 +565,6 @@ class ConstantContact {
         ],
       ]);
 
-      $this->updateTokenExpiration();
       $json = json_decode($response->getBody()->getContents());
 
       if ($json->contacts) {
@@ -561,7 +626,6 @@ class ConstantContact {
             ],
           ]);
 
-          $this->updateTokenExpiration();
           $json = json_decode($response->getBody()->getContents());
           $lists = [];
 
@@ -594,6 +658,8 @@ class ConstantContact {
         return [];
       }
     }
+
+    return [];
   }
 
   /**
@@ -629,7 +695,6 @@ class ConstantContact {
           ],
         ]);
 
-        $this->updateTokenExpiration();
         $json = json_decode($response->getBody()->getContents());
 
         $this->cache->set($cid, $json);
@@ -805,8 +870,6 @@ class ConstantContact {
       $json = json_decode($response->getBody()->getContents());
 
       $this->loggerFactory->info('@method has been executed successfully.', ['@method' => $method]);
-
-      $this->updateTokenExpiration();
 
       if ($method === 'getContact') {
         return $json;
@@ -1053,19 +1116,31 @@ class ConstantContact {
    *
    * @see $this->refreshToken
    */
-  private function saveTokens($data) {
+  public function saveTokens($data) {
     if ($data && property_exists($data, 'access_token') && property_exists($data, 'refresh_token')) {
-      $tokens = $this->config->getEditable('ik_constant_contact.tokens');
-      $tokens->clear('ik_constant_contact.tokens');
-      $tokens->set('access_token', $data->access_token);
-      $tokens->set('refresh_token', $data->refresh_token);
-      $tokens->set('timestamp', strtotime('now'));
+      $schema = $this->database->schema();
 
-      if ($data->expires_in < $tokens->get('expires')) {
-        $tokens->set('expires', $data->expires_in);
+      if (!$schema->tableExists('ik_constant_contact_tokens')) {
+        $tokens = $this->config->getEditable('ik_constant_contact.tokens');
+        $tokens->clear('ik_constant_contact.tokens');
+        $tokens->set('access_token', $data->access_token);
+        $tokens->set('refresh_token', $data->refresh_token);
+        $tokens->set('timestamp', strtotime('now'));
+
+        if ($data->expires_in < $tokens->get('expires')) {
+          $tokens->set('expires', $data->expires_in);
+        }
+
+        $tokens->save();
+      } else {
+        $this->database->merge('ik_constant_contact_tokens')->fields([
+          'access_token' => $data->access_token,
+          'refresh_token' => $data->refresh_token,
+          'expires_in' => $data->expires_in,
+          'timestamp' => strtotime('now')
+        ])
+        ->key('refresh_token', $data->refresh_token)->execute();
       }
-
-      $tokens->save();
 
       $this->loggerFactory->info('New tokens saved at ' . date('Y-m-d h:ia', strtotime('now')));
     }
@@ -1310,11 +1385,4 @@ class ConstantContact {
       return ['error: No contact id provided'];
     }
   }
-
-  protected function updateTokenExpiration() {
-    $tokens = $this->config->getEditable('ik_constant_contact.tokens');
-    $tokens->set('expires', strtotime('now +2 hours'));
-    $tokens->save();
-  }
-
 }

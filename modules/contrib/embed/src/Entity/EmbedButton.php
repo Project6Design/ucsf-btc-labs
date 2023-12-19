@@ -168,6 +168,7 @@ class EmbedButton extends ConfigEntityBase implements EmbedButtonInterface {
    * Gets the file URL generator service.
    *
    * @return \Drupal\Core\File\FileUrlGeneratorInterface
+   *   The file URL generator.
    */
   protected function fileUrlGenerator() {
     return \Drupal::service('file_url_generator');

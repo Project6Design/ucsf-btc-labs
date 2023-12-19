@@ -90,7 +90,7 @@ class DateRangeMergeFormatterTest extends UnitTestCase
 //    $property->setValue($items, ['test_field' => $item]);
 //
 //    $return = $this->plugin->viewElements($items, 'en');
-//    $this->assertArrayEquals($expected, $return);
+//    $this->assertEquals($expected, $return);
 //  }
 
   /**

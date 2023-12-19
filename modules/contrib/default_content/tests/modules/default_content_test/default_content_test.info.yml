@@ -2,13 +2,11 @@ name: 'Default content tests'
 type: module
 hidden: TRUE
 description: 'Default content tests'
-package: Web services
-# core: 8.x
+package: Testing
 dependencies:
   - default_content:default_content
 
-# Information added by Drupal.org packaging script on 2017-10-19
-version: '8.x-1.0-alpha7'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2022-08-02
+version: '2.0.0-alpha2'
 project: 'default_content'
-datestamp: 1508448636
+datestamp: 1659466708

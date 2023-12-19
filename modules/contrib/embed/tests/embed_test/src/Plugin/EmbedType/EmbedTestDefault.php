@@ -18,7 +18,7 @@ class EmbedTestDefault extends EmbedTypeBase {
    * {@inheritdoc}
    */
   public function getDefaultIconUrl() {
-    return '/default.png';
+    return $this->getModulePath('embed_test') . '/default.png';
   }
 
 }

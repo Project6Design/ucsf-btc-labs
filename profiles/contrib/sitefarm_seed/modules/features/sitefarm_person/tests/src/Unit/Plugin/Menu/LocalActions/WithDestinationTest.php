@@ -93,7 +93,7 @@ class WithDestinationTest extends UnitTestCase
     $route_match = $this->prophesize(RouteMatchInterface::CLASS);
 
     $options = $this->plugin->getOptions($route_match->reveal());
-    $this->assertArrayEquals($expected, $options);
+    $this->assertEquals($expected, $options);
   }
 
 }

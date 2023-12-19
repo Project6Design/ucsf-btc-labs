@@ -4,10 +4,143 @@
  * @file
  * Install, update and uninstall functions for the ik_constant_contact module.
  */
+use Drupal\Core\Database\Database;
+use Drupal\Core\Utility\UpdateException;
+
+/**
+ * Implements hook_schema().
+ */
+function ik_constant_contact_schema() {
+  $schema['ik_constant_contact_tokens'] = [
+    'description' => 'Stores tokens for validating and integrating with CC API',
+    'fields' => [
+      'access_token' => [
+        'description' => 'Access tokens automatically expire 1440 minutes (86,400 seconds). Making an API call with an expired access token returns a 401 unauthorized status code.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ],
+      'refresh_token' => [
+        'description' => 'Each refresh token corresponds to an access token. Use the refresh token to obtain a new access_token when the corresponding access_token expires.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ],
+      'expires_in' => [
+        'description' => 'The number of seconds remaining until the access_token expires.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'length' => 11,
+        'default' => 86400,
+      ],
+      'timestamp' => [
+        'description' => 'The Unix timestamp when the token was retrieved',
+        'type' => 'int',
+        'not null' => TRUE,
+        'length' => 11,
+      ],
+    ],
+    'primary key' => ['timestamp'],
+  ];
+}
 
 /**
  * Implements hook_uninstall().
  */
 function ik_constant_contact_uninstall() {
   Drupal::configFactory()->getEditable('ik_constant_contact')->delete();
+}
+
+/**
+ * Creates ik_constant_contact_tokens table.
+ * See https://www.drupal.org/project/ik_constant_contact/issues/3215168
+ */
+function ik_constant_contact_update_93100() {
+  $spec = [
+    'description' => 'Stores tokens for validating and integrating with CC API',
+    'fields' => [
+      'access_token' => [
+        'description' => 'Access tokens automatically expire 1440 minutes (86,400 seconds). Making an API call with an expired access token returns a 401 unauthorized status code.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ],
+      'refresh_token' => [
+        'description' => 'Each refresh token corresponds to an access token. Use the refresh token to obtain a new access_token when the corresponding access_token expires.',
+        'type' => 'blob',
+        'not null' => TRUE,
+        'size' => 'big',
+      ],
+      'expires_in' => [
+        'description' => 'The number of seconds remaining until the access_token expires.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'length' => 11,
+        'default' => 86400,
+      ],
+      'timestamp' => [
+        'description' => 'The Unix timestamp when the token was retrieved',
+        'type' => 'int',
+        'not null' => TRUE,
+        'length' => 11,
+      ],
+    ],
+    'primary key' => ['timestamp'],
+  ];
+
+  $schema = Database::getConnection()->schema();
+
+  if (!$schema->tableExists('ik_constant_contact_tokens')) {
+    $schema->createTable('ik_constant_contact_tokens', $spec);
+  }
+  
+}
+
+/**
+ * Move ik_constant_contact.tokens config values to database
+ * See https://www.drupal.org/project/ik_constant_contact/issues/3215168
+ */
+function ik_constant_contact_update_93101() {
+  $schema = Database::getConnection()->schema();
+  $tokens = \Drupal::service('config.factory')->get('ik_constant_contact.tokens');
+
+  if (!$schema->tableExists('ik_constant_contact_tokens')) {
+    throw new UpdateException('This update requires ik_constant_contact_update_93100 to install new database schema.');
+  }
+  
+  if ($tokens->get('access_token') && $tokens->get('refresh_token')) {
+    \Drupal::service('ik_constant_contact')->refreshToken();
+  }
+}
+
+/**
+ * If tokens have been successfully saved, delete the config
+ * See https://www.drupal.org/project/ik_constant_contact/issues/3215168
+ */
+function ik_constant_contact_update_93103() {
+  $schema = Database::getConnection()->schema();
+  if (!$schema->tableExists('ik_constant_contact_tokens')) {
+    throw new UpdateException('This update requires ik_constant_contact_update_93100 to install new database schema.');
+  } else {
+    $tokens = \Drupal::service('config.factory')->getEditable('ik_constant_contact.tokens');
+    $ccConfig = \Drupal::service('ik_constant_contact')->getConfig();
+
+    if (
+      $tokens->get('access_token') && 
+      $tokens->get('refresh_token') && 
+      isset($ccConfig['token_source']) && 
+      isset($ccConfig['access_token']) && 
+      isset($ccConfig['refresh_token']) && 
+      $ccConfig['token_source'] === 'database'
+    ) {
+      $tokens->delete();
+    } else if (
+      $ccConfig['token_source'] === 'config' &&
+      $tokens->get('access_token') && 
+      $tokens->get('refresh_token')
+    ) {
+      \Drupal::service('ik_constant_contact')->refreshToken();
+      $tokens->delete();
+    }
+  }
 }

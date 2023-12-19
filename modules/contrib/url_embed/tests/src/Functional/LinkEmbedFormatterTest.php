@@ -19,7 +19,7 @@ class LinkEmbedFormatterTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['url_embed', 'entity_test', 'link'];
+  protected static $modules = ['url_embed', 'entity_test', 'link'];
 
   /**
    * {@inheritdoc}
@@ -101,7 +101,6 @@ class LinkEmbedFormatterTest extends BrowserTestBase {
     $content = $display->build($entity);
     $output = \Drupal::service('renderer')->renderRoot($content);
     $output = (string) $output;
-    $this->verbose($output);
     return $output;
   }
 

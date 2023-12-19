@@ -37,6 +37,8 @@ class EmbedButtonListBuilder extends ConfigEntityListBuilder {
         '#theme' => 'image',
         '#uri' => $icon_url,
         '#alt' => $this->t('Icon for the @label button.', ['@label' => $entity->label()]),
+        '#height' => 32,
+        '#width' => 32,
       ];
     }
     else {

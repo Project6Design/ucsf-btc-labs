@@ -19,7 +19,8 @@ class ShareMessageTwitterCardsTest extends ShareMessageTestBase {
       'add_twitter_card' => TRUE,
       'twitter_user' => $user_name,
     ];
-    $this->drupalPostForm('admin/config/services/sharemessage/sharemessage-settings', $edit, t('Save configuration'));
+    $this->drupalGet('admin/config/services/sharemessage/sharemessage-settings');
+    $this->submitForm($edit, t('Save configuration'));
 
     // Create a share message in the UI.
     $this->drupalGet('admin/config/services/sharemessage/add');
@@ -33,31 +34,32 @@ class ShareMessageTwitterCardsTest extends ShareMessageTestBase {
       'image_url' => 'http://www.example.com/drupal.jpg',
       'share_url' => 'http://www.example.com',
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('Share Message @label has been added.', ['@label' => $edit['label']]), 'Share Message is successfully saved.');
+    $this->submitForm($edit, t('Save'));
+    $this->assertSession()->pageTextContains(t('Share Message @label has been added.', ['@label' => $edit['label']]));
 
     // Display share message and verify the twitter card meta tags.
     $this->drupalGet('sharemessage-test/sharemessage_test_label');
 
     $meta = '<meta name="twitter:card" content="summary_large_image" />';
-    $this->assertRaw($meta);
+    $this->assertSession()->responseContains($meta);
     $meta = '<meta name="twitter:site" content="' . $user_name . '" />';
-    $this->assertRaw($meta);
+    $this->assertSession()->responseContains($meta);
     $meta = '<meta name="twitter:description" content="' . $edit['message_long'] . '" />';
-    $this->assertRaw($meta);
+    $this->assertSession()->responseContains($meta);
     $meta = '<meta name="twitter:image" content="' . $edit['image_url'] . '" />';
-    $this->assertRaw($meta);
+    $this->assertSession()->responseContains($meta);
 
     // Disable rendering of twitter cards meta tags.
     $edit = [
       'add_twitter_card' => FALSE,
     ];
-    $this->drupalPostForm('admin/config/services/sharemessage/sharemessage-settings', $edit, t('Save configuration'));
+    $this->drupalGet('admin/config/services/sharemessage/sharemessage-settings');
+    $this->submitForm($edit, t('Save configuration'));
 
     $this->drupalGet('sharemessage-test/sharemessage_test_label');
-    $this->assertNoRaw('<meta name="twitter:card"');
-    $this->assertNoRaw('<meta name="twitter:site"');
-    $this->assertNoRaw('<meta name="twitter:description"');
+    $this->assertSession()->responseNotContains('<meta name="twitter:card"');
+    $this->assertSession()->responseNotContains('<meta name="twitter:site"');
+    $this->assertSession()->responseNotContains('<meta name="twitter:description"');
   }
 
 }

@@ -23,7 +23,7 @@ class ShareMessageSocialSharePrivacyTest extends ShareMessageTestBase {
         'facebook',
       ],
     ];
-    $this->drupalPostForm(NULL, $default_settings, t('Save configuration'));
+    $this->submitForm($default_settings, t('Save configuration'));
 
     // Set a new Share Message.
     $sharemessage = [
@@ -32,17 +32,18 @@ class ShareMessageSocialSharePrivacyTest extends ShareMessageTestBase {
       'plugin' => 'socialshareprivacy',
       'title' => 'SocialSharePrivacy test',
     ];
-    $this->drupalPostForm('admin/config/services/sharemessage/add', $sharemessage, t('Save'));
+    $this->drupalGet('admin/config/services/sharemessage/add');
+    $this->submitForm($sharemessage, t('Save'));
     $this->drupalGet('admin/config/services/sharemessage/manage/sharemessage_test_socialshareprivacy_label');
     $override_settings = '//details[starts-with(@data-drupal-selector, "edit-settings")]';
-    $this->assertFieldByXPath($override_settings);
-    $this->assertText('Social Share Privacy is a jQuery plugin that lets you add social share buttons to your website that don\'t allow the social sites to track your users.');
+    $this->xpath($override_settings);
+    $this->assertSession()->pageTextContains('Social Share Privacy is a jQuery plugin that lets you add social share buttons to your website that don\'t allow the social sites to track your users.');
 
     // Assert that the initial settings are saved correctly.
     $this->drupalGet('sharemessage-test/sharemessage_test_socialshareprivacy_label');
-    $this->assertRaw('"facebook":{"status":true');
-    $this->assertRaw('"gplus":{"status":true');
-    $this->assertRaw('"twitter":{"status":false');
+    $this->assertSession()->responseContains('"facebook":{"status":true');
+    $this->assertSession()->responseContains('"gplus":{"status":true');
+    $this->assertSession()->responseContains('"twitter":{"status":false');
 
     // Set new Social Share Privacy settings.
     $this->drupalGet('admin/config/services/sharemessage/socialshareprivacy-settings');
@@ -52,13 +53,13 @@ class ShareMessageSocialSharePrivacyTest extends ShareMessageTestBase {
         'twitter',
       ],
     ];
-    $this->drupalPostForm(NULL, $default_settings, t('Save configuration'));
+    $this->submitForm($default_settings, t('Save configuration'));
 
     // Check the saving of the new Social Share Privacy settings is correctly.
     $this->drupalGet('sharemessage-test/sharemessage_test_socialshareprivacy_label');
-    $this->assertRaw('"twitter":{"status":true');
-    $this->assertRaw('"gplus":{"status":true');
-    $this->assertRaw('"facebook":{"status":false');
+    $this->assertSession()->responseContains('"twitter":{"status":true');
+    $this->assertSession()->responseContains('"gplus":{"status":true');
+    $this->assertSession()->responseContains('"facebook":{"status":false');
   }
 
 }

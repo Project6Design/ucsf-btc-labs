@@ -110,7 +110,7 @@ class SubstitutionPluginTest extends LinkitKernelTestBase {
       'status' => FileInterface::STATUS_PERMANENT,
     ]);
     $file->save();
-    $this->assertEquals($GLOBALS['base_url'] . '/' . $this->siteDirectory . '/files/druplicon.txt', $fileSubstitution->getUrl($file)->getGeneratedUrl());
+    $this->assertEquals('/' . $this->siteDirectory . '/files/druplicon.txt', $fileSubstitution->getUrl($file)->toString());
 
     $entity_type = $this->entityTypeManager->getDefinition('file');
     $this->assertTrue(FileSubstitutionPlugin::isApplicable($entity_type), 'The entity type File is applicable the file substitution.');
@@ -126,7 +126,7 @@ class SubstitutionPluginTest extends LinkitKernelTestBase {
     $canonicalSubstitution = $this->substitutionManager->createInstance('canonical');
     $entity = EntityTest::create([]);
     $entity->save();
-    $this->assertEquals('/entity_test/1', $canonicalSubstitution->getUrl($entity)->getGeneratedUrl());
+    $this->assertEquals('/entity_test/1', $canonicalSubstitution->getUrl($entity)->toString());
 
     $entity_type = $this->entityTypeManager->getDefinition('entity_test');
     $this->assertTrue(CanonicalSubstitutionPlugin::isApplicable($entity_type), 'The entity type EntityTest is applicable the canonical substitution.');
@@ -170,13 +170,13 @@ class SubstitutionPluginTest extends LinkitKernelTestBase {
     $media->save();
 
     $media_substitution = $this->substitutionManager->createInstance('media');
-    $expected = $GLOBALS['base_url'] . '/' . $this->siteDirectory . '/files/druplicon.txt';
-    $this->assertEquals($expected, $media_substitution->getUrl($media)->getGeneratedUrl());
+    $expected = '/' . $this->siteDirectory . '/files/druplicon.txt';
+    $this->assertEquals($expected, $media_substitution->getUrl($media)->toString());
 
     // Ensure the url is identical when media entities have a standalone URL
     // enabled.
     \Drupal::configFactory()->getEditable('media.settings')->set('standalone_url', TRUE)->save();
-    $this->assertEquals($expected, $media_substitution->getUrl($media)->getGeneratedUrl());
+    $this->assertEquals($expected, $media_substitution->getUrl($media)->toString());
 
     $entity_type = $this->entityTypeManager->getDefinition('media');
     $this->assertTrue(MediaSubstitutionPlugin::isApplicable($entity_type), 'The entity type Media is applicable the media substitution.');
@@ -211,11 +211,11 @@ class SubstitutionPluginTest extends LinkitKernelTestBase {
     $media->save();
 
     $media_substitution = $this->substitutionManager->createInstance('media');
-    $this->assertEquals('', $media_substitution->getUrl($media)->getGeneratedUrl());
+    $this->assertNull($media_substitution->getUrl($media));
 
     $this->config('media.settings')->set('standalone_url', TRUE)->save();
     \Drupal::entityTypeManager()->clearCachedDefinitions();
-    $this->assertEquals('/media/' . $media->id(), $media_substitution->getUrl($media)->getGeneratedUrl());
+    $this->assertEquals('/media/' . $media->id(), $media_substitution->getUrl($media)->toString());
   }
 
 }

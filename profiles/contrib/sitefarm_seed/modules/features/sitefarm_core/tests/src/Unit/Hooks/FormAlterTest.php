@@ -92,7 +92,7 @@ class FormAlterTest extends UnitTestCase {
     $form = ['test_field' => []];
     $field_name = 'wrong_field';
     $return = $this->helper->setAddAnotherItemLabel($form, $field_name, $text);
-    $this->assertArrayEquals($form, $return);
+    $this->assertEquals($form, $return);
 
     // The field is correctly found on the form with all needed arrays
     $form['test_field']['widget']['add_more']['#value'] = 'test';

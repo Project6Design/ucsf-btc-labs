@@ -29,7 +29,7 @@ trait AssertLinkitFilterTrait {
   protected function assertLinkitFilter(EntityInterface $entity, $langcode = LanguageInterface::LANGCODE_SITE_DEFAULT) {
     if ($entity->getEntityTypeId() === "file") {
       /** @var \Drupal\file\Entity\File $entity */
-      $href = \Drupal::service('file_url_generator')->generateAbsoluteString($entity->getFileUri());
+      $href = \Drupal::service('file_url_generator')->generateString($entity->getFileUri());
     }
     else {
       $href = $entity->toUrl()->toString();
@@ -37,7 +37,11 @@ trait AssertLinkitFilterTrait {
 
     $input = '<a data-entity-type="' . $entity->getEntityTypeId() . '" data-entity-uuid="' . $entity->uuid() . '">Link text</a>';
     $expected = '<a data-entity-type="' . $entity->getEntityTypeId() . '" data-entity-uuid="' . $entity->uuid() . '" href="' . $href . '">Link text</a>';
-    $this->assertSame($expected, $this->process($input, $langcode)->getProcessedText());
+    $actual = $this->process($input, $langcode)->getProcessedText();
+    $actual = urldecode($actual);
+    $this->assertSame($expected, $actual);
+    $canonical_url_aka_not_path_alias = '/entity_test_mul/manage/1';
+    $this->assertStringNotContainsString($canonical_url_aka_not_path_alias, $this->process($input, $langcode)->getProcessedText());
   }
 
   /**
@@ -51,7 +55,7 @@ trait AssertLinkitFilterTrait {
   protected function assertLinkitFilterWithTitle(EntityInterface $entity, $langcode = LanguageInterface::LANGCODE_SITE_DEFAULT) {
     if ($entity->getEntityTypeId() === "file") {
       /** @var \Drupal\file\Entity\File $entity */
-      $href = \Drupal::service('file_url_generator')->generateAbsoluteString($entity->getFileUri());
+      $href = \Drupal::service('file_url_generator')->generateString($entity->getFileUri());
     }
     else {
       $href = $entity->toUrl()->toString();
@@ -59,7 +63,9 @@ trait AssertLinkitFilterTrait {
 
     $input = '<a data-entity-type="' . $entity->getEntityTypeId() . '" data-entity-uuid="' . $entity->uuid() . '">Link text</a>';
     $expected = '<a data-entity-type="' . $entity->getEntityTypeId() . '" data-entity-uuid="' . $entity->uuid() . '" href="' . $href . '" title="' . Html::decodeEntities($entity->label()) . '">Link text</a>';
-    $this->assertSame($expected, $this->process($input, $langcode)->getProcessedText());
+    $actual = $this->process($input, $langcode)->getProcessedText();
+    $actual = urldecode($actual);
+    $this->assertSame($expected, $actual);
   }
 
   /**

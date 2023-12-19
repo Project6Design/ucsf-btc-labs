@@ -5,9 +5,9 @@ namespace Drupal\webform;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBuilderInterface;
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\Form\FormState;
 use Drupal\Core\Url;
 use Drupal\webform\Plugin\WebformElementManagerInterface;
 use Drupal\webform\Utility\WebformArrayHelper;
@@ -150,7 +150,9 @@ class WebformEntityElementsValidator implements WebformEntityElementsValidatorIn
       'rendering' => TRUE,
     ];
 
-    $this->webform = $webform;
+    // Clone the webform to prevent the webform's settings from being
+    // unexpectedly updated or overridden.
+    $this->webform = clone $webform;
 
     $this->elementsRaw = $webform->getElementsRaw();
     $this->originalElementsRaw = $webform->getElementsOriginalRaw();

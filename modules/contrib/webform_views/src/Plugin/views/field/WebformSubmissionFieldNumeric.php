@@ -19,7 +19,7 @@ class WebformSubmissionFieldNumeric extends WebformSubmissionField {
   public function clickSort($order) {
     $this->ensureMyTable();
 
-    $field = $this->query->addField(NULL, $this->castToDataType($this->tableAlias . '.value'), $this->realField . '_sort');
+    $field = $this->query->addField(NULL, $this->castToDataType($this->tableAlias . '.' . $this->realField), $this->realField . '_sort');
 
     $params = $this->options['group_type'] != 'group' ? ['function' => $this->options['group_type']] : [];
     $this->query->addOrderBy(NULL, NULL, $order, $field, $params);

@@ -5,7 +5,7 @@ namespace Drupal\linkit\Plugin\Linkit\Substitution;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\GeneratedUrl;
+use Drupal\file\FileInterface;
 use Drupal\linkit\SubstitutionInterface;
 
 /**
@@ -22,11 +22,13 @@ class File extends PluginBase implements SubstitutionInterface {
    * {@inheritdoc}
    */
   public function getUrl(EntityInterface $entity) {
-    $url = new GeneratedUrl();
-    /** @var \Drupal\file\FileInterface $entity */
-    $url->setGeneratedUrl(\Drupal::service('file_url_generator')->generateAbsoluteString($entity->getFileUri()));
-    $url->addCacheableDependency($entity);
-    return $url;
+    if (!($entity instanceof FileInterface)) {
+      return NULL;
+    }
+
+    /** @var \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator */
+    $file_url_generator = \Drupal::service('file_url_generator');
+    return $file_url_generator->generate($entity->getFileUri());
   }
 
   /**

@@ -18,7 +18,7 @@ class MenuLinkContentNormalizerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = [
+  protected static $modules = [
     'better_normalizers',
     'serialization',
     'menu_link_content',
@@ -33,14 +33,11 @@ class MenuLinkContentNormalizerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('node');
     $this->installEntitySchema('user');
     $this->installEntitySchema('menu_link_content');
-    $this->installSchema('system', 'router');
-    $this->installSchema('node', 'node_access');
-    $this->container->get('router.builder')->rebuild();
   }
 
   /**

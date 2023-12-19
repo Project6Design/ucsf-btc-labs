@@ -31,15 +31,16 @@ class ShareMessageOGHeadersTest extends ShareMessageTestBase {
       'message_short' => 'OG headers short description',
       'fallback_image' => $file->uuid(),
     ];
-    $this->drupalPostForm('admin/config/services/sharemessage/add', $sharemessage, t('Save'));
-    $this->assertText(t('Share Message @label has been added.', ['@label' => $sharemessage['label']]));
+    $this->drupalGet('admin/config/services/sharemessage/add');
+    $this->submitForm($sharemessage, t('Save'));
+    $this->assertSession()->pageTextContains(t('Share Message @label has been added.', ['@label' => $sharemessage['label']]));
     $this->drupalGet('admin/config/services/sharemessage/manage/sharemessage_test_og_label');
     $override_settings = '//details[starts-with(@data-drupal-selector, "edit-settings")]';
-    $this->assertFieldByXPath($override_settings);
-    $this->assertText('Open graph headers are used when users want to use it as a framework or a background tool only.');
-    $this->assertText('The OG Headers plugin doesn\'t provide any settings.');
+    $this->xpath($override_settings);
+    $this->assertSession()->pageTextContains('Open graph headers are used when users want to use it as a framework or a background tool only.');
+    $this->assertSession()->pageTextContains('The OG Headers plugin doesn\'t provide any settings.');
     $this->drupalGet('sharemessage-test/sharemessage_test_og_label');
-    $url = file_create_url($file->getFileUri());
+    $url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
 
     $image = \Drupal::service('image.factory')->get($file->getFileUri());
     $image_width = $image->getWidth();
@@ -62,7 +63,7 @@ class ShareMessageOGHeadersTest extends ShareMessageTestBase {
       'message_long' => 'Long description',
       'message_short' => 'Short description',
     ];
-    $this->drupalPostForm(NULL, $sharemessage, t('Save'));
+    $this->submitForm($sharemessage, t('Save'));
     $this->drupalGet('sharemessage-test/sharemessage_test_special_characters');
     // Test for special characters (such as ', ", <, >, &) in a node title
     // used as token for a Share Message title.

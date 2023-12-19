@@ -10,6 +10,12 @@
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Site\Settings;
 
+// Ludwig module integration.
+if (\Drupal::hasService('ludwig.require_once')) {
+  $ludwig_require_once = \Drupal::service('ludwig.require_once');
+  $ludwig_require_once->requireOnce('starkbank/ecdsa', 'src/ellipticcurve.php', dirname(__FILE__));
+}
+
 /**
  * Implements hook_help().
  */
@@ -35,7 +41,7 @@ function sendgrid_integration_mail($key, &$message, $params) {
     Settings::get('mail_line_endings', PHP_EOL) . Settings::get('mail_line_endings', PHP_EOL),
     $params['body']
   );
-  if ($params['include_test_attachment']) {
+  if (isset($params['include_test_attachment'])) {
     $message['attachments'][] = \Drupal::service('file_system')
       ->realpath('core/misc/druplicon.png');
   }

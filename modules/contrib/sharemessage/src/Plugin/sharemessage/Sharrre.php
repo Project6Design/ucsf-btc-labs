@@ -50,7 +50,7 @@ class Sharrre extends SharePluginBase implements  SharePluginInterface {
 
     if (\Drupal::moduleHandler()->moduleExists('libraries')) {
       // Check if local library is set correctly.
-      $directory = libraries_get_path('sharrre');
+      $directory = \Drupal::service('libraries.manager')->getLibrary('sharrre');
       $file = 'jquery.sharrre.min.js';
       if (!file_exists($directory . '/' . $file) && $show_message) {
         $form['message'] = [
@@ -225,7 +225,7 @@ class Sharrre extends SharePluginBase implements  SharePluginInterface {
     $library_exists = FALSE;
     // Check if the library module is enabled and if the library is present.
     if (\Drupal::moduleHandler()->moduleExists('libraries')) {
-      $directory = libraries_get_path('sharrre');
+      $directory = \Drupal::service('libraries.manager')->getLibrary('sharrre');
       $file = 'jquery.sharrre.min.js';
       if (file_exists($directory . '/' . $file)) {
         $library_exists = TRUE;

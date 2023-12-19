@@ -44,9 +44,9 @@ class WebformCompositeViews extends WebformElementViewsAbstract {
           ],
         ];
 
-        $title = $element_title . ': ' . $element['#webform_composite_elements'][$composite_key]['#title'];
+        $title = isset($element['#webform_composite_elements'][$composite_key]['#title']) ? $element['#webform_composite_elements'][$composite_key]['#title'] : $composite_key;
         $data[$table_alias . '__' . $composite_key]['webform_submission_value'] = [
-          'title' => Html::escape($title),
+          'title' => Html::escape($element_title . ': ' . $title),
           'help' => $this->t('Value of the field %field property in webform %webform submission.', [
             '%field' => $element_title,
             '%webform' => $webform->label(),

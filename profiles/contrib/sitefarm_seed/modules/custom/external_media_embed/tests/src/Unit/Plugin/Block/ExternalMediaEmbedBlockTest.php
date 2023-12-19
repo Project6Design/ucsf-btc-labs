@@ -81,7 +81,7 @@ class ExternalMediaEmbedBlockTest extends UnitTestCase {
   public function testDefaultConfiguration() {
     $expected = $this->pluginConfig;
 
-    $this->assertArrayEquals($expected, $this->plugin->defaultConfiguration());
+    $this->assertEquals($expected, $this->plugin->defaultConfiguration());
   }
 
   /**
@@ -123,7 +123,7 @@ class ExternalMediaEmbedBlockTest extends UnitTestCase {
 
     $form = [];
     $this->plugin->blockSubmit($form, $this->formState);
-    $this->assertArrayEquals($expectedConfig, $this->plugin->getConfiguration());
+    $this->assertEquals($expectedConfig, $this->plugin->getConfiguration());
   }
 
   /**
@@ -152,7 +152,7 @@ class ExternalMediaEmbedBlockTest extends UnitTestCase {
 
     $return = $this->plugin->build();
 
-    $this->assertArrayEquals(['#markup' => 'output_url_markup'], $this->plugin->build());
+    $this->assertEquals(['#markup' => 'output_url_markup'], $this->plugin->build());
     $this->assertInstanceOf('Drupal\Component\Render\MarkupInterface', $return['#markup']);
   }
 

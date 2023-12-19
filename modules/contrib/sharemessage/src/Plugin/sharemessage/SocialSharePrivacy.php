@@ -244,10 +244,10 @@ class SocialSharePrivacy extends SharePluginBase implements SharePluginInterface
         $enabled_services[$service] = array_merge($enabled_services[$service], $this->servicesWithSettings()[$service]);
       }
       if (in_array($service, ['mail', 'tumblr', 'fbshare'])) {
-        $enabled_services[$service]['line_img'] = file_create_url($images_folder . $service . '.png');
+        $enabled_services[$service]['line_img'] = \Drupal::service('file_url_generator')->generateAbsoluteString($images_folder . $service . '.png');
       }
       else {
-        $enabled_services[$service]['dummy_line_img'] = file_create_url($images_folder . 'dummy_' . $service . '.png');
+        $enabled_services[$service]['dummy_line_img'] = \Drupal::service('file_url_generator')->generateAbsoluteString($images_folder . 'dummy_' . $service . '.png');
       }
     }
 

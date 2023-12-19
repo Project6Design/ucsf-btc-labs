@@ -42,10 +42,8 @@ interface EmbedTypeInterface extends ConfigurableInterface, DependentPluginInter
    * Gets the default icon URL for the embed type.
    *
    * @return string
-   *   The URL to the default icon. Must have been passed through
-   *   file_create_url() if the file is local.
-   *
-   * @see file_create_url()
+   *   The URL to the default icon. This can be a relative path from the Drupal
+   *   root.
    */
   public function getDefaultIconUrl();
 

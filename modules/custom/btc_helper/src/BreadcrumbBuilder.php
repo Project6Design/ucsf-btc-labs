@@ -10,8 +10,9 @@ use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Component\Utility\Unicode;
 use Drupal\system\PathBasedBreadcrumbBuilder;
-use Symfony\Cmf\Component\Routing\RouteObjectInterface;
 use Drupal\Core\Breadcrumb\Breadcrumb;
+Use Drupal\Core\Routing\RouteObjectInterface;
+
 /**
  * Adds the current page title to the breadcrumb.
  *
@@ -30,6 +31,7 @@ class BreadcrumbBuilder extends PathBasedBreadcrumbBuilder {
         $request = \Drupal::request();
         $path = trim($this->context->getPathInfo(), '/');
         $path_elements = explode('/', $path);
+
         $route = $request->attributes->get(RouteObjectInterface::ROUTE_OBJECT);
 
         // Do not adjust the breadcrumbs on admin paths.

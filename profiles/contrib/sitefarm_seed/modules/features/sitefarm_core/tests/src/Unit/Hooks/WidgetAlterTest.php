@@ -78,7 +78,7 @@ class WidgetAlterTest extends UnitTestCase {
       ]
     ];
     $return = $this->helper->primaryImageTitleProcess($element, $this->formState->reveal(), $form);
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
   }
 
   /**
@@ -94,7 +94,7 @@ class WidgetAlterTest extends UnitTestCase {
     $element['#process'] = ['test'];
     $expected = ['#process' => ['test']];
     $this->helper->setFocalPointHelpText($element);
-    $this->assertArrayEquals($expected, $element);
+    $this->assertEquals($expected, $element);
 
     // Focal Point will be used
     $element['#process'] = [
@@ -119,7 +119,7 @@ class WidgetAlterTest extends UnitTestCase {
     // Access is denied
     $element['alt']['#access'] = FALSE;
     $return = $this->helper->focalPointHelpProcess($element, $this->formState->reveal(), $form);
-    $this->assertArrayEquals($element, $return);
+    $this->assertEquals($element, $return);
 
     // Access granted
     $element = [
@@ -140,7 +140,7 @@ class WidgetAlterTest extends UnitTestCase {
       ]
     ];
     $return = $this->helper->focalPointHelpProcess($element, $this->formState->reveal(), $form);
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
 
   }
 

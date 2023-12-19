@@ -30,7 +30,7 @@ class UrlEmbedFilterTest extends UrlEmbedTestBase {
     $node = $this->drupalCreateNode($settings);
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->responseContains(static::FLICKR_OUTPUT_WYSIWYG);
-    $this->assertNoText(strip_tags($content), 'Placeholder does not appear in the output when embed is successful.');
+    $this->assertSession()->pageTextNotContains(strip_tags($content));
 
     // Ensure that placeholder is not replaced when embed is unsuccessful.
     $content = '<drupal-url data-embed-url="">This placeholder should be rendered since specified URL does not exists.</drupal-url>';
@@ -40,7 +40,7 @@ class UrlEmbedFilterTest extends UrlEmbedTestBase {
     $settings['body'] = array(array('value' => $content, 'format' => 'custom_format'));
     $node = $this->drupalCreateNode($settings);
     $this->drupalGet('node/' . $node->id());
-    $this->assertNoText(strip_tags($content), 'Placeholder does not appear in the output when embed is unsuccessful.');
+    $this->assertSession()->pageTextNotContains(strip_tags($content));
 
     // Test that tag of container element is not replaced when it's not
     // <drupal-url>.

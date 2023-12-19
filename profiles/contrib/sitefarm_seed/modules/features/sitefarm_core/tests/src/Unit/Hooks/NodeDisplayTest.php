@@ -33,7 +33,7 @@ class NodeDisplayTest extends UnitTestCase {
    */
   public function testForceRestrictedHtmlOnTeasers($build, $view_mode, $expected) {
     $this->helper->forceRestrictedHtmlOnTeasers($build, $view_mode);
-    $this->assertArrayEquals($expected, $build);
+    $this->assertEquals($expected, $build);
   }
 
   /**
@@ -103,7 +103,7 @@ class NodeDisplayTest extends UnitTestCase {
    */
   public function testForcePlainTextOnPoster($build, $view_mode, $expected) {
     $this->helper->forcePlainTextOnPoster($build, $view_mode);
-    $this->assertArrayEquals($expected, $build);
+    $this->assertEquals($expected, $build);
   }
 
   /**

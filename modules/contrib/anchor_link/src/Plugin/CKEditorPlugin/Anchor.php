@@ -26,15 +26,6 @@ class Anchor extends CKEditorPluginBase {
   /**
    * {@inheritdoc}
    */
-  public function getDependencies(Editor $editor) {
-    return [
-      'fakeobjects',
-    ];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getLibraries(Editor $editor) {
     return [];
   }

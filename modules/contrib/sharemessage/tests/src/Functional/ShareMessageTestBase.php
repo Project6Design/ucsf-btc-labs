@@ -16,7 +16,7 @@ abstract class ShareMessageTestBase extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['sharemessage', 'sharemessage_test', 'block', 'filter', 'file'];
+  protected static $modules = ['sharemessage', 'sharemessage_test', 'block', 'filter', 'file'];
 
   /**
    * Permissions for the admin user.
@@ -50,7 +50,7 @@ abstract class ShareMessageTestBase extends BrowserTestBase {
    */
   protected $adminUser;
 
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     // Create an admin user.
@@ -178,7 +178,7 @@ abstract class ShareMessageTestBase extends BrowserTestBase {
     }
 
     if (isset($this->renderedEntity)) {
-      return $not_exists ? $this->assertNotContains($raw_html_icon_style, $this->renderedEntity, $message) : $this->assertContains($raw_html_icon_style, $this->renderedEntity, $message);
+      return $not_exists ? $this->assertStringNotContainsString($raw_html_icon_style, $this->renderedEntity, $message) : $this->assertStringContainsString($raw_html_icon_style, $this->renderedEntity, $message);
     }
 
     if ($not_exists) {
@@ -261,10 +261,10 @@ abstract class ShareMessageTestBase extends BrowserTestBase {
     }
 
     if ($not_exists) {
-      return $this->assertNoRaw($meta_tag, $message);
+      return $this->assertSession()->responseNotContains($meta_tag);
     }
     else {
-      return $this->assertRaw($meta_tag, $message);
+      return $this->assertSession()->responseContains($meta_tag);
     }
   }
 

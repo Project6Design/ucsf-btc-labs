@@ -23,8 +23,7 @@
     }
   },
   "require": {
-    "drupal/core": "^9 || ^10",
-    "drupal/fakeobjects": "~1.0"
+    "drupal/core": "^9 || ^10"
   },
   "extra": {
     "branch-alias": {

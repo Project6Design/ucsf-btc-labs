@@ -1,0 +1,10 @@
+url_embed.settings:
+  type: config_object
+  label: 'Url Embed config.'
+  mapping:
+    facebook_app_id:
+      type: string
+      label: 'Facebook App ID'
+    facebook_app_secret:
+      type: string
+      label: 'Facebook App Secret'

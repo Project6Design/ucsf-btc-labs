@@ -1,0 +1,17 @@
+drupal.anchor_link:
+  version: VERSION
+  css:
+    theme:
+      css/anchor_link.css: { every_page: 1 }
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+cke5_anchor_link:
+  js:
+    /libraries/ckeditor5-anchor-drupal/build/anchor-drupal.js: { preprocess: false, minified: true }
+  dependencies:
+    - core/ckeditor5
+admin.cke5_anchor_link:
+  css:
+    theme:
+      css/anchor_link.admin.css: { }

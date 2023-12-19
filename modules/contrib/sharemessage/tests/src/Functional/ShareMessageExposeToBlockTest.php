@@ -18,12 +18,12 @@ class ShareMessageExposeToBlockTest extends ShareMessageTestBase {
    *
    * @var array
    */
-  public static $modules = ['contextual', 'node', 'token', 'field_ui', 'image'];
+  protected static $modules = ['contextual', 'node', 'token', 'field_ui', 'image'];
 
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     $this->adminPermissions[] = 'access contextual links';
     $this->adminPermissions[] = 'administer nodes';
     $this->adminPermissions[] = 'access content';
@@ -73,8 +73,8 @@ class ShareMessageExposeToBlockTest extends ShareMessageTestBase {
       'image_test' => $file,
     ]);
     $this->drupalGet('node/' . $node->id());
-    $this->assertTitle('Share Message article | Drupal');
-    $this->assertNoRaw('<h2>Share Message test block</h2>');
+    $this->assertSession()->titleEquals('Share Message article | Drupal');
+    $this->assertSession()->responseNotContains('<h2>Share Message test block</h2>');
 
     // Create another Share Message.
     $sharemessage = [
@@ -86,15 +86,16 @@ class ShareMessageExposeToBlockTest extends ShareMessageTestBase {
       'image_width' => '[node:image_test:width]',
       'image_height' => '[node:image_test:height]',
     ];
-    $this->drupalPostForm('admin/config/services/sharemessage/add', $sharemessage, t('Save'));
+    $this->drupalGet('admin/config/services/sharemessage/add');
+    $this->submitForm($sharemessage, t('Save'));
     // Check for confirmation message and listing of the Share Message entity.
-    $this->assertText(t('Share Message @label has been added.', ['@label' => $sharemessage['label']]));
-    $this->assertText($sharemessage['label']);
+    $this->assertSession()->pageTextContains(t('Share Message @label has been added.', ['@label' => $sharemessage['label']]));
+    $this->assertSession()->pageTextContains($sharemessage['label']);
 
     // Enable twitter and tweet services for AddThis.
     $this->drupalGet('admin/config/services/sharemessage/addthis-settings');
     $edit = ['default_services[]' => ['twitter', 'tweet']];
-    $this->drupalPostForm(NULL, $edit, 'Save configuration');
+    $this->submitForm($edit, 'Save configuration');
 
     // Add a block that will contain the created Share Message.
     $block = [
@@ -102,12 +103,13 @@ class ShareMessageExposeToBlockTest extends ShareMessageTestBase {
       'settings[sharemessage]' => $sharemessage['id'],
       'region' => 'content',
     ];
-    $this->drupalPostForm('admin/structure/block/add/sharemessage_block/' . $theme, $block, t('Save block'));
+    $this->drupalGet('admin/structure/block/add/sharemessage_block/' . $theme);
+    $this->submitForm($block, t('Save block'));
 
     // Check the Share Message block is now displayed on the article node.
     $this->drupalGet('node/' . $node->id());
-    $this->assertTitle('Share Message article | Drupal');
-    $this->assertRaw('<h2>Share Message test block</h2>');
+    $this->assertSession()->titleEquals('Share Message article | Drupal');
+    $this->assertSession()->responseContains('<h2>Share Message test block</h2>');
     $sharemessage_values = $sharemessage;
     $sharemessage_values['message_long'] = 'Share Message article';
     $this->assertShareButtons($sharemessage_values, 'addthis_16x16_style', TRUE);
@@ -125,22 +127,22 @@ class ShareMessageExposeToBlockTest extends ShareMessageTestBase {
       'revision' => TRUE,
       'title[0][value]' => 'Share Message article edit',
     ];
-    $this->drupalPostForm(NULL, $edit, 'Save');
-    $this->assertTitle('Share Message article edit | Drupal');
-    $this->assertRaw('<h2>Share Message test block</h2>');
+    $this->submitForm($edit, 'Save');
+    $this->assertSession()->titleEquals('Share Message article edit | Drupal');
+    $this->assertSession()->responseContains('<h2>Share Message test block</h2>');
     $sharemessage_values['message_long'] = 'Share Message article edit';
     $this->assertShareButtons($sharemessage_values, 'addthis_16x16_style', TRUE);
     // Visit the old article node's revision and check the Share message block.
     $this->drupalGet('node/' . $node->id() . '/revisions/' . $node->getRevisionId() . '/view');
-    $this->assertResponse(200);
-    $this->assertTitle('Share Message article | Drupal');
-    $this->assertRaw('<h2>Share Message test block</h2>');
+    $this->assertSession()->statusCodeEquals(200);
+    $this->assertSession()->titleEquals('Share Message article | Drupal');
+    $this->assertSession()->responseContains('<h2>Share Message test block</h2>');
     $sharemessage_values['message_long'] = '';
     $this->assertShareButtons($sharemessage_values, 'addthis_16x16_style', TRUE);
 
     // Verify that the block is in the submitted region of the bartik theme.
     $this->drupalGet('admin/structure/block/list/' . $theme);
-    $this->assertText($block['settings[label]']);
+    $this->assertSession()->pageTextContains($block['settings[label]']);
 
     // Go to front page and check whether Share Message is displayed.
     $this->drupalGet('');
@@ -148,11 +150,11 @@ class ShareMessageExposeToBlockTest extends ShareMessageTestBase {
 
     // Check the twitter template placeholder.
     $twitter_template = 'var addthis_share = { templates: { twitter: "AddThis sharemessage short description." } }';
-    $this->assertRaw($twitter_template);
+    $this->assertSession()->responseContains($twitter_template);
 
     // Check for the contextual links presence.
     $sharemessage_contextual_id = 'data-contextual-id="block:block=sharemessage:langcode=en|sharemessage:sharemessage=sharemessage_test_label:langcode=en"';
-    $this->assertRaw($sharemessage_contextual_id);
+    $this->assertSession()->responseContains($sharemessage_contextual_id);
 
     // Logout the user and check for the Share Message block.
     $this->drupalLogout();
@@ -167,7 +169,7 @@ class ShareMessageExposeToBlockTest extends ShareMessageTestBase {
     $this->assertShareButtons($sharemessage_values, 'addthis_16x16_style', TRUE);
 
     // A normal user must not see contextual links.
-    $this->assertNoRaw($sharemessage_contextual_id);
+    $this->assertSession()->responseNotContains($sharemessage_contextual_id);
   }
 
 }

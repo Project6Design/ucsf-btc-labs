@@ -6,11 +6,11 @@ use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\simple_sitemap\Manager\Generator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Drupal\simple_sitemap\Manager\Generator;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Controller routines for sitemap routes.
@@ -57,8 +57,11 @@ class SimpleSitemapController extends ControllerBase {
    * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
    */
   public function getSitemap(Request $request, ?string $variant = NULL): Response {
-    $variant = $variant ?? $this->generator->getDefaultVariant();
-    $output = $this->generator->setVariants($variant)->getContent($request->query->get('page'));
+    $defaultSitemap = $this->generator->getDefaultSitemap();
+    $variant = $variant ?? ($defaultSitemap ? $defaultSitemap->id() : NULL);
+
+    $page = $request->query->get('page') ? (int) $request->query->get('page') : NULL;
+    $output = $this->generator->setSitemaps($variant)->getContent($page);
     if ($output === NULL) {
       throw new NotFoundHttpException();
     }
@@ -70,6 +73,7 @@ class SimpleSitemapController extends ControllerBase {
     $response->getCacheableMetadata()
       ->addCacheTags(Cache::buildTags('simple_sitemap', (array) $variant))
       ->addCacheContexts(['url.query_args']);
+
     return $response;
   }
 
@@ -83,15 +87,16 @@ class SimpleSitemapController extends ControllerBase {
    */
   public function getSitemapXsl(string $sitemap_generator): Response {
     /** @var \Drupal\Component\Plugin\PluginManagerInterface $manager */
+    // @phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
     $manager = \Drupal::service('plugin.manager.simple_sitemap.sitemap_generator');
     try {
-      /** @var \Drupal\simple_sitemap\Plugin\simple_sitemap\SitemapGenerator\SitemapGeneratorInterface $sitemap_generator */
       $sitemap_generator = $manager->createInstance($sitemap_generator);
     }
     catch (PluginNotFoundException $ex) {
       throw new NotFoundHttpException();
     }
 
+    /** @var \Drupal\simple_sitemap\Plugin\simple_sitemap\SitemapGenerator\SitemapGeneratorInterface $sitemap_generator */
     if (NULL === ($xsl = $sitemap_generator->getXslContent())) {
       throw new NotFoundHttpException();
     }

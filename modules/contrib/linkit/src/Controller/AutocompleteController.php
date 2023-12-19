@@ -3,7 +3,7 @@
 namespace Drupal\linkit\Controller;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\linkit\ProfileInterface;
 use Drupal\linkit\SuggestionManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,13 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
 class AutocompleteController implements ContainerInjectionInterface {
 
   /**
-   * The linkit profile storage service.
-   *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
-   */
-  protected $linkitProfileStorage;
-
-  /**
    * The suggestion manager.
    *
    * @var \Drupal\linkit\SuggestionManager
@@ -29,22 +22,12 @@ class AutocompleteController implements ContainerInjectionInterface {
   protected $suggestionManager;
 
   /**
-   * The linkit profile.
+   * Constructs a AutocompleteController object.
    *
-   * @var \Drupal\linkit\ProfileInterface
-   */
-  protected $linkitProfile;
-
-  /**
-   * Constructs a EntityAutocompleteController object.
-   *
-   * @param \Drupal\Core\Entity\EntityStorageInterface $linkit_profile_storage
-   *   The linkit profile storage service.
    * @param \Drupal\linkit\SuggestionManager $suggestionManager
    *   The suggestion service.
    */
-  public function __construct(EntityStorageInterface $linkit_profile_storage, SuggestionManager $suggestionManager) {
-    $this->linkitProfileStorage = $linkit_profile_storage;
+  public function __construct(SuggestionManager $suggestionManager) {
     $this->suggestionManager = $suggestionManager;
   }
 
@@ -53,7 +36,6 @@ class AutocompleteController implements ContainerInjectionInterface {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('entity_type.manager')->getStorage('linkit_profile'),
       $container->get('linkit.suggestion_manager')
     );
   }
@@ -66,17 +48,19 @@ class AutocompleteController implements ContainerInjectionInterface {
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request.
-   * @param string $linkit_profile_id
-   *   The linkit profile id.
+   * @param \Drupal\linkit\ProfileInterface $linkit_profile_id
+   *   The linkit profile.
    *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    *   A JSON response containing the autocomplete suggestions.
    */
-  public function autocomplete(Request $request, $linkit_profile_id) {
-    $this->linkitProfile = $this->linkitProfileStorage->load($linkit_profile_id);
+  public function autocomplete(Request $request, ProfileInterface $linkit_profile_id) {
+    // We do not need to load the entity, since it is upcaste automatically,
+    // per https://www.drupal.org/project/linkit/issues/3212820.
+    // The erroneous variable name $linkit_profile_id is to avoid BC breaks.
     $string = $request->query->get('q');
 
-    $suggestionCollection = $this->suggestionManager->getSuggestions($this->linkitProfile, mb_strtolower($string));
+    $suggestionCollection = $this->suggestionManager->getSuggestions($linkit_profile_id, mb_strtolower($string));
 
     /*
      * If there are no suggestions from the matcher plugins, we have to add a

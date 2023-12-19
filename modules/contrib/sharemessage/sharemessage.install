@@ -61,6 +61,7 @@ function sharemessage_requirements($phase) {
     $storage = \Drupal::entityTypeManager()->getStorage('sharemessage');
     $in_use = (int) $storage->getQuery()
       ->condition('plugin', 'socialshareprivacy')
+      ->accessCheck(FALSE)
       ->count()
       ->execute();
 

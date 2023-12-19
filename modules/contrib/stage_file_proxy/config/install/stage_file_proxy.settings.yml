@@ -1,5 +1,7 @@
 hotlink: false
 origin: ''
-origin_dir: false
+origin_dir: ''
 use_imagecache_root: true
+proxy_headers: ''
 verify: true
+excluded_extensions: ''

@@ -18,7 +18,7 @@ class ConvertUrlToEmbedFilterTest extends BrowserTestBase {
    *
    * @var array
    */
-  public static $modules = ['url_embed', 'node', 'ckeditor'];
+  protected static $modules = ['url_embed', 'node', 'ckeditor'];
 
   /**
    * {@inheritdoc}
@@ -28,7 +28,7 @@ class ConvertUrlToEmbedFilterTest extends BrowserTestBase {
   /**
    * Set the configuration up.
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     // Create a page content type.
     $this->drupalCreateContentType(['type' => 'page', 'name' => 'Basic page']);
@@ -87,7 +87,7 @@ class ConvertUrlToEmbedFilterTest extends BrowserTestBase {
     $node = $this->drupalCreateNode($settings);
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->responseContains('<drupal-url data-embed-url="https://twitter.com/drupal/status/735873777683320832"></drupal-url>');
-    $this->assertNoText(strip_tags($content), 'URL does not appear in the output when embed is successful.');
+    $this->assertSession()->pageTextNotContains(strip_tags($content));
 
     $content = 'before /not-valid/url after';
     $settings = [];
@@ -123,7 +123,7 @@ class ConvertUrlToEmbedFilterTest extends BrowserTestBase {
     $node = $this->drupalCreateNode($settings);
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->responseContains('<drupal-url data-embed-url="https://twitter.com/drupal/status/735873777683320832"></drupal-url>');
-    $this->assertNoText(strip_tags($content), 'URL does not appear in the output when embed is successful.');
+    $this->assertSession()->pageTextNotContains(strip_tags($content));
 
     $content = 'before Embed https://twitter.com/drupal/status/735873777683320832 after';
     $settings = [];

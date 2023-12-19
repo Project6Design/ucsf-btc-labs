@@ -17,8 +17,8 @@ interface SubstitutionInterface extends PluginInspectionInterface {
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity to get a URL for.
    *
-   * @return \Drupal\Core\GeneratedUrl
-   *   A url to replace.
+   * @return \Drupal\Core\Url
+   *   A URL to replace.
    */
   public function getUrl(EntityInterface $entity);
 

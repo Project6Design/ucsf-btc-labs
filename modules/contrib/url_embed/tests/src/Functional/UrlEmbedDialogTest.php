@@ -18,18 +18,18 @@ class UrlEmbedDialogTest extends UrlEmbedTestBase {
     // Ensure that the route is not accessible without specifying all the
     // parameters.
     $this->getEmbedDialog();
-    $this->assertResponse(404, 'Embed dialog is not accessible without specifying filter format and embed button.');
+    $this->assertSession()->statusCodeEquals(404);
     $this->getEmbedDialog('custom_format');
-    $this->assertResponse(404, 'Embed dialog is not accessible without specifying embed button.');
+    $this->assertSession()->statusCodeEquals(404);
 
     // Ensure that the route is not accessible with an invalid embed button.
     $this->getEmbedDialog('custom_format', 'invalid_button');
-    $this->assertResponse(404, 'Embed dialog is not accessible without specifying filter format and embed button.');
+    $this->assertSession()->statusCodeEquals(404);
 
     // Ensure that the route is not accessible with text format without the
     // button configured.
     $this->getEmbedDialog('plain_text', 'url');
-    $this->assertResponse(404, 'Embed dialog is not accessible with a filter that does not have an editor configuration.');
+    $this->assertSession()->statusCodeEquals(404);
 
     // Add an empty configuration for the plain_text editor configuration.
     $editor = Editor::create([
@@ -38,13 +38,13 @@ class UrlEmbedDialogTest extends UrlEmbedTestBase {
     ]);
     $editor->save();
     $this->getEmbedDialog('plain_text', 'url');
-    $this->assertResponse(403, 'Embed dialog is not accessible with a filter that does not have the embed button assigned to it.');
+    $this->assertSession()->statusCodeEquals(403);
 
     // Ensure that the route is accessible with a valid embed button.
     // 'URL' embed button is provided by default by the module and hence the
     // request must be successful.
     $this->getEmbedDialog('custom_format', 'url');
-    $this->assertResponse(200, 'Embed dialog is accessible with correct filter format and embed button.');
+    $this->assertSession()->statusCodeEquals(200);
   }
 
   /**
@@ -54,7 +54,7 @@ class UrlEmbedDialogTest extends UrlEmbedTestBase {
     // Ensure that the route is not accessible with text format without the
     // button configured.
     $this->getEmbedDialog('plain_text', 'url');
-    $this->assertResponse(404, 'Embed dialog is not accessible with a filter that does not have an editor configuration.');
+    $this->assertSession()->statusCodeEquals(404);
     // Add an empty configuration for the plain_text editor configuration.
     $editor = Editor::create([
       'format' => 'plain_text',
@@ -62,18 +62,18 @@ class UrlEmbedDialogTest extends UrlEmbedTestBase {
     ]);
     $editor->save();
     $this->getEmbedDialog('plain_text', 'url');
-    $this->assertResponse(403, 'Embed dialog is not accessible with a filter that does not have the embed button assigned to it.');
+    $this->assertSession()->statusCodeEquals(403);
     // Ensure that the route is accessible with a valid embed button.
     // 'URL' embed button is provided by default by the module and hence the
     // request must be successful.
     $this->getEmbedDialog('custom_format', 'url');
-    $this->assertResponse(200, 'Embed dialog is accessible with correct filter format and embed button.');
+    $this->assertSession()->statusCodeEquals(200);
     // Ensure form structure of the url_embed_dialog form.
-    $this->assertFieldByName('attributes[data-embed-url]', '', 'URL field is present.');
+    $this->assertSession()->fieldValueEquals('attributes[data-embed-url]', '');
     // Check that 'Embed' is a primary button.
-    $this->assertFieldByXPath('//input[contains(@class, "button--primary")]', 'Embed', 'Embed is a primary button');
+    $this->assertSession()->elementExists('css','input.button--primary');
     $edit = ['attributes[data-embed-url]' => static::FLICKR_URL];
-    $this->drupalPostForm(NULL, $edit, 'Embed');
+    $this->submitForm($edit, 'Embed');
   }
 
   /**

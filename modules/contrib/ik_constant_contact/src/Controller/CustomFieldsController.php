@@ -10,6 +10,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Defines CustomFieldsController class.
  */
 class CustomFieldsController extends ControllerBase {
+  /**
+   * The Constant Contact service object.
+   *
+   * @var \Drupal\ik_constant_contact\Service\ConstantContact
+   */
+  protected $constantContact;
 
   /**
    * Constructor function.

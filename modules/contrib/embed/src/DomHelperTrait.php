@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace Drupal\embed;
 
 use Drupal\Component\Utility\Html;
@@ -22,7 +24,7 @@ trait DomHelperTrait {
    * @param string $name
    *   The new tag name.
    */
-  protected function changeNodeName(\DOMNode &$node, $name = 'div') {
+  protected function changeNodeName(\DOMNode &$node, string $name = 'div'): void {
     if ($node->nodeName != $name) {
       /** @var \DOMElement $replacement_node */
       $replacement_node = $node->ownerDocument->createElement($name);
@@ -55,7 +57,7 @@ trait DomHelperTrait {
    * @param string $content
    *   The text or HTML that will replace the contents of $node.
    */
-  protected function setNodeContent(\DOMNode $node, $content) {
+  protected function setNodeContent(\DOMNode $node, string $content): void {
     // Remove all children of the DOMNode.
     while ($node->hasChildNodes()) {
       $node->removeChild($node->firstChild);
@@ -81,7 +83,7 @@ trait DomHelperTrait {
    * @param string $content
    *   The text or HTML that will replace the contents of $node.
    */
-  protected function replaceNodeContent(\DOMNode &$node, $content) {
+  protected function replaceNodeContent(\DOMNode $node, string $content): void {
     if (strlen($content)) {
       // Load the content into a new DOMDocument and retrieve the DOM nodes.
       $replacement_nodes = Html::load($content)->getElementsByTagName('body')
@@ -112,7 +114,7 @@ trait DomHelperTrait {
    * @return array
    *   The attributes as an associative array, keyed by the attribute names.
    */
-  public function getNodeAttributesAsArray(\DOMNode $node) {
+  public function getNodeAttributesAsArray(\DOMNode $node): array {
     $return = [];
 
     // Convert the data attributes to the context array.

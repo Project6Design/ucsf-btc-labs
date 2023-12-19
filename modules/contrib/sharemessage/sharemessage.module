@@ -84,7 +84,7 @@ function sharemessage_library_info_alter(&$libraries, $extension) {
     ];
   }
   elseif (\Drupal::moduleHandler()->moduleExists('libraries')) {
-    $info = libraries_detect('sharrre');
+    $info = \Drupal::service('libraries.manager')->getLibrary('sharrre');
     $libraries['sharrre'] += [
       'version' => $info['installed'] ? $info['version'] : 'web-hosted',
     ];
@@ -107,7 +107,7 @@ function sharemessage_library_info_alter(&$libraries, $extension) {
   }
 
   if (\Drupal::moduleHandler()->moduleExists('libraries')) {
-    $info = libraries_detect('socialshareprivacy');
+    $info = \Drupal::service('libraries.manager')->getLibrary('socialshareprivacy');
     $libraries['socialshareprivacy'] += [
       'version' => $info['version'],
     ];
@@ -206,7 +206,7 @@ function sharemessage_get_addthis_services() {
  */
 function addthis_get_services_json() {
   if (\Drupal::config('sharemessage.addthis')->get('local_services_definition')) {
-    $file_uri = drupal_get_path('module', 'sharemessage') . '/addthis/sharing.en.json';
+    $file_uri = \Drupal::service('extension.list.module')->getPath('sharemessage') . '/addthis/sharing.en.json';
   }
   else {
     $file_uri = 'http://cache.addthiscdn.com/services/v1/sharing.en.json';

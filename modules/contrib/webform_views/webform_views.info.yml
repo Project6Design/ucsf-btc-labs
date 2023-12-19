@@ -1,14 +1,13 @@
-name: 'Webform views'
+name: 'Webform Views Integration'
 description: 'Webform integration with views.'
-# core: '8.x'
+core_version_requirement: ^9.3 || ^10.0
 package: 'Webform'
 type: module
 dependencies:
-  - webform
-  - views
+  - drupal:views
+  - webform:webform
 
-# Information added by Drupal.org packaging script on 2018-02-12
-version: '8.x-5.0-alpha4'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2023-08-10
+version: '8.x-5.2'
 project: 'webform_views'
-datestamp: 1518427984
+datestamp: 1691641744

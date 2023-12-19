@@ -542,7 +542,7 @@ class ShareMessage extends ConfigEntityBase implements ShareMessageInterface {
       /** @var \Drupal\file\FileInterface $image */
       $fallback_image = $entity_repository->loadEntityByUuid('file', $this->fallback_image);
       if ($fallback_image) {
-        $image_url = file_create_url($fallback_image->getFileUri());
+        $image_url = \Drupal::service('file_url_generator')->generateAbsoluteString($fallback_image->getFileUri());
       }
     }
     return $image_url;

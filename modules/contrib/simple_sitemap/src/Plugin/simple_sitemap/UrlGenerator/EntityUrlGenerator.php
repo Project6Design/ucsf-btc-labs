@@ -138,7 +138,7 @@ class EntityUrlGenerator extends EntityUrlGeneratorBase {
   public function getDataSets(): array {
     $data_sets = [];
     $sitemap_entity_types = $this->entityHelper->getSupportedEntityTypes();
-    $all_bundle_settings = $this->entitiesManager->setVariants($this->sitemap->id())->getAllBundleSettings();
+    $all_bundle_settings = $this->entitiesManager->setSitemaps($this->sitemap)->getAllBundleSettings();
     if (isset($all_bundle_settings[$this->sitemap->id()])) {
       foreach ($all_bundle_settings[$this->sitemap->id()] as $entity_type_name => $bundles) {
         if (!isset($sitemap_entity_types[$entity_type_name])) {
@@ -162,6 +162,8 @@ class EntityUrlGenerator extends EntityUrlGeneratorBase {
             if (!empty($keys['bundle'])) {
               $query->condition($keys['bundle'], $bundle_name);
             }
+
+            // @todo Remove the below and add hooks for greater flexibility.
             if (!empty($keys['published'])) {
               $query->condition($keys['published'], 1);
             }
@@ -248,7 +250,7 @@ class EntityUrlGenerator extends EntityUrlGeneratorBase {
    */
   protected function processEntity(ContentEntityInterface $entity): array {
     $entity_settings = $this->entitiesManager
-      ->setVariants($this->sitemap->id())
+      ->setSitemaps($this->sitemap)
       ->getEntityInstanceSettings($entity->getEntityTypeId(), $entity->id());
 
     if (empty($entity_settings[$this->sitemap->id()]['index'])) {
@@ -266,13 +268,13 @@ class EntityUrlGenerator extends EntityUrlGeneratorBase {
     return [
       'url' => $url_object,
       'lastmod' => method_exists($entity, 'getChangedTime')
-      ? date('c', $entity->getChangedTime())
-      : NULL,
+        ? date('c', $entity->getChangedTime())
+        : NULL,
       'priority' => $entity_settings['priority'] ?? NULL,
       'changefreq' => !empty($entity_settings['changefreq']) ? $entity_settings['changefreq'] : NULL,
       'images' => !empty($entity_settings['include_images'])
-      ? $this->getEntityImageData($entity)
-      : [],
+        ? $this->getEntityImageData($entity)
+        : [],
 
         // Additional info useful in hooks.
       'meta' => [

@@ -2,11 +2,10 @@
 
 namespace Drupal\stage_file_proxy;
 
-use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\Core\StreamWrapper\PublicStream;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Fetch manager.
@@ -28,97 +27,64 @@ class FetchManager implements FetchManagerInterface {
   protected $fileSystem;
 
   /**
+   * The logger.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * The download manager.
+   *
+   * @var \Drupal\stage_file_proxy\DownloadManagerInterface
+   */
+  protected DownloadManager $downloadManager;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(Client $client, FileSystemInterface $file_system) {
+  public function __construct(Client $client, FileSystemInterface $file_system, LoggerInterface $logger, ConfigFactoryInterface $config_factory, DownloadManagerInterface $download_manager = NULL) {
     $this->client = $client;
     $this->fileSystem = $file_system;
+    $this->logger = $logger;
+    $this->configFactory = $config_factory;
+
+    if (is_null($download_manager)) {
+      @trigger_error('Calling ' . __METHOD__ . ' without the $download_manager argument is deprecated in stage_file_proxy:2.1.0 and will be required in stage_file_proxy:3.0.0. See https://www.drupal.org/project/stage_file_proxy/issues/3375749', E_USER_DEPRECATED);
+      // phpcs:ignore
+      $this->downloadManager = \Drupal::service('stage_file_proxy.download_manager');
+    }
+    else {
+      $this->downloadManager = $download_manager;
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function fetch($server, $remote_file_dir, $relative_path, array $options) {
-    try {
-      // Fetch remote file.
-      $url = $server . '/' . UrlHelper::encodePath($remote_file_dir . '/' . $relative_path);
-      $options['Connection'] = 'close';
-      $response = $this->client->get($url, $options);
-
-      $result = $response->getStatusCode();
-      if ($result != 200) {
-        \Drupal::logger('stage_file_proxy')->error('HTTP error @errorcode occurred when trying to fetch @remote.', [
-          '@errorcode' => $result,
-          '@remote' => $url,
-        ]);
-        return FALSE;
-      }
-
-      // Prepare local target directory and save downloaded file.
-      $file_dir = $this->filePublicPath();
-      $destination = $file_dir . '/' . dirname($relative_path);
-      if (!file_prepare_directory($destination, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-        \Drupal::logger('stage_file_proxy')->error('Unable to prepare local directory @path.', ['@path' => $destination]);
-        return FALSE;
-      }
-
-      $destination = str_replace('///', '//', "$destination/") . $this->fileSystem->basename($relative_path);
-
-      $response_headers = $response->getHeaders();
-      $content_length = array_shift($response_headers['Content-Length']);
-      $response_data = $response->getBody()->getContents();
-      if (isset($content_length) && strlen($response_data) != $content_length) {
-        \Drupal::logger('stage_file_proxy')->error('Incomplete download. Was expecting @content-length bytes, actually got @data-length.', [
-          '@content-length' => $content_length,
-          '@data-length' => $content_length,
-        ]);
-        return FALSE;
-      }
-
-      if ($this->writeFile($destination, $response_data)) {
-        return TRUE;
-      }
-      \Drupal::logger('stage_file_proxy')->error('@remote could not be saved to @path.', ['@remote' => $url, '@path' => $destination]);
-      return FALSE;
-    }
-    catch (ClientException $e) {
-      // Do nothing.
-    }
-    return FALSE;
+    return $this->downloadManager->fetch($server, $remote_file_dir, $relative_path, $options);
   }
 
   /**
    * {@inheritdoc}
    */
   public function filePublicPath() {
-    return PublicStream::basePath();
+    return $this->downloadManager->filePublicPath();
   }
 
   /**
    * {@inheritdoc}
    */
   public function styleOriginalPath($uri, $style_only = TRUE) {
-    $scheme = $this->fileSystem->uriScheme($uri);
-    if ($scheme) {
-      $path = file_uri_target($uri);
-    }
-    else {
-      $path = $uri;
-      $scheme = file_default_scheme();
-    }
-
-    // It is a styles path, so we extract the different parts.
-    if (strpos($path, 'styles') === 0) {
-      // Then the path is like styles/[style_name]/[schema]/[original_path].
-      return preg_replace('/styles\/.*\/(.*)\/(.*)/U', '$1://$2', $path);
-    }
-    // Else it seems to be the original.
-    elseif ($style_only == FALSE) {
-      return "$scheme://$path";
-    }
-    else {
-      return FALSE;
-    }
+    return $this->downloadManager->styleOriginalPath($uri, $style_only);
   }
 
   /**
@@ -135,6 +101,12 @@ class FetchManager implements FetchManagerInterface {
    * @param string $data
    *   A string containing the contents of the file.
    *
+   * @deprecated in stage_file_proxy:2.1.0 and is removed from
+   *   stage_file_proxy:3.0.0. This function is no longer used by Stage File
+   *   Proxy itself.
+   *
+   * @see https://www.drupal.org/project/stage_file_proxy/issues/3282542
+   *
    * @return bool
    *   True if write was successful. False if write or rename failed.
    */
@@ -148,7 +120,7 @@ class FetchManager implements FetchManagerInterface {
     // name. Preserves the mime type in different stream wrapper
     // implementations.
     $parts = pathinfo($destination);
-    $extension = '.' . $parts['extension'];
+    $extension = isset($parts['extension']) ? '.' . $parts['extension'] : '';
     if ($extension === '.gz') {
       $parts = pathinfo($parts['filename']);
       $extension = '.' . $parts['extension'] . $extension;
@@ -165,7 +137,7 @@ class FetchManager implements FetchManagerInterface {
     }
 
     // Save to temporary filename in the destination directory.
-    $filepath = file_unmanaged_save_data($data, $temporary_file, FILE_EXISTS_REPLACE);
+    $filepath = $this->fileSystem->saveData($data, $temporary_file, FileSystemInterface::EXISTS_REPLACE);
 
     // Perform the rename operation if the write succeeded.
     if ($filepath) {
@@ -180,9 +152,9 @@ class FetchManager implements FetchManagerInterface {
       }
     }
 
-    // Final check; make sure file exists & is not empty.
+    // Final check; make sure file exists and is not empty.
     $result = FALSE;
-    if (file_exists($destination) & filesize($destination) != 0) {
+    if (file_exists($destination) && filesize($destination) > 0) {
       $result = TRUE;
     }
     return $result;

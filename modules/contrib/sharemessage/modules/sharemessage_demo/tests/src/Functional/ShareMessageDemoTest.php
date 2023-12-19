@@ -21,7 +21,7 @@ class ShareMessageDemoTest extends BrowserTestBase {
    *
    * @var string[]
    */
-  public static $modules = [
+  protected static $modules = [
     'path',
     'block',
     'filter',
@@ -45,50 +45,50 @@ class ShareMessageDemoTest extends BrowserTestBase {
 
     $this->drupalLogin($admin_user);
     $this->drupalGet('admin/structure/block');
-    $this->assertText(t('Share Message'));
+    $this->assertSession()->pageTextContains(t('Share Message'));
     $this->clickLink(t('Configure'), 0);
 
     $this->drupalGet('admin/structure/types');
-    $this->assertText(t('Shareable content'));
+    $this->assertSession()->pageTextContains(t('Shareable content'));
 
     // Search for the Share Message block on the demo node.
     $this->drupalGet('admin/content');
     $this->clickLink(t('Share Message demo'));
-    $this->assertText(t('Welcome to the Share Message demo module!'));
-    $this->assertText(t('Share Message'));
+    $this->assertSession()->pageTextContains(t('Welcome to the Share Message demo module!'));
+    $this->assertSession()->pageTextContains(t('Share Message'));
     // Assert the demo links are correct.
     $node = $this->getNodeByTitle('Share Message demo');
     $this->drupalGet('node/' . $node->id());
-    $this->assertLinkByHref('admin/config/services/sharemessage/sharemessage-settings');
-    $this->assertLinkByHref('admin/config/services/sharemessage/manage/share_message_addthis_demo');
-    $this->assertLinkByHref('admin/config/services/sharemessage');
-    $this->assertLinkByHref('admin/structure/block/manage/sharemessage_addthis');
+    $this->assertSession()->linkByHrefExists('admin/config/services/sharemessage/sharemessage-settings');
+    $this->assertSession()->linkByHrefExists('admin/config/services/sharemessage/manage/share_message_addthis_demo');
+    $this->assertSession()->linkByHrefExists('admin/config/services/sharemessage');
+    $this->assertSession()->linkByHrefExists('admin/structure/block/manage/sharemessage_addthis');
 
     // Asserts that the buttons are displayed.
-    $this->assertRaw('addthis_button_preferred_1');
-    $this->assertRaw('addthis_button_preferred_2');
-    $this->assertRaw('addthis_button_preferred_3');
-    $this->assertRaw('addthis_button_preferred_4');
-    $this->assertRaw('addthis_button_preferred_5');
-    $this->assertRaw('addthis_button_compact');
+    $this->assertSession()->responseContains('addthis_button_preferred_1');
+    $this->assertSession()->responseContains('addthis_button_preferred_2');
+    $this->assertSession()->responseContains('addthis_button_preferred_3');
+    $this->assertSession()->responseContains('addthis_button_preferred_4');
+    $this->assertSession()->responseContains('addthis_button_preferred_5');
+    $this->assertSession()->responseContains('addthis_button_compact');
 
     // Test OG headers for image, video and url.
-    $this->assertRaw('<meta property="og:image" content="https://www.drupal.org/files/drupal%208%20logo%20Stacked%20CMYK%20300.png" />');
-    $this->assertRaw('<meta property="og:video" content="https://www.youtube.com/watch?v=ktCgVopf7D0?fs=1" />');
-    $this->assertRaw('<meta property="og:video:width" content="360" />');
-    $this->assertRaw('<meta property="og:video:height" content="270" />');
-    $this->assertRaw('<meta property="og:url" content="' . $this->getUrl() . '" />');
+    $this->assertSession()->responseContains('<meta property="og:image" content="https://www.drupal.org/files/drupal%208%20logo%20Stacked%20CMYK%20300.png" />');
+    $this->assertSession()->responseContains('<meta property="og:video" content="https://www.youtube.com/watch?v=ktCgVopf7D0?fs=1" />');
+    $this->assertSession()->responseContains('<meta property="og:video:width" content="360" />');
+    $this->assertSession()->responseContains('<meta property="og:video:height" content="270" />');
+    $this->assertSession()->responseContains('<meta property="og:url" content="' . $this->getUrl() . '" />');
 
     // Test that Sharrre plugin works.
-    $this->assertText('Share Message - Sharrre');
-    $this->assertRaw('<div id="block-sharemessage-sharrre" class="block block-sharemessage block-sharemessage-block">');
-    $this->assertRaw('"services":{"googlePlus":"googlePlus","facebook":"facebook","twitter":"twitter"}');
+    $this->assertSession()->pageTextContains('Share Message - Sharrre');
+    $this->assertSession()->responseContains('<div id="block-sharemessage-sharrre" class="block block-sharemessage block-sharemessage-block">');
+    $this->assertSession()->responseContains('"services":{"googlePlus":"googlePlus","facebook":"facebook","twitter":"twitter"}');
 
     // Test that Social Share Privacy plugin works.
-    $this->assertText('Share Message - Social Share Privacy');
-    $this->assertRaw('<div id="block-sharemessage-socialshareprivacy" class="block block-sharemessage block-sharemessage-block">');
-    $this->assertRaw('"twitter":{"status":true');
-    $this->assertRaw('"facebook":{"status":true');
+    $this->assertSession()->pageTextContains('Share Message - Social Share Privacy');
+    $this->assertSession()->responseContains('<div id="block-sharemessage-socialshareprivacy" class="block block-sharemessage block-sharemessage-block">');
+    $this->assertSession()->responseContains('"twitter":{"status":true');
+    $this->assertSession()->responseContains('"facebook":{"status":true');
   }
 
 }

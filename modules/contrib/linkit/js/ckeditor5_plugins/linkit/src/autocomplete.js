@@ -15,6 +15,7 @@ const $ = jQuery;
 function renderItem(ul, item) {
   var $line = $('<li>').addClass('linkit-result-line');
   var $wrapper = $('<div>').addClass('linkit-result-line-wrapper');
+  $wrapper.addClass(item.status);
   $wrapper.append($('<span>').html(item.label).addClass('linkit-result-line--title'));
 
   if (item.hasOwnProperty('description')) {
@@ -120,8 +121,7 @@ export default function initializeAutocomplete(element, settings) {
   instance._renderMenu = renderMenu;
   instance._renderItem = renderItem;
 
-
-  $auto.autocomplete('widget').addClass('linkit-ui-autocomplete');
+  $auto.autocomplete('widget').addClass('linkit-ui-autocomplete ck-reset_all-excluded');
 
   $auto.on('click', function () {
     $auto.autocomplete('search', $auto.val());

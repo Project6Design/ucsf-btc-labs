@@ -25,8 +25,8 @@ class ShareMessageViewModesTest extends ShareMessageTestBase {
       'image_url' => 'http://www.example.com/drupal.jpg',
       'share_url' => 'http://www.example.com',
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('Share Message @label has been added.', ['@label' => $edit['label']]), 'Share Message is successfully saved.');
+    $this->submitForm($edit, t('Save'));
+    $this->assertSession()->pageTextContains(t('Share Message @label has been added.', ['@label' => $edit['label']]));
 
     $this->drupalGet('sharemessage-test/sharemessage_test_label');
     $this->assertShareButtons($edit, 'addthis_16x16_style', TRUE);

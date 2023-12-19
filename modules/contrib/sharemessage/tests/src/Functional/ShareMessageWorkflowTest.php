@@ -32,8 +32,8 @@ class ShareMessageWorkflowTest extends ShareMessageTestBase {
       'image_url' => 'http://www.example.com/drupal.jpg',
       'share_url' => 'http://www.example.com',
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
-    $this->assertText(t('Share Message @label has been added.', ['@label' => $edit['label']]), 'Share Message is successfully saved.');
+    $this->submitForm($edit, t('Save'));
+    $this->assertSession()->pageTextContains(t('Share Message @label has been added.', ['@label' => $edit['label']]));
 
     // Step 2: Display Share Message and verify AddThis markup
     // and meta header elements.
@@ -47,7 +47,7 @@ class ShareMessageWorkflowTest extends ShareMessageTestBase {
 
     $this->drupalGet('admin/config/services/sharemessage/add');
     // Check if the enforce checkbox is there.
-    $this->assertFieldByName('enforce_usage', NULL, 'The enforce checkbox was found.');
+    $this->assertSession()->fieldExists('enforce_usage');
 
     $edit_2 = [
       'label' => 'Share Message 2 Test Label',
@@ -59,12 +59,12 @@ class ShareMessageWorkflowTest extends ShareMessageTestBase {
       'share_url' => $edit['share_url'],
       'enforce_usage' => 1,
     ];
-    $this->drupalPostForm(NULL, $edit_2, t('Save'));
+    $this->submitForm($edit_2, t('Save'));
 
     /** @var \Drupal\sharemessage\ShareMessageInterface $sharemessage */
     $sharemessage = \Drupal::entityTypeManager()->getStorage('sharemessage')->load('sharemessage_test_label2');
     // Check if the option was saved as expected.
-    $this->assertEqual($sharemessage->enforce_usage, TRUE, 'Enforce setting was saved on the entity.');
+    $this->assertEquals($sharemessage->enforce_usage, TRUE, 'Enforce setting was saved on the entity.');
     $this->drupalGet('sharemessage-test/sharemessage_test_label', ['query' => ['smid' => 'sharemessage_test_label2']]);
 
     // Check if the og:description tag gets rendered correctly.
@@ -76,7 +76,7 @@ class ShareMessageWorkflowTest extends ShareMessageTestBase {
     $this->assertNoOGTags('og:url', $edit['share_url'], $message_description);
 
     // Check if the overridden Share Message is rendered correctly.
-    $this->assertRaw('addthis:description="' . $edit['message_long'] . '"', 'Overridden sharemessage has og data as attributes.');
+    $this->assertSession()->responseContains('addthis:description="' . $edit['message_long'] . '"');
 
     // Disable enforcement of overrides in the global settings.
     $this->config('sharemessage.settings')->set('message_enforcement', FALSE)->save();
@@ -100,7 +100,7 @@ class ShareMessageWorkflowTest extends ShareMessageTestBase {
       'title' => 'Share Message Test Title [current-user:name]',
       'message_long' => 'Share Message Test Long Description',
     ];
-    $this->drupalPostForm(NULL, $edit, t('Save'));
+    $this->submitForm($edit, t('Save'));
 
     // Add a block that will contain the created Share Message.
     $theme = 'classy';
@@ -109,20 +109,21 @@ class ShareMessageWorkflowTest extends ShareMessageTestBase {
       'settings[sharemessage]' => $edit['id'],
       'region' => 'content',
     ];
-    $this->drupalPostForm('admin/structure/block/add/sharemessage_block/' . $theme, $block, t('Save block'));
+    $this->drupalGet('admin/structure/block/add/sharemessage_block/' . $theme);
+    $this->submitForm($block, t('Save block'));
 
     $this->drupalGet('user');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     // Check that the username is displayed.
-    $this->assertRaw('Share Message Test Title ' . $this->adminUser->getAccountName());
+    $this->assertSession()->responseContains('Share Message Test Title ' . $this->adminUser->getAccountName());
 
     // Step 2: Edit the username.
     $this->adminUser->name = 'new user';
     $this->adminUser->save();
 
     $this->drupalGet('user');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
     // Check that the changed username is displayed.
-    $this->assertRaw('Share Message Test Title ' . $this->adminUser->getAccountName());
+    $this->assertSession()->responseContains('Share Message Test Title ' . $this->adminUser->getAccountName());
   }
 }

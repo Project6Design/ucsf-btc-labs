@@ -49,6 +49,14 @@ class AuthenticationCallback extends ControllerBase {
    */
   protected $client;
 
+
+  /**
+   * The Constant Contact service object.
+   *
+   * @var \Drupal\ik_constant_contact\Service\ConstantContact
+   */
+  protected $constantContact;
+
   /**
    * Constructor function.
    *

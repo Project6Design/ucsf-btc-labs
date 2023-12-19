@@ -3,6 +3,7 @@
 namespace Drupal\embed\EmbedType;
 
 use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginBase;
 
@@ -12,6 +13,13 @@ use Drupal\Core\Plugin\PluginBase;
  * @ingroup embed_api
  */
 abstract class EmbedTypeBase extends PluginBase implements EmbedTypeInterface {
+
+  /**
+   * The module list service.
+   *
+   * @var \Drupal\Core\Extension\ModuleExtensionList
+   */
+  protected $moduleList;
 
   /**
    * {@inheritdoc}
@@ -95,6 +103,37 @@ abstract class EmbedTypeBase extends PluginBase implements EmbedTypeInterface {
         )
       );
     }
+  }
+
+  /**
+   * Gets the module list service.
+   *
+   * @return \Drupal\Core\Extension\ModuleExtensionList
+   *   The module extension list service.
+   */
+  protected function getModuleList(): ModuleExtensionList {
+    if (!$this->moduleList) {
+      $this->moduleList = \Drupal::service('extension.list.module');
+    }
+    return $this->moduleList;
+  }
+
+  /**
+   * Gets the Drupal-root relative installation directory of a module.
+   *
+   * @param string $module_name
+   *   The machine name of the module.
+   *
+   * @return string
+   *   The module installation directory.
+   *
+   * @throws \InvalidArgumentException
+   *   If there is no extension with the supplied machine name.
+   *
+   * @see \Drupal\Core\Extension\ExtensionList::getPath()
+   */
+  protected function getModulePath(string $module_name): string {
+    return $this->getModuleList()->getPath($module_name);
   }
 
 }

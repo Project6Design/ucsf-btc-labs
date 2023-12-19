@@ -21,6 +21,7 @@ function ik_constant_contact_cron() {
   $cc = \Drupal::service('ik_constant_contact');
 
   $cc->getContactLists(false);
+  $cc->deleteExpiredTokens();
 }
 
 /**
@@ -110,12 +111,7 @@ function ik_constant_contact_form_alter(array &$form, FormStateInterface $form_s
           $form['#validate'][] = '_ik_constant_contact_subscribe_on_save_validate';
         }
 
-        // Add our list options.
-        if ($fieldDefinition->getSetting('enabled_lists_only') === 1) {
-          $lists = $cc->getEnabledContactLists();
-        } else {
-          $lists = $cc->getContactLists();
-        }
+        $lists = $cc->getEnabledContactLists(false);
 
         foreach ($lists as $id => $list) {
           $form[$field_name]['widget']['#options'][$id] = $list->name;

@@ -7,6 +7,8 @@
 
 namespace Drupal\url_embed;
 
+use Embed\Extractor;
+
 /**
  * A service class for handling URL embeds.
  *
@@ -14,26 +16,24 @@ namespace Drupal\url_embed;
  */
 interface UrlEmbedInterface {
 
-  public function __construct(array $config = []);
-
   public function getConfig();
 
   public function setConfig(array $config);
 
   /**
-   * @param string|\Embed\Request $request
-   *   The url or a request with the url
+   * Returns the Embed Extractor for the given URL.
+   *
+   * @param string $url
+   *   The URL.
    * @param array $config
    *   (optional) Options passed to the adapter. If not provided the default
    *   options on the service will be used.
    *
-   * @throws \Embed\Exceptions\InvalidUrlException
-   *   If the urls is not valid
-   * @throws \InvalidArgumentException
-   *   If any config argument is not valid
+   * @return \Embed\Extractor
    *
-   * @return \Embed\Adapters\AdapterInterface
+   * @throws \InvalidArgumentException
+   *   If the URL or config is not valid.
    */
-  public function getEmbed($request, array $config = []);
+  public function getEmbed(string $url, array $config = []): Extractor;
 
 }

@@ -5,7 +5,6 @@ namespace Drupal\linkit\Plugin\Linkit\Substitution;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\Core\GeneratedUrl;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\file\FileInterface;
 use Drupal\linkit\SubstitutionInterface;
@@ -38,28 +37,26 @@ class Media extends PluginBase implements SubstitutionInterface, ContainerFactor
    * {@inheritdoc}
    */
   public function getUrl(EntityInterface $entity) {
-    $url = new GeneratedUrl();
-
     if (!($entity instanceof MediaInterface)) {
-      return $url;
+      return NULL;
     }
 
     $source_field = $entity->getSource()->getSourceFieldDefinition($entity->get('bundle')->entity);
     if ($source_field && $entity->hasField($source_field->getName()) && $entity->get($source_field->getName())->entity instanceof FileInterface) {
       /** @var \Drupal\file\FileInterface $file */
       $file = $entity->get($source_field->getName())->entity;
-      $url->setGeneratedUrl(\Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri()));
-      $url->addCacheableDependency($entity);
-      return $url;
+      /** @var \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator */
+      $file_url_generator = \Drupal::service('file_url_generator');
+      return $file_url_generator->generate($file->getFileUri());
     }
 
     // If available, fall back to the canonical URL if the bundle doesn't have
     // a file source field.
     if ($entity->getEntityType()->getLinkTemplate('canonical') != $entity->getEntityType()->getLinkTemplate('edit-form')) {
-      return $entity->toUrl('canonical')->toString(TRUE);
+      return $entity->toUrl('canonical');
     }
 
-    return $url;
+    return NULL;
   }
 
   /**

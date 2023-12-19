@@ -1,7 +1,7 @@
 name: 'RSS Feed Block'
 description: 'Add a block which displays an RSS feed.'
 type: module
-core_version_requirement: ^8.8 || ^9
+core_version_requirement: ^9 || ^10
 package: Custom UCD
 dependencies:
   - sitefarm_core

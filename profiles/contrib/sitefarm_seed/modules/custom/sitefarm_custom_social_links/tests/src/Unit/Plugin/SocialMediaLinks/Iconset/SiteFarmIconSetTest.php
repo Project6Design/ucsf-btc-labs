@@ -55,7 +55,7 @@ class SiteFarmIconSetTest extends UnitTestCase {
       'default' => 'default',
     ];
 
-    $this->assertArrayEquals($expected, $this->iconSet->getStyle());
+    $this->assertEquals($expected, $this->iconSet->getStyle());
   }
 
   /**

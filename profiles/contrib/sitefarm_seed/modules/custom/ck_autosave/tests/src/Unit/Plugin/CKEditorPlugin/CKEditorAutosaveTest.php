@@ -108,7 +108,7 @@ class CKEditorAutosaveTest extends UnitTestCase {
       ]
     ];
 
-    $this->assertArrayEquals(
+    $this->assertEquals(
       $expected,
       $this->plugin->settingsForm($form, $form_state, $this->editor->reveal())
     );
@@ -118,7 +118,7 @@ class CKEditorAutosaveTest extends UnitTestCase {
     $settings['plugins']['autosave']['enable'] = FALSE;
     $this->editor->getSettings()->willReturn($settings);
 
-    $this->assertArrayEquals(
+    $this->assertEquals(
       $expected,
       $this->plugin->settingsForm($form, $form_state, $this->editor->reveal())
     );
@@ -135,7 +135,7 @@ class CKEditorAutosaveTest extends UnitTestCase {
       'autosave_messageType' => 'no',
     ];
 
-    $this->assertArrayEquals(
+    $this->assertEquals(
       $expected,
       $this->plugin->getConfig($this->editor->reveal())
     );
@@ -149,7 +149,7 @@ class CKEditorAutosaveTest extends UnitTestCase {
   public function testGetDependencies() {
     $expected = ['notification'];
 
-    $this->assertArrayEquals(
+    $this->assertEquals(
       $expected,
       $this->plugin->getDependencies($this->editor->reveal())
     );

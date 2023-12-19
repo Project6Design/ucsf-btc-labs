@@ -9,22 +9,12 @@ namespace Drupal\webform_views\Plugin\views\filter;
  */
 class WebformSubmissionCompositeFieldFilter extends WebformSubmissionFieldFilter {
 
-  /**
-   * {@inheritdoc}
-   */
-  function operators() {
-    $operators = parent::operators();
+  protected function getWebformElement() {
+    $element = parent::getWebformElement();
 
-    // Replace all occurrences of "use the element type itself" with
-    // "textfield". At the moment we do not support more complex composites than
-    // plain text field.
-    foreach ($operators as $k => $v) {
-      if ($operators[$k]['webform_views_element_type'] == WebformSubmissionFieldFilter::ELEMENT_TYPE) {
-        $operators[$k]['webform_views_element_type'] = 'textfield';
-      }
-    }
-
-    return $operators;
+    // Nest into the sub-element.
+    $element = $element['#webform_composite_elements'][$this->definition['webform_submission_property']];
+    return $element;
   }
 
 }

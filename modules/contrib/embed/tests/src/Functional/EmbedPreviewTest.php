@@ -18,7 +18,7 @@ class EmbedPreviewTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  public static $modules = ['embed_test', 'filter'];
+  protected static $modules = ['embed_test', 'filter'];
 
   /**
    * {@inheritdoc}

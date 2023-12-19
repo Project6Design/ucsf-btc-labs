@@ -3,6 +3,7 @@
 namespace Drupal\webform_views\Plugin\Derivative;
 
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Menu\LocalTaskManagerInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
@@ -45,6 +46,13 @@ class ViewsLocalTask extends DeriverBase implements ContainerDeriverInterface {
   protected $viewStorage;
 
   /**
+   * Local task manager service.
+   *
+   * @var \Drupal\Core\Menu\LocalTaskManagerInterface
+   */
+  protected $localTaskManager;
+
+  /**
    * Constructs a \Drupal\views\Plugin\Derivative\ViewsLocalTask instance.
    *
    * @param \Drupal\Core\Routing\RouteProviderInterface $route_provider
@@ -53,11 +61,14 @@ class ViewsLocalTask extends DeriverBase implements ContainerDeriverInterface {
    *   The state key value store.
    * @param \Drupal\Core\Entity\EntityStorageInterface $view_storage
    *   The view storage.
+   * @param \Drupal\Core\Menu\LocalTaskManagerInterface $local_task_manager
+   *   Local task manager service.
    */
-  public function __construct(RouteProviderInterface $route_provider, StateInterface $state, EntityStorageInterface $view_storage) {
+  public function __construct(RouteProviderInterface $route_provider, StateInterface $state, EntityStorageInterface $view_storage, LocalTaskManagerInterface $local_task_manager) {
     $this->routeProvider = $route_provider;
     $this->state = $state;
     $this->viewStorage = $view_storage;
+    $this->localTaskManager = $local_task_manager;
   }
 
   /**
@@ -67,7 +78,8 @@ class ViewsLocalTask extends DeriverBase implements ContainerDeriverInterface {
     return new static(
       $container->get('router.route_provider'),
       $container->get('state'),
-      $container->get('entity.manager')->getStorage('view')
+      $container->get('entity_type.manager')->getStorage('view'),
+      $container->get('plugin.manager.menu.local_task')
     );
   }
 
@@ -75,6 +87,8 @@ class ViewsLocalTask extends DeriverBase implements ContainerDeriverInterface {
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
+    static $recursion = 0;
+
     $this->derivatives = [];
 
     $view_route_names = $this->state->get('views.view_route_names');
@@ -97,14 +111,56 @@ class ViewsLocalTask extends DeriverBase implements ContainerDeriverInterface {
 
       if ($routes = $this->routeProvider->getRoutesByPattern($pattern)) {
         foreach ($routes->all() as $name => $route) {
-          $this->derivatives['webform_views:' . $plugin_id] = [
-            'route_name' => $route_name,
-            'weight' => $menu['weight'],
-            'title' => $menu['title'],
-            'base_route' => $name,
-          ] + $base_plugin_definition;
-          // Skip after the first found route.
-          break;
+          // Array reverse is here because we prefer the lower level tasks over
+          // higher level ones.
+          foreach (array_reverse($this->localTaskManager->getLocalTasksForRoute($name)) as $leveled_local_tasks) {
+            foreach ($leveled_local_tasks as $local_task) {
+              /** @var \Drupal\Core\Menu\LocalTaskInterface $local_task */
+              if ($local_task->getRouteName() == $name) {
+                $definition = [
+                    'route_name' => $route_name,
+                    'weight' => $menu['weight'],
+                    'title' => $menu['title'],
+                  ] + $base_plugin_definition;
+                if ($local_task->getPluginDefinition()['parent_id']) {
+                  $definition['parent_id'] = $local_task->getPluginDefinition()['parent_id'];
+                }
+                else {
+                  $definition['base_route'] = $local_task->getPluginDefinition()['base_route'];
+                }
+
+                $this->derivatives['webform_views:' . $plugin_id] = $definition;
+
+                // Skip after the first found route.
+                break(3);
+              }
+            }
+          }
+        }
+
+        $recursion++;
+
+        if ($recursion == 1 && isset($name) && !isset($this->derivatives['webform_views:' . $plugin_id])) {
+          // As a last resort try to look up a local task whose ID equals the
+          // route name because most of local tasks copy-paste their IDs after
+          // the route they represent.
+          $parent_task = $this->localTaskManager->getDefinition($name, FALSE);
+          if ($parent_task) {
+            $this->derivatives['webform_views:' . $plugin_id] = [
+                'route_name' => $route_name,
+                'weight' => $menu['weight'],
+                'title' => $menu['title'],
+                'parent_id' => $parent_task['parent_id'] ?: $parent_task['id'],
+              ] + $base_plugin_definition;
+          }
+          else {
+            $this->derivatives['webform_views:' . $plugin_id] = [
+                'route_name' => $route_name,
+                'weight' => $menu['weight'],
+                'title' => $menu['title'],
+                'base_route' => $name,
+              ] + $base_plugin_definition;
+          }
         }
       }
     }

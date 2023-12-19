@@ -142,7 +142,7 @@ class SlideshowGalleryBlockTest extends UnitTestCase
 
     $form = [];
     $this->plugin->blockSubmit($form, $this->formState);
-    $this->assertArrayEquals($expectedConfig, $this->plugin->getConfiguration());
+    $this->assertEquals($expectedConfig, $this->plugin->getConfiguration());
   }
 
   /**
@@ -276,11 +276,11 @@ class SlideshowGalleryBlockTest extends UnitTestCase
    */
   public function testGetCacheTags() {
     // If a gallery node is not set
-    $this->assertArrayEquals([], $this->plugin->getCacheTags());
+    $this->assertEquals([], $this->plugin->getCacheTags());
 
     // If gallery node is set
     $this->plugin->setConfiguration(['gallery' => 1]);
-    $this->assertArrayEquals(['node:1'], $this->plugin->getCacheTags());
+    $this->assertEquals(['node:1'], $this->plugin->getCacheTags());
   }
 
   /**

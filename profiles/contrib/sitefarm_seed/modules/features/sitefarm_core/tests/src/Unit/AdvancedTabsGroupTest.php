@@ -39,7 +39,7 @@ class AdvancedTabsGroupTest extends UnitTestCase
     $return = $this->groupObj->loadForm($form);
 
     $this->assertInstanceOf('Drupal\sitefarm_core\AdvancedTabsGroup', $return);
-    $this->assertArrayEquals($form, $return->save());
+    $this->assertEquals($form, $return->save());
   }
 
   /**
@@ -56,7 +56,7 @@ class AdvancedTabsGroupTest extends UnitTestCase
     $this->groupObj->createGroup($machine_name, $title);
     $return = $this->groupObj->save();
 
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
   }
 
   /**
@@ -112,7 +112,7 @@ class AdvancedTabsGroupTest extends UnitTestCase
     $this->groupObj->moveField($field_name, $group_name);
     $return = $this->groupObj->save();
 
-    $this->assertArrayEquals($form, $return);
+    $this->assertEquals($form, $return);
   }
 
   /**

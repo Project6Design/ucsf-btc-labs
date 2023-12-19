@@ -1,0 +1,5 @@
+url_embed.admin:
+  title: 'Url Embed'
+  description: 'Configuration for Url Embed module'
+  parent: system.admin_config_media
+  route_name: url_embed.admin

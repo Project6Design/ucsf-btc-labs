@@ -3,10 +3,12 @@
 namespace Drupal\ik_constant_contact\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Messenger\MessengerInterface;
+use Drupal\Core\Session\AccountProxy;
 use Drupal\Core\Url;
 use Drupal\ik_constant_contact\Service\ConstantContact;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -43,6 +45,22 @@ class ConstantContactConfig extends ConfigFormBase {
   protected $constantContact;
 
   /**
+   * \Drupal\Core\Extension\ModuleHandlerInterface
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   *   Module handler interface
+   */
+  protected $moduleHandler;
+
+  /**
+   * Drupal\Core\Session\AccountProxy.
+   *
+   * @var \Drupal\Core\Session\AccountProxy
+   *   Drupal current user.
+   */
+  protected $currentUser;
+
+  /**
    * ConstantContactConfig constructor.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -53,12 +71,18 @@ class ConstantContactConfig extends ConfigFormBase {
    *   Symfony\Component\HttpFoundation\RequestStack.
    * @param \Drupal\ik_constant_contact\Service\ConstantContact $constantContact
    *   Constant contact service.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler service.
+   * @param \Drupal\Core\Session\AccountProxy
+   *   The current logged in user
    */
-  public function __construct(ConfigFactoryInterface $config_factory, MessengerInterface $messenger, RequestStack $request_stack, ConstantContact $constantContact) {
+  public function __construct(ConfigFactoryInterface $config_factory, MessengerInterface $messenger, RequestStack $request_stack, ConstantContact $constantContact, ModuleHandlerInterface $moduleHandler, AccountProxy $currentUser) {
     parent::__construct($config_factory);
-    $this->messenger = $messenger;
-    $this->requestStack = $request_stack;
     $this->constantContact = $constantContact;
+    $this->currentUser = $currentUser;
+    $this->messenger = $messenger;
+    $this->moduleHandler = $moduleHandler;
+    $this->requestStack = $request_stack;
   }
 
   /**
@@ -69,7 +93,9 @@ class ConstantContactConfig extends ConfigFormBase {
       $container->get('config.factory'),
       $container->get('messenger'),
       $container->get('request_stack'),
-      $container->get('ik_constant_contact')
+      $container->get('ik_constant_contact'),
+      $container->get('module_handler'),
+      $container->get('current_user')
     );
   }
 
@@ -87,7 +113,6 @@ class ConstantContactConfig extends ConfigFormBase {
     return [
       'ik_constant_contact.config',
       'ik_constant_contact.pkce',
-      'ik_constant_contact.tokens',
     ];
   }
 
@@ -100,12 +125,24 @@ class ConstantContactConfig extends ConfigFormBase {
     $authType = isset($settings['auth_type']) ? $settings['auth_type'] : NULL;
     $configType = isset($settings['config_type']) ? $settings['config_type'] : 'config';
     $secret = isset($settings['client_secret']) ? $settings['client_secret'] : NULL;
-    $tokens = $this->config('ik_constant_contact.tokens');
     $accessToken = isset($settings['access_token']) ? $settings['access_token'] : NULL;
     $refreshToken = isset($settings['refresh_token']) ? $settings['refresh_token'] : NULL;
     $authUrl = isset($settings['authentication_url']) ? $settings['authentication_url'] : NULL;
     $codeVerifier = isset($settings['code_verifier']) ? $settings['code_verifier'] : NULL;
     $codeChallenge = null;
+
+    if (
+      (!$this->moduleHandler->moduleExists('automated_cron') || !$this->moduleHandler->moduleExists('ultimate_cron')) && 
+      (int)$this->currentUser->id() !== 0 && 
+      $this->currentUser->hasPermission('administer constant contact configuration') &&
+      $this->currentUser->hasPermission('administer modules')
+    ) {
+      $this->messenger->addMessage($this->t('It is recommended to install automated_cron or make sure that cron is run regularly to refresh access tokens from Constant Contact API.'), 'warning');
+    }
+
+    if (!isset($settings['token_source']) || $settings['token_source'] === 'config') {
+      $this->messenger->addMessage($this->t('There are database updates for the Constant Contact module. Please run these updates.'), 'warning');
+    }
 
     $form['auth'] = [
       '#type' => 'details',
@@ -159,9 +196,14 @@ class ConstantContactConfig extends ConfigFormBase {
       ]
     ];
 
-    if ($accessToken && $refreshToken) {
+    if ($accessToken && $refreshToken) {      
       $form['tokens'] = [
-        '#markup' => '<p>' . $this->t('Your account is successfully set up. Thank you!<br/>Last token was generated at <strong>@date</strong> and expires on <strong>@expires</strong>.', ['@date' => date('m/d/Y h:i a', $tokens->get('timestamp')), '@expires' => date('m/d/Y h:i a', $tokens->get('expires'))]) . '</p>',
+        '#markup' => '<p>' . $this->t(
+          'Your account is successfully set up. Thank you!<br/>Last token was generated at <strong>@date</strong> and expires on <strong>@expires</strong>.', 
+          [
+            '@date' => date('m/d/Y h:i a', $settings['token_timestamp']), 
+            '@expires' => date('m/d/Y h:i a', $settings['token_expires'])
+         ]) . '</p>',
       ];
     }
 
@@ -232,7 +274,6 @@ class ConstantContactConfig extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('ik_constant_contact.config');
-    $tokens = $this->config('ik_constant_contact.tokens');
     $clientId = $form_state->getValue('client_id');
     $secret = $form_state->getValue('client_secret');
     $authType = $form_state->getValue('auth_type');
@@ -241,7 +282,6 @@ class ConstantContactConfig extends ConfigFormBase {
     $config->set('client_secret', $secret);
     $config->set('auth_type', $authType);
     $config->save();
-    $tokens->delete();
 
     $this->messenger->addMessage($this->t('Your configuration has been saved'));
   }

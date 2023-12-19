@@ -92,7 +92,7 @@ function btc_helper_system_breadcrumb_alter(Breadcrumb &$breadcrumb, RouteMatchI
 }
 
 function btc_helper_form_search_block_form_alter(&$form, FormStateInterface $form_state) {
-    $theme_path = drupal_get_path('theme', 'btc_labs');
+    $theme_path = \Drupal::service('extension.list.theme')->getPathname('btc_labs');
 
     $form['icons']['#markup'] = '<svg class="search-action__search" role="img"><title>Search</title><use xlink:href="/' . $theme_path . '/images/optimized/store.svg#search-white" /></svg>';
     $form['icons']['#allowed_tags'] = ['div','svg', 'use'];
@@ -136,7 +136,10 @@ function btc_helper_form_views_exposed_form_alter(&$form, FormStateInterface $fo
 
         // Prepare conditions filter.
         $conditions = ['' => t('All')];
-        $condition_ids = \Drupal::entityQuery('node')->condition('type','condition')->execute();
+        $condition_ids = \Drupal::entityQuery('node')
+          ->condition('type','condition')
+          ->accessCheck()
+          ->execute();
         $condition_nodes =  \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($condition_ids);
 
 

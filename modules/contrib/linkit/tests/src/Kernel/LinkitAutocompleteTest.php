@@ -220,7 +220,7 @@ class LinkitAutocompleteTest extends LinkitKernelTestBase {
     $request->query->set('q', $input);
 
     $controller = AutocompleteController::create($this->container);
-    $result = Json::decode($controller->autocomplete($request, $this->linkitProfile->id())->getContent());
+    $result = Json::decode($controller->autocomplete($request, $this->linkitProfile)->getContent());
     return $result['suggestions'];
   }
 

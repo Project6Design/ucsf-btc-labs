@@ -95,13 +95,9 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
     $element = parent::storageSettingsForm($form, $form_state, false);
     $entityType = $this->getEntity();
     $entityFields = $entityType->getFields();
+    $cc = $this->constantContact();
+    $lists = $cc->getEnabledContactLists(false);
 
-    // Remove this for now since ConstantContact service only allowes enabled lists.
-    // $element['enabled_lists_only'] = [
-    //   '#type' => 'checkbox',
-    //   '#title' => $this->t('Allow only enabled lists to be selected'),
-    //   '#default_value' => $this->getSetting('enabled_lists_only')
-    // ];
 
     $element['subscribe_on_save'] = [
       '#type' => 'checkbox',
@@ -150,6 +146,10 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
       }
     }
 
+    if (count($lists) === 0) {
+      \Drupal::service('messenger')->addError(t('You must enable at least one mailing list for this field to work. <a href="/admin/config/services/ik-constant-contact/lists">View available lists.</a>') );
+    }
+
     return $element;
   }
 
@@ -183,12 +183,7 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
     $cc = $this->constantContact();
     $options = [];
 
-    // Remove this for now since ConstantContact service only allowes enabled lists.
-    // if ($this->getSetting('enabled_lists_only') === 1) {
-      $lists = $cc->getEnabledContactLists();
-    // } else {
-    //   $lists = $cc->getContactLists();
-    // }
+    $lists = $cc->getEnabledContactLists(false);
 
     foreach ($lists as $id => $list) {
       $options[$id] = $list->name;

@@ -118,7 +118,7 @@ class BlockContentGenerateDescriptionTest extends UnitTestCase
 
     $expected = ['field_sf_title' => 'test'];
 
-    $this->assertArrayEquals($expected, $form);
+    $this->assertEquals($expected, $form);
   }
 
 
@@ -156,7 +156,7 @@ class BlockContentGenerateDescriptionTest extends UnitTestCase
     ]);
 
     $this->helperObj->createDescription($form, $form_state);
-    $this->assertArrayEquals(['info' => [['value' => 'TBL: Block Content Title']]], $form_state_stub);
+    $this->assertEquals(['info' => [['value' => 'TBL: Block Content Title']]], $form_state_stub);
   }
 
   /**

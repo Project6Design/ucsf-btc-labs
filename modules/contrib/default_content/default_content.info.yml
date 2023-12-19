@@ -2,12 +2,9 @@ name: 'Default content'
 type: module
 description: 'Imports default content when a module is enabled'
 package: Web services
-# core: 8.x
-dependencies:
-  - drupal:hal (>=8.3.x)
+core_version_requirement: ^9.1 || ^10
 
-# Information added by Drupal.org packaging script on 2017-10-19
-version: '8.x-1.0-alpha7'
-core: '8.x'
+# Information added by Drupal.org packaging script on 2022-08-02
+version: '2.0.0-alpha2'
 project: 'default_content'
-datestamp: 1508448636
+datestamp: 1659466708

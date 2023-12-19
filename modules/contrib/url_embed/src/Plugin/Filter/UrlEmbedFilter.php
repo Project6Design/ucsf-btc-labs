@@ -15,6 +15,7 @@ use Drupal\filter\Plugin\FilterBase;
 use Drupal\url_embed\UrlEmbedHelperTrait;
 use Drupal\url_embed\UrlEmbedInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Logger\RfcLogLevel;
 
 /**
  * Provides a filter to display embedded URLs based on data attributes.
@@ -74,7 +75,7 @@ class UrlEmbedFilter extends FilterBase implements ContainerFactoryPluginInterfa
         $url_output = '';
         try {
           if ($info = $this->urlEmbed()->getEmbed($url)) {
-            $url_output = $info->getCode();
+            $url_output = (string) $info->code->html;
           }
         }
         catch (\Exception $e) {

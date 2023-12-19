@@ -116,6 +116,9 @@
             // Use a custom event to trigger the call.
             event: 'url_embed_dummy_event'
           });
+          urlEmbedPreview.options.headers = {
+            'X-Drupal-EmbedPreview-CSRF-Token': editor.config.DrupalUrlEmbed_previewCsrfToken
+          };
           urlEmbedPreview.execute();
         },
 

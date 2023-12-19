@@ -55,13 +55,6 @@ class SendGridSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
-    return ['sendgrid_integration.settings'];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('sendgrid_integration.settings');
 
@@ -106,14 +99,14 @@ class SendGridSettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Track Opens'),
       '#description' => $this->t('Track opening of emails. This will include a small image in each email. Set to off by default.'),
-      '#default_value' => !empty($config->get('trackopens')) ? $config->get('trackopens') : 0
+      '#default_value' => !empty($config->get('trackopens')) ? $config->get('trackopens') : 0,
     ];
 
     $form['settings']['sendgrig_intergration_trackclicks'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Track Clicks'),
       '#description' => $this->t('Track the clicking of links in email. Set to off by default.'),
-      '#default_value' => !empty($config->get('trackclicks')) ? $config->get('trackclicks') : 0
+      '#default_value' => !empty($config->get('trackclicks')) ? $config->get('trackclicks') : 0,
     ];
 
     return parent::buildForm($form, $form_state);
@@ -168,6 +161,13 @@ class SendGridSettingsForm extends ConfigFormBase {
 
     $config->save();
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getEditableConfigNames() {
+    return ['sendgrid_integration.settings'];
   }
 
 }

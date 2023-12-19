@@ -10,8 +10,8 @@ use Drupal\Core\Render\Element\MachineName;
 use Drupal\webform\Plugin\WebformHandlerInterface;
 use Drupal\webform\Utility\WebformFormHelper;
 use Drupal\webform\WebformInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Provides a base webform for webform handlers.
@@ -312,7 +312,7 @@ abstract class WebformHandlerFormBase extends FormBase {
     $this->webformHandler->setNotes($form_state->getValue('notes'));
     $this->webformHandler->setStatus($form_state->getValue('status'));
     $this->webformHandler->setWeight($form_state->getValue('weight'));
-    $this->webformHandler->setConditions($form_state->getValue('conditions'));
+    $this->webformHandler->setConditions($form_state->getValue('conditions') ?? []);
 
     if ($this instanceof WebformHandlerAddForm) {
       $this->webform->addWebformHandler($this->webformHandler);

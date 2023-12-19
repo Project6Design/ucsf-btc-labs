@@ -21,7 +21,7 @@ class Canonical extends PluginBase implements SubstitutionInterface {
    * {@inheritdoc}
    */
   public function getUrl(EntityInterface $entity) {
-    return $entity->toUrl('canonical')->toString(TRUE);
+    return $entity->toUrl('canonical');
   }
 
   /**

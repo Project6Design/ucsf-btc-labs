@@ -51,7 +51,7 @@ class BlockPlaceTest extends UnitTestCase {
         ]
       ]
     ];
-    $this->assertArrayEquals($expected, $form);
+    $this->assertEquals($expected, $form);
   }
 
   /**

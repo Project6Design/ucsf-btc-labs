@@ -295,7 +295,14 @@ class WebformConstantContactHandler extends WebformHandlerBase {
 
     if (!empty($configuration['list']) && !empty($email)) {
       $data = array_merge(['email_address' => $email], $mergevars);
-      $this->constantContact->submitContactForm($data , $configuration['list']);
+
+      if (is_string($configuration['list'])) {
+        $lists = [$configuration['list']];
+      } else {
+        $lists = $configuration['list'];
+      }
+
+      $this->constantContact->submitContactForm($data , $lists);
     }
     else {
       if (empty($configuration['list'])) {

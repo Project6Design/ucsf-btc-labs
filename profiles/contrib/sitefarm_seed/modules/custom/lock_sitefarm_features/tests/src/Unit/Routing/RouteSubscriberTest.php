@@ -29,7 +29,7 @@ class RouteSubscriberTest extends UnitTestCase {
     $subscriber = new RouteSubscriber();
 
     $return = $subscriber->getSubscribedEvents();
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
   }
 
   /**
@@ -54,7 +54,7 @@ class RouteSubscriberTest extends UnitTestCase {
     $requirements = $route->getRequirements();
     $expected = ['_lock_sitefarm_features' => 'TRUE'];
 
-    $this->assertArrayEquals($expected, $requirements);
+    $this->assertEquals($expected, $requirements);
   }
 
 }

@@ -428,6 +428,7 @@ class EntityMatcher extends ConfigurableMatcherBase {
       ->setEntityUuid($entity->uuid())
       ->setEntityTypeId($entity->getEntityTypeId())
       ->setSubstitutionId($this->configuration['substitution_type'])
+      ->setStatus($this->buildStatus($entity))
       ->setPath($this->buildPath($entity));
 
     return $suggestion;
@@ -505,6 +506,24 @@ class EntityMatcher extends ConfigurableMatcherBase {
       }
     }
     return $path;
+  }
+
+  /**
+   * Builds the status string used in the suggestion.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The matched entity.
+   *
+   * @return string
+   *   The status for this entity.
+   */
+  protected function buildStatus(EntityInterface $entity) {
+    $entity_type = $entity->getEntityTypeId();
+    if ($entity->getEntityType()->hasKey('status')) {
+      $entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($entity->id());
+      return $entity->isPublished() ? 'published' : 'unpublished';
+    }
+    return '';
   }
 
   /**

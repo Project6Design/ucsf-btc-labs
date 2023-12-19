@@ -5,6 +5,8 @@
  * Documentation of webform views module.
  */
 
+use Drupal\webform\WebformInterface;
+
 /**
  * Alter webform element views handler.
  *
@@ -22,7 +24,7 @@
  * @param \Drupal\webform\WebformInterface $webform
  *   Webform where $element belongs to
  */
-function hook_webform_views_element_views_handler(&$views_handler_class, $element, \Drupal\webform\WebformInterface $webform) {
+function hook_webform_views_element_views_handler(&$views_handler_class, $element, WebformInterface $webform) {
   if ($webform->id() == 'my_special_webform' && $element['#webform_key'] == 'my_special_webform_element') {
     $views_handler_class = '\Drupal\custom\WebformElementViews\MySpecialHandler';
   }

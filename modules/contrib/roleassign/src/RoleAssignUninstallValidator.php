@@ -3,8 +3,8 @@
 namespace Drupal\roleassign;
 
 use Drupal\Core\Extension\ModuleUninstallValidatorInterface;
+use Drupal\Core\Session\AccountProxy;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Core\StringTranslation\TranslationInterface;
 
 /**
  * Prevents uninstallation of roleassign module by restricted users.
@@ -14,13 +14,17 @@ class RoleAssignUninstallValidator implements ModuleUninstallValidatorInterface 
   use StringTranslationTrait;
 
   /**
-   * Constructs a new RoleAssignUninstallValidator.
+   * Gets the current active user.
    *
-   * @param \Drupal\Core\StringTranslation\TranslationInterface $string_translation
-   *   The string translation service.
+   * @var Drupal\Core\Session\AccountProxy
    */
-  public function __construct(TranslationInterface $string_translation) {
-    $this->stringTranslation = $string_translation;
+  protected $currentUser;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(AccountProxy $current_user) {
+    $this->currentUser = $current_user;
   }
 
   /**
@@ -32,11 +36,14 @@ class RoleAssignUninstallValidator implements ModuleUninstallValidatorInterface 
       return $reasons;
     }
 
-    if ($module == "roleassign") {
-      if (!\Drupal::currentUser()->hasPermission('administer roles')) {
-        $reasons[] = $this->t('You are not allowed to disable this module.');
-      }
+    switch ($module) {
+      case 'roleassign':
+        if (!$this->currentUser->hasPermission('administer roles')) {
+          $reasons[] = $this->t('You are not allowed to disable this module.');
+        }
+        break;
     }
+
     return $reasons;
   }
 

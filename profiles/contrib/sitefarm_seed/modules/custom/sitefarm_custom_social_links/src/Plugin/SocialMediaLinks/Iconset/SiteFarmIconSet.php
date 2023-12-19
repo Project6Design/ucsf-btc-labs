@@ -21,7 +21,7 @@ class SiteFarmIconSet extends IconsetBase implements IconsetInterface {
    * @codeCoverageIgnore
    */
   public function getPath() {
-    return drupal_get_path("module", "sitefarm_custom_social_links");
+    return \Drupal::service('extension.list.module')->getPathname('sitefarm_custom_social_links');
   }
 
   /**

@@ -5,18 +5,21 @@
 This is a major breaking change.
 
 Some changes
+
 * Unique Args have been removed by Sendgrid
 
 Tracking of opens and clicks are now off by default. Can be enabled in the
 setting UI of the module.
 
 To upgrade from 8.x-1.x do the following
+
 ```shell
 composer require drupal/sendgrid_integration:2.x --with-all-dependencies
 ```
+
 What you should see change is the module code, composer.json, and composer.lock
 in your main code base. If you have your vendor folder under souce control you
-will see sendgrid/smtpapi be deleted and nearly all code change for 
+will see sendgrid/smtpapi be deleted and nearly all code change for
 fastglass/sendgrid-php-ng. You may see starkbank/ecdsa get added as a transient
 dependency.
 
@@ -46,6 +49,7 @@ upgrade to Guzzle 6.x sometime in the unknown future.
 
 Major changes
 --------------------------------------------------------------------------------
+
 * Composer Manager Required (https://www.drupal.org/project/composer_manager)
 * Requires PHP 5.4 or greater
 * New sub-module for Reports
@@ -53,6 +57,7 @@ Major changes
 
 Dependencies (loaded via composer)
 --------------------------------------------------------------------------------
+
 * Forked Sengrid Library (fastglass/sendgrid)
 * Guzzle 6.0.0 or greater
 
@@ -68,6 +73,7 @@ Run an update, "drush updb". Go to the admin pages for Sendgrid and update the
 settings (admin/config/services/sendgrid).
 
 Option 2:
+
 1. Install dependencies for module before attempting to upgrade module.
 2. Download module and replace existing Sendgrid Integration Module.
 3. Run update.

@@ -129,7 +129,7 @@ class BlockConfigFormHelpersTest extends UnitTestCase
 
     $form = [];
     $this->helperObj->hideBlockTitleCheckbox($form);
-    $this->assertArrayEquals($expected, $form);
+    $this->assertEquals($expected, $form);
   }
 
   /**

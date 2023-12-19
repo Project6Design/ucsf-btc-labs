@@ -28,9 +28,14 @@ class WebformDefaultViews extends WebformElementViewsAbstract {
       ];
     }
 
-    if ($element_plugin->isInput($element) && !$element_plugin->hasMultipleValues($element)) {
+    if ($element_plugin->isInput($element)) {
       $views_data['filter'] = [
         'id' => 'webform_submission_field_filter',
+        'real field' => 'value',
+      ];
+
+      $views_data['argument'] = [
+        'id' => 'standard',
         'real field' => 'value',
       ];
     }

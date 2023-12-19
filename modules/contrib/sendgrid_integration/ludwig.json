@@ -1,15 +1,15 @@
 {
   "require": {
     "fastglass/sendgrid": {
-      "version": "v1.0.11",
-      "url": "https://github.com/taz77/sendgrid-php-ng/archive/1.0.11.zip"
+      "version": "2.0.5",
+      "url": "https://github.com/taz77/sendgrid-php-ng/archive/2.0.5.zip"
     },
-    "sendgrid/smtpapi": {
-      "version": "v0.6.6",
-      "url": "https://github.com/sendgrid/smtpapi-php/archive/0.6.6.zip"
+    "starkbank/ecdsa": {
+      "version": "v0.0.4",
+      "url": "https://github.com/starkbank/ecdsa-php/archive/v0.0.4.zip"
     },
     "html2text/html2text": {
-      "version": "v4.3.1",
+      "version": "4.3.1",
       "url": "https://github.com/mtibben/html2text/archive/4.3.1.zip"
     }
   }

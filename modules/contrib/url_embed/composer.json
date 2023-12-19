@@ -9,7 +9,11 @@
   },
   "license": "GPL-2.0+",
   "require": {
-    "embed/embed": "^3.4",
+    "drupal/core": "^9 || ^10",
+    "embed/embed": "^4.4",
     "drupal/embed": "^1.4"
+  },
+  "require-dev": {
+    "drupal/ckeditor": "^1"
   }
 }

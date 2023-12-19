@@ -107,7 +107,7 @@ class UrlEmbedDialog extends FormBase {
 
     try {
       if (!empty($url_element['data-embed-url']) && $info = $this->urlEmbed()->getEmbed($url_element['data-embed-url'])) {
-        $url_element['data-url-provider'] = $info->getProviderName();
+        $url_element['data-url-provider'] = $info->providerName;
       }
     }
     catch (\Exception $e) {

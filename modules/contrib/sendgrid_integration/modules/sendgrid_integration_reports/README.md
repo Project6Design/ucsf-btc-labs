@@ -19,6 +19,7 @@ in turn requires the installation of Composer Manager module.
 
 Requirements
 ============
+
 1. Sendgrid Integration Module
 2. Composer Manager
 3. Guzzlehttp (loaded with Composer Manager)

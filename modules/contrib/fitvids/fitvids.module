@@ -37,7 +37,7 @@ function fitvids_help($route_name, RouteMatchInterface $route_match) {
     case 'help.page.fitvids':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t("The Fitvids module uses <a href=\"@github\" rel=\"external\">the FitVids.js jQuery plugin</a> to achieve fluid/responsive video embeds. You don't need it for pure HTML5 videos.", array('@github' => FITVIDS_GITHUB_URL)) . '</p>';
+      $output .= '<p>' . t("The Fitvids module uses <a href=\"@github\" rel=\"external\">the FitVids.js jQuery plugin</a> to achieve fluid/responsive video embeds. You don't need it for pure HTML5 videos.", ['@github' => FITVIDS_GITHUB_URL]) . '</p>';
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<p>' . t("Use this module if you are using a responsive theme (such as Bootstrap), and want the videos to scale to fit the available space. By default it supports YouTube, Vimeo and Kickstarter.") . '</p>';
       return $output;

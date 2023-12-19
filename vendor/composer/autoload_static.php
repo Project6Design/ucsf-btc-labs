@@ -20,32 +20,39 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
-        '07d7f1a47144818725fd8d91a907ac57' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/create_uploaded_file.php',
-        'da94ac5d3ca7d2dbab84ce561ce72bfd' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/marshal_headers_from_sapi.php',
-        '3d97c8dcdfba8cb85d3b34f116bb248b' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/marshal_method_from_sapi.php',
-        'e6f3bc6883e449ab367280b34158c05b' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/marshal_protocol_version_from_sapi.php',
-        'd59fbae42019aedf227094ac49a46f50' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/marshal_uri_from_sapi.php',
-        'de95e0ac670b27c84ef8c5ac41fc1b34' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/normalize_server.php',
-        'b6c2870932b0250c10334a86dcb33c7f' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/normalize_uploaded_files.php',
-        'd02cf21124526632320d6f20b1bbf905' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/parse_cookie_header.php',
-        'd919fc9d5ad52cfb7f322f7fe36458ab' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/create_uploaded_file.legacy.php',
-        'e397f74f8af3b1e56166a6e99f216ee7' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/marshal_headers_from_sapi.legacy.php',
-        'd154b49fab8e4da34fb553a2d644918c' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/marshal_method_from_sapi.legacy.php',
-        '9d3db23ca418094bcf0b641a0c9559ed' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/marshal_protocol_version_from_sapi.legacy.php',
-        'b0b88a3b89caae681462c58ff19a7059' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/marshal_uri_from_sapi.legacy.php',
-        'cc8e14526dc240491e17a838cb78508c' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/normalize_server.legacy.php',
-        '786bf90caabc9e09b6ad4cc5ca8f0e30' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/normalize_uploaded_files.legacy.php',
-        '751a5a3f463e4be759be31748b61737c' => __DIR__ . '/..' . '/laminas/laminas-diactoros/src/functions/parse_cookie_header.legacy.php',
+        '3e41e0554275033aae3e9e7e056c2d14' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/create_uploaded_file.php',
+        'f4ee20bfdee1006b0970e8d951bea11e' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/marshal_headers_from_sapi.php',
+        '039b4ca04402a921dc2af19c2e8c1f6e' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/marshal_method_from_sapi.php',
+        'e3ea60c79d95f68a8005f1699ae513c5' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/marshal_protocol_version_from_sapi.php',
+        '32c046824d90c279f6205409af6d2c04' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/marshal_uri_from_sapi.php',
+        '0c1d1192b79078f21e2cfaabe4543edd' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/normalize_server.php',
+        '33ef8f0e3889759e13b3a2e8d06325e5' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/normalize_uploaded_files.php',
+        'ea6b969496254d8be854dfbb28e60b1f' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/parse_cookie_header.php',
+        'ebe6ad1233b263746a5e998216124099' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/create_uploaded_file.legacy.php',
+        'ebf83de93801166132fffcabcef8f564' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/marshal_headers_from_sapi.legacy.php',
+        '4cb966b9de75f305b18307914ba7d042' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/marshal_method_from_sapi.legacy.php',
+        'e5fb9cb38e01d209a22030eecd50868a' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/marshal_protocol_version_from_sapi.legacy.php',
+        '63beb777bb579c5901a9b5062ef48224' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/marshal_uri_from_sapi.legacy.php',
+        '6a77975e917fcf1582f1467d916545de' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/normalize_server.legacy.php',
+        '65d28722cbac54041593541c6e32acc5' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/normalize_uploaded_files.legacy.php',
+        'bef1cc96c7d36a38fa2d1ce60deb9d54' => __DIR__ . '/..' . '/longwave/laminas-diactoros/src/functions/parse_cookie_header.legacy.php',
         'def43f6c87e4f8dfd0c9e1b1bab14fe8' => __DIR__ . '/..' . '/symfony/polyfill-iconv/bootstrap.php',
         '2f69d3914119f042cca9e44442d5ce95' => __DIR__ . '/../..' . '/core/includes/bootstrap.inc',
         '6db5533840cb1ae1bc049452845aa88e' => __DIR__ . '/../..' . '/core/includes/guzzle_php81_shim.php',
+        '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
+        'c9d07b32a2e02bc0fc582d4f0c1b56cc' => __DIR__ . '/..' . '/laminas/laminas-servicemanager/src/autoload.php',
         '8825ede83f2f289127722d4e842cf7e8' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         '79f66bc0a1900f77abe4a9a299057a0a' => __DIR__ . '/..' . '/starkbank/ecdsa/src/ellipticcurve.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
+        '09fc349b549513bf7f4291502426f919' => __DIR__ . '/..' . '/embed/embed/src/functions.php',
         '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
     );
 
     public static $prefixLengthsPsr4 = array (
+        'm' => 
+        array (
+            'mglaman\\PHPStanDrupal\\' => 22,
+        ),
         'T' => 
         array (
             'Twig\\' => 5,
@@ -98,24 +105,31 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
             'Psy\\' => 4,
             'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
+            'Psr\\Http\\Client\\' => 16,
             'Psr\\Container\\' => 14,
             'Psr\\Cache\\' => 10,
             'PhpParser\\' => 10,
+            'PHPStan\\' => 8,
         ),
         'M' => 
         array (
+            'MathieuViossat\\Util\\' => 20,
             'Masterminds\\' => 12,
+            'ML\\JsonLD\\' => 10,
         ),
         'L' => 
         array (
             'League\\Container\\' => 17,
+            'Laminas\\Text\\' => 13,
             'Laminas\\Stdlib\\' => 15,
+            'Laminas\\ServiceManager\\' => 23,
             'Laminas\\Feed\\' => 13,
             'Laminas\\Escaper\\' => 16,
             'Laminas\\Diactoros\\' => 18,
         ),
         'H' => 
         array (
+            'HtmlParser\\' => 11,
             'Html2Text\\' => 10,
         ),
         'G' => 
@@ -130,6 +144,7 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
             'Enlightn\\SecurityChecker\\' => 25,
             'Embed\\' => 6,
             'Egulias\\EmailValidator\\' => 23,
+            'EasyRdf\\' => 8,
         ),
         'D' => 
         array (
@@ -142,12 +157,9 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
             'Drupal\\Component\\' => 17,
             'DrupalCodeGenerator\\' => 20,
             'Doctrine\\Persistence\\' => 21,
-            'Doctrine\\Inflector\\' => 19,
             'Doctrine\\Deprecations\\' => 22,
             'Doctrine\\Common\\Lexer\\' => 22,
-            'Doctrine\\Common\\Inflector\\' => 26,
             'Doctrine\\Common\\Collections\\' => 28,
-            'Doctrine\\Common\\Cache\\' => 22,
             'Doctrine\\Common\\Annotations\\' => 28,
             'Doctrine\\Common\\' => 16,
             'Dflydev\\DotAccessData\\' => 22,
@@ -173,6 +185,10 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
     );
 
     public static $prefixDirsPsr4 = array (
+        'mglaman\\PHPStanDrupal\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mglaman/phpstan-drupal/src',
+        ),
         'Twig\\' => 
         array (
             0 => __DIR__ . '/..' . '/twig/twig/src',
@@ -338,6 +354,10 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
             0 => __DIR__ . '/..' . '/psr/http-factory/src',
             1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
+        'Psr\\Http\\Client\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/http-client/src',
+        ),
         'Psr\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
@@ -350,17 +370,37 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
         ),
+        'PHPStan\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpstan/phpstan-deprecation-rules/src',
+        ),
+        'MathieuViossat\\Util\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mathieuviossat/arraytotexttable/src',
+        ),
         'Masterminds\\' => 
         array (
             0 => __DIR__ . '/..' . '/masterminds/html5/src',
+        ),
+        'ML\\JsonLD\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/ml/json-ld',
         ),
         'League\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/container/src',
         ),
+        'Laminas\\Text\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/laminas/laminas-text/src',
+        ),
         'Laminas\\Stdlib\\' => 
         array (
             0 => __DIR__ . '/..' . '/laminas/laminas-stdlib/src',
+        ),
+        'Laminas\\ServiceManager\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/laminas/laminas-servicemanager/src',
         ),
         'Laminas\\Feed\\' => 
         array (
@@ -372,7 +412,11 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         ),
         'Laminas\\Diactoros\\' => 
         array (
-            0 => __DIR__ . '/..' . '/laminas/laminas-diactoros/src',
+            0 => __DIR__ . '/..' . '/longwave/laminas-diactoros/src',
+        ),
+        'HtmlParser\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/oscarotero/html-parser/src',
         ),
         'Html2Text\\' => 
         array (
@@ -406,6 +450,10 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         'Egulias\\EmailValidator\\' => 
         array (
             0 => __DIR__ . '/..' . '/egulias/email-validator/src',
+        ),
+        'EasyRdf\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/easyrdf/easyrdf/lib',
         ),
         'Drush\\' => 
         array (
@@ -441,11 +489,7 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         ),
         'Doctrine\\Persistence\\' => 
         array (
-            0 => __DIR__ . '/..' . '/doctrine/persistence/lib/Doctrine/Persistence',
-        ),
-        'Doctrine\\Inflector\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/inflector/lib/Doctrine/Inflector',
+            0 => __DIR__ . '/..' . '/doctrine/persistence/src/Persistence',
         ),
         'Doctrine\\Deprecations\\' => 
         array (
@@ -455,17 +499,9 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         array (
             0 => __DIR__ . '/..' . '/doctrine/lexer/lib/Doctrine/Common/Lexer',
         ),
-        'Doctrine\\Common\\Inflector\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/inflector/lib/Doctrine/Common/Inflector',
-        ),
         'Doctrine\\Common\\Collections\\' => 
         array (
-            0 => __DIR__ . '/..' . '/doctrine/collections/lib/Doctrine/Common/Collections',
-        ),
-        'Doctrine\\Common\\Cache\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/doctrine/cache/lib/Doctrine/Common/Cache',
+            0 => __DIR__ . '/..' . '/doctrine/collections/src',
         ),
         'Doctrine\\Common\\Annotations\\' => 
         array (
@@ -473,10 +509,9 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         ),
         'Doctrine\\Common\\' => 
         array (
-            0 => __DIR__ . '/..' . '/doctrine/common/lib/Doctrine/Common',
+            0 => __DIR__ . '/..' . '/doctrine/common/src',
             1 => __DIR__ . '/..' . '/doctrine/event-manager/src',
-            2 => __DIR__ . '/..' . '/doctrine/persistence/lib/Doctrine/Common',
-            3 => __DIR__ . '/..' . '/doctrine/reflection/lib/Doctrine/Common',
+            2 => __DIR__ . '/..' . '/doctrine/reflection/lib/Doctrine/Common',
         ),
         'Dflydev\\DotAccessData\\' => 
         array (
@@ -545,6 +580,13 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
             'Stack' => 
             array (
                 0 => __DIR__ . '/..' . '/stack/builder/src',
+            ),
+        ),
+        'M' => 
+        array (
+            'ML\\IRI' => 
+            array (
+                0 => __DIR__ . '/..' . '/ml/iri',
             ),
         ),
         'C' => 

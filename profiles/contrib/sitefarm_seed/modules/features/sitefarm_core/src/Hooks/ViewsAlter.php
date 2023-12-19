@@ -22,7 +22,7 @@ class ViewsAlter {
    * @param QueryPluginBase $query
    */
   public function hideAdministratorsOnPeopleDisplay(ViewExecutable $view, QueryPluginBase $query) {
-    if ($view->id() == 'user_admin_people' && roleassign_restrict_access()) {
+    if ($view->id() == 'user_admin_people' && _roleassign_restrict_access()) {
       // Create a Condition object so that we can check if a role is set or not
       // even available. Regular authenticated users do not get a user role.
       $or_condition = new Condition('OR');

@@ -69,8 +69,7 @@ class WebformSubmissionSelectFilter extends InOperator {
    */
   public function getValueOptions() {
     if (!isset($this->valueOptions)) {
-      $webform = $this->entityTypeManager->getStorage('webform')->load($this->definition['webform_id']);
-      $element = $webform->getElementInitialized($this->definition['webform_submission_field']);
+      $element = $this->getWebformElement();
 
       // We need this explicit "all" option because otherwise
       // InOperator::validate() rises validation errors when we are an exposed
@@ -88,7 +87,7 @@ class WebformSubmissionSelectFilter extends InOperator {
   public function acceptExposedInput($input) {
     $accept = parent::acceptExposedInput($input);
     $identifier = $this->options['expose']['identifier'];
-    if ($input[$identifier] == self::ALL) {
+    if (isset($input[$identifier]) && $input[$identifier] == self::ALL) {
       return FALSE;
     }
     return $accept;

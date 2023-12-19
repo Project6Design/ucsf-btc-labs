@@ -68,7 +68,7 @@ class BlockFormAlterTest extends UnitTestCase {
       ]
     ];
     $this->helper->hideVisibilityOptions($form, $hide);
-    $this->assertArrayEquals($expected, $form);
+    $this->assertEquals($expected, $form);
   }
 
   /**
@@ -120,7 +120,7 @@ class BlockFormAlterTest extends UnitTestCase {
         'entity_bundle' => [],
       ]
     ];
-    $this->assertArrayEquals($expected, $form);
+    $this->assertEquals($expected, $form);
   }
 
   /**

@@ -66,7 +66,7 @@ class RssFeedBlockTest extends UnitTestCase {
   public function testDefaultConfiguration() {
     $expected = $this->pluginConfig;
 
-    $this->assertArrayEquals($expected, $this->plugin->defaultConfiguration());
+    $this->assertEquals($expected, $this->plugin->defaultConfiguration());
   }
 
   /**
@@ -126,7 +126,7 @@ class RssFeedBlockTest extends UnitTestCase {
 
     $form = [];
     $this->plugin->blockSubmit($form, $this->formState);
-    $this->assertArrayEquals($expectedConfig, $this->plugin->getConfiguration());
+    $this->assertEquals($expectedConfig, $this->plugin->getConfiguration());
   }
 
   /**
@@ -147,6 +147,6 @@ class RssFeedBlockTest extends UnitTestCase {
 
     $return = $this->plugin->build();
 
-    $this->assertArrayEquals($expected, $return);
+    $this->assertEquals($expected, $return);
   }
 }

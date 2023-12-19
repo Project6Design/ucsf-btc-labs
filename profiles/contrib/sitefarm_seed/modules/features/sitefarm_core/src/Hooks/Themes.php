@@ -104,7 +104,7 @@ class Themes {
    * @codeCoverageIgnore
    */
   protected function getThemePath($theme_name) {
-    return DRUPAL_ROOT . base_path() . drupal_get_path('theme', $theme_name);
+    return DRUPAL_ROOT . base_path() .  \Drupal::service('extension.list.theme')->getPathname($theme_name);
   }
 
 }

@@ -3,31 +3,31 @@
 namespace Drupal\webform\Plugin\WebformElement;
 
 use Drupal\Component\Utility\Bytes;
-use Drupal\Component\Utility\Html;
-use Drupal\Component\Utility\Unicode;
 use Drupal\Component\Utility\Environment;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url as UrlGenerator;
-use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\webform\Element\WebformHtmlEditor;
 use Drupal\webform\Entity\WebformSubmission;
 use Drupal\webform\Plugin\WebformElementAttachmentInterface;
-use Drupal\webform\Plugin\WebformElementFileDownloadAccessInterface;
 use Drupal\webform\Plugin\WebformElementBase;
+use Drupal\webform\Plugin\WebformElementEntityReferenceInterface;
+use Drupal\webform\Plugin\WebformElementFileDownloadAccessInterface;
 use Drupal\webform\Utility\WebformOptionsHelper;
 use Drupal\webform\WebformInterface;
 use Drupal\webform\WebformSubmissionForm;
 use Drupal\webform\WebformSubmissionInterface;
-use Drupal\webform\Plugin\WebformElementEntityReferenceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 
 /**
  * Provides a base class webform 'managed_file' elements.
@@ -256,7 +256,7 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
     // file upload help only.
     $upload_validators = $element['#upload_validators'];
     if ($file_limit) {
-      $upload_validators['webform_file_limit'] = [Bytes::toInt($file_limit)];
+      $upload_validators['webform_file_limit'] = [Bytes::toNumber($file_limit)];
     }
     $file_upload_help = [
       '#theme' => 'file_upload_help',
@@ -296,8 +296,9 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
     // Allow ManagedFile Ajax callback to disable flexbox wrapper.
     // @see \Drupal\file\Element\ManagedFile::uploadAjaxCallback
     // @see \Drupal\webform\Plugin\WebformElementBase::preRenderFixFlexboxWrapper
+    $request_params = \Drupal::request()->request->all();
     if (\Drupal::request()->request->get('_drupal_ajax')
-      && \Drupal::request()->request->get('files')) {
+      && !empty($request_params['files'])) {
       $element['#webform_wrapper'] = FALSE;
     }
 
@@ -604,9 +605,9 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
    */
   protected function getMaxFileSize(array $element) {
     $max_filesize = $this->configFactory->get('webform.settings')->get('file.default_max_filesize') ?: Environment::getUploadMaxSize();
-    $max_filesize = Bytes::toInt($max_filesize);
+    $max_filesize = Bytes::toNumber($max_filesize);
     if (!empty($element['#max_filesize'])) {
-      $max_filesize = min($max_filesize, Bytes::toInt($element['#max_filesize'] . 'MB'));
+      $max_filesize = min($max_filesize, Bytes::toNumber($element['#max_filesize'] . 'MB'));
     }
     return $max_filesize;
   }
@@ -617,7 +618,7 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
    * @param array $element
    *   An element.
    *
-   * @return int
+   * @return string
    *   File extensions.
    */
   protected function getFileExtensions(array $element = NULL) {
@@ -629,12 +630,13 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
   /**
    * Get the default allowed file extensions.
    *
-   * @return int
+   * @return string
    *   File extensions.
    */
   protected function getDefaultFileExtensions() {
     $file_type = str_replace('webform_', '', $this->getPluginId());
-    return $this->configFactory->get('webform.settings')->get("file.default_{$file_type}_extensions");
+    $extensions = $this->configFactory->get('webform.settings')->get("file.default_{$file_type}_extensions");
+    return $extensions ?? '';
   }
 
   /**
@@ -926,7 +928,7 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
     $file_limit = $webform_submission->getWebform()->getSetting('form_file_limit')
       ?: \Drupal::config('webform.settings')->get('settings.default_form_file_limit')
       ?: '';
-    $file_limit = Bytes::toInt($file_limit);
+    $file_limit = Bytes::toNumber($file_limit);
 
     // Track file size across all file upload elements.
     static $total_file_size = 0;
@@ -1008,7 +1010,7 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
     }
 
     $max_filesize = \Drupal::config('webform.settings')->get('file.default_max_filesize') ?: Environment::getUploadMaxSize();
-    $max_filesize = Bytes::toInt($max_filesize);
+    $max_filesize = Bytes::toNumber($max_filesize);
     $max_filesize = ($max_filesize / 1024 / 1024);
     $form['file']['file_help'] = [
       '#type' => 'select',
@@ -1375,12 +1377,14 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
       /** @var \Drupal\Core\File\FileSystemInterface $file_system */
       $file_system = \Drupal::service('file_system');
       $filename = $file_system->basename($uri);
+      // Fallback name in case file name contains none ASCII characters.
+      $filename_fallback = \Drupal::transliteration()->transliterate($filename);
       // Force blacklisted files to be downloaded instead of opening in the browser.
       if (in_array($headers['Content-Type'], static::$blacklistedMimeTypes)) {
-        $headers['Content-Disposition'] = 'attachment; filename="' . Unicode::mimeHeaderEncode($filename) . '"';
+        $headers['Content-Disposition'] = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, (string) $filename, $filename_fallback);
       }
       else {
-        $headers['Content-Disposition'] = 'inline; filename="' . Unicode::mimeHeaderEncode($filename) . '"';
+        $headers['Content-Disposition'] = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_INLINE, (string) $filename, $filename_fallback);
       }
       return $headers;
     }

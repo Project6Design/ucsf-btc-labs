@@ -69,3 +69,6 @@ linkit.autocomplete:
     _access: 'TRUE'
   options:
     _theme: ajax_base_page
+    parameters:
+      linkit_profile_id:
+        type: entity:linkit_profile

@@ -10,7 +10,7 @@
  * If the plugin doesn't exist, show a warning on the status page
  */
 function fitvids_requirements($phase) {
-  $requirements = array();
+  $requirements = [];
 
   // Check if plugin exists
   if ($phase == 'install') {
@@ -19,29 +19,29 @@ function fitvids_requirements($phase) {
     if (!$installed) {
       // just a message will do here...
       // returning a $requirements array seems to crash drupal...
-      drupal_set_message(t('The FitVids.js jQuery plugin is missing. <a href="https://raw.github.com/davatron5000/FitVids.js/master/jquery.fitvids.js" rel="external">Download the plugin</a> and copy it to /libraries/fitvids/jquery.fitvids.js'), 'warning');
+      \Drupal::messenger()->addWarning(t('The FitVids.js jQuery plugin is missing. <a href="https://raw.github.com/davatron5000/FitVids.js/master/jquery.fitvids.js" rel="external">Download the plugin</a> and copy it to /libraries/fitvids/jquery.fitvids.js'));
     }
   }
   else if ($phase == 'runtime') {
     $path = DRUPAL_ROOT . '/libraries/fitvids/jquery.fitvids.js';
     $installed = file_exists($path);
     if (!$installed) {
-      $requirements['fitvids'] = array(
+      $requirements['fitvids'] = [
         'title' => t('FitVids.js jQuery plugin'),
         'value' => t('Missing'),
-        'description' => t('<a href=":url" rel="external">Download the plugin</a> and copy it to :library', array(':url' => FITVIDS_PLUGIN_URL, ':library' => FITVIDS_LIBRARY_PATH)),
+        'description' => t('<a href=":url" rel="external">Download the plugin</a> and copy it to :library', [':url' => FITVIDS_PLUGIN_URL, ':library' => FITVIDS_LIBRARY_PATH]),
         'severity' => REQUIREMENT_WARNING,
-      );
+      ];
     }
     else {
-      $requirements['fitvids'] = array(
+      $requirements['fitvids'] = [
         'title' => t('FitVids.js jQuery plugin'),
         'value' => t('Installed'),
         'severity' => REQUIREMENT_OK,
-      );
+      ];
     }
   }
-  
+
   return $requirements;
 }
 
@@ -53,17 +53,17 @@ function fitvids_enable() {
   $path = libraries_get_path('fitvids') . '/jquery.fitvids.js';
   $installed = file_exists($path);
   if (!$installed) {
-    $message = t('You need to download the FitVids.js jQuery plugin to use this module. Download it from !fitvids-site, copy it to the !fitvids-library directory, and rename it to !fitvids-filename.', array(
+    $message = t('You need to download the FitVids.js jQuery plugin to use this module. Download it from !fitvids-site, copy it to the !fitvids-library directory, and rename it to !fitvids-filename.', [
       '!fitvids-site' => l(t('here'), FITVIDS_PLUGIN_URL),
       '!fitvids-library' => libraries_get_path('fitvids'),
       '!fitvids-filename' => FITVIDS_PLUGIN_FILENAME,
-    ));
+    ]);
     drupal_set_message(filter_xss_admin($message), $type = 'warning');
   }
   else {
-    $message = t('You already have the FitVids.js jQuery plugin installed. Configure the module !fitvids-configuration', array(
+    $message = t('You already have the FitVids.js jQuery plugin installed. Configure the module !fitvids-configuration', [
       '!fitvids-configuration' => l(t('here'), 'admin/config/media/fitvids'),
-    ));
+    ]);
     drupal_set_message(filter_xss_admin($message));
   }
 } */

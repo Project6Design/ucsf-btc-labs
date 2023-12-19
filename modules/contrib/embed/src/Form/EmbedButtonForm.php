@@ -5,10 +5,10 @@ namespace Drupal\embed\Form;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
-use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityForm;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\embed\EmbedType\EmbedTypeManager;
 use Drupal\embed\Entity\EmbedButton;
@@ -20,13 +20,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class EmbedButtonForm extends EntityForm {
 
   /**
-   * The entity type manager service.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
    * The embed type plugin manager.
    *
    * @var \Drupal\embed\EmbedType\EmbedTypeManager
@@ -36,17 +29,17 @@ class EmbedButtonForm extends EntityForm {
   /**
    * Constructs a new EmbedButtonForm.
    *
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The entity type manager service.
    * @param \Drupal\embed\EmbedType\EmbedTypeManager $embed_type_manager
    *   The embed type plugin manager.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The config factory.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, EmbedTypeManager $embed_type_manager, ConfigFactoryInterface $config_factory) {
-    $this->entityTypeManager = $entity_type_manager;
+  public function __construct(ModuleHandlerInterface $module_handler, EntityTypeManagerInterface $entity_type_manager, EmbedTypeManager $embed_type_manager) {
+    $this->setModuleHandler($module_handler);
+    $this->setEntityTypeManager($entity_type_manager);
     $this->embedTypeManager = $embed_type_manager;
-    $this->configFactory = $config_factory;
   }
 
   /**
@@ -54,9 +47,9 @@ class EmbedButtonForm extends EntityForm {
    */
   public static function create(ContainerInterface $container) {
     return new static(
+      $container->get('module_handler'),
       $container->get('entity_type.manager'),
-      $container->get('plugin.manager.embed.type'),
-      $container->get('config.factory')
+      $container->get('plugin.manager.embed.type')
     );
   }
 
@@ -127,21 +120,36 @@ class EmbedButtonForm extends EntityForm {
 
     $config = $this->config('embed.settings');
     $upload_location = $config->get('file_scheme') . '://' . $config->get('upload_directory') . '/';
+
+    $has_ckeditor5 = $this->moduleHandler->moduleExists('ckeditor5');
+
+    $validate_extensions = $has_ckeditor5 ? 'svg' : 'gif png jpg jpeg svg';
+    // First parameter is maximum dimensions, second is minimum dimensions.
+    $validate_dimensions = $has_ckeditor5 ? [0, 0] : ['32x32', '16x16'];
+
+    $validators = [];
+    if (version_compare(\Drupal::VERSION, '10.2', '<')) {
+      $validators['file_validate_extensions'] = [$validate_extensions];
+      $validators['file_validate_image_resolution'] = $validate_dimensions;
+    }
+    else {
+      $validators['FileExtension']['extensions'] = $validate_extensions;
+      $validators['FileImageDimensions']['maxDimensions'] = $validate_dimensions[0];
+      $validators['FileImageDimensions']['minDimensions'] = $validate_dimensions[1];
+    }
+
     $form['icon_file'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Button icon'),
       '#upload_location' => $upload_location,
-      '#upload_validators' => [
-        'file_validate_extensions' => ['gif png jpg jpeg svg'],
-        'file_validate_image_resolution' => ['32x32', '16x16'],
-      ],
+      '#upload_validators' => $validators,
     ];
 
     if (!$button->isNew()) {
       $form['icon_reset'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Reset to default icon'),
-        '#access' => $button->getIconUrl() !== $button->getTypePlugin()->getDefaultIconUrl(),
+        '#access' => !empty($button->icon),
       ];
 
       $form['icon_preview'] = [
@@ -152,10 +160,12 @@ class EmbedButtonForm extends EntityForm {
         '#theme' => 'image',
         '#uri' => $button->getIconUrl(),
         '#alt' => $this->t('Preview of @label button icon', ['@label' => $button->label()]),
+        '#height' => 32,
+        '#width' => 32,
       ];
 
-      // Show an even nicer preview with CKEditor being used.
-      if ($this->moduleHandler->moduleExists('ckeditor')) {
+      if ($this->moduleHandler->moduleExists('ckeditor') && !$has_ckeditor5) {
+        // Show an even nicer preview with CKEditor4 being used.
         $form['icon_preview']['image']['#prefix'] = '<div data-toolbar="active" role="form" class="ckeditor-toolbar ckeditor-toolbar-active clearfix"><ul class="ckeditor-active-toolbar-configuration" role="presentation" aria-label="CKEditor toolbar and button configuration."><li class="ckeditor-row" role="group" aria-labelledby="ckeditor-active-toolbar"><ul class="ckeditor-toolbar-groups clearfix js-sortable"><li class="ckeditor-toolbar-group" role="presentation" data-drupal-ckeditor-type="group" data-drupal-ckeditor-toolbar-group-name="Embed button icon preview" tabindex="0"><h3 class="ckeditor-toolbar-group-name" id="ckeditor-toolbar-group-aria-label-for-formatting">Embed button icon preview</h3><ul class="ckeditor-buttons ckeditor-toolbar-group-buttons js-sortable" role="toolbar" data-drupal-ckeditor-button-sorting="target" aria-labelledby="ckeditor-toolbar-group-aria-label-for-formatting"><li data-drupal-ckeditor-button-name="Bold" class="ckeditor-button"><a href="#" role="button" title="' . $button->label() . '" aria-label="' . $button->label() . '"><span class="cke_button_icon">';
         $form['icon_preview']['image']['#suffix'] = '</span></a></li></ul></li></ul></div>';
         $form['icon_preview']['#attached']['library'][] = 'ckeditor/drupal.ckeditor.admin';
@@ -212,7 +222,7 @@ class EmbedButtonForm extends EntityForm {
       $button->set('icon', EmbedButton::convertImageToEncodedData($file->getFileUri()));
     }
     elseif ($form_state->getValue('icon_reset')) {
-      $button->set('icon', NULL);
+      $button->set('icon', []);
     }
 
     $status = $button->save();

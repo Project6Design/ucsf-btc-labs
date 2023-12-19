@@ -25,7 +25,7 @@ class DrupalUrl extends EmbedCKEditorPluginBase {
    * {@inheritdoc}
    */
   public function getFile() {
-    return drupal_get_path('module', 'url_embed') . '/js/plugins/drupalurl/plugin.js';
+    return \Drupal::service('extension.list.module')->getPath('url_embed') . '/js/plugins/drupalurl/plugin.js';
   }
 
   /**
@@ -36,6 +36,7 @@ class DrupalUrl extends EmbedCKEditorPluginBase {
       'DrupalUrl_dialogTitleAdd' => t('Insert Url'),
       'DrupalUrl_dialogTitleEdit' => t('Edit Url'),
       'DrupalUrl_buttons' => $this->getButtons(),
+      'DrupalUrlEmbed_previewCsrfToken' => \Drupal::csrfToken()->get('X-Drupal-EmbedPreview-CSRF-Token'),
     );
   }
 

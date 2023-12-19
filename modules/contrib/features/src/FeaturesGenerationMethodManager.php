@@ -25,7 +25,6 @@ class FeaturesGenerationMethodManager extends DefaultPluginManager {
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
     parent::__construct('Plugin/FeaturesGeneration', $namespaces, $module_handler, 'Drupal\features\FeaturesGenerationMethodInterface');
     $this->cacheBackend = $cache_backend;
-    $this->cacheKeyPrefix = 'features_generation_methods';
     $this->cacheKey = 'features_generation_methods';
     $this->alterInfo('features_generation_info');
   }

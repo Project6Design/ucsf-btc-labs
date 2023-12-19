@@ -126,7 +126,7 @@ class CustomUrlGenerator extends EntityUrlGeneratorBase {
   public function getDataSets(): array {
     $this->includeImages = $this->settings->get('custom_links_include_images', FALSE);
 
-    $custom_link_settings = $this->customLinks->setVariants($this->sitemap->id())->get();
+    $custom_link_settings = $this->customLinks->setSitemaps($this->sitemap)->get();
     $custom_link_settings = $custom_link_settings ? reset($custom_link_settings) : [];
 
     return array_values($custom_link_settings);
@@ -136,10 +136,10 @@ class CustomUrlGenerator extends EntityUrlGeneratorBase {
    * {@inheritdoc}
    */
   protected function processDataSet($data_set): array {
-    if (!(bool) $this->pathValidator->getUrlIfValidWithoutAccessCheck($data_set['path'])) {
+    if (!$this->pathValidator->getUrlIfValidWithoutAccessCheck($data_set['path'])) {
       $this->logger->m(self::PATH_DOES_NOT_EXIST_MESSAGE, [
         '@path' => $data_set['path'],
-        '@custom_paths_url' => $GLOBALS['base_url'] . '/admin/config/search/simplesitemap/custom',
+        '@custom_paths_url' => Url::fromRoute('simple_sitemap.custom')->setAbsolute()->toString(),
       ])
         ->display('warning', 'administer sitemap settings')
         ->log('warning');
@@ -154,13 +154,13 @@ class CustomUrlGenerator extends EntityUrlGeneratorBase {
     $path_data = [
       'url' => $url_object,
       'lastmod' => !empty($entity) && method_exists($entity, 'getChangedTime')
-      ? date('c', $entity->getChangedTime())
-      : NULL,
+        ? date('c', $entity->getChangedTime())
+        : NULL,
       'priority' => $data_set['priority'] ?? NULL,
       'changefreq' => !empty($data_set['changefreq']) ? $data_set['changefreq'] : NULL,
       'images' => $this->includeImages && !empty($entity)
-      ? $this->getEntityImageData($entity)
-      : [],
+        ? $this->getEntityImageData($entity)
+        : [],
       'meta' => [
         'path' => $url_object->getInternalPath(),
       ],

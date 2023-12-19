@@ -3,8 +3,8 @@
 namespace Drupal\embed\Access;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\editor\EditorInterface;
 use Drupal\embed\EmbedButtonInterface;
@@ -78,18 +78,27 @@ class EmbedButtonEditorAccessCheck implements AccessInterface {
    *   currently only capable of detecting buttons used by CKEditor.
    */
   protected function checkButtonEditorAccess(EmbedButtonInterface $embed_button, EditorInterface $editor) {
-    if ($editor->getEditor() !== 'ckeditor') {
+    if (!in_array($editor->getEditor(), ['ckeditor', 'ckeditor5'], TRUE)) {
       throw new HttpException(500, 'Currently, only CKEditor is supported.');
     }
 
     $has_button = FALSE;
     $settings = $editor->getSettings();
-    foreach ($settings['toolbar']['rows'] as $row) {
-      foreach ($row as $group) {
-        if (in_array($embed_button->id(), $group['items'])) {
-          $has_button = TRUE;
-          break 2;
+    if ($editor->getEditor() === 'ckeditor') {
+      foreach ($settings['toolbar']['rows'] as $row) {
+        foreach ($row as $group) {
+          if (in_array($embed_button->id(), $group['items'])) {
+            $has_button = TRUE;
+            break 2;
+          }
         }
+      }
+    }
+    elseif ($editor->getEditor() === 'ckeditor5') {
+      // The schema for CKEditor5 has changed, therefore we need to check for
+      // the toolbar items differently.
+      if ($settings['toolbar']['items'] && in_array($embed_button->id(), $settings['toolbar']['items'])) {
+        $has_button = TRUE;
       }
     }
 
