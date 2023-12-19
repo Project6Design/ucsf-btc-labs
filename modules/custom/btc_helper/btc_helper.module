@@ -170,3 +170,12 @@ function btc_helper_page_attachments(array &$attachments) {
         }
     }
 }
+
+function btc_helper_form_alter(&$form, &$form_state, $form_id) {
+  if($form_id == 'user_pass') {
+    $form['name']['#access'] = FALSE;
+    $form['mail']['#markup'] = t('Managers, please contact neurosurgery@ucsf.edu to reset your password.');
+    $form['actions']['submit']['#disabled'] = TRUE;
+    $form['actions']['submit']['#access'] = FALSE;
+  }
+}
