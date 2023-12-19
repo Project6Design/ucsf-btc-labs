@@ -73,6 +73,9 @@
     "prefer-stable": true,
     "config": {
         "sort-packages": true,
+        "platform": {
+            "php": "8.1"
+        },
         "allow-plugins": {
             "composer/installers": true,
             "drupal/core-composer-scaffold": true,
