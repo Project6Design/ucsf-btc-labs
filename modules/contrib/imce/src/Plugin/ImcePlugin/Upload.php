@@ -3,7 +3,6 @@
 namespace Drupal\imce\Plugin\ImcePlugin;
 
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\file\FileInterface;
 use Drupal\imce\ImcePluginBase;
 use Drupal\imce\ImceFM;
 
@@ -53,7 +52,9 @@ class Upload extends ImcePluginBase {
     $validators = [];
     // Extension validator.
     $exts = $fm->getConf('extensions', '');
-    $validators['file_validate_extensions'] = [$exts === '*' ? NULL : $exts];
+    if ($exts !== '*') {
+      $validators['file_validate_extensions'] = [$exts];
+    }
     // File size and user quota validator.
     $validators['file_validate_size'] = [
       $fm->getConf('maxsize'),
@@ -70,7 +71,7 @@ class Upload extends ImcePluginBase {
       $validators['file_validate_image_resolution'] = [($width ? $width : 10000) . 'x' . ($height ? $height : 10000)];
     }
     // Name validator.
-    $validators[get_class($this) . '::validateFileName'] = [$fm];
+    $validators['imce_file_validate_name'] = [$fm->getNameFilter()];
     // Save files.
     if ($files = file_save_upload('imce', $validators, $destination, NULL, $replace)) {
       $fs = \Drupal::service('file_system');
@@ -85,18 +86,6 @@ class Upload extends ImcePluginBase {
         $item->addToJs();
       }
     }
-  }
-
-  /**
-   * Validates the name of a file object.
-   */
-  public static function validateFileName(FileInterface $file, ImceFM $fm) {
-    $errors = [];
-    $filename = $file->getFileName();
-    if (!$fm->validateFileName($filename, TRUE)) {
-      $errors[] = t('%filename contains invalid characters.', ['%filename' => $filename]);
-    }
-    return $errors;
   }
 
 }

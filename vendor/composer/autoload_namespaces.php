@@ -6,8 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Twig_' => array($vendorDir . '/twig/twig/lib'),
-    'Stack' => array($vendorDir . '/stack/builder/src'),
     'ML\\IRI' => array($vendorDir . '/ml/iri'),
     'Console' => array($vendorDir . '/pear/console_getopt'),
     'Archive_Tar' => array($vendorDir . '/pear/archive_tar'),

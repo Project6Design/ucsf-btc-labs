@@ -1,0 +1,24 @@
+name: ucsf-btc-labs
+recipe: pantheon
+config:
+  framework: drupal9
+  site: ucsf-btc-labs
+  id: d82a8cbf-614d-4141-b135-d388cd8cded8
+  drupal: true
+  webroot: .
+services:
+  node:
+    type: node
+    build:
+      - npm install
+      - npm install gulp
+      - gulp
+    globals:
+      gulp-cli: latest
+tooling:
+  npm:
+    service: node
+  node:
+    service: node
+  gulp:
+    service: node

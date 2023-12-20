@@ -1,0 +1,10 @@
+'*':
+  host: appserver.${env-name}.d82a8cbf-614d-4141-b135-d388cd8cded8.drush.in
+  paths:
+    files: files
+  uri: ${env-name}-btc-labs.pantheonsite.io
+  user: ${env-name}.d82a8cbf-614d-4141-b135-d388cd8cded8
+  ssh:
+    options: '-p 2222 -o "AddressFamily inet"'
+    tty: false
+

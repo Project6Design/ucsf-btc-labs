@@ -84,7 +84,8 @@ class RouteSubscriber extends RouteSubscriberBase {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array
+  {
     // Ensure that our route alterations occur last so that can not be overridden
     $events[RoutingEvents::ALTER] = ['onAlterRoutes', -9999];  // negative Values means "late"
     return $events;

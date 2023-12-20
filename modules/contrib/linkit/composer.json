@@ -16,10 +16,7 @@
     "source": "http://cgit.drupalcode.org/linkit"
   },
   "require" : {
-    "drupal/core": "^9.4 || ^10.0.0"
-  },
-  "conflict": {
-    "drupal/core": ">=10.1"
+    "drupal/core": "^10.1"
   },
   "license": "GPL-2.0-or-later"
 }

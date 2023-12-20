@@ -136,6 +136,11 @@ class Sql extends QueryPluginBase {
   protected $messenger;
 
   /**
+   * The count field definition.
+   */
+  public array $count_field;
+
+  /**
    * Constructs a Sql object.
    *
    * @param array $configuration
@@ -1434,7 +1439,7 @@ class Sql extends QueryPluginBase {
    * Get the arguments attached to the WHERE and HAVING clauses of this query.
    */
   public function getWhereArgs() {
-    return array_merge([], ...array_column($this->where, 'args'), ...array_column($this->having, 'args'));
+    return array_merge(...array_column($this->where, 'args'), ...array_column($this->having, 'args'));
   }
 
   /**
@@ -1628,6 +1633,7 @@ class Sql extends QueryPluginBase {
 
     // Now load all revisions.
     foreach ($revision_ids_by_type as $entity_type => $revision_ids) {
+      /** @var \Drupal\Core\Entity\RevisionableStorageInterface $entity_storage */
       $entity_storage = $this->entityTypeManager->getStorage($entity_type);
       $entities = [];
 

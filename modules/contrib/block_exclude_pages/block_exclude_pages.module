@@ -5,6 +5,7 @@
  * Contains block_exclude_pages.module.
  */
 
+use Drupal\block_exclude_pages\Plugin\Condition\BlockExcludePagesRequestPath;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\block\Entity\Block;
@@ -135,7 +136,7 @@ function block_exclude_pages_block_access(Block $block, $operation, AccountInter
       if (function_exists('ksm')) {
         ksm($debug_log);
       } else {
-        \Drupal::logger('block_exclude_pages')->notice( print_r($debug_log,1) ); 
+        \Drupal::logger('block_exclude_pages')->notice( print_r($debug_log,1) );
       }
     }
 
@@ -186,4 +187,13 @@ EEE
     ],
   ];
   return $senario;
+}
+
+/**
+ * Implements hook_condition_info_alter().
+ */
+function block_exclude_pages_condition_info_alter(array &$definitions) {
+  if (isset($definitions['request_path']) && $definitions['request_path']['class'] === 'Drupal\\system\\Plugin\\Condition\\RequestPath') {
+    $definitions['request_path']['class'] = 'Drupal\\block_exclude_pages\\Plugin\\Condition\\BlockExcludePagesRequestPath';
+  }
 }

@@ -361,23 +361,6 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
   public function entityClassImplements($interface);
 
   /**
-   * Indicates if the entity type is a subclass of the given class or interface.
-   *
-   * @param string $class
-   *   The class or interface to check.
-   *
-   * @return bool
-   *   TRUE if the entity type is a subclass of the class or interface.
-   *
-   * @deprecated in drupal:8.3.0 and is removed from drupal:10.0.0.
-   *   Use Drupal\Core\Entity\EntityTypeInterface::entityClassImplements()
-   *   instead.
-   *
-   * @see https://www.drupal.org/node/2842808
-   */
-  public function isSubclassOf($class);
-
-  /**
    * Sets the handlers for a given type.
    *
    * @param string $handler_type
@@ -400,6 +383,16 @@ interface EntityTypeInterface extends PluginDefinitionInterface {
    * @return string|bool
    */
   public function getAdminPermission();
+
+  /**
+   * Gets the name of the default collection permission.
+   *
+   * @see \Drupal\Core\Entity\Routing\DefaultHtmlRouteProvider::getCollectionRoute()
+   *
+   * @return string|null
+   *   The collection permission name, or NULL if none.
+   */
+  public function getCollectionPermission(): ?string;
 
   /**
    * Gets the permission granularity level.

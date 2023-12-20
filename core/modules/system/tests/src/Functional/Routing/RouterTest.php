@@ -14,6 +14,7 @@ use Drupal\Core\Url;
  * Functional class for the full integrated routing system.
  *
  * @group Routing
+ * @group #slow
  */
 class RouterTest extends BrowserTestBase {
 
@@ -43,7 +44,6 @@ class RouterTest extends BrowserTestBase {
     $session = $this->getSession();
 
     // Check expected headers from FinishResponseSubscriber.
-    $this->assertSession()->responseHeaderEquals('X-UA-Compatible', 'IE=edge');
     $this->assertSession()->responseHeaderEquals('Content-language', 'en');
     $this->assertSession()->responseHeaderEquals('X-Content-Type-Options', 'nosniff');
     $this->assertSession()->responseHeaderEquals('X-Frame-Options', 'SAMEORIGIN');
@@ -172,7 +172,7 @@ class RouterTest extends BrowserTestBase {
   public function testControllerPlaceholdersDefaultValues() {
     $this->drupalGet('router_test/test4');
     $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->pageTextContains('narf');
+    $this->assertSession()->pageTextContains('Lassie');
 
     // Confirm that the page wrapping is being added, so we're not getting a
     // raw body returned.
