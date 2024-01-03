@@ -1,0 +1,17 @@
+name: 'Photoswipe responive image setup'
+description: 'This module simply sets up a testing environment for testing the photoswipe responsive image formatter.'
+type: module
+package: Testing
+core_version_requirement: ^9.3 || ^10
+
+dependencies:
+  - drupal:media_library
+  - drupal:node
+  - drupal:path
+  - photoswipe:photoswipe
+  - drupal:responsive_image
+
+# Information added by Drupal.org packaging script on 2023-08-09
+version: '4.0.1'
+project: 'photoswipe'
+datestamp: 1691566824

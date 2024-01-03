@@ -1,0 +1,23 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.teaser
+    - field.field.node.node.field_image
+    - field.field.node.node.field_responsive_image
+    - node.type.node
+  module:
+    - user
+id: node.node.teaser
+targetEntityType: node
+bundle: node
+mode: teaser
+content:
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden:
+  field_image: true
+  field_responsive_image: true

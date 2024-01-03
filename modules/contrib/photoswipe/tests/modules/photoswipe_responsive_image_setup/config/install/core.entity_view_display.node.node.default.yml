@@ -1,0 +1,49 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.node.field_image
+    - field.field.node.node.field_responsive_image
+    - node.type.node
+  module:
+    - photoswipe
+    - user
+id: node.node.default
+targetEntityType: node
+bundle: node
+mode: default
+content:
+  field_image:
+    type: photoswipe_field_formatter
+    label: above
+    settings:
+      photoswipe_node_style_first: ''
+      photoswipe_node_style: ''
+      photoswipe_image_style: ''
+      photoswipe_reference_image_field: ''
+      photoswipe_caption: alt
+      photoswipe_caption_custom: ''
+      photoswipe_view_mode: ''
+    third_party_settings: {  }
+    weight: 101
+    region: content
+  field_responsive_image:
+    type: photoswipe_responsive_field_formatter
+    label: above
+    settings:
+      photoswipe_node_style_first: ''
+      photoswipe_node_style: ''
+      photoswipe_image_style: ''
+      photoswipe_reference_image_field: ''
+      photoswipe_caption: alt
+      photoswipe_caption_custom: ''
+      photoswipe_view_mode: ''
+    third_party_settings: {  }
+    weight: 102
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 100
+    region: content
+hidden: {  }

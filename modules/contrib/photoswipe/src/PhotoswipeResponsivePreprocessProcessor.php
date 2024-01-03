@@ -18,7 +18,7 @@ class PhotoswipeResponsivePreprocessProcessor extends PhotoswipePreprocessProces
     $settings = $this->imageDTO->getSettings();
     $image_style_store = $this->entityTypeManager->getStorage('image_style');
     $resp_image_store = $this->entityTypeManager->getStorage('responsive_image_style');
-    $responsive_image_style = $resp_image_store->load($this->imageDTO->getSettings()['photoswipe_node_style']);
+    $responsive_image_style = $resp_image_store->load($settings['photoswipe_node_style']);
 
     $cache_tags = [];
     $image_styles_to_load = [];
@@ -40,27 +40,15 @@ class PhotoswipeResponsivePreprocessProcessor extends PhotoswipePreprocessProces
       '#cache' => [
         'tags' => $cache_tags,
       ],
-      '#style_name' => $this->imageDTO->getSettings()['photoswipe_node_style'],
+      '#style_name' => $settings['photoswipe_node_style'],
     ];
 
     $meta_a = CacheableMetadata::createFromRenderArray($image);
     $meta_b = CacheableMetadata::createFromObject($item->getEntity());
     $meta_a->merge($meta_b)->applyTo($image);
 
-    // If this is the first image:
-    if (isset($variables['delta']) && $variables['delta'] === 0) {
-      // If a special style is selected for the first image:
-      if (!empty($settings['photoswipe_node_style_first'])) {
-        // If the image style isn't hide:
-        if ($settings['photoswipe_node_style_first'] != 'hide') {
-          $responsive_image_style_first = $resp_image_store->load($settings['photoswipe_node_style_first']);
-          $image['#responsive_image_style_id'] = $responsive_image_style_first->id();
-        }
-        // If the image style is "hide" set style name to 'hide'.
-        else {
-          $image['#style_name'] = 'hide';
-        }
-      }
+    if (isset($variables['delta']) && $variables['delta'] === 0 && !empty($settings['photoswipe_node_style_first'])) {
+      $image['#style_name'] = $settings['photoswipe_node_style_first'];
     }
 
     // Render as a standard image if an image style is not given or "hide".

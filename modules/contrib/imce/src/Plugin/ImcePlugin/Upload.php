@@ -52,14 +52,29 @@ class Upload extends ImcePluginBase {
     $validators = [];
     // Extension validator.
     $exts = $fm->getConf('extensions', '');
-    if ($exts !== '*') {
+    if ($exts === '*') {
+      $exts = NULL;
+    }
+    $constraints = class_exists('\Drupal\file\Plugin\Validation\Constraint\FileExtensionConstraint');
+    if ($constraints) {
+      $validators['FileExtension'] = ['extensions' => $exts];
+    }
+    else {
       $validators['file_validate_extensions'] = [$exts];
     }
     // File size and user quota validator.
-    $validators['file_validate_size'] = [
-      $fm->getConf('maxsize'),
-      $fm->getConf('quota'),
-    ];
+    if ($constraints) {
+      $validators['FileSizeLimit'] = [
+        'fileLimit' => $fm->getConf('maxsize'),
+        'userLimit' => $fm->getConf('quota'),
+      ];
+    }
+    else {
+      $validators['file_validate_size'] = [
+        $fm->getConf('maxsize'),
+        $fm->getConf('quota'),
+      ];
+    }
     // Image resolution validator.
     $width = $fm->getConf('maxwidth');
     $height = $fm->getConf('maxheight');
@@ -68,7 +83,13 @@ class Upload extends ImcePluginBase {
       if (function_exists('exif_orientation_validate_image_rotation')) {
         $validators['exif_orientation_validate_image_rotation'] = [];
       }
-      $validators['file_validate_image_resolution'] = [($width ? $width : 10000) . 'x' . ($height ? $height : 10000)];
+      $dims = ($width ?: 10000) . 'x' . ($height ?: 10000);
+      if ($constraints) {
+        $validators['FileImageDimensions'] = ['maxDimensions' => $dims];
+      }
+      else {
+        $validators['file_validate_image_resolution'] = [$dims];
+      }
     }
     // Name validator.
     $validators['imce_file_validate_name'] = [$fm->getNameFilter()];
