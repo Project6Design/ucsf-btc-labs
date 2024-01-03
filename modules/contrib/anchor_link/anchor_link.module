@@ -5,7 +5,6 @@
  * Contains anchor_link.module.
  */
 
-use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -23,42 +22,10 @@ function anchor_link_help($route_name, RouteMatchInterface $route_match) {
       $output .= '  <li>Context menu option to edit or remove links and anchors.</li>';
       $output .= '  <li>Ability to insert a link with the URL using multiple protocols, including an external file if a file manager is integrated.</li>';
       $output .= '</ul></p>';
+      $output .= '<p><a href="https://ckeditor.com/cke4/addon/link">https://ckeditor.com/cke4/addon/link</a></p>';
+      $output .= '<p><a href="https://ckeditor.com/cke4/addon/fakeobjects">https://ckeditor.com/cke4/addon/fakeobjects</a></p>';
       return $output;
 
     default:
-  }
-}
-
-/**
- * Implements hook_ckeditor5_plugin_info_alter().
- */
-function anchor_link_ckeditor5_plugin_info_alter(array &$plugin_definitions): void {
-  $plugins_to_override = [
-    'ckeditor5_arbitraryHtmlSupport',
-  ];
-
-  foreach ($plugins_to_override as $plugin_id) {
-    if (!isset($plugin_definitions[$plugin_id])) {
-      return;
-    }
-
-    $plugin_definition = $plugin_definitions[$plugin_id]->toArray();
-
-    // Make plugin-specific alterations. Disallow the General HTML Support
-    // plugin from controlling links with the attributes handled by the
-    // Anchor plugin.
-    $plugin_definition['ckeditor5']['config']['htmlSupport']['disallow'][] = [
-      'name' => 'a',
-      'attributes' => [
-        'id',
-        'name',
-      ],
-      'classes' => [
-        'ck-anchor',
-      ],
-    ];
-
-    // Update plugin definitions.
-    $plugin_definitions[$plugin_id] = new CKEditor5PluginDefinition($plugin_definition);
   }
 }

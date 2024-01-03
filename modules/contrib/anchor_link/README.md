@@ -1,7 +1,7 @@
 # CKEditor Anchor Link
 
 This plugin module adds the better link dialog and anchor related features
-to CKEditor in Drupal 9:
+to CKEditor in Drupal:
 
 - Dialog to insert links and anchors with some properties.
 - Context menu option to edit or remove links and anchors.
@@ -13,6 +13,12 @@ Most text formats limit HTML tags. If this is the case, it will
 
 E.g. `<a name href hreflang>`
 
+
 ### Requirements
-* Core CKEditor
-* Include the [ckeditor5-anchor-drupal](https://www.npmjs.com/package/@northernco/ckeditor5-anchor-drupal) plugin library via your site's composer file as a drupal-library. See the details in composer.libraries.json; you should be able to copy/paste most of that into your composer.json.
+* CKEditor
+* [CKEditor FakeObjects](https://www.drupal.org/project/fakeobjects) module.
+* [CKEditor Anchor link](https://ckeditor.com/cke4/addon/link) plugin library.
+   Place it in **/libraries/link** directory.
+* CKEditor [Fake Objects](https://ckeditor.com/cke4/addon/fakeobjects)
+  plugin library. Place it in **/libraries/fakeobjects** directory.
+ which managed by the CKEditor fakeobjects module.

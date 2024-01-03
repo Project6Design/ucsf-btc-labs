@@ -20,7 +20,7 @@
         "composer/installers": "^1.12",
         "drupal/address": "^1.11",
         "drupal/admin_toolbar": "^3.2",
-        "drupal/anchor_link": "^3.0.x-dev",
+        "drupal/anchor_link": "^2.6",
         "drupal/better_exposed_filters": "^6.0",
         "drupal/better_normalizers": "^2.0@beta",
         "drupal/block_exclude_pages": "^2.1@beta",

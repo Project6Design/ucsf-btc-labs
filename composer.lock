@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be02cc18f0327e7e7060f14ddb5b5500",
+    "content-hash": "b0b8ad0dd945428c2f1e1f95c79b78d7",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1838,27 +1838,35 @@
         },
         {
             "name": "drupal/anchor_link",
-            "version": "dev-3.0.x",
+            "version": "2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/anchor_link.git",
-                "reference": "4e1a75be6cd377321b90e522902697c98d23cee6"
+                "reference": "8.x-2.6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/anchor_link-8.x-2.6.zip",
+                "reference": "8.x-2.6",
+                "shasum": "deb452a7da610472a4ab3b5fbdf06904c041a225"
             },
             "require": {
-                "drupal/core": "^9 || ^10"
+                "drupal/ckeditor": "*",
+                "drupal/core": "^8 || ^9 || ^10",
+                "drupal/fakeobjects": "~1.0"
             },
             "type": "drupal-module",
             "extra": {
-                "branch-alias": {
-                    "dev-3.0.x": "3.0.x-dev"
-                },
                 "drupal": {
-                    "version": "3.0.0-alpha1+3-dev",
-                    "datestamp": "1703093102",
+                    "version": "8.x-2.6",
+                    "datestamp": "1674976179",
                     "security-coverage": {
-                        "status": "not-covered",
-                        "message": "Dev releases are not covered by Drupal security advisories."
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
                     }
+                },
+                "branch-alias": {
+                    "dev-8.x-2.x": "8.2.x-dev"
                 }
             },
             "notification-url": "https://packages.drupal.org/8/downloads",
@@ -1880,7 +1888,7 @@
                     "homepage": "https://www.drupal.org/user/1414312"
                 }
             ],
-            "description": "This plugin module adds the better link dialog and anchor related features to CKEditor in Drupal 9.",
+            "description": "This plugin module adds the better link dialog and anchor related features to CKEditor in Drupal.",
             "homepage": "https://www.drupal.org/project/anchor_link",
             "support": {
                 "source": "http://cgit.drupalcode.org/anchor_link",
@@ -11868,7 +11876,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "drupal/anchor_link": 20,
         "drupal/better_normalizers": 10,
         "drupal/block_exclude_pages": 10,
         "drupal/config_update": 15,

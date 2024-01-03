@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '9e61bc809e7a7da3db7095b0f9e09f66e7beff31',
+        'reference' => 'fc7d28536c63e028536d3c27e6c48911d50b4de8',
         'name' => 'drupal/legacy-project',
         'dev' => true,
     ),
@@ -251,14 +251,12 @@
             'dev_requirement' => false,
         ),
         'drupal/anchor_link' => array(
-            'pretty_version' => 'dev-3.0.x',
-            'version' => 'dev-3.0.x',
+            'pretty_version' => '2.6.0',
+            'version' => '2.6.0.0',
             'type' => 'drupal-module',
             'install_path' => __DIR__ . '/../../modules/contrib/anchor_link',
-            'aliases' => array(
-                0 => '3.0.x-dev',
-            ),
-            'reference' => '4e1a75be6cd377321b90e522902697c98d23cee6',
+            'aliases' => array(),
+            'reference' => '8.x-2.6',
             'dev_requirement' => false,
         ),
         'drupal/better_exposed_filters' => array(
@@ -753,7 +751,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '9e61bc809e7a7da3db7095b0f9e09f66e7beff31',
+            'reference' => 'fc7d28536c63e028536d3c27e6c48911d50b4de8',
             'dev_requirement' => false,
         ),
         'drupal/linkit' => array(
@@ -1334,9 +1332,9 @@
         'psr/container-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '^1.0',
-                1 => '1.1|2.0',
-                2 => '^1.1 || ^2.0',
+                0 => '^1.1 || ^2.0',
+                1 => '^1.0',
+                2 => '1.1|2.0',
             ),
         ),
         'psr/event-dispatcher' => array(
