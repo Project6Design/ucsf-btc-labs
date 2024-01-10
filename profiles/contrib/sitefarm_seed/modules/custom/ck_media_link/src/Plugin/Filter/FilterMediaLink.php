@@ -7,14 +7,14 @@ use Drupal\filter\FilterProcessResult;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Path\PathValidator;
-use Drupal\Core\Path\AliasManager;
+use Drupal\path_alias\AliasManager;
 
 /**
  * @Filter(
  *   id = "filter_media_link",
  *   title = @Translation("Media Link Filter"),
  *   description = @Translation("Wrap Media Link widgets with a link."),
- *   type = Drupal\filter\Plugin\FilterInterface::TYPE_MARKUP_LANGUAGE,
+ *   type = Drupal\filter\Plugin\FilterInterface::TYPE_TRANSFORM_IRREVERSIBLE,
  * )
  */
 class FilterMediaLink extends FilterBase implements ContainerFactoryPluginInterface {
@@ -25,7 +25,7 @@ class FilterMediaLink extends FilterBase implements ContainerFactoryPluginInterf
   protected $pathValidator;
 
   /**
-   * @var \Drupal\Core\Path\AliasManager $aliasManager
+   * @var AliasManager $aliasManager
    */
   protected $aliasManager;
 
@@ -40,7 +40,7 @@ class FilterMediaLink extends FilterBase implements ContainerFactoryPluginInterf
    *   The plugin implementation definition.
    * @param \Drupal\Core\Path\PathValidator $pathValidator
    *   Path Validator service.
-   * @param \Drupal\Core\Path\AliasManager $aliasManager
+   * @param \Drupal\path_alias\AliasManager $aliasManager
    *   Alias Manager service.
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, PathValidator $pathValidator, $aliasManager) {

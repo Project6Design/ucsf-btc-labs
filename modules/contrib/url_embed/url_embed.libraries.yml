@@ -1,0 +1,12 @@
+# CKEditor 5
+plugin:
+  js:
+    js/ckeditor5_plugins/urlembed/build/urlembed.js: { preprocess: false, minified: true }
+  dependencies:
+    - core/ckeditor5
+    - core/drupal
+    - core/drupal.ajax
+admin:
+  css:
+    theme:
+      css/ckeditor5.css: { }

@@ -2,3 +2,7 @@ services:
   url_embed:
     class: Drupal\url_embed\UrlEmbed
     arguments: [['config'], '@?config.factory']
+  url_embed.dialog_access:
+    class: Drupal\url_embed\Access\UrlEmbedAccessCheck
+    tags:
+      - { name: access_check, applies_to: _url_embed_editor_access }

@@ -1,0 +1,35 @@
+url_embed_button:
+  ckeditor5:
+    plugins:
+      - urlembed.UrlEmbed
+      # The name of the plugin is determined by the filename of the buildfile
+      # plus the componentFactory.add() name in the UI's init() function.
+      # The filename of the buildfile is determined by the directory name
+      # of the plugin.
+    config:
+      urlEmbed:
+        openDialog:
+          func:
+            name: Drupal.ckeditor5.openDialog
+            invoke: false
+        dialogSettings:
+          height: 75%
+          dialogClass: url-embed-widget-modal
+          title: Url Embed
+
+  drupal:
+    label: urlembed
+    class: Drupal\url_embed\Plugin\CKEditor5Plugin\UrlEmbed
+    library: url_embed/plugin
+    # The library that provides the built JS plugin.
+    admin_library: url_embed/admin
+    toolbar_items:
+      # This name determines what will be shown in the Drupal interface.
+      urlembed:
+        label: Url Embed
+    elements:
+      - <drupal-url>
+      - <drupal-url data-embed-button>
+      - <drupal-url data-embed-url>
+      - <drupal-url data-entity-label>
+      - <drupal-url data-url-provider>

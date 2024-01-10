@@ -12,3 +12,10 @@ url_embed.admin:
     _title: 'Url Embed'
   requirements:
     _permission: 'administer url_embed'
+url_embed.cke5dialog:
+  path: '/url-embedcke5/dialog/{editor}'
+  defaults:
+    _form: '\Drupal\url_embed\Form\UrlEmbedCke5Dialog'
+    _title: 'Embed URL'
+  requirements:
+    _url_embed_editor_access: 'TRUE'

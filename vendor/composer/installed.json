@@ -2549,17 +2549,17 @@
         },
         {
             "name": "drupal/core",
-            "version": "10.2.0",
-            "version_normalized": "10.2.0.0",
+            "version": "10.2.1",
+            "version_normalized": "10.2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core.git",
-                "reference": "2f6c400cd6200f6e5900754e7e363cac811546b8"
+                "reference": "0050280087b8ed1fb145fcf22e01ad53c85931db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core/zipball/2f6c400cd6200f6e5900754e7e363cac811546b8",
-                "reference": "2f6c400cd6200f6e5900754e7e363cac811546b8",
+                "url": "https://api.github.com/repos/drupal/core/zipball/0050280087b8ed1fb145fcf22e01ad53c85931db",
+                "reference": "0050280087b8ed1fb145fcf22e01ad53c85931db",
                 "shasum": ""
             },
             "require": {
@@ -2639,7 +2639,7 @@
             "suggest": {
                 "ext-zip": "Needed to extend the plugin.manager.archiver service capability with the handling of files in the ZIP format."
             },
-            "time": "2023-12-15T22:46:04+00:00",
+            "time": "2024-01-05T09:27:16+00:00",
             "type": "drupal-core",
             "extra": {
                 "drupal-scaffold": {
@@ -2709,14 +2709,14 @@
             ],
             "description": "Drupal is an open source content management platform powering millions of websites and applications.",
             "support": {
-                "source": "https://github.com/drupal/core/tree/10.2.0"
+                "source": "https://github.com/drupal/core/tree/10.2.1"
             },
             "install-path": "../../core"
         },
         {
             "name": "drupal/core-composer-scaffold",
-            "version": "10.2.0",
-            "version_normalized": "10.2.0.0",
+            "version": "10.2.1",
+            "version_normalized": "10.2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-composer-scaffold.git",
@@ -2762,14 +2762,14 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-composer-scaffold/tree/10.2.0"
+                "source": "https://github.com/drupal/core-composer-scaffold/tree/10.2.1"
             },
             "install-path": "../drupal/core-composer-scaffold"
         },
         {
             "name": "drupal/core-project-message",
-            "version": "10.2.0",
-            "version_normalized": "10.2.0.0",
+            "version": "10.2.1",
+            "version_normalized": "10.2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-project-message.git",
@@ -2806,23 +2806,23 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-project-message/tree/10.2.0"
+                "source": "https://github.com/drupal/core-project-message/tree/10.2.1"
             },
             "install-path": "../drupal/core-project-message"
         },
         {
             "name": "drupal/core-recommended",
-            "version": "10.2.0",
-            "version_normalized": "10.2.0.0",
+            "version": "10.2.1",
+            "version_normalized": "10.2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-recommended.git",
-                "reference": "13b68ef925c75455fd6cb6766d5879790727d83f"
+                "reference": "e4809a6155daf96eb927f59d44e9f26fb5607dbe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drupal/core-recommended/zipball/13b68ef925c75455fd6cb6766d5879790727d83f",
-                "reference": "13b68ef925c75455fd6cb6766d5879790727d83f",
+                "url": "https://api.github.com/repos/drupal/core-recommended/zipball/e4809a6155daf96eb927f59d44e9f26fb5607dbe",
+                "reference": "e4809a6155daf96eb927f59d44e9f26fb5607dbe",
                 "shasum": ""
             },
             "require": {
@@ -2831,7 +2831,7 @@
                 "doctrine/annotations": "~1.14.3",
                 "doctrine/deprecations": "~1.1.2",
                 "doctrine/lexer": "~2.1.0",
-                "drupal/core": "10.2.0",
+                "drupal/core": "10.2.1",
                 "egulias/email-validator": "~4.0.2",
                 "guzzlehttp/guzzle": "~7.8.1",
                 "guzzlehttp/promises": "~2.0.2",
@@ -2885,7 +2885,7 @@
             "conflict": {
                 "webflo/drupal-core-strict": "*"
             },
-            "time": "2023-12-15T22:46:04+00:00",
+            "time": "2024-01-05T09:27:16+00:00",
             "type": "metapackage",
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -2893,14 +2893,14 @@
             ],
             "description": "Core and its dependencies with known-compatible minor versions. Require this project INSTEAD OF drupal/core.",
             "support": {
-                "source": "https://github.com/drupal/core-recommended/tree/10.2.0"
+                "source": "https://github.com/drupal/core-recommended/tree/10.2.1"
             },
             "install-path": null
         },
         {
             "name": "drupal/core-vendor-hardening",
-            "version": "10.2.0",
-            "version_normalized": "10.2.0.0",
+            "version": "10.2.1",
+            "version_normalized": "10.2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-vendor-hardening.git",
@@ -2937,7 +2937,7 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-vendor-hardening/tree/10.2.0"
+                "source": "https://github.com/drupal/core-vendor-hardening/tree/10.2.1"
             },
             "install-path": "../drupal/core-vendor-hardening"
         },
@@ -6266,18 +6266,18 @@
         },
         {
             "name": "drupal/url_embed",
-            "version": "2.0.0-alpha1",
-            "version_normalized": "2.0.0.0-alpha1",
+            "version": "2.0.0-alpha2",
+            "version_normalized": "2.0.0.0-alpha2",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/url_embed.git",
-                "reference": "2.0.0-alpha1"
+                "reference": "2.0.0-alpha2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/url_embed-2.0.0-alpha1.zip",
-                "reference": "2.0.0-alpha1",
-                "shasum": "e679914d700dc494468720b966e373c4243cd069"
+                "url": "https://ftp.drupal.org/files/projects/url_embed-2.0.0-alpha2.zip",
+                "reference": "2.0.0-alpha2",
+                "shasum": "d44d7a60271a11160f0562b74dc26fb15c82183a"
             },
             "require": {
                 "drupal/core": "^9 || ^10",
@@ -6290,8 +6290,8 @@
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "2.0.0-alpha1",
-                    "datestamp": "1670487734",
+                    "version": "2.0.0-alpha2",
+                    "datestamp": "1704363828",
                     "security-coverage": {
                         "status": "not-covered",
                         "message": "Alpha releases are not covered by Drupal security advisories."
@@ -6323,6 +6323,10 @@
                 {
                     "name": "Drupal Media Team",
                     "homepage": "https://www.drupal.org/user/3260690"
+                },
+                {
+                    "name": "mark_fullmer",
+                    "homepage": "https://www.drupal.org/user/2612816"
                 },
                 {
                     "name": "slashrsm",
@@ -8675,17 +8679,17 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.50",
-            "version_normalized": "1.10.50.0",
+            "version": "1.10.55",
+            "version_normalized": "1.10.55.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "06a98513ac72c03e8366b5a0cb00750b487032e4"
+                "reference": "9a88f9d18ddf4cf54c922fbeac16c4cb164c5949"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/06a98513ac72c03e8366b5a0cb00750b487032e4",
-                "reference": "06a98513ac72c03e8366b5a0cb00750b487032e4",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9a88f9d18ddf4cf54c922fbeac16c4cb164c5949",
+                "reference": "9a88f9d18ddf4cf54c922fbeac16c4cb164c5949",
                 "shasum": ""
             },
             "require": {
@@ -8694,7 +8698,7 @@
             "conflict": {
                 "phpstan/phpstan-shim": "*"
             },
-            "time": "2023-12-13T10:59:42+00:00",
+            "time": "2024-01-08T12:32:40+00:00",
             "bin": [
                 "phpstan",
                 "phpstan.phar"
