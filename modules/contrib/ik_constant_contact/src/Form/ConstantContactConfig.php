@@ -132,7 +132,7 @@ class ConstantContactConfig extends ConfigFormBase {
     $codeChallenge = null;
 
     if (
-      (!$this->moduleHandler->moduleExists('automated_cron') || !$this->moduleHandler->moduleExists('ultimate_cron')) && 
+      (!$this->moduleHandler->moduleExists('automated_cron') && !$this->moduleHandler->moduleExists('ultimate_cron')) && 
       (int)$this->currentUser->id() !== 0 && 
       $this->currentUser->hasPermission('administer constant contact configuration') &&
       $this->currentUser->hasPermission('administer modules')

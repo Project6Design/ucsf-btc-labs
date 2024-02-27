@@ -433,7 +433,7 @@ final class DeprecationAnalyzer {
     // Assume next step is to relax (there were no errors found).
     $result['data']['totals']['upgrade_status_next'] = ProjectCollector::NEXT_RELAX;
 
-    foreach ($result['data']['files'] as $path => &$errors) {
+    foreach ($result['data']['files'] as &$errors) {
       foreach ($errors['messages'] as &$error) {
 
         // Overwrite message with processed text. Save category.
@@ -792,11 +792,43 @@ final class DeprecationAnalyzer {
       'Call to deprecated function file_move(). Deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use Drupal\file\FileRepositoryInterface::move() instead.',
       'Call to deprecated function file_save_data(). Deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use Drupal\file\FileRepositoryInterface::writeData() instead.',
 
-      // 0.12.3 (0.12.2 has no rule additions.)
+      // 0.12.2
+      // No new rules
+
+      // 0.12.3
       'Call to deprecated function user_password(). Deprecated in drupal:9.1.0 and is removed from drupal:10.0.0. Use \Drupal\Core\Password\PasswordGeneratorInterface::generate() instead.',
 
       // 0.12.4
       'Call to deprecated function file_build_uri(). Deprecated in drupal:9.3.0 and is removed from drupal:10.0.0 without replacement.',
+
+      // 0.13.0
+      // No new rules
+
+      // 0.13.1
+      // Covers https://www.drupal.org/node/2909426 ($modules property in tests), but not identified in contrib by phpstan.
+
+      // 0.15.0
+      // No new rules
+
+      // 0.15.1
+      // No new rules
+
+      // 0.18.0
+      // Add TwigSetList::TWIG_240 to D9 deprecations (https://github.com/palantirnet/drupal-rector/pull/223) -- not tracking non-Drupal coverage here
+      // system_sort_modules_by_info_name: (https://www.drupal.org/node/3225999) -- not found in contrib
+      'Call to deprecated function module_load_install(). Deprecated in drupal:9.4.0 and is removed from drupal:10.0.0. Use Drupal::moduleHandler()->loadInclude($module, \'install\') instead. Note, the replacement no longer allows including code from uninstalled modules.',
+      'Call to deprecated function watchdog_exception(). Deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use Use Drupal\Core\Utility\Error::logException() instead.',
+      'Call to deprecated function taxonomy_vocabulary_get_names(). Deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use Drupal::entityQuery(\'taxonomy_vocabulary\')->execute() instead.',
+      // taxonomy_term_uri
+      'Call to deprecated function taxonomy_term_load_multiple_by_name(). Deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use Drupal::entityTypeManager()->getStorage(\'taxonomy_term\')->loadByProperties([\'name\' => $name, \'vid\' => $vid]) instead, to get a list of taxonomy term entities having the same name and keyed by their term ID.',
+      // taxonomy_terms_static_reset -- not found in contrib
+      // taxonomy_vocabulary_static_reset -- not found in contrib
+      'Call to deprecated function taxonomy_implode_tags(). Deprecated in drupal:9.3.0 and is removed from drupal:10.0.0. Use Drupal\Core\Entity\Element\EntityAutocomplete::getEntityLabels() instead.',
+      // taxonomy_term_title -- not found in contrib
+      // Drupal 9 rector now includes PHPUnit rector (PHPUnitLevelSetList::UP_TO_PHPUNIT_90)
+
+      // 0.18.1
+      'Drupal\Tests\BrowserTestBase::$defaultTheme is required in drupal:9.0.0 when using an install profile that does not set a default theme. See https://www.drupal.org/node/3083055, which includes recommendations on which theme to use.',
     ];
     return
       in_array($string, $rector_covered) ||

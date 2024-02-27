@@ -553,7 +553,7 @@ class ProjectCollector {
    * A customized version of Semver::satisfies(), since that only works for
    * a == condition.
    *
-   * @paran string $constraints
+   * @param string $constraints
    *   Composer compatible constraints from core_version_requirement or
    *   drupal/core requirement.
    *
@@ -567,19 +567,21 @@ class ProjectCollector {
   }
 
   /**
-   * Checks constraint compatibility with PHP 8.
+   * Checks constraint compatibility with a PHP version.
    *
    * A customized version of Semver::satisfies(), since that only works for
    * a == condition.
    *
-   * @paran string $constraints
+   * @param string $constraints
    *   Composer compatible constraints from a PHP version requirement.
+   * @param string $php
+   *   Optional PHP version number. Defaults to 8.0.0.
    *
    * @return bool
    */
-  public static function isCompatibleWithPHP8(string $constraints) {
+  public static function isCompatibleWithPHP(string $constraints, string $php = '8.0.0') {
     $version_parser = new VersionParser();
-    $provider = new Constraint('>=', $version_parser->normalize('8.0.0'));
+    $provider = new Constraint('>=', $version_parser->normalize($php));
     $parsed_constraints = $version_parser->parseConstraints($constraints);
     return $parsed_constraints->matches($provider);
   }
@@ -594,9 +596,9 @@ class ProjectCollector {
     $major = (int) \Drupal::VERSION;
     switch ($major) {
       case 9:
-        return '9.4';
+        return '9.5';
       case 10:
-        return '10.0';
+        return '10.1';
       }
     return '';
   }

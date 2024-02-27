@@ -51,7 +51,7 @@ final class ExtensionMetadataDeprecationAnalyzer {
         }
 
         if (!isset($info['core_version_requirement'])) {
-          $deprecations[] = new DeprecationMessage("Add core_version_requirement: ^9 || ^10 to designate that the extension is compatible with Drupal 10. See https://drupal.org/node/3070687.", $error_path, 0);
+          $deprecations[] = new DeprecationMessage("Add core_version_requirement to designate which Drupal versions is the extension compatible with. See https://drupal.org/node/3070687.", $error_path, 0);
         }
         elseif (!ProjectCollector::isCompatibleWithNextMajorDrupal($info['core_version_requirement'])) {
           $deprecations[] = new DeprecationMessage("Value of core_version_requirement: {$info['core_version_requirement']} is not compatible with the next major version of Drupal core. See https://drupal.org/node/3070687.", $error_path, 0);
@@ -87,10 +87,10 @@ final class ExtensionMetadataDeprecationAnalyzer {
         $deprecations[] = new DeprecationMessage("Parse error in composer.json. Having a composer.json is not a requirement in general, but if there is one, it should be valid. See https://drupal.org/node/2514612.", $error_path, 0);
       }
       elseif (!empty($composer_json->require->{'drupal/core'}) && !projectCollector::isCompatibleWithNextMajorDrupal($composer_json->require->{'drupal/core'})) {
-        $deprecations[] = new DeprecationMessage("The drupal/core requirement is not compatible with the next major version of Drupal. Either remove it or update it to be compatible. See https://drupal.org/node/2514612#s-drupal-9-compatibility.", $error_path, 0);
+        $deprecations[] = new DeprecationMessage("The drupal/core requirement is not compatible with the next major version of Drupal. Either remove it or update it to be compatible. See https://www.drupal.org/docs/develop/using-composer/add-a-composerjson-file#core-compatibility.", $error_path, 0);
       }
-      elseif ((projectCollector::getDrupalCoreMajorVersion() > 8) && !empty($composer_json->require->{'php'}) && !projectCollector::isCompatibleWithPHP8($composer_json->require->{'php'})) {
-        $deprecations[] = new DeprecationMessage("The PHP requirement is not compatible with PHP 8. Once the codebase is actually compatible, either remove this limitation or update it to be compatible.", $error_path, 0);
+      elseif (!empty($composer_json->require->{'php'}) && !projectCollector::isCompatibleWithPHP($composer_json->require->{'php'}, '8.1.0')) {
+        $deprecations[] = new DeprecationMessage("The PHP requirement is not compatible with PHP 8.1. Once the codebase is actually compatible, either remove this limitation or update it to be compatible.", $error_path, 0);
       }
     }
     return $deprecations;

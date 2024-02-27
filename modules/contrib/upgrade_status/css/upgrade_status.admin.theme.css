@@ -7,8 +7,8 @@
   margin-left: 0;
 }
 [dir="rtl"] .drupal-upgrade-status-form .button {
-  margin-left: inherit;
   margin-right: 0;
+  margin-left: inherit;
 }
 
 .upgrade-status-overview {
@@ -22,9 +22,9 @@
   color: inherit;
 }
 .upgrade-status-overview th {
-  background-color: #f5f5f2;
-  border: 1px solid #ccc;
   width: 33%;
+  border: 1px solid #ccc;
+  background-color: #f5f5f2;
 }
 .upgrade-status-overview td {
   vertical-align: top;
@@ -39,9 +39,9 @@
 
 .upgrade-status-summary > summary,
 .upgrade-status-summary-environment > summary {
-  background-color: #f5f5f2;
   margin: 0 0 1em 0;
   border-bottom: 1px solid #ccc;
+  background-color: #f5f5f2;
 }
 
 .upgrade-status-summary table,
@@ -83,8 +83,8 @@
 [dir="rtl"] .upgrade-status-error-list tr > td.status-info,
 [dir="rtl"] .upgrade-status-summary tr > td.status-info,
 [dir="rtl"] .upgrade-status-summary-environment tr > td.status-info {
-  padding-left: 0;
   padding-right: 35px; /* LTR */
+  padding-left: 0;
   /* @todo x background position for RTL */
 }
 
@@ -94,8 +94,8 @@
 .upgrade-status-summary-environment tr.known-error,
 .upgrade-status-summary-label-rector,
 .upgrade-status-summary-label-manual {
-  background-color: #fcf4f2;
   color: #a51b00;
+  background-color: #fcf4f2;
 }
 
 .upgrade-status-error-list tr.known-errors > td.status-info,
@@ -109,8 +109,8 @@
 .upgrade-status-summary-environment tr.known-warning,
 .upgrade-status-summary-label-update,
 .upgrade-status-summary-label-remove {
-  background-color: #fdf8ed;
   color: #734c00;
+  background-color: #fdf8ed;
 }
 
 .upgrade-status-error-list tr.known-warnings > td.status-info,
@@ -128,8 +128,8 @@
 .upgrade-status-next-step-relax tr,
 .upgrade-status-summary-environment tr.no-known-error,
 .upgrade-status-summary-label-relax {
-  background-color: #f3faef;
   color: #325e1c;
+  background-color: #f3faef;
 }
 
 .upgrade-status-error-list tr.no-known-error > td.status-info,
@@ -141,8 +141,8 @@
 .upgrade-status-error-list tr.rector-covered,
 .upgrade-status-next-step-collaborate tr,
 .upgrade-status-summary-label-collaborate {
-  background-color: #f0f8ff;
   color: #000;
+  background-color: #f0f8ff;
 }
 
 .upgrade-status-error-list tr.rector-covered > td.status-info {
@@ -164,9 +164,9 @@
 
 .upgrade-status-result-circle {
   display: block;
-  margin: 0 0 1em 1em;
-  height: 5em;
   float: right;
+  height: 5em;
+  margin: 0 0 1em 1em;
 }
 .upgrade-status-result-circle .circle-bg {
   fill: none;
@@ -177,7 +177,9 @@
   fill: none;
   stroke-width: 2.8;
   stroke-linecap: round;
-  animation: progress 1s ease-out forwards;
+  animation-duration: 1s;
+  animation-timing-function: ease-out;
+  animation-direction: forwards;
   stroke: #325e1c;
 }
 .upgrade-status-result-circle .percentage {
@@ -190,11 +192,11 @@
 .upgrade-status-error-label {
   margin-left: 1em;
   padding: 3px;
+  white-space: nowrap;
+  color: #fff;
   border-radius: 3px;
   background-color: #fb8800;
-  color: #fff;
   font-size: 11px;
-  white-space: nowrap;
 }
 .upgrade-status-ok-label {
   background-color: #7bae4a;

@@ -6,6 +6,7 @@ config:
   id: d82a8cbf-614d-4141-b135-d388cd8cded8
   drupal: true
   webroot: .
+  php: '8.2'
 services:
   node:
     type: node

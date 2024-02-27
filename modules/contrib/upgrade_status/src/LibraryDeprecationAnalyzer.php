@@ -344,7 +344,7 @@ final class LibraryDeprecationAnalyzer {
       $potential_libraries = array_values(
         array_map(
           function($token) {
-            list($type, $value, $line) = $token;
+            list(, $value, $line) = $token;
             return [
               'value' => substr($value, 1, -1),
               'line' => $line,

@@ -41,8 +41,8 @@ class UpgradeStatusAnalyzeTest extends UpgradeStatusTestBase {
     $file = reset($report['data']['files']);
     $message = $file['messages'][0];
     $this->assertEquals('fatal.php', basename(key($report['data']['files'])));
-    $this->assertEquals("Syntax error, unexpected T_STRING on line 3", $message['message']);
-    $this->assertEquals(3, $message['line']);
+    $this->assertEquals("Syntax error, unexpected T_STRING on line 5", $message['message']);
+    $this->assertEquals(5, $message['line']);
     $file = next($report['data']['files']);
     $this->assertEquals('UpgradeStatusTestErrorController.php', basename(key($report['data']['files'])));
     $message = $file['messages'][0];
@@ -71,7 +71,7 @@ class UpgradeStatusAnalyzeTest extends UpgradeStatusTestBase {
     $file = next($report['data']['files']);
     $this->assertEquals('upgrade_status_test_error.info.yml', basename(key($report['data']['files'])));
     $message = $file['messages'][0];
-    $this->assertEquals("Add core_version_requirement: ^9 || ^10 to designate that the extension is compatible with Drupal 10. See https://drupal.org/node/3070687.", $message['message']);
+    $this->assertEquals("Add core_version_requirement to designate which Drupal versions is the extension compatible with. See https://drupal.org/node/3070687.", $message['message']);
     $this->assertEquals(0, $message['line']);
 
     // The Drupal 10 compatible test modules are not Drupal 11 compatible.
@@ -118,7 +118,7 @@ class UpgradeStatusAnalyzeTest extends UpgradeStatusTestBase {
     $this->assertEquals(14, $message['line']);
     $this->assertEquals($this->getDrupalCoreMajorVersion() < 10 ? 'ignore' : 'old', $message['upgrade_status_category']);
     $message = $file['messages'][2];
-    $this->assertEquals("Call to deprecated function upgrade_status_test_contrib_error_function_10_to_11(). Deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use the replacement instead.", $message['message']);
+    $this->assertEquals("Call to deprecated function upgrade_status_test_contrib_error_function_10_to_11(). Deprecated in drupal:10.3.0 and is removed from drupal:11.0.0. Use the replacement instead.", $message['message']);
     $this->assertEquals(15, $message['line']);
     $this->assertEquals($this->getDrupalCoreMajorVersion() < 10 ? 'ignore' : 'later', $message['upgrade_status_category']);
     $message = $file['messages'][3];
@@ -128,7 +128,7 @@ class UpgradeStatusAnalyzeTest extends UpgradeStatusTestBase {
     $file = next($report['data']['files']);
     $this->assertEquals('upgrade_status_test_contrib_error.info.yml', basename(key($report['data']['files'])));
     $message = $file['messages'][0];
-    $this->assertEquals("Add core_version_requirement: ^9 || ^10 to designate that the extension is compatible with Drupal 10. See https://drupal.org/node/3070687.", $message['message']);
+    $this->assertEquals("Add core_version_requirement to designate which Drupal versions is the extension compatible with. See https://drupal.org/node/3070687.", $message['message']);
     $this->assertEquals(0, $message['line']);
     $this->assertEquals('uncategorized', $message['upgrade_status_category']);
 
@@ -136,11 +136,13 @@ class UpgradeStatusAnalyzeTest extends UpgradeStatusTestBase {
     $this->assertNotEmpty($report);
     $this->assertEquals(4, $report['data']['totals']['file_errors']);
     $this->assertCount(2, $report['data']['files']);
+
     if ($this->getDrupalCoreMajorVersion() < 10) {
       // In Drupal 9, the spaceless tag deprecation is found with Twig 2, but
       // the info file is properly compatible with Drupal 10.
       $file = array_shift($report['data']['files']);
-      $this->assertEquals('The spaceless tag in "modules/contrib/upgrade_status/tests/modules/upgrade_status_test_twig/templates/spaceless.html.twig" at line 2 is deprecated since Twig 2.7, use the "spaceless" filter with the "apply" tag instead. See https://drupal.org/node/3071078.', $file['messages'][0]['message']);
+      $upgrade_status_test_twig_directory = $this->container->get('module_handler')->getModule('upgrade_status_test_twig')->getPath();
+      $this->assertEquals(sprintf('The spaceless tag in "%s/templates/spaceless.html.twig" at line 2 is deprecated since Twig 2.7, use the "spaceless" filter with the "apply" tag instead. See https://drupal.org/node/3071078.', $upgrade_status_test_twig_directory), $file['messages'][0]['message']);
     }
     $file = array_shift($report['data']['files']);
     $this->assertEquals('Twig Filter "deprecatedfilter" is deprecated. See https://drupal.org/node/3071078.', $file['messages'][0]['message']);

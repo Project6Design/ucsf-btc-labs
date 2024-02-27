@@ -23,7 +23,6 @@ return array(
     '2f69d3914119f042cca9e44442d5ce95' => $baseDir . '/core/includes/bootstrap.inc',
     '23c18046f52bef3eea034657bafda50f' => $vendorDir . '/symfony/polyfill-php81/bootstrap.php',
     '9b38cf48e83f5d8f60375221cd213eee' => $vendorDir . '/phpstan/phpstan/bootstrap.php',
-    'c9d07b32a2e02bc0fc582d4f0c1b56cc' => $vendorDir . '/laminas/laminas-servicemanager/src/autoload.php',
     '79f66bc0a1900f77abe4a9a299057a0a' => $vendorDir . '/starkbank/ecdsa/src/ellipticcurve.php',
     '09fc349b549513bf7f4291502426f919' => $vendorDir . '/embed/embed/src/functions.php',
     '801c31d8ed748cfa537fa45402288c95' => $vendorDir . '/psy/psysh/src/functions.php',

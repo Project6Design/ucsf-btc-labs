@@ -42,6 +42,8 @@ function ik_constant_contact_schema() {
     ],
     'primary key' => ['timestamp'],
   ];
+
+  return $schema;
 }
 
 /**

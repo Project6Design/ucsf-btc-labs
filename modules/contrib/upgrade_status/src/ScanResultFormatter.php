@@ -9,7 +9,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
-use MathieuViossat\Util\ArrayToTextTable;
+use dekor\ArrayToTextTable;
 
 /**
  * Format scan results for display or export.
@@ -262,7 +262,7 @@ class ScanResultFormatter {
       'rector' => [
         $this->t('Fix now with automation'),
         'rector-covered',
-        $this->t('Avoid some manual work by using <a href="@drupal-rector">drupal-rector to fix issues automatically</a> or <a href="@upgrade-rector">Upgrade Rector to generate patches</a>.', ['@drupal-rector' => 'https://www.drupal.org/project/rector', '@upgrade-rector' => 'https://www.drupal.org/project/upgrade_rector']),
+        $this->t('Avoid some manual work by using <a href="@drupal-rector">drupal-rector to fix issues automatically</a>.', ['@drupal-rector' => 'https://www.drupal.org/project/rector']),
       ],
       'now' => [
         $this->t('Fix now manually'),
@@ -480,7 +480,7 @@ class ScanResultFormatter {
         ];
       }
       $asciiRenderer = new ArrayToTextTable($table);
-      $tables .= $asciiRenderer->getTable() . "\n";
+      $tables .= $asciiRenderer->render() . "\n";
     }
     $build['data'] = $tables;
 

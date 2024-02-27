@@ -24,7 +24,6 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         '2f69d3914119f042cca9e44442d5ce95' => __DIR__ . '/../..' . '/core/includes/bootstrap.inc',
         '23c18046f52bef3eea034657bafda50f' => __DIR__ . '/..' . '/symfony/polyfill-php81/bootstrap.php',
         '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
-        'c9d07b32a2e02bc0fc582d4f0c1b56cc' => __DIR__ . '/..' . '/laminas/laminas-servicemanager/src/autoload.php',
         '79f66bc0a1900f77abe4a9a299057a0a' => __DIR__ . '/..' . '/starkbank/ecdsa/src/ellipticcurve.php',
         '09fc349b549513bf7f4291502426f919' => __DIR__ . '/..' . '/embed/embed/src/functions.php',
         '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
@@ -40,6 +39,10 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         'm' => 
         array (
             'mglaman\\PHPStanDrupal\\' => 22,
+        ),
+        'd' => 
+        array (
+            'dekor\\' => 6,
         ),
         'T' => 
         array (
@@ -101,16 +104,12 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         ),
         'M' => 
         array (
-            'MathieuViossat\\Util\\' => 20,
             'Masterminds\\' => 12,
             'ML\\JsonLD\\' => 10,
         ),
         'L' => 
         array (
             'League\\Container\\' => 17,
-            'Laminas\\Text\\' => 13,
-            'Laminas\\Stdlib\\' => 15,
-            'Laminas\\ServiceManager\\' => 23,
         ),
         'H' => 
         array (
@@ -184,6 +183,10 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         'mglaman\\PHPStanDrupal\\' => 
         array (
             0 => __DIR__ . '/..' . '/mglaman/phpstan-drupal/src',
+        ),
+        'dekor\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dekor/php-array-table/src',
         ),
         'Twig\\' => 
         array (
@@ -370,10 +373,6 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         array (
             0 => __DIR__ . '/..' . '/phpstan/phpstan-deprecation-rules/src',
         ),
-        'MathieuViossat\\Util\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/mathieuviossat/arraytotexttable/src',
-        ),
         'Masterminds\\' => 
         array (
             0 => __DIR__ . '/..' . '/masterminds/html5/src',
@@ -385,18 +384,6 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         'League\\Container\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/container/src',
-        ),
-        'Laminas\\Text\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/laminas/laminas-text/src',
-        ),
-        'Laminas\\Stdlib\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/laminas/laminas-stdlib/src',
-        ),
-        'Laminas\\ServiceManager\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/laminas/laminas-servicemanager/src',
         ),
         'HtmlParser\\' => 
         array (
