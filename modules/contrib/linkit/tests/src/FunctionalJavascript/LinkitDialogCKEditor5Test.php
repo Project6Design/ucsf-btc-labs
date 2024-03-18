@@ -148,8 +148,8 @@ class LinkitDialogCKEditor5Test extends WebDriverTestBase {
     $this->assertFalse($autocomplete_container->isVisible());
 
     // Trigger a keydown event to activate a autocomplete search.
+    $this->assertNotEmpty($assert_session->waitForElement('css', '.ck-balloon-panel .ck-input'));
     $autocomplete_field->setValue('f');
-    $this->getSession()->getDriver()->keyDown($autocomplete_field->getXpath(), ' ');
     $this->assertTrue($this->getSession()->wait(5000, "document.querySelectorAll('.linkit-result-line.ui-menu-item').length > 0"));
 
     // Make sure the autocomplete result container is visible.

@@ -2,13 +2,13 @@
 
 namespace Drupal\sitemap\Form;
 
-use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Config\ConfigFactory;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\sitemap\SitemapManager;
-use Drupal\Core\Link;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a configuration form for sitemap.

@@ -155,14 +155,14 @@ class SitemapBookTest extends SitemapBrowserTestBase {
 
     if ($parent !== NULL) {
       $this->drupalGet('node/add/book');
-      $this->submitForm($edit, $this->t('Change book (update list of parents)'));
+      $this->submitForm($edit, 'Change book (update list of parents)');
 
       $edit['book[pid]'] = $parent;
-      $this->submitForm($edit, $this->t('Save'));
+      $this->submitForm($edit, 'Save');
     }
     else {
       $this->drupalGet('node/add/book');
-      $this->submitForm($edit, $this->t('Save'));
+      $this->submitForm($edit, 'Save');
     }
 
     return $this->drupalGetNodeByTitle($edit['title[0][value]']);

@@ -52,7 +52,17 @@ class SitemapFrontpageTest extends SitemapBrowserTestBase {
     $elements = $this->cssSelect(".sitemap-plugin--frontpage img");
     $this->assertEquals(\count($elements), 1, 'RSS icon is included.');
 
+    // Make sure "Feed URL" control is hidden for users without permission to
+    // see it.
+    $this->drupalGet('admin/config/search/sitemap');
+    $this->assertSession()->fieldNotExists('plugins[frontpage][settings][rss]');
+
     // Change RSS feed for front page.
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer sitemap',
+      'set front page rss link on sitemap',
+      'access sitemap',
+    ]));
     $href = \mb_strtolower($this->randomMachineName());
     $this->saveSitemapForm(['plugins[frontpage][settings][rss]' => '/' . $href]);
 

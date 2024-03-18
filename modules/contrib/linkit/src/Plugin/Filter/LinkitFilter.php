@@ -137,6 +137,16 @@ class LinkitFilter extends FilterBase implements ContainerFactoryPluginInterface
               if (!empty($href_url["query"])) {
                 $parsed_query = [];
                 parse_str($href_url['query'], $parsed_query);
+                $url_query = $url->getOption('query');
+                // If something was NULL before, we need to keep it as NULL, but
+                // parse_str will convert that to an empty string. Restore those.
+                if ($url_query !== NULL) {
+                  foreach ($parsed_query as $key => $value) {
+                    if ($value === '' && array_key_exists($key, $url_query) && $url_query[$key] === NULL) {
+                      $parsed_query[$key] = NULL;
+                    }
+                  }
+                }
                 if (!empty($parsed_query)) {
                   $url->setOption('query', $parsed_query);
                 }

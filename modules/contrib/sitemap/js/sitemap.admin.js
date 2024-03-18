@@ -7,53 +7,56 @@
 
 (function ($, Drupal) {
   Drupal.behaviors.sitemapStatus = {
-    attach: function attach(context, settings) {
+    attach: function attach(context) {
       var $context = $(context);
-      $context
-        .find('#sitemap-enabled-wrapper input.form-checkbox')
-        .once('sitemap-enabled')
-        .each(function () {
-          var $checkbox = $(this);
+      $(
+        once(
+          'sitemap-enabled',
+          $context.find('#sitemap-enabled-wrapper input.form-checkbox'),
+          context,
+        ),
+      ).each(function () {
+        var $checkbox = $(this);
 
-          var $row = $context
-            .find('#' + $checkbox.attr('id').replace(/-enabled$/, '-weight'))
-            .closest('tr');
+        var $row = $context
+          .find('#' + $checkbox.attr('id').replace(/-enabled$/, '-weight'))
+          .closest('tr');
 
-          var $filterSettings = $context.find(
-            '#' + $checkbox.attr('id').replace(/-enabled$/, '-settings')
-          );
-          var filterSettingsTab = $filterSettings.data('verticalTab');
+        var $filterSettings = $context.find(
+          '#' + $checkbox.attr('id').replace(/-enabled$/, '-settings'),
+        );
+        var filterSettingsTab = $filterSettings.data('verticalTab');
 
-          $checkbox.on('click.filterUpdate', function () {
-            if ($checkbox.is(':checked')) {
-              $row.show();
-              if (filterSettingsTab) {
-                filterSettingsTab.tabShow().updateSummary();
-              } else {
-                $filterSettings.show();
-              }
+        $checkbox.on('click.filterUpdate', function () {
+          if ($checkbox.is(':checked')) {
+            $row.show();
+            if (filterSettingsTab) {
+              filterSettingsTab.tabShow().updateSummary();
             } else {
-              $row.hide();
-              if (filterSettingsTab) {
-                filterSettingsTab.tabHide().updateSummary();
-              } else {
-                $filterSettings.hide();
-              }
+              $filterSettings.show();
             }
-
-            Drupal.tableDrag['sitemap-order'].restripeTable();
-          });
-
-          if (filterSettingsTab) {
-            filterSettingsTab.details.drupalSetSummary(function () {
-              return $checkbox.is(':checked')
-                ? Drupal.t('Enabled')
-                : Drupal.t('Disabled');
-            });
+          } else {
+            $row.hide();
+            if (filterSettingsTab) {
+              filterSettingsTab.tabHide().updateSummary();
+            } else {
+              $filterSettings.hide();
+            }
           }
 
-          $checkbox.triggerHandler('click.filterUpdate');
+          Drupal.tableDrag['sitemap-order'].restripeTable();
         });
+
+        if (filterSettingsTab) {
+          filterSettingsTab.details.drupalSetSummary(function () {
+            return $checkbox.is(':checked')
+              ? Drupal.t('Enabled')
+              : Drupal.t('Disabled');
+          });
+        }
+
+        $checkbox.triggerHandler('click.filterUpdate');
+      });
     },
   };
 })(jQuery, Drupal);

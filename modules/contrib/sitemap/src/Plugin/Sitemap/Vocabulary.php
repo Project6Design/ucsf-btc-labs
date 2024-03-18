@@ -101,7 +101,10 @@ class Vocabulary extends SitemapBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Display unpublished taxonomy terms'),
       '#default_value' => $this->settings['display_unpublished'] ?? FALSE,
-      '#description' => $this->t('When enabled, this option will include unpublished taxonomy terms.'),
+      '#description' => $this->t('When enabled, this option will include unpublished taxonomy terms.<br><strong>Warning</strong>: displaying unpublished taxonomy terms will reveal information that would normally require the sitemap viewer to have the %permission permission!', [
+        '%permission' => $this->t('Administer vocabularies and terms'),
+      ]),
+      '#access' => $this->currentUser->hasPermission('show unpublished taxonomy terms on sitemap'),
     ];
 
     $form['term_depth'] = [
@@ -242,7 +245,7 @@ class Vocabulary extends SitemapBase {
             continue;
           }
           $currentDepth = 1;
-          $this->buildList($list, $obj, $vid, $currentDepth, $maxDepth);
+          $this->buildList($list, $obj, $vid, $currentDepth, $maxDepth, $display_unpublished);
           // @todo Remove parents where all child terms are not displayed.
         }
       }
@@ -381,10 +384,12 @@ class Vocabulary extends SitemapBase {
    *   The current depth.
    * @param int $maxDepth
    *   The max depth.
+   * @param bool $display_unpublished
+   *   Check publish/unpublish from configuration.
    *
    * @see https://www.webomelette.com/loading-taxonomy-terms-tree-drupal-8
    */
-  protected function buildList(array &$list, $object, $vid, &$currentDepth, $maxDepth) {
+  protected function buildList(array &$list, $object, $vid, &$currentDepth, $maxDepth, $display_unpublished = FALSE) {
     // Check that we are only working with the parent-most term.
     if ($object->depth != 0) {
       return;
@@ -421,8 +426,11 @@ class Vocabulary extends SitemapBase {
       /** @var \Drupal\taxonomy\TermInterface[] $children */
       foreach ($children as $child) {
         foreach ($child_objects as $child_object) {
+          if (!$display_unpublished && empty($child_object->status)) {
+            continue;
+          }
           if ($child_object->tid == $child->id()) {
-            $this->buildlist($object_children, $child_object, $vid, $currentDepth, $maxDepth);
+            $this->buildlist($object_children, $child_object, $vid, $currentDepth, $maxDepth, $display_unpublished);
           }
         }
       }
@@ -494,7 +502,7 @@ class Vocabulary extends SitemapBase {
    * Helper function to split the route|arg pattern.
    *
    * @param string $string
-   *   The string that will be splited.
+   *   The string that will be split.
    *
    * @return array
    *   Returns the route|arg pattern.

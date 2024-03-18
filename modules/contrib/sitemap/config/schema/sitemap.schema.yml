@@ -49,7 +49,7 @@ sitemap.settings.plugins.*:
           type: boolean
           label: 'Show disabled'
           nullable: true
-        # Frontpage plugin settings
+        # Front page plugin settings
         rss:
           type: string
           label: "RSS"

@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\sitemap\Functional;
 
-use Drupal\Tests\sitemap\Functional\SitemapTaxonomyTestBase;
-
 /**
  * Tests the display of RSS links based on sitemap settings.
  *

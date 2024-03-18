@@ -2,13 +2,12 @@
 
 namespace Drupal\Tests\sitemap\Functional;
 
-use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
-use Drupal\Tests\sitemap\Functional\SitemapBrowserTestBase;
-use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\taxonomy\Entity\Vocabulary;
+use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 
 /**
  * Base class for some Sitemap test cases.
@@ -137,7 +136,7 @@ abstract class SitemapTaxonomyTestBase extends SitemapBrowserTestBase {
       $this->terms = $this->createTerms($this->vocabulary);
     }
 
-    // Add an entityreference field to a node bundle.
+    // Add an entity reference field to a node bundle.
     $this->addEntityreferenceField();
 
     $values = [];
@@ -150,11 +149,11 @@ abstract class SitemapTaxonomyTestBase extends SitemapBrowserTestBase {
       $this->fieldTagsName . '[target_id]' => implode(',', $values),
     ];
     $this->drupalGet('node/add/article');
-    $this->submitForm($edit, $this->t('Save'));
+    $this->submitForm($edit, 'Save');
   }
 
   /**
-   * Add an entityreference field to tag nodes.
+   * Add an entity reference field to tag nodes.
    */
   protected function addEntityreferenceField() {
     $this->fieldTagsName = 'field_' . $this->vocabulary->id();

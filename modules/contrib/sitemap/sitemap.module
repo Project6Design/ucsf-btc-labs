@@ -5,10 +5,10 @@
  * Provides sitemap functionality.
  */
 
-use Drupal\taxonomy\VocabularyInterface;
-use Drupal\system\MenuInterface;
-use Drupal\node\NodeInterface;
 use Drupal\Component\Utility\Html;
+use Drupal\node\NodeInterface;
+use Drupal\system\MenuInterface;
+use Drupal\taxonomy\VocabularyInterface;
 
 /**
  * Implements hook_theme().

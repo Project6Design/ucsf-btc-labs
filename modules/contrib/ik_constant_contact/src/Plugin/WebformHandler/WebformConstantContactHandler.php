@@ -193,7 +193,7 @@ class WebformConstantContactHandler extends WebformHandlerBase {
       '#mode' => 'yaml',
       '#title' => $this->t('Merge vars'),
       '#default_value' => $this->configuration['mergevars'],
-      '#description' => $this->t('You can map additional fields from your webform to fields in your Constant Contact list, one per line. An example might be first_name: [webform_submission:values:first_name]. The result is sent as an array. You may use tokens.'),
+      '#description' => $this->t('You can map additional fields from your webform to fields in your Constant Contact list, one per line. An example might be first_name: "[webform_submission:values:first_name]". The result is sent as an array. You may use tokens. Tokens should be wrapped in quotes to avoid YAML parsing errors.'),
     ];
 
     $form['constant_contact']['token_tree_link'] = $this->tokenManager->buildTreeLink();

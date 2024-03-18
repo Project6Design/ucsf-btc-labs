@@ -71,7 +71,7 @@ class Linkit extends Plugin {
               this.set('entitySubstitution', null);
             }
 
-            event.target.value = item.path;
+            linkFormView.urlInputView.fieldView.set('value', item.path);
             selected = true;
             return false;
           },

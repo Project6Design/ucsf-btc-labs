@@ -2,9 +2,9 @@
 
 namespace Drupal\sitemap\Plugin\Sitemap;
 
-use Drupal\sitemap\SitemapBase;
-use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\sitemap\SitemapBase;
 
 /**
  * Provides a link to the front page for the sitemap.
@@ -34,6 +34,7 @@ class Frontpage extends SitemapBase {
       '#title' => $this->t('Feed URL'),
       '#default_value' => $this->settings['rss'],
       '#description' => $this->t('Specify the RSS feed for the front page. If you do not wish to display a feed, leave this field blank.'),
+      '#access' => $this->currentUser->hasPermission('set front page rss link on sitemap'),
     ];
 
     return $form;

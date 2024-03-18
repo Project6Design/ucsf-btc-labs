@@ -3,7 +3,6 @@
 namespace Drupal\Tests\sitemap\Functional;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\Tests\sitemap\Functional\SitemapBrowserTestBase;
 
 /**
  * Test the display of menus based on sitemap settings.
@@ -73,7 +72,7 @@ abstract class SitemapMenuTestBase extends SitemapBrowserTestBase {
       'menu[menu_parent]' => $menu_id . ':',
     ];
     $this->drupalGet('node/add/article');
-    $this->submitForm($edit, $this->t('Save'));
+    $this->submitForm($edit, 'Save');
   }
 
 }

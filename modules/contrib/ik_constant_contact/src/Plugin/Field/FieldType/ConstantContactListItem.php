@@ -22,6 +22,7 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
  *   category = @Translation("Constant Contact"),
  *   default_widget = "constant_contact_lists_default",
  *   default_formatter = "constant_contact_lists_formatter",
+ *   description = @Translation("Constant contact list description"),
  * )
  */
 

@@ -37,6 +37,20 @@ class SitemapMenuTest extends SitemapMenuTestBase {
     $elements = $this->cssSelect(".sitemap-plugin--menu");
     $this->assertEquals(\count($elements), 0, 'Main menu is not included.');
 
+    // Make sure "Show disabled menu items" control is hidden for users without
+    // permission to see it.
+    $this->drupalGet('admin/config/search/sitemap');
+    $this->assertSession()->fieldNotExists('plugins[menu:main][settings][show_disabled]');
+
+    $this->drupalLogin($this->drupalCreateUser([
+      'administer sitemap',
+      'access sitemap',
+      'administer menu',
+      'administer nodes',
+      'create article content',
+      'show disabled menu items on sitemap',
+    ]));
+
     // Configure module to show main menu, with enabled menu items only.
     $edit = [
       'plugins[menu:main][enabled]' => TRUE,
@@ -56,7 +70,7 @@ class SitemapMenuTest extends SitemapMenuTestBase {
       'menu[menu_parent]' => 'main:',
     ];
     $this->drupalGet('node/add/article');
-    $this->submitForm($edit, $this->t('Save'));
+    $this->submitForm($edit, 'Save');
 
     // Create a node for a disabled menu item.
     $node_2_title = $this->randomString();
@@ -67,14 +81,14 @@ class SitemapMenuTest extends SitemapMenuTestBase {
       'menu[menu_parent]' => 'main:',
     ];
     $this->drupalGet('node/add/article');
-    $this->submitForm($edit, $this->t('Save'));
+    $this->submitForm($edit, 'Save');
 
     // Disable menu item.
     $menu_links = \Drupal::entityTypeManager()->getStorage('menu_link_content')->loadByProperties(['title' => $node_2_title]);
     $menu_link = reset($menu_links);
     $mlid = $menu_link->id();
     $this->drupalGet("admin/structure/menu/item/$mlid/edit");
-    $this->submitForm(['enabled[value]' => FALSE], $this->t('Save'));
+    $this->submitForm(['enabled[value]' => FALSE], 'Save');
 
     // Add admin link that an anonymous user doesn't have access to.
     $admin_link_title = $this->randomString();
@@ -84,7 +98,7 @@ class SitemapMenuTest extends SitemapMenuTestBase {
       'menu_parent' => 'main:',
     ];
     $this->drupalGet("admin/structure/menu/manage/main/add");
-    $this->submitForm($edit, $this->t('Save'));
+    $this->submitForm($edit, 'Save');
 
     // Assert that main menu is included in the sitemap.
     $this->drupalGet('/sitemap');

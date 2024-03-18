@@ -2,10 +2,10 @@
 
 namespace Drupal\sitemap\Menu;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Access\AccessResultInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Menu\MenuLinkTree;
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Template\Attribute;
 
 /**

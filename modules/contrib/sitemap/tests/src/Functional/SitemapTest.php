@@ -2,8 +2,6 @@
 
 namespace Drupal\Tests\sitemap\Functional;
 
-use Drupal\Tests\sitemap\Functional\SitemapTestBase;
-
 /**
  * Tests the routes provided by the sitemap module.
  *

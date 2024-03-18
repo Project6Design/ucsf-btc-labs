@@ -53,7 +53,7 @@ function sitemap_update_8200(&$sandbox) {
   $config->clear('show_titles');
   $config->clear('order');
 
-  // Update to the frontpage plugin.
+  // Update to the front page plugin.
   $plugins['frontpage'] = [
     'enabled' => (bool) $config->get('show_front'),
     'weight' => $order['front'] ?? 0,

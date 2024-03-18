@@ -149,13 +149,8 @@ class AuthenticationCallback extends ControllerBase {
         $json = json_decode($response->getBody()->getContents());
 
         if ($json && property_exists($json, 'access_token') && property_exists($json, 'refresh_token')) {
-          $tokens = $this->config->getEditable('ik_constant_contact.tokens');
-          $tokens->clear('ik_constant_contact.tokens');
-          $tokens->set('access_token', $json->access_token);
-          $tokens->set('refresh_token', $json->refresh_token);
-          $tokens->set('timestamp', strtotime('now'));
-          $tokens->save();
-
+          // Remove outdated code and use saveTokens instead 
+          $this->constantContact->saveTokens($json);
           $this->messenger->addMessage($this->t('Tokens were successfully saved.'));
         }
         else {

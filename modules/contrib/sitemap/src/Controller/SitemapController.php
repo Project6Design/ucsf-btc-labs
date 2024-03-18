@@ -5,8 +5,8 @@ namespace Drupal\sitemap\Controller;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\sitemap\SitemapManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Controller routines for update routes.

@@ -3,9 +3,9 @@
 namespace Drupal\sitemap\Plugin\Sitemap;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\sitemap\SitemapBase;
 use Drupal\system\Entity\Menu as MenuEntity;
-use Drupal\Core\Menu\MenuTreeParameters;
 
 /**
  * Provides a sitemap for an individual menu.
@@ -40,7 +40,10 @@ class Menu extends SitemapBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Show disabled menu items'),
       '#default_value' => $this->settings['show_disabled'] ?? FALSE,
-      '#description' => $this->t('When selected, disabled menu links will also be shown.'),
+      '#description' => $this->t('When selected, disabled menu links will also be shown.<br><strong>Warning</strong>: Showing disabled menu links will reveal information that would normally require the sitemap viewer to have the %permission permission!', [
+        '%permission' => $this->t('Administer menus and menu links'),
+      ]),
+      '#access' => $this->currentUser->hasPermission('show disabled menu items on sitemap'),
     ];
 
     return $form;

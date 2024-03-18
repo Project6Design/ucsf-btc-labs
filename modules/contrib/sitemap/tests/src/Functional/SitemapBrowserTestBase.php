@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\sitemap\Functional;
 
-use Drupal\Tests\BrowserTestBase;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Test behaviors when saving the sitemap form.
@@ -26,7 +26,7 @@ abstract class SitemapBrowserTestBase extends BrowserTestBase {
    */
   protected function saveSitemapForm(array $edit = []) {
     $this->drupalGet('admin/config/search/sitemap');
-    $this->submitForm($edit, $this->t('Save configuration'));
+    $this->submitForm($edit, 'Save configuration');
   }
 
 }

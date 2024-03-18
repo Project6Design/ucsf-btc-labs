@@ -5,15 +5,16 @@ namespace Drupal\sitemap;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for Sitemap plugin implementations.
  *
  * @ingroup sitemap
  */
-abstract class SitemapBase extends PluginBase implements SitemapInterface {
-
+abstract class SitemapBase extends PluginBase implements SitemapInterface, ContainerFactoryPluginInterface {
   use StringTranslationTrait;
 
   /**
@@ -45,6 +46,13 @@ abstract class SitemapBase extends PluginBase implements SitemapInterface {
   public $provider;
 
   /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
    * The global sitemap config.
    *
    * @var object
@@ -56,10 +64,20 @@ abstract class SitemapBase extends PluginBase implements SitemapInterface {
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+
     $this->setConfiguration($configuration);
     $this->settings = $this->configuration['settings'];
     $this->provider = $this->configuration['provider'];
     $this->sitemapConfig = \Drupal::config('sitemap.settings');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $plugin = new static($configuration, $plugin_id, $plugin_definition);
+    $plugin->currentUser = $container->get('current_user');
+    return $plugin;
   }
 
   /**
