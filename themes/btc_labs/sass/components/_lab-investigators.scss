@@ -66,7 +66,7 @@ article {
           }
 
           .more-link {
-            color: $red;
+            color: $sky-blue;
             font-size: $fs-extra-small;
           }
         }
@@ -76,11 +76,11 @@ article {
           font-size: $fs-small;
 
           + a {
-            color: $red;
+            color: $sky-blue;
             font-size: $fs-extra-small;
           }
         }
-        
+
         a {
           color: $dark-blue;
           font-weight: $fw-bold;

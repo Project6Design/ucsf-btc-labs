@@ -13,32 +13,22 @@
                 <ul>
                     {% if twitter is not empty %}
                         <li>
-                            <a href="{{ twitter }}" target="_blank">
-                                <svg role="img">
-                                    <title>Twitter Icon</title>
-                                    <use xlink:href="/{{ directory }}/images/optimized/store.svg#twitter-circle" />
-                                </svg>
-                            </a>
+                          <a href="{{ twitter }}" target="_blank" class="twitter-icon"></a>
                         </li>
                     {% endif %}
                     {% if facebook is not empty %}
                         <li>
-                            <a href="{{ facebook }}" target="_blank">
-                                <svg role="img">
-                                    <title>Facebook Icon</title>
-                                    <use xlink:href="/{{ directory }}/images/optimized/store.svg#facebook-circle" />
-                                </svg>
-                            </a>
+                          <a href="{{ facebook }}" target="_blank" class="facebook-icon"></a>
                         </li>
                     {% endif %}
                     {% if instagram is not empty %}
                         <li>
-                            <a href="{{ instagram }}" target="_blank">
-                                <svg role="img">
-                                    <title>Instagram Icon</title>
-                                    <use xlink:href="/{{ directory }}/images/optimized/store.svg#instagram-circle" />
-                                </svg>
-                            </a>
+                          <a href="{{ instagram }}" target="_blank" class="instagram-icon"></a>
+                        </li>
+                    {% endif %}
+                    {% if youtube is not empty %}
+                        <li>
+                          <a href="{{ youtube }}" target="_blank" class="youtube-icon"></a>
                         </li>
                     {% endif %}
                 </ul>

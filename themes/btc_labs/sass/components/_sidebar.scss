@@ -14,7 +14,7 @@
   }
 
   a {
-    color: $red;
+    color: $sky-blue;
     font-size: $fs-extra-small;
 
     &.btn--primary {
@@ -23,7 +23,7 @@
       padding: $base-spacing $large-spacing;
 
       &:hover {
-        color: $red;
+        color: $sky-blue;
       }
     }
   }

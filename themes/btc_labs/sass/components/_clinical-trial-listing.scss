@@ -209,18 +209,18 @@
         visibility: initial;
         margin: $large-spacing $base-spacing/2 $base-spacing*4 $base-spacing/2;
         padding: $base-spacing $base-spacing*4;
-        background-color: $red;
+        background-color: $sky-blue;
         color: $white;
         line-height: 1;
         font-size: 18px;
         display: inline-block;
         border-radius: 5px;
-        border: 2px solid $red;
+        border: 2px solid $sky-blue;
         font-family: "Helvetica Bold";
 
         &:hover {
           background-color: $white;
-          color: $red;
+          color: $sky-blue;
         }
 
         @include media($medium-screen-down) {
@@ -342,7 +342,7 @@
             margin-bottom: $base-spacing;
 
             .required {
-              color: $red;
+              color: $sky-blue;
               font-size: $fs-medium;
             }
           }

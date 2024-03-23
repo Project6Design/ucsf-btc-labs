@@ -78,8 +78,12 @@
     }
 
     .field--name-field-link {
-      color: $red;
+      color: $sky-blue;;
       font-weight: $fw-bold;
+
+      &:hover {
+        text-decoration: underline;
+      }
 
       @include media($larger-screen-down) {
         font-size: 0.875em;

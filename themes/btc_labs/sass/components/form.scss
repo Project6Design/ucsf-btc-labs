@@ -43,7 +43,7 @@
 
       &:after {
         content: "";
-        background: url("../../images/optimized/search-red.svg") no-repeat center center;
+        background: url("../../images/optimized/search-blue.svg") no-repeat center center;
         width: 42px;
         height: 40px;
         display: block;
@@ -132,7 +132,7 @@
     top: 8px;
     width: $base-spacing;
     height: $base-spacing;
-    border: 1px solid $red;
+    border: 1px solid $sky-blue;
     background: $white;
     border-radius: 0;
   }
@@ -144,7 +144,7 @@
     top: .45em;
     left: .2em;
     line-height: 0.5;
-    color: $red;
+    color: $sky-blue;
     transition: all .2s;
   }
   /* checked mark aspect changes */

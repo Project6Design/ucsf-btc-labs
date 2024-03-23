@@ -1,6 +1,6 @@
 #footer {
   .container {
-    background: $green;
+    background: $dark-blue;
 
     @include clearfix;
 
@@ -14,11 +14,9 @@
 
   a {
     color: #FFF;
-    text-decoration: underline;
 
     &:hover {
-      color: $dark-blue;
-      text-decoration: none;
+      text-decoration: underline;
     }
   }
 }
@@ -118,8 +116,21 @@
     margin-right: 30px;
     margin-bottom: 20px;
 
-    &:nth-child(2n) {
-      margin-right: 0;
+    @include media($medium-screen-down) {
+      margin-right: 18px;
+    }
+
+    a::after {
+      display: block;
+      width: 52px;
+      height: 52px;
+      content: "";
+      background-repeat: no-repeat;
+
+      @include media($medium-screen-down) {
+        width: 58px;
+        height: 58px;
+      }
     }
   }
 
@@ -128,19 +139,41 @@
     width: auto;
     margin: 0;
     clear: both;
+  }
 
-    li:nth-child(2n) {
-      margin-right: 30px;
+  .twitter-icon {
+    &:after {
+      background-image: url('../../images/optimized/twitter-circle.svg');
+    }
+    &:hover:after {
+      background-image: url('../../images/optimized/twitter-circle-white.svg');
     }
   }
 
-  svg {
-    width: 60px;
-    height: 60px;
+  .facebook-icon {
+    &:after {
+      background-image: url('../../images/optimized/facebook-circle.svg');
+    }
+    &:hover:after {
+      background-image: url('../../images/optimized/facebook-circle-white.svg');
+    }
+  }
 
-    @include media($medium-screen-down) {
-      width: 40px;
-      height: 40px;
+  .instagram-icon {
+    &:after {
+      background-image: url('../../images/optimized/instagram-circle.svg');
+    }
+    &:hover:after {
+      background-image: url('../../images/optimized/instagram-circle-white.svg');
+    }
+  }
+
+  .youtube-icon {
+    &:after {
+      background-image: url('../../images/optimized/youtube-circle.svg');
+    }
+    &:hover:after {
+      background-image: url('../../images/optimized/youtube-circle-white.svg');
     }
   }
 }
@@ -154,11 +187,6 @@
 
   p {
     font-size: 1em;
-    color: #000000;
-  }
-
-  a {
-    color: #000000 !important;
   }
 
   @include media($large-screen-down) {

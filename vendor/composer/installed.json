@@ -6345,17 +6345,17 @@
         },
         {
             "name": "drush/drush",
-            "version": "12.5.0",
-            "version_normalized": "12.5.0.0",
+            "version": "12.5.1",
+            "version_normalized": "12.5.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drush-ops/drush.git",
-                "reference": "48dc17e0678e9ac162d4598c9e0a7e9009344ed8"
+                "reference": "71fcea30a22e7336e17be18bb5945400b2c63fad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/drush-ops/drush/zipball/48dc17e0678e9ac162d4598c9e0a7e9009344ed8",
-                "reference": "48dc17e0678e9ac162d4598c9e0a7e9009344ed8",
+                "url": "https://api.github.com/repos/drush-ops/drush/zipball/71fcea30a22e7336e17be18bb5945400b2c63fad",
+                "reference": "71fcea30a22e7336e17be18bb5945400b2c63fad",
                 "shasum": ""
             },
             "require": {
@@ -6396,7 +6396,7 @@
                 "rector/rector": "^0.12",
                 "squizlabs/php_codesniffer": "^3.7"
             },
-            "time": "2024-03-18T17:30:17+00:00",
+            "time": "2024-03-20T15:03:27+00:00",
             "bin": [
                 "drush"
             ],
@@ -6480,7 +6480,7 @@
                 "issues": "https://github.com/drush-ops/drush/issues",
                 "security": "https://github.com/drush-ops/drush/security/advisories",
                 "slack": "https://drupal.slack.com/messages/C62H9CWQM",
-                "source": "https://github.com/drush-ops/drush/tree/12.5.0"
+                "source": "https://github.com/drush-ops/drush/tree/12.5.1"
             },
             "funding": [
                 {
@@ -7492,17 +7492,17 @@
         },
         {
             "name": "mglaman/phpstan-drupal",
-            "version": "1.2.7",
-            "version_normalized": "1.2.7.0",
+            "version": "1.2.9",
+            "version_normalized": "1.2.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mglaman/phpstan-drupal.git",
-                "reference": "32f79fcf48c74532014248687ae3850581a22416"
+                "reference": "206285277fad650560cb26b43397b952228e3006"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mglaman/phpstan-drupal/zipball/32f79fcf48c74532014248687ae3850581a22416",
-                "reference": "32f79fcf48c74532014248687ae3850581a22416",
+                "url": "https://api.github.com/repos/mglaman/phpstan-drupal/zipball/206285277fad650560cb26b43397b952228e3006",
+                "reference": "206285277fad650560cb26b43397b952228e3006",
                 "shasum": ""
             },
             "require": {
@@ -7516,7 +7516,7 @@
             "require-dev": {
                 "behat/mink": "^1.8",
                 "composer/installers": "^1.9",
-                "drupal/core-recommended": "^9.0",
+                "drupal/core-recommended": "^10",
                 "drush/drush": "^10.0 || ^11 || ^12",
                 "phpstan/extension-installer": "^1.1",
                 "phpstan/phpstan-strict-rules": "^1.0",
@@ -7530,7 +7530,7 @@
                 "phpstan/phpstan-deprecation-rules": "For catching deprecations, especially in Drupal core.",
                 "phpstan/phpstan-phpunit": "PHPUnit extensions and rules for PHPStan."
             },
-            "time": "2024-02-14T04:38:08+00:00",
+            "time": "2024-03-22T18:50:10+00:00",
             "type": "phpstan-extension",
             "extra": {
                 "branch-alias": {
@@ -7579,7 +7579,7 @@
             "description": "Drupal extension and rules for PHPStan",
             "support": {
                 "issues": "https://github.com/mglaman/phpstan-drupal/issues",
-                "source": "https://github.com/mglaman/phpstan-drupal/tree/1.2.7"
+                "source": "https://github.com/mglaman/phpstan-drupal/tree/1.2.9"
             },
             "funding": [
                 {
@@ -8228,17 +8228,17 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "1.10.63",
-            "version_normalized": "1.10.63.0",
+            "version": "1.10.64",
+            "version_normalized": "1.10.64.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "ad12836d9ca227301f5fb9960979574ed8628339"
+                "reference": "fb9f270daffedcb5ff46275dcafe92538b1bc4bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/ad12836d9ca227301f5fb9960979574ed8628339",
-                "reference": "ad12836d9ca227301f5fb9960979574ed8628339",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/fb9f270daffedcb5ff46275dcafe92538b1bc4bb",
+                "reference": "fb9f270daffedcb5ff46275dcafe92538b1bc4bb",
                 "shasum": ""
             },
             "require": {
@@ -8247,7 +8247,7 @@
             "conflict": {
                 "phpstan/phpstan-shim": "*"
             },
-            "time": "2024-03-18T16:53:53+00:00",
+            "time": "2024-03-21T09:57:47+00:00",
             "bin": [
                 "phpstan",
                 "phpstan.phar"

@@ -1,0 +1,14 @@
+<svg id="Twitter" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="52" height="52" viewBox="0 0 52 52">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_526" data-name="Rectangle 526" width="24.51" height="25" fill="#052049"/>
+    </clipPath>
+  </defs>
+  <g id="Ellipse_367" data-name="Ellipse 367" fill="#fff" stroke="#fff" stroke-width="3">
+    <circle cx="26" cy="26" r="26" stroke="none"/>
+    <circle cx="26" cy="26" r="24.5" fill="none"/>
+  </g>
+  <g id="_11244080_x_twitter_elon_musk_twitter_new_logo_icon" data-name="11244080_x_twitter_elon musk_twitter new logo_icon" transform="translate(14 14)" clip-path="url(#clip-path)">
+    <path id="Path_569" data-name="Path 569" d="M14.527,10.563,23.615,0H21.461l-7.89,9.172L7.269,0H0L9.53,13.87,0,24.947H2.154l8.333-9.686,6.655,9.686H24.41L14.527,10.563Zm-2.95,3.428-.966-1.381L2.929,1.621H6.237l6.2,8.869.966,1.381L21.462,23.4H18.155l-6.577-9.407Z" fill="#052049"/>
+  </g>
+</svg>

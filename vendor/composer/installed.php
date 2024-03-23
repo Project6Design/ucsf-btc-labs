@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'de67d4037e74895ebdc21f4f236b345b5c9809d1',
+        'reference' => '64ebedf9fee50741d7dd8c83d7357ce7f975c463',
         'name' => 'drupal/legacy-project',
         'dev' => true,
     ),
@@ -736,7 +736,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'de67d4037e74895ebdc21f4f236b345b5c9809d1',
+            'reference' => '64ebedf9fee50741d7dd8c83d7357ce7f975c463',
             'dev_requirement' => false,
         ),
         'drupal/linkit' => array(
@@ -976,12 +976,12 @@
             'dev_requirement' => false,
         ),
         'drush/drush' => array(
-            'pretty_version' => '12.5.0',
-            'version' => '12.5.0.0',
+            'pretty_version' => '12.5.1',
+            'version' => '12.5.1.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../drush/drush',
             'aliases' => array(),
-            'reference' => '48dc17e0678e9ac162d4598c9e0a7e9009344ed8',
+            'reference' => '71fcea30a22e7336e17be18bb5945400b2c63fad',
             'dev_requirement' => false,
         ),
         'easyrdf/easyrdf' => array(
@@ -1102,12 +1102,12 @@
             'dev_requirement' => false,
         ),
         'mglaman/phpstan-drupal' => array(
-            'pretty_version' => '1.2.7',
-            'version' => '1.2.7.0',
+            'pretty_version' => '1.2.9',
+            'version' => '1.2.9.0',
             'type' => 'phpstan-extension',
             'install_path' => __DIR__ . '/../mglaman/phpstan-drupal',
             'aliases' => array(),
-            'reference' => '32f79fcf48c74532014248687ae3850581a22416',
+            'reference' => '206285277fad650560cb26b43397b952228e3006',
             'dev_requirement' => false,
         ),
         'ml/iri' => array(
@@ -1216,12 +1216,12 @@
             'dev_requirement' => false,
         ),
         'phpstan/phpstan' => array(
-            'pretty_version' => '1.10.63',
-            'version' => '1.10.63.0',
+            'pretty_version' => '1.10.64',
+            'version' => '1.10.64.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../phpstan/phpstan',
             'aliases' => array(),
-            'reference' => 'ad12836d9ca227301f5fb9960979574ed8628339',
+            'reference' => 'fb9f270daffedcb5ff46275dcafe92538b1bc4bb',
             'dev_requirement' => false,
         ),
         'phpstan/phpstan-deprecation-rules' => array(
@@ -1263,8 +1263,8 @@
         'psr/container-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.1|2.0',
-                1 => '^1.0',
+                0 => '^1.0',
+                1 => '1.1|2.0',
             ),
         ),
         'psr/event-dispatcher' => array(

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52">
+  <g id="Facebook" transform="translate(-0.101)">
+    <g id="Ellipse_369" data-name="Ellipse 369" transform="translate(0.101)" fill="#fff" stroke="#fff" stroke-width="3">
+      <circle cx="26" cy="26" r="26" stroke="none"/>
+      <circle cx="26" cy="26" r="24.5" fill="none"/>
+    </g>
+    <path id="_211902_social_facebook_icon" data-name="211902_social_facebook_icon" d="M168.2,72.2v-2.44c0-1.1.243-1.659,1.953-1.659H172.3V64h-3.58c-4.387,0-5.834,2.011-5.834,5.462V72.2H160v4.1h2.882v12.3H168.2V76.3h3.612l.487-4.1Z" transform="translate(-139.899 -50)" fill="#052049"/>
+  </g>
+</svg>

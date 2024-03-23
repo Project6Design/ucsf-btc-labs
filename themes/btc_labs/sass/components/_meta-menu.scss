@@ -48,13 +48,13 @@
     &:nth-child(3) {
       a {
         background: $light-blue;
-        color: $blue;
-        border: 1px solid $blue;
+        color: $sky-blue;
+        border: 1px solid $sky-blue;
 
         &:hover {
-          background: $dark-blue;
+          background: $medium-blue;
           color: $white;
-          border: 1px solid $dark-blue;
+          border: 1px solid $medium-blue;
         }
       }
     }

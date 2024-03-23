@@ -85,6 +85,8 @@ function btc_labs_preprocess_page(&$vars) {
   $vars['facebook'] = theme_get_setting('facebook');
   $vars['twitter'] = theme_get_setting('twitter');
   $vars['instagram'] = theme_get_setting('instagram');
+  $vars['youtube'] = theme_get_setting('youtube');
+
 
   // Create mobile menu based on main and meta menu.
   $menu_tree = \Drupal::menuTree();

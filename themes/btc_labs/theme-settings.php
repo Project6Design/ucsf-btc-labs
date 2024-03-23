@@ -66,6 +66,13 @@ function btc_labs_form_system_theme_settings_alter(array &$form, FormStateInterf
     '#maxlength' => 255,
     '#required' => FALSE,
   );
+  $form['footer']['youtube'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Youtube'),
+    '#default_value' => theme_get_setting('youtube'),
+    '#size' => 60,
+    '#maxlength' => 255,
+  );
 
   $copyright = theme_get_setting('copyright');
   $form['footer']['copyright'] = array(
