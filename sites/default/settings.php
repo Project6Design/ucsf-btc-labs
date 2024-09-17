@@ -26,7 +26,8 @@ if (file_exists($local_settings)) {
 
 $redirect_targets = [
   'live-btc-francis.pantheonsite.io' => 'francislab.ucsf.edu',
-  'live-btc-lu.pantheonsite.io' => 'lulab.ucsf.edu'
+  'live-btc-lu.pantheonsite.io' => 'lulab.ucsf.edu',
+  'live-btc-young.pantheonsite.io' => 'younglab.ucsf.edu'
 ];
 
 if (isset($_ENV['PANTHEON_ENVIRONMENT']) && php_sapi_name() != 'cli' && array_key_exists($_SERVER['HTTP_HOST'], $redirect_targets)) {
