@@ -32,7 +32,7 @@ final class CSSDeprecationAnalyzer {
       $content = str_replace('#drupal-off-canvas:not(.drupal-off-canvas-reset)', 'removed', $content);
       $content = str_replace('#drupal-off-canvas-wrapper', 'removed', $content);
       if (strpos($content, '#drupal-off-canvas')) {
-        $deprecations[] = new DeprecationMessage('The #drupal-off-canvas selector is deprecated in drupal:9.5.0 and is removed from drupal:10.0.0. See https://www.drupal.org/node/3305664.', $css_file, 0);
+        $deprecations[] = new DeprecationMessage('The #drupal-off-canvas selector is deprecated in drupal:9.5.0 and is removed from drupal:10.0.0. See https://www.drupal.org/node/3305664.', $css_file, 0, 'CSSDeprecationAnalyzer');
       }
     }
     return $deprecations;

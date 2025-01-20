@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '1db8b31089b77cb1a852e384bcdec31e564e276e',
+        'reference' => '46f518d6da7a79dce584835f1fe5f4f05b09e654',
         'name' => 'drupal/legacy-project',
         'dev' => true,
     ),
@@ -736,7 +736,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '1db8b31089b77cb1a852e384bcdec31e564e276e',
+            'reference' => '46f518d6da7a79dce584835f1fe5f4f05b09e654',
             'dev_requirement' => false,
         ),
         'drupal/linkit' => array(
@@ -940,12 +940,12 @@
             'dev_requirement' => false,
         ),
         'drupal/upgrade_status' => array(
-            'pretty_version' => '4.1.0',
-            'version' => '4.1.0.0',
+            'pretty_version' => '4.3.1',
+            'version' => '4.3.1.0',
             'type' => 'drupal-module',
             'install_path' => __DIR__ . '/../../modules/contrib/upgrade_status',
             'aliases' => array(),
-            'reference' => '4.1.0',
+            'reference' => '4.3.1',
             'dev_requirement' => false,
         ),
         'drupal/url_embed' => array(
