@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Database\Database;
@@ -19,7 +21,7 @@ class InstallerBrokenDatabasePortSettingsTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function prepareEnvironment() {
+  protected function prepareEnvironment(): void {
     parent::prepareEnvironment();
     // Pre-configure database credentials in settings.php.
     $connection_info = Database::getConnectionInfo();
@@ -40,21 +42,21 @@ class InstallerBrokenDatabasePortSettingsTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpSettings() {
+  protected function setUpSettings(): void {
     // This form will never be reached.
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function setUpSite() {
+  protected function setUpSite(): void {
     // This form will never be reached.
   }
 
   /**
    * Tests the expected requirements problem.
    */
-  public function testRequirementsProblem() {
+  public function testRequirementsProblem(): void {
     $this->assertSession()->titleEquals('Requirements problem | Drupal');
     $this->assertSession()->pageTextContains('Database settings');
     $this->assertSession()->pageTextContains('Resolve all issues below to continue the installation. For help configuring your database server,');

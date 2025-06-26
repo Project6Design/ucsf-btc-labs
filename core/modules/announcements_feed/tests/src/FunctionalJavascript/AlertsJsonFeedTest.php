@@ -41,6 +41,10 @@ class AlertsJsonFeedTest extends OffCanvasTestBase {
    * {@inheritdoc}
    */
   public function setUp():void {
+    if ($this->name() === 'testAnnounceFeedUpdatedAndRemoved') {
+      $this->markTestSkipped('Skipped due to major version-specific logic. See https://www.drupal.org/project/drupal/issues/3359322');
+    }
+
     parent::setUp();
 
     $this->user = $this->drupalCreateUser(
@@ -56,8 +60,7 @@ class AlertsJsonFeedTest extends OffCanvasTestBase {
   /**
    * Check the status of the announcements when the feed is updated and removed.
    */
-  public function testAnnounceFeedUpdatedAndRemoved() {
-    $this->markTestSkipped('Skipped due to major version-specific logic. See https://www.drupal.org/project/drupal/issues/3359322');
+  public function testAnnounceFeedUpdatedAndRemoved(): void {
     $this->drupalLogin($this->user);
     $this->drupalGet('<front>');
     $this->clickLink('Announcements');
@@ -88,7 +91,7 @@ class AlertsJsonFeedTest extends OffCanvasTestBase {
   /**
    * Check with an empty JSON feed.
    */
-  public function testAnnounceFeedEmpty() {
+  public function testAnnounceFeedEmpty(): void {
     // Change the feed url and reset temp storage.
     AnnounceTestHttpClientMiddleware::setAnnounceTestEndpoint('/announce-feed-json/empty');
 

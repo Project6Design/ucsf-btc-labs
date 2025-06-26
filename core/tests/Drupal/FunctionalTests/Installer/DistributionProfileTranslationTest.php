@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Serialization\Yaml;
@@ -33,7 +35,7 @@ class DistributionProfileTranslationTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function prepareEnvironment() {
+  protected function prepareEnvironment(): void {
     parent::prepareEnvironment();
     // We set core_version_requirement to '*' for the test so that it does not
     // need to be updated between major versions.
@@ -62,7 +64,7 @@ class DistributionProfileTranslationTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpLanguage() {
+  protected function setUpLanguage(): void {
     // This step is skipped, because the distribution profile uses a fixed
     // language.
   }
@@ -70,14 +72,14 @@ class DistributionProfileTranslationTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpProfile() {
+  protected function setUpProfile(): void {
     // This step is skipped, because there is a distribution profile.
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function setUpSettings() {
+  protected function setUpSettings(): void {
     // The language should have been automatically detected, all following
     // screens should be translated already.
     $this->assertSession()->buttonExists('Save and continue de');
@@ -99,7 +101,7 @@ class DistributionProfileTranslationTest extends InstallerTestBase {
   /**
    * Confirms that the installation succeeded.
    */
-  public function testInstalled() {
+  public function testInstalled(): void {
     $this->assertSession()->addressEquals('user/1');
     $this->assertSession()->statusCodeEquals(200);
 
@@ -108,7 +110,8 @@ class DistributionProfileTranslationTest extends InstallerTestBase {
 
     // Verify German was configured but not English.
     $this->drupalGet('admin/config/regional/language');
-    $this->assertSession()->pageTextContains('German');
+    // cspell:ignore deutsch
+    $this->assertSession()->pageTextContains('Deutsch');
     $this->assertSession()->pageTextNotContains('English');
   }
 
@@ -121,7 +124,7 @@ class DistributionProfileTranslationTest extends InstallerTestBase {
    * @return string
    *   Contents for the test .po file.
    */
-  protected function getPo($langcode) {
+  protected function getPo($langcode): string {
     return <<<PO
 msgid ""
 msgstr ""

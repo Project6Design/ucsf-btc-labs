@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
+use Drupal\jsonapi\JsonApiSpec;
 use Drupal\block_content\Entity\BlockContentType;
 use Drupal\Core\Url;
 
@@ -9,7 +12,6 @@ use Drupal\Core\Url;
  * JSON:API integration test for the "BlockContentType" config entity type.
  *
  * @group jsonapi
- * @group #slow
  */
 class BlockContentTypeTest extends ConfigEntityResourceTestBase {
 
@@ -43,7 +45,7 @@ class BlockContentTypeTest extends ConfigEntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpAuthorization($method) {
+  protected function setUpAuthorization($method): void {
     $this->grantPermissionsToTestedRole(['administer block types']);
   }
 
@@ -66,16 +68,16 @@ class BlockContentTypeTest extends ConfigEntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedDocument() {
+  protected function getExpectedDocument(): array {
     $self_url = Url::fromUri('base:/jsonapi/block_content_type/block_content_type/' . $this->entity->uuid())->setAbsolute()->toString(TRUE)->getGeneratedUrl();
     return [
       'jsonapi' => [
         'meta' => [
           'links' => [
-            'self' => ['href' => 'http://jsonapi.org/format/1.0/'],
+            'self' => ['href' => JsonApiSpec::SUPPORTED_SPECIFICATION_PERMALINK],
           ],
         ],
-        'version' => '1.0',
+        'version' => JsonApiSpec::SUPPORTED_SPECIFICATION_VERSION,
       ],
       'links' => [
         'self' => ['href' => $self_url],
@@ -91,7 +93,7 @@ class BlockContentTypeTest extends ConfigEntityResourceTestBase {
           'description' => 'Provides a competitive alternative to the "basic" type',
           'label' => 'Pascal',
           'langcode' => 'en',
-          'revision' => 0,
+          'revision' => FALSE,
           'status' => TRUE,
           'drupal_internal__id' => 'pascal',
         ],
@@ -102,7 +104,7 @@ class BlockContentTypeTest extends ConfigEntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getPostDocument() {
+  protected function getPostDocument(): array {
     // @todo Update in https://www.drupal.org/node/2300677.
     return [];
   }

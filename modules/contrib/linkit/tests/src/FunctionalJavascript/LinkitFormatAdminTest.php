@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\linkit\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
@@ -48,16 +50,11 @@ class LinkitFormatAdminTest extends WebDriverTestBase {
     // Enable the 'Limit allowed HTML tags and correct faulty HTML' filter.
     $page->findField('filters[filter_html][status]')->check();
 
-    $javascript = "(function (){ return jQuery('p.editor-update-message > strong').text(); })()";
-    $this->assertStringNotContainsString('<a href hreflang data-entity-substitution data-entity-type data-entity-uuid title>', $session->evaluateScript($javascript));
-
     // Enable the 'Linkit filter' filter.
     $page->findField('filters[linkit][status]')->check();
-    $this->assertStringContainsString('<a href hreflang data-entity-substitution data-entity-type data-entity-uuid title>', $session->evaluateScript($javascript));
 
     // Disable the 'Linkit filter' filter.
     $page->findField('filters[linkit][status]')->uncheck();
-    $this->assertStringNotContainsString('<a href hreflang data-entity-substitution data-entity-type data-entity-uuid title>', $session->evaluateScript($javascript));
   }
 
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\dblog\Kernel;
 
 use Drupal\Core\Database\Database;
@@ -33,7 +35,7 @@ class DbLogTest extends KernelTestBase {
   /**
    * Tests that cron correctly applies the database log row limit.
    */
-  public function testDbLogCron() {
+  public function testDbLogCron(): void {
     $row_limit = 100;
     // Generate additional log entries.
     $this->generateLogEntries($row_limit + 10);
@@ -55,7 +57,7 @@ class DbLogTest extends KernelTestBase {
     $this->assertEquals($expected_count, $cron_detailed_count, "Cron added $cron_detailed_count of $expected_count new log entries");
 
     // Test disabling of detailed cron logging.
-    $this->config('system.cron')->set('logging', 0)->save();
+    $this->config('system.cron')->set('logging', FALSE)->save();
     $cron_count = $this->runCron();
     $this->assertEquals(1, $cron_count, "Cron added $cron_count of 1 new log entries");
   }
@@ -63,8 +65,13 @@ class DbLogTest extends KernelTestBase {
   /**
    * Tests that only valid placeholders are stored in the variables column.
    */
-  public function testInvalidPlaceholders() {
-    \Drupal::logger('my_module')->warning('Hello @string @array @object', ['@string' => '', '@array' => [], '@object' => new \stdClass()]);
+  public function testInvalidPlaceholders(): void {
+    \Drupal::logger('my_module')
+      ->warning('Hello @string @array @object', [
+        '@string' => '',
+        '@array' => [],
+        '@object' => new \stdClass(),
+      ]);
     $variables = \Drupal::database()
       ->select('watchdog', 'w')
       ->fields('w', ['variables'])
@@ -81,7 +88,7 @@ class DbLogTest extends KernelTestBase {
    * @return int
    *   Number of new watchdog entries.
    */
-  private function runCron() {
+  private function runCron(): int {
     $connection = Database::getConnection();
     // Get last ID to compare against; log entries get deleted, so we can't
     // reliably add the number of newly created log entries to the current count

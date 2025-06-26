@@ -2,14 +2,14 @@
 
 namespace Drupal\Tests\rdf\Functional;
 
+use Drupal\comment\Entity\Comment;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\node\Entity\NodeType;
 use Drupal\node\NodeInterface;
-use Drupal\Tests\BrowserTestBase;
-use Drupal\comment\Entity\Comment;
 use Drupal\taxonomy\Entity\Term;
+use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\rdf\Traits\RdfParsingTrait;
 
 /**
@@ -301,7 +301,6 @@ class StandardProfileTest extends BrowserTestBase {
 
     // @todo Once the image points to the original instead of the processed
     //   image, move this to testArticleProperties().
-
     $expected_value = [
       'type' => 'uri',
       'value' => $this->imageUri,
@@ -442,19 +441,6 @@ class StandardProfileTest extends BrowserTestBase {
       'value' => $this->termUri,
     ];
     $this->assertTrue($this->hasRdfProperty($this->getSession()->getPage()->getContent(), $this->baseUri, $this->articleUri, 'http://schema.org/about', $expected_value), "$message_prefix tag was found (schema:about).");
-
-    // Tag type.
-    // @todo Enable with https://www.drupal.org/node/2072791.
-    // $this->assertEquals('schema:Thing', $graph->type($this->termUri), 'Tag type was found (schema:Thing).');
-
-    // Tag name.
-    $expected_value = [
-      'type' => 'literal',
-      'value' => $this->term->getName(),
-      'lang' => 'en',
-    ];
-    // @todo Enable with https://www.drupal.org/node/2072791.
-    // $this->assertTrue($graph->hasProperty($this->termUri, 'http://schema.org/name', $expected_value), "$message_prefix name was found (schema:name).");
   }
 
   /**
@@ -497,8 +483,7 @@ class StandardProfileTest extends BrowserTestBase {
       'type' => 'literal',
       // There is an extra carriage return in the value when parsing comments as
       // output by Bartik, so it must be added to the expected value.
-      'value' => "$text
-",
+      'value' => "$text\n",
       'lang' => 'en',
     ];
     $this->assertTrue($this->hasRdfProperty($this->getSession()->getPage()->getContent(), $this->baseUri, $this->articleCommentUri, 'http://schema.org/text', $expected_value), "Article comment body was found (schema:text).");

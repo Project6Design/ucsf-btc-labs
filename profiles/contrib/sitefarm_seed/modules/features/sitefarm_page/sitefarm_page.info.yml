@@ -1,7 +1,7 @@
 name: 'Basic Page'
 description: 'Provides Basic Page content type and related configuration. A standard page to display content which will not change regularly like an "About Us" page.'
 type: module
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^9 || ^10 || ^11
 dependencies:
   - block
   - ctools

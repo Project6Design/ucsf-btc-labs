@@ -2,6 +2,7 @@
 
 namespace Drupal\Core\KeyValueStore;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Component\Serialization\SerializationInterface;
 use Drupal\Core\Database\Connection;
 
@@ -22,10 +23,18 @@ class DatabaseStorageExpirable extends DatabaseStorage implements KeyValueStoreE
    *   The serialization class to use.
    * @param \Drupal\Core\Database\Connection $connection
    *   The database connection to use.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
    * @param string $table
    *   The name of the SQL table to use, defaults to key_value_expire.
    */
-  public function __construct($collection, SerializationInterface $serializer, Connection $connection, $table = 'key_value_expire') {
+  public function __construct(
+    $collection,
+    SerializationInterface $serializer,
+    Connection $connection,
+    protected TimeInterface $time,
+    $table = 'key_value_expire',
+  ) {
     parent::__construct($collection, $serializer, $connection, $table);
   }
 
@@ -37,7 +46,7 @@ class DatabaseStorageExpirable extends DatabaseStorage implements KeyValueStoreE
       return (bool) $this->connection->query('SELECT 1 FROM {' . $this->connection->escapeTable($this->table) . '} WHERE [collection] = :collection AND [name] = :key AND [expire] > :now', [
         ':collection' => $this->collection,
         ':key' => $key,
-        ':now' => REQUEST_TIME,
+        ':now' => $this->time->getRequestTime(),
       ])->fetchField();
     }
     catch (\Exception $e) {
@@ -54,14 +63,14 @@ class DatabaseStorageExpirable extends DatabaseStorage implements KeyValueStoreE
       $values = $this->connection->query(
         'SELECT [name], [value] FROM {' . $this->connection->escapeTable($this->table) . '} WHERE [expire] > :now AND [name] IN ( :keys[] ) AND [collection] = :collection',
         [
-          ':now' => REQUEST_TIME,
+          ':now' => $this->time->getRequestTime(),
           ':keys[]' => $keys,
           ':collection' => $this->collection,
         ])->fetchAllKeyed();
       return array_map([$this->serializer, 'decode'], $values);
     }
     catch (\Exception $e) {
-      // @todo: Perhaps if the database is never going to be available,
+      // @todo Perhaps if the database is never going to be available,
       // key/value requests should return FALSE in order to allow exception
       // handling to occur but for now, keep it an array, always.
       // https://www.drupal.org/node/2787737
@@ -79,7 +88,7 @@ class DatabaseStorageExpirable extends DatabaseStorage implements KeyValueStoreE
         'SELECT [name], [value] FROM {' . $this->connection->escapeTable($this->table) . '} WHERE [collection] = :collection AND [expire] > :now',
         [
           ':collection' => $this->collection,
-          ':now' => REQUEST_TIME,
+          ':now' => $this->time->getRequestTime(),
         ])->fetchAllKeyed();
       return array_map([$this->serializer, 'decode'], $values);
     }
@@ -109,7 +118,7 @@ class DatabaseStorageExpirable extends DatabaseStorage implements KeyValueStoreE
       ])
       ->fields([
         'value' => $this->serializer->encode($value),
-        'expire' => REQUEST_TIME + $expire,
+        'expire' => $this->time->getRequestTime() + $expire,
       ])
       ->execute();
   }
@@ -180,13 +189,6 @@ class DatabaseStorageExpirable extends DatabaseStorage implements KeyValueStoreE
     foreach ($data as $key => $value) {
       $this->setWithExpire($key, $value, $expire);
     }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function deleteMultiple(array $keys) {
-    parent::deleteMultiple($keys);
   }
 
   /**

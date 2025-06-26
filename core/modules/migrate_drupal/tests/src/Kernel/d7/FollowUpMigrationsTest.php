@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal\Kernel\d7;
 
 use Drupal\node\Entity\Node;
@@ -10,6 +12,7 @@ use Drupal\user\Entity\User;
  * Tests follow-up migrations.
  *
  * @group migrate_drupal
+ * @group #slow
  */
 class FollowUpMigrationsTest extends MigrateDrupal7TestBase {
 
@@ -56,7 +59,7 @@ class FollowUpMigrationsTest extends MigrateDrupal7TestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getFileMigrationInfo() {
+  protected function getFileMigrationInfo(): array {
     return [
       'path' => 'public://sites/default/files/cube.jpeg',
       'size' => 3620,
@@ -70,7 +73,7 @@ class FollowUpMigrationsTest extends MigrateDrupal7TestBase {
    *
    * @dataProvider providerTestEntityReferenceTranslations
    */
-  public function testEntityReferenceTranslations($node_migrations) {
+  public function testEntityReferenceTranslations($node_migrations): void {
     $this->executeMigrations($node_migrations);
 
     // Test the entity reference field before the follow-up migrations.
@@ -119,7 +122,7 @@ class FollowUpMigrationsTest extends MigrateDrupal7TestBase {
   /**
    * Data provider for testEntityReferenceTranslations().
    */
-  public function providerTestEntityReferenceTranslations() {
+  public static function providerTestEntityReferenceTranslations() {
     return [
       [
         ['d7_node', 'd7_node_translation'],

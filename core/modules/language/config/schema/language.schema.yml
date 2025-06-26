@@ -87,18 +87,30 @@ language.mappings:
 language.entity.*:
   type: config_entity
   label: 'Language'
+  constraints:
+    FullyValidatable: ~
   mapping:
     id:
       type: string
       label: 'ID'
+      constraints:
+        NotBlank: []
+        Regex:
+          # @see \Drupal\Core\Language\LanguageInterface::VALID_LANGCODE_REGEX
+          pattern: '/[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*/'
+          message: 'This is not a valid language code.'
     label:
       type: required_label
       label: 'Label'
     direction:
       type: string
       label: 'Direction'
+      constraints:
+        # @see \Drupal\Core\Language\LanguageInterface::DIRECTION_LTR and
+        # \Drupal\Core\Language\LanguageInterface::DIRECTION_RTL
+        Choice: [ 'ltr', 'rtl' ]
     weight:
-      type: integer
+      type: weight
       label: 'Weight'
     locked:
       type: boolean
@@ -107,16 +119,26 @@ language.entity.*:
 language.content_settings.*.*:
   type: config_entity
   label: 'Content Language Settings'
+  constraints:
+    FullyValidatable: ~
   mapping:
     id:
       type: string
       label: 'ID'
+      constraints:
+        NotBlank: []
     target_entity_type_id:
       type: string
       label: 'Entity Type ID'
+      constraints:
+        PluginExists:
+          manager: entity_type.manager
+          interface: Drupal\Core\Entity\ContentEntityInterface
     target_bundle:
       type:  string
       label: 'Bundle'
+      constraints:
+        EntityBundleExists: '%parent.target_entity_type_id'
     default_langcode:
       type: langcode
       label: 'Default language'

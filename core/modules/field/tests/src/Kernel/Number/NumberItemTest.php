@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\Number;
 
 use Drupal\Core\Field\FieldItemInterface;
@@ -19,9 +21,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 class NumberItemTest extends FieldKernelTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [];
 
@@ -49,7 +49,7 @@ class NumberItemTest extends FieldKernelTestBase {
   /**
    * Tests using entity fields of the number field type.
    */
-  public function testNumberItem() {
+  public function testNumberItem(): void {
     // Verify entity creation.
     $entity = EntityTest::create();
     $integer = rand(0, 10);
@@ -128,8 +128,6 @@ class NumberItemTest extends FieldKernelTestBase {
   /**
    * Tests constraints on numeric item fields.
    *
-   * @dataProvider dataNumberFieldSettingsProvider
-   *
    * @param string $type
    *   The field type.
    * @param int|float $min
@@ -144,8 +142,10 @@ class NumberItemTest extends FieldKernelTestBase {
    *   The expected constraint violation message.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   *
+   * @dataProvider dataNumberFieldSettingsProvider
    */
-  public function testConstraints($type, $min, $max, $value, $expect_constraints, $expected_constraint_message = '') {
+  public function testConstraints($type, $min, $max, $value, $expect_constraints, $expected_constraint_message = ''): void {
     $field = FieldConfig::loadByName('entity_test', 'entity_test', 'field_' . $type);
     $field->setSetting('min', $min);
     $field->setSetting('max', $max);
@@ -167,7 +167,7 @@ class NumberItemTest extends FieldKernelTestBase {
    * @return \Generator
    *   The test data.
    */
-  public function dataNumberFieldSettingsProvider() {
+  public static function dataNumberFieldSettingsProvider() {
     yield ['integer', NULL, NULL, -100, FALSE];
     yield ['integer', 0, NULL, -100, TRUE, 'field_integer: the value may be no less than 0.'];
     yield ['integer', 10, NULL, 100, FALSE];
@@ -243,7 +243,7 @@ class NumberItemTest extends FieldKernelTestBase {
    * @return \Generator
    *   The test data.
    */
-  public function dataTestMinMaxValue() {
+  public static function dataTestMinMaxValue() {
     yield [1, 10, 5, FALSE, ''];
     yield [10, 5, 6, TRUE, 'The minimum value must be less than or equal to 5.'];
     yield [1, 0, 6, TRUE, 'The minimum value must be less than or equal to 0.'];

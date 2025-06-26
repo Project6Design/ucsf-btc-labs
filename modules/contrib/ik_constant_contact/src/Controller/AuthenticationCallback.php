@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+
 /**
  * Constant Contact Callback Controller.
  *
@@ -159,11 +160,11 @@ class AuthenticationCallback extends ControllerBase {
         }
       }
       catch (RequestException $e) {
-        watchdog_exception('ik_constant_contact', $e);
+        \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.1.0', fn() => \Drupal\Core\Utility\Error::logException(\Drupal::logger('ik_constant_contact'), $e), fn() => watchdog_exception('ik_constant_contact', $e));
         $this->messenger->addMessage($this->t('There was a problem authorizing your account.'), $this->messenger::TYPE_ERROR);
       }
       catch (\Exception $e) {
-        watchdog_exception('ik_constant_contact', $e);
+        \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.1.0', fn() => \Drupal\Core\Utility\Error::logException(\Drupal::logger('ik_constant_contact'), $e), fn() => watchdog_exception('ik_constant_contact', $e));
         $this->messenger->addMessage($this->t('There was a problem authorizing your account.'), $this->messenger::TYPE_ERROR);
       }
     }

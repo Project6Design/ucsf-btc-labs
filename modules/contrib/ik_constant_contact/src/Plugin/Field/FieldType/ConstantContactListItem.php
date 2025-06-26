@@ -19,10 +19,10 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
  * @FieldType(
  *   id = "constant_contact_lists",
  *   label = @Translation("Constant Contact Lists"),
- *   category = @Translation("Constant Contact"),
+ *   category = "constant_contact",
  *   default_widget = "constant_contact_lists_default",
  *   default_formatter = "constant_contact_lists_formatter",
- *   description = @Translation("Constant contact list description"),
+ *   description = @Translation("All entity to select a Constant Contact list(s) to subscribe to."),
  * )
  */
 
@@ -43,7 +43,11 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
    * {@inheritdoc}
    */
   public static function defaultStorageSettings() {
-    return [
+    $cc = \Drupal::service('ik_constant_contact');
+    $ccConfig = $cc->getConfig();
+    $ccFields = $ccConfig['fields'];
+
+    $settings = [
       'enabled_lists_only' => TRUE,
       'subscribe_on_save' => FALSE,
       'unsubscribe_on_delete' => FALSE,
@@ -51,6 +55,13 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
         'email_address' => NULL
       ]
     ] + parent::defaultStorageSettings();
+
+
+    foreach ($ccFields as $ccKey => $ccField) {
+      $settings['field_mapping'][$ccField] = NULL;
+    }
+
+    return $settings;
   }
 
   /**
@@ -135,6 +146,21 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
       ]
     ];
 
+    $ccConfig = $cc->getConfig();
+    $ccFields = $ccConfig['fields'];
+
+    foreach ($ccFields as $ccKey => $ccField) {
+      $element['field_mapping'][$ccKey] = [
+        '#type' => 'select',
+        '#title' => $ccField,
+        '#default_value' => isset($this->getSetting('field_mapping')[$ccKey]) ? $this->getSetting('field_mapping')[$ccKey] : NULL,
+        '#options' => ['' => 'Do not map this field']
+      ];
+    }
+
+    $element['field_mapping']['street_address']['#description'] = $this->t('Requires a field of type <strong>address</strong>');
+
+
     // Add field mapping options
     // @TODO - what to do if field is deleted.
     foreach ($entityFields as $fieldName => $fieldItemList) {
@@ -144,6 +170,17 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
 
       if ($fieldType === 'email') {
         $element['field_mapping']['email_address']['#options'][$fieldName] = $fieldLabel;
+      } else if ($fieldType === 'address') {
+        $element['field_mapping']['street_address']['#options'][$fieldName] = $fieldLabel;
+      } else if ($fieldType === 'datetime') {
+        $element['field_mapping']['birthday']['#options'][$fieldName] = $fieldLabel;
+        $element['field_mapping']['anniversary']['#options'][$fieldName] = $fieldLabel;
+      } else if (in_array($fieldType, ['string'])) {
+        foreach ($ccFields as $ccKey => $ccField) {
+          if ($ccKey !== 'street_address') {
+            $element['field_mapping'][$ccKey]['#options'][$fieldName] = $fieldLabel;
+          }
+        }
       }
     }
 

@@ -292,7 +292,7 @@ class SelectExtender implements SelectInterface {
   /**
    * {@inheritdoc}
    */
-  public function getArguments(PlaceholderInterface $queryPlaceholder = NULL) {
+  public function getArguments(?PlaceholderInterface $queryPlaceholder = NULL) {
     return $this->query->getArguments($queryPlaceholder);
   }
 
@@ -306,7 +306,7 @@ class SelectExtender implements SelectInterface {
   /**
    * {@inheritdoc}
    */
-  public function preExecute(SelectInterface $query = NULL) {
+  public function preExecute(?SelectInterface $query = NULL) {
     // If no query object is passed in, use $this.
     if (!isset($query)) {
       $query = $this;
@@ -503,11 +503,11 @@ class SelectExtender implements SelectInterface {
   /**
    * Magic override for undefined methods.
    *
-   * If one extender extends another extender, then methods in the inner extender
-   * will not be exposed on the outer extender.  That's because we cannot know
-   * in advance what those methods will be, so we cannot provide wrapping
-   * implementations as we do above.  Instead, we use this slower catch-all method
-   * to handle any additional methods.
+   * If one extender extends another extender, then methods in the inner
+   * extender will not be exposed on the outer extender.  That's because we
+   * cannot know in advance what those methods will be, so we cannot provide
+   * wrapping implementations as we do above.  Instead, we use this slower
+   * catch-all method to handle any additional methods.
    */
   public function __call($method, $args) {
     $return = call_user_func_array([$this->query, $method], $args);

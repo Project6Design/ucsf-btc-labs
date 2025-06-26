@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\linkit\Functional;
 
 use Drupal\linkit\Entity\Profile;
@@ -111,7 +113,7 @@ class MatcherAdminTest extends LinkitBrowserTestBase {
 
     // Try delete a matcher that is not attached to the profile.
     $this->drupalGet('/admin/config/content/linkit/manage/' . $this->linkitProfile->id() . '/matchers/doesntexists/delete');
-    $this->assertSession()->statusCodeEquals('404');
+    $this->assertSession()->statusCodeEquals(404);
 
     // Go to the delete page, but press cancel.
     $this->drupalGet('/admin/config/content/linkit/manage/' . $this->linkitProfile->id() . '/matchers/' . $plugin_uuid . '/delete');

@@ -26,8 +26,8 @@ function menu_block_update_8102() {
     // Only update system_menu_block config.
     if (strpos($settings['id'], 'system_menu_block:') === 0) {
       // Set default config for existing menu block config.
-      $settings['label_link'] ?? FALSE;
-      $settings['label_type'] ?? MenuBlock::LABEL_BLOCK;
+      $settings['label_link'] = $settings['label_link'] ?? FALSE;
+      $settings['label_type'] = $settings['label_type'] ?? MenuBlock::LABEL_BLOCK;
       $block->set('settings', $settings)
         ->save(TRUE);
     }

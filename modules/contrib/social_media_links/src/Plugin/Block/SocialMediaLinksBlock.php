@@ -3,19 +3,19 @@
 namespace Drupal\social_media_links\Plugin\Block;
 
 use Drupal\Component\Plugin\Exception\PluginException;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
-use Drupal\social_media_links\SocialMediaLinksPlatformManager;
-use Drupal\social_media_links\SocialMediaLinksIconsetManager;
 use Drupal\social_media_links\IconsetBase;
 use Drupal\social_media_links\IconsetFinderService;
-use Drupal\Core\Render\RendererInterface;
+use Drupal\social_media_links\SocialMediaLinksIconsetManager;
+use Drupal\social_media_links\SocialMediaLinksPlatformManager;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides the Social Media Links Block.
@@ -125,7 +125,7 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
         '#title' => $platform['name']->render(),
         '#title_display' => 'invisible',
         '#size' => 40,
-        '#default_value' => isset($config['platforms'][$platform_id]['value']) ? $config['platforms'][$platform_id]['value'] : '',
+        '#default_value' => $config['platforms'][$platform_id]['value'] ?? '',
         '#field_prefix' => $platform['instance']->getUrlPrefix(),
         '#field_suffix' => $platform['instance']->getUrlSuffix(),
         '#element_validate' => [
@@ -145,7 +145,7 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
         '#description' => $this->t('The description is used for the title and WAI-ARIA attribute.'),
         '#size' => 40,
         '#placeholder' => $this->t('Find / Follow us on %platform', ['%platform' => $platform['name']->render()]),
-        '#default_value' => isset($config['platforms'][$platform_id]['description']) ? $config['platforms'][$platform_id]['description'] : '',
+        '#default_value' => $config['platforms'][$platform_id]['description'] ?? '',
       ];
 
       $form['platforms'][$platform_id]['weight'] = [
@@ -174,18 +174,18 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
         'v' => $this->t('vertical'),
         'h' => $this->t('horizontal'),
       ],
-      '#default_value' => isset($config['appearance']['orientation']) ? $config['appearance']['orientation'] : 'h',
+      '#default_value' => $config['appearance']['orientation'] ?? 'h',
     ];
     $form['appearance']['show_name'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show name'),
       '#description' => $this->t('Show the platform name next to the icon.'),
-      '#default_value' => isset($config['appearance']['show_name']) ? $config['appearance']['show_name'] : 0,
+      '#default_value' => $config['appearance']['show_name'] ?? 0,
     ];
     $form['appearance']['suggestion'] = [
       '#type' => 'machine_name',
       '#title' => $this->t('Theme hook suggestion'),
-      '#default_value' => isset($config['appearance']['suggestion']) ? $config['appearance']['suggestion'] : '',
+      '#default_value' => $config['appearance']['suggestion'] ?? '',
       '#required' => FALSE,
       '#field_prefix' => '<code>social_media_links_platforms__</code>',
       '#description' => $this->t('A theme hook suggestion can be used to override the default HTML and CSS found in <code>social-media-links-platforms.html</code>.'),
@@ -204,7 +204,7 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
     $form['link_attributes']['target'] = [
       '#type' => 'select',
       '#title' => $this->t('Default target'),
-      '#default_value' => isset($config['link_attributes']['target']) ? $config['link_attributes']['target'] : '<none>',
+      '#default_value' => $config['link_attributes']['target'] ?? '<none>',
       '#options' => [
         '<none>' => $this->t('Remove target attribute'),
         '_blank' => $this->t('Open in a new browser window or tab (_blank)'),
@@ -216,7 +216,7 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
     $form['link_attributes']['rel'] = [
       '#type' => 'select',
       '#title' => $this->t('Default rel'),
-      '#default_value' => isset($config['link_attributes']['rel']) ? $config['link_attributes']['rel'] : '<none>',
+      '#default_value' => $config['link_attributes']['rel'] ?? '<none>',
       '#options' => [
         '<none>' => $this->t('Remove rel attribute'),
         'nofollow' => $this->t('Set nofollow'),
@@ -235,7 +235,7 @@ class SocialMediaLinksBlock extends BlockBase implements ContainerFactoryPluginI
     $form['iconset']['style'] = [
       '#type' => 'select',
       '#title' => $this->t('Icon Style'),
-      '#default_value' => isset($config['iconset']['style']) ? $config['iconset']['style'] : '',
+      '#default_value' => $config['iconset']['style'] ?? '',
       '#options' => $iconsetStyles,
     ];
 

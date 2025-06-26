@@ -1,12 +1,12 @@
 name: Better Normalizers
 type: module
 description: 'Improve the normalizers in core.'
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^9 || ^10 || ^11
 
 dependencies:
   - hal:hal
 
-# Information added by Drupal.org packaging script on 2023-10-25
-version: '2.0.0-beta1'
+# Information added by Drupal.org packaging script on 2025-06-19
+version: '2.0.0-beta2'
 project: 'better_normalizers'
-datestamp: 1698277488
+datestamp: 1750296431

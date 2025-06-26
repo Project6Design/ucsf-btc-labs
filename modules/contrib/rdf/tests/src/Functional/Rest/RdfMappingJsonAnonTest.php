@@ -5,6 +5,8 @@ namespace Drupal\Tests\rdf\Functional\Rest;
 use Drupal\Tests\rest\Functional\AnonResourceTestTrait;
 
 /**
+ * Tests JSON Anon for RDF mappings.
+ *
  * @group rest
  */
 class RdfMappingJsonAnonTest extends RdfMappingResourceTestBase {

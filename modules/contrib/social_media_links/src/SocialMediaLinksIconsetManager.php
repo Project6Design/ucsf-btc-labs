@@ -2,9 +2,9 @@
 
 namespace Drupal\social_media_links;
 
-use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
  * Manager class for the iconset plugins.

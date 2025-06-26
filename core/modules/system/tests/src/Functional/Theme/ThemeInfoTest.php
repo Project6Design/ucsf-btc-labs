@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Theme;
 
 use Drupal\Tests\BrowserTestBase;
@@ -12,9 +14,7 @@ use Drupal\Tests\BrowserTestBase;
 class ThemeInfoTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['theme_test'];
 
@@ -58,13 +58,13 @@ class ThemeInfoTest extends BrowserTestBase {
   /**
    * Tests libraries-override.
    */
-  public function testStylesheets() {
-    $this->themeInstaller->install(['test_basetheme', 'test_subtheme']);
+  public function testStylesheets(): void {
+    $this->themeInstaller->install(['test_base_theme', 'test_subtheme']);
     $this->config('system.theme')
       ->set('default', 'test_subtheme')
       ->save();
 
-    $base = $this->getThemePath('test_basetheme');
+    $base = $this->getThemePath('test_base_theme');
     $sub = $this->getThemePath('test_subtheme') . '/css';
 
     // All removals are expected to be based on a file's path and name and
@@ -78,16 +78,17 @@ class ThemeInfoTest extends BrowserTestBase {
     $this->assertSession()->elementNotExists('xpath', '//link[contains(@href, "sub-remove.css")]');
     $this->assertSession()->elementNotExists('xpath', '//link[contains(@href, "base-add.sub-remove.css")]');
 
-    // Verify that CSS files with the same name are loaded from both the base theme and subtheme.
-    $this->assertSession()->elementsCount('xpath', '//link[contains(@href, "' . $base . '/samename.css")]', 1);
-    $this->assertSession()->elementsCount('xpath', '//link[contains(@href, "' . $sub . '/samename.css")]', 1);
+    // Verify that CSS files with the same name are loaded from both the base
+    // theme and subtheme.
+    $this->assertSession()->elementsCount('xpath', '//link[contains(@href, "' . $base . '/same-name.css")]', 1);
+    $this->assertSession()->elementsCount('xpath', '//link[contains(@href, "' . $sub . '/same-name.css")]', 1);
 
   }
 
   /**
    * Tests that changes to the info file are picked up.
    */
-  public function testChanges() {
+  public function testChanges(): void {
     $this->themeInstaller->install(['test_theme']);
     $this->config('system.theme')->set('default', 'test_theme')->save();
     $this->themeManager->resetActiveTheme();

@@ -60,6 +60,8 @@ class LinkGeneratorTest extends UnitTestCase {
 
   /**
    * Contains the LinkGenerator default options.
+   *
+   * @var array
    */
   protected $defaultOptions = [
     'query' => [],
@@ -91,7 +93,7 @@ class LinkGeneratorTest extends UnitTestCase {
    * @return array
    *   Returns some test data.
    */
-  public function providerTestGenerateHrefs() {
+  public static function providerTestGenerateHrefs() {
     return [
       // Test that the URL returned by the URL generator is used.
       ['test_route_1', [], FALSE, '/test-route-1'],
@@ -110,7 +112,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @dataProvider providerTestGenerateHrefs
    */
-  public function testGenerateHrefs($route_name, array $parameters, $absolute, $expected_url) {
+  public function testGenerateHrefs($route_name, array $parameters, $absolute, $expected_url): void {
     $this->urlGenerator->expects($this->once())
       ->method('generateFromRoute')
       ->with($route_name, $parameters, ['absolute' => $absolute] + $this->defaultOptions)
@@ -131,7 +133,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @covers ::generate
    */
-  public function testGenerate() {
+  public function testGenerate(): void {
     $this->urlGenerator->expects($this->once())
       ->method('generateFromRoute')
       ->with('test_route_1', [], ['fragment' => 'the-fragment'] + $this->defaultOptions)
@@ -161,7 +163,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @covers ::generate
    */
-  public function testGenerateNoLink() {
+  public function testGenerateNoLink(): void {
     $this->urlGenerator->expects($this->never())
       ->method('generateFromRoute');
     $this->moduleHandler->expects($this->exactly(2))
@@ -193,7 +195,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @covers ::generate
    */
-  public function testGenerateNone() {
+  public function testGenerateNone(): void {
     $this->urlGenerator->expects($this->once())
       ->method('generateFromRoute')
       ->with('<none>', [], ['set_active_class' => TRUE] + $this->defaultOptions)
@@ -216,7 +218,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @covers ::generate
    */
-  public function testGenerateButton() {
+  public function testGenerateButton(): void {
     $this->urlGenerator->expects($this->never())
       ->method('generateFromRoute');
     $this->moduleHandler->expects($this->exactly(2))
@@ -247,11 +249,11 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @covers ::generate
    */
-  public function testGenerateExternal() {
+  public function testGenerateExternal(): void {
     $this->urlAssembler->expects($this->once())
       ->method('assemble')
       ->with('https://www.drupal.org', ['set_active_class' => TRUE, 'external' => TRUE] + $this->defaultOptions)
-      ->will($this->returnArgument(0));
+      ->willReturnArgument(0);
 
     $this->moduleHandler->expects($this->once())
       ->method('alter')
@@ -281,7 +283,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @covers ::generate
    */
-  public function testGenerateUrlWithQuotes() {
+  public function testGenerateUrlWithQuotes(): void {
     $this->urlAssembler->expects($this->once())
       ->method('assemble')
       ->with('base:example', ['query' => ['foo' => '"bar"', 'zoo' => 'baz']] + $this->defaultOptions)
@@ -312,7 +314,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Utility\LinkGenerator::generate()
    */
-  public function testGenerateAttributes() {
+  public function testGenerateAttributes(): void {
     $this->urlGenerator->expects($this->once())
       ->method('generateFromRoute')
       ->with('test_route_1', [], $this->defaultOptions)
@@ -337,7 +339,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Utility\LinkGenerator::generate()
    */
-  public function testGenerateQuery() {
+  public function testGenerateQuery(): void {
     $this->urlGenerator->expects($this->once())
       ->method('generateFromRoute')
       ->with('test_route_1', [], ['query' => ['test' => 'value']] + $this->defaultOptions)
@@ -360,7 +362,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Utility\LinkGenerator::generate()
    */
-  public function testGenerateParametersAsQuery() {
+  public function testGenerateParametersAsQuery(): void {
     $this->urlGenerator->expects($this->once())
       ->method('generateFromRoute')
       ->with('test_route_1', ['test' => 'value'], $this->defaultOptions)
@@ -381,7 +383,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Utility\LinkGenerator::generate()
    */
-  public function testGenerateOptions() {
+  public function testGenerateOptions(): void {
     $this->urlGenerator->expects($this->once())
       ->method('generateFromRoute')
       ->with('test_route_1', [], ['key' => 'value'] + $this->defaultOptions)
@@ -403,7 +405,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Utility\LinkGenerator::generate()
    */
-  public function testGenerateXss() {
+  public function testGenerateXss(): void {
     $this->urlGenerator->expects($this->once())
       ->method('generateFromRoute')
       ->with('test_route_4', [], $this->defaultOptions)
@@ -421,7 +423,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Utility\LinkGenerator::generate()
    */
-  public function testGenerateWithHtml() {
+  public function testGenerateWithHtml(): void {
     $this->urlGenerator->expects($this->exactly(2))
       ->method('generateFromRoute')
       ->with('test_route_5', [], $this->defaultOptions)
@@ -460,7 +462,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @see \Drupal\Core\Utility\LinkGenerator::generate()
    */
-  public function testGenerateActive() {
+  public function testGenerateActive(): void {
     $this->urlGenerator->expects($this->exactly(5))
       ->method('generateFromRoute')
       ->willReturnCallback(function ($name, $parameters = [], $options = [], $collect_bubbleable_metadata = FALSE) {
@@ -550,11 +552,8 @@ class LinkGeneratorTest extends UnitTestCase {
    * Tests the LinkGenerator's support for collecting bubbleable metadata.
    *
    * @see \Drupal\Core\Utility\LinkGenerator::generate()
-   * @see \Drupal\Core\Utility\LinkGenerator::generateFromLink()
-   *
-   * @group legacy
    */
-  public function testGenerateBubbleableMetadata() {
+  public function testGenerateBubbleableMetadata(): void {
     $options = ['query' => [], 'language' => NULL, 'set_active_class' => FALSE, 'absolute' => FALSE];
     $this->urlGenerator->expects($this->any())
       ->method('generateFromRoute')
@@ -578,13 +577,6 @@ class LinkGeneratorTest extends UnitTestCase {
     $this->assertSame($expected_link_markup, (string) $generated_link->getGeneratedLink());
     $this->assertInstanceOf('\Drupal\Core\Render\BubbleableMetadata', $generated_link);
 
-    // Test ::generateFromLink().
-    $this->expectDeprecation('\Drupal\Core\Utility\LinkGeneratorInterface::generateFromLink() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use \Drupal\Core\Utility\LinkGeneratorInterface::generate() instead. See https://www.drupal.org/node/3342992');
-    $link = new Link('Test', $url);
-    $this->assertSame($expected_link_markup, (string) $this->linkGenerator->generateFromLink($link));
-    $generated_link = $this->linkGenerator->generateFromLink($link);
-    $this->assertSame($expected_link_markup, (string) $generated_link->getGeneratedLink());
-    $this->assertInstanceOf('\Drupal\Core\Render\BubbleableMetadata', $generated_link);
   }
 
   /**
@@ -592,7 +584,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * @covers ::generate
    */
-  public function testGenerateWithAlterHook() {
+  public function testGenerateWithAlterHook(): void {
     $options = ['query' => [], 'language' => NULL, 'set_active_class' => FALSE, 'absolute' => FALSE];
     $this->urlGenerator->expects($this->any())
       ->method('generateFromRoute')
@@ -631,7 +623,7 @@ class LinkGeneratorTest extends UnitTestCase {
    *
    * This is a regression test for https://www.drupal.org/node/2842399.
    */
-  public function testGenerateTwice() {
+  public function testGenerateTwice(): void {
     $this->urlGenerator->expects($this->any())
       ->method('generateFromRoute')
       ->willReturn((new GeneratedUrl())->setGeneratedUrl('/'));

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Update;
 
 use Drupal\Component\Utility\Crypt;
@@ -12,7 +14,6 @@ use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Language\Language;
 use Drupal\Core\Url;
 use Drupal\Tests\UpdatePathTestTrait;
-use Drupal\user\Entity\User;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -47,18 +48,20 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
   }
 
   /**
-   * Modules to enable after the database is loaded.
+   * Modules to install after the database is loaded.
+   *
+   * @var string[]
    */
   protected static $modules = [];
 
   /**
    * The file path(s) to the dumped database(s) to load into the child site.
    *
-   * The file system/tests/fixtures/update/drupal-9.4.0.bare.standard.php.gz is
+   * The file system/tests/fixtures/update/drupal-10.3.0.bare.standard.php.gz is
    * normally included first -- this sets up the base database from a bare
    * standard Drupal installation.
    *
-   * The file system/tests/fixtures/update/drupal-9.4.0.filled.standard.php.gz
+   * The file system/tests/fixtures/update/drupal-10.3.0.filled.standard.php.gz
    * can also be used in case we want to test with a database filled with
    * content, and with all core modules enabled.
    *
@@ -81,17 +84,6 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
    * @var bool
    */
   protected $strictConfigSchema = FALSE;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    if (!extension_loaded('zlib')) {
-      $this->markTestSkipped('The zlib extension is not available.');
-    }
-
-    parent::setUp();
-  }
 
   /**
    * Overrides BrowserTestBase::installDrupal() for update testing.
@@ -145,7 +137,7 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
 
     // Load the database(s).
     foreach ($this->databaseDumpFiles as $file) {
-      if (substr($file, -3) == '.gz') {
+      if (str_ends_with($file, '.gz')) {
         $file = "compress.zlib://$file";
       }
       require $file;
@@ -232,14 +224,18 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
    * Replace User 1 with the user created here.
    */
   protected function replaceUser1() {
-    /** @var \Drupal\user\UserInterface $account */
-    // @todo Saving the account before the update is problematic.
-    //   https://www.drupal.org/node/2560237
-    $account = User::load(1);
-    $account->setPassword($this->rootUser->pass_raw);
-    $account->setEmail($this->rootUser->getEmail());
-    $account->setUsername($this->rootUser->getAccountName());
-    $account->save();
+    // We try not to save content entities in hook_update_N() because the schema
+    // might be out of sync, or hook invocations might rely on other schemas
+    // that also aren't updated yet. Hence we are directly updating the database
+    // tables with the values.
+    Database::getConnection()->update('users_field_data')
+      ->fields([
+        'name' => $this->rootUser->getAccountName(),
+        'pass' => \Drupal::service('password')->hash($this->rootUser->pass_raw),
+        'mail' => $this->rootUser->getEmail(),
+      ])
+      ->condition('uid', 1)
+      ->execute();
   }
 
   /**
@@ -251,7 +247,7 @@ abstract class UpdatePathTestBase extends BrowserTestBase {
 
     /** @var \Drupal\Core\Update\UpdateHookRegistry $update_registry */
     $update_registry = \Drupal::service('update.update_hook_registry');
-    foreach (['user' => 9301, 'node' => 8700, 'system' => 8901, 'update_test_schema' => 8000] as $module => $schema) {
+    foreach (['user' => 10000, 'node' => 8700, 'system' => 10201, 'update_test_schema' => 8000] as $module => $schema) {
       $this->assertEquals($schema, $update_registry->getInstalledVersion($module), "Module $module schema is $schema");
     }
 

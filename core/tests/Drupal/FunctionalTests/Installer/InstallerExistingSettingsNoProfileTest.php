@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\DrupalKernel;
@@ -24,7 +26,7 @@ class InstallerExistingSettingsNoProfileTest extends InstallerTestBase {
    * Configures a preexisting settings.php file without an install_profile
    * setting before invoking the interactive installer.
    */
-  protected function prepareEnvironment() {
+  protected function prepareEnvironment(): void {
     parent::prepareEnvironment();
 
     // Pre-configure hash salt.
@@ -55,7 +57,7 @@ class InstallerExistingSettingsNoProfileTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpSettings() {
+  protected function setUpSettings(): void {
     // This step should not appear, since settings.php is fully configured
     // already.
   }
@@ -63,7 +65,7 @@ class InstallerExistingSettingsNoProfileTest extends InstallerTestBase {
   /**
    * Verifies that installation succeeded.
    */
-  public function testInstaller() {
+  public function testInstaller(): void {
     $this->assertSession()->addressEquals('user/1');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertEquals('testing', \Drupal::installProfile());

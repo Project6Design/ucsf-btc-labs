@@ -5,9 +5,9 @@
  * Enables semantically enriched output for Drupal sites in the form of RDFa.
  */
 
-use Drupal\Core\Url;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Template\Attribute;
+use Drupal\Core\Url;
 use Drupal\rdf\Entity\RdfMapping;
 
 /**
@@ -16,9 +16,11 @@ use Drupal\rdf\Entity\RdfMapping;
 function rdf_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.rdf':
-      $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('The RDF module enriches your content with metadata to let other applications (e.g., search engines, aggregators, and so on) better understand its relationships and attributes. This semantically enriched, machine-readable output for your website uses the <a href=":rdfa">RDFa specification</a>, which allows RDF data to be embedded in HTML markup. Other modules can define mappings of their data to RDF terms, and the RDF module makes this RDF data available to the theme. The core modules define RDF mappings for their data model, and the core themes output this RDF metadata information along with the human-readable visual information. For more information, see the <a href=":rdf">online documentation for the RDF module</a>.', [':rdfa' => 'http://www.w3.org/TR/xhtml-rdfa-primer/', ':rdf' => 'https://www.drupal.org/documentation/modules/rdf']) . '</p>';
+      $output = '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('The RDF module enriches your content with metadata to let other applications (e.g., search engines, aggregators, and so on) better understand its relationships and attributes. This semantically enriched, machine-readable output for your website uses the <a href=":rdfa">RDFa specification</a>, which allows RDF data to be embedded in HTML markup. Other modules can define mappings of their data to RDF terms, and the RDF module makes this RDF data available to the theme. The core modules define RDF mappings for their data model, and the core themes output this RDF metadata information along with the human-readable visual information. For more information, see the <a href=":rdf">online documentation for the RDF module</a>.', [
+        ':rdfa' => 'http://www.w3.org/TR/xhtml-rdfa-primer/',
+        ':rdf' => 'https://www.drupal.org/documentation/modules/rdf',
+      ]) . '</p>';
       return $output;
   }
 }
@@ -53,12 +55,12 @@ function rdf_help($route_name, RouteMatchInterface $route_match) {
  * -Map the 'article' bundle to 'sioc:Post' and the 'title' field to 'dc:title'.
  * @code
  * rdf_get_mapping('node', 'article')
- *   ->setBundleMapping(array(
- *     'types' => array('sioc:Post'),
- *   ))
- *   ->setFieldMapping('title', array(
- *     'properties' => array('dc:title')
- *   ))
+ *   ->setBundleMapping([
+ *     'types' => ['sioc:Post'],
+ *   ])
+ *   ->setFieldMapping('title', [
+ *     'properties' => ['dc:title']
+ *   ])
  *   ->save();
  * @endcode
  *
@@ -151,16 +153,16 @@ function rdf_get_namespaces() {
  *   An array containing a mandatory 'properties' key and optional 'datatype',
  *   'datatype_callback' and 'type' keys. For example:
  *   @code
- *     array(
- *       'properties' => array('schema:interactionCount'),
+ *     [
+ *       'properties' => ['schema:interactionCount'],
  *       'datatype' => 'xsd:integer',
- *       'datatype_callback' => array(
+ *       'datatype_callback' => [
  *         'callable' => 'Drupal\rdf\SchemaOrgDataConverter::interactionCount',
- *         'arguments' => array(
+ *         'arguments' => [
  *           'interaction_type' => 'UserComments'
- *         ),
- *       ),
- *     );
+ *         ],
+ *       ],
+ *     ];
  *   @endcode
  * @param mixed $data
  *   (optional) A value that needs to be converted by the provided callback
@@ -221,6 +223,9 @@ function rdf_entity_prepare_view($entity_type, array $entities, array $displays)
       $field_mapping = $mapping->getPreparedFieldMapping($name);
       if ($field_mapping) {
         foreach ($entity->get($name) as $item) {
+          if (!isset($item->_attributes)) {
+            $item->_attributes = [];
+          }
           $item->_attributes += rdf_rdfa_attributes($field_mapping, $item->toArray());
         }
       }
@@ -297,14 +302,14 @@ function rdf_preprocess_html(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for UID field templates.
  */
-function rdf_preprocess_field__node__uid(&$variables) {
+function rdf_preprocess_field__node__uid(&$variables): void {
   _rdf_set_field_rel_attribute($variables);
 }
 
 /**
  * Transforms the field property attribute into a rel attribute.
  */
-function _rdf_set_field_rel_attribute(&$variables) {
+function _rdf_set_field_rel_attribute(&$variables): void {
   // Swap the regular field property attribute and use the rel attribute
   // instead so that it plays well with the RDFa markup when only a link is
   // present in the field output, for example in the case of the uid field.
@@ -317,8 +322,8 @@ function _rdf_set_field_rel_attribute(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for node templates.
  */
-function rdf_preprocess_node(&$variables) {
-  // Adds RDFa markup to the node container. The about attribute specifies the
+function rdf_preprocess_node(&$variables): void {
+  // Adds RDFa markup to the node container. The attribute specifies the
   // URI of the resource described within the HTML element, while the @typeof
   // attribute indicates its RDF type (e.g., foaf:Document, sioc:Person, and so
   // on.)
@@ -392,7 +397,7 @@ function rdf_preprocess_node(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for user templates.
  */
-function rdf_preprocess_user(&$variables) {
+function rdf_preprocess_user(&$variables): void {
   /** @var \Drupal\user\UserInterface $account */
   $account = $variables['elements']['#user'];
   $uri = $account->toUrl();
@@ -429,7 +434,7 @@ function rdf_preprocess_user(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for username.html.twig.
  */
-function rdf_preprocess_username(&$variables) {
+function rdf_preprocess_username(&$variables): void {
   // Because lang is set on the HTML element that wraps the page, the
   // username inherits this language attribute. However, since the username
   // might not be transliterated to the same language that the content is in,
@@ -479,7 +484,7 @@ function rdf_preprocess_username(&$variables) {
 /**
  * Implements hook_preprocess_HOOK() for comment templates.
  */
-function rdf_preprocess_comment(&$variables) {
+function rdf_preprocess_comment(&$variables): void {
   $comment = $variables['comment'];
   $mapping = rdf_get_mapping('comment', $comment->bundle());
   $bundle_mapping = $mapping->getPreparedBundleMapping();

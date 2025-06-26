@@ -2,7 +2,7 @@ name: Share Message Demo
 type: module
 description: All elements for a functioning demo.
 package: Sharemessage
-core_version_requirement: ^9.3 || ^10
+core_version_requirement: ^10.1 || ^11
 hidden: FALSE
 
 dependencies:

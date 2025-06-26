@@ -1,5 +1,5 @@
 const log = require('./log');
-const fs = require('fs');
+const fs = require('node:fs');
 const postcss = require('postcss');
 const postcssImport = require('postcss-import');
 const postcssHeader = require('postcss-header');
@@ -33,6 +33,8 @@ module.exports = (filePath, callback) => {
           'has-pseudo-class': false,
           'image-set-function': false,
           'prefers-color-scheme-query': false,
+          'content-alt-text': false,
+          'nesting-rules': { edition: '2021' },
         }
       }),
       postcssPixelsToRem({
@@ -68,10 +70,10 @@ module.exports = (filePath, callback) => {
       })
     ])
     .process(css, { from: filePath })
-    .then(result => prettier.format(result.css, {
-      parser: 'css',
-      printWidth: 10000,
-    }))
+    .then(async result => {
+      const config = await prettier.resolveConfig(filePath);
+      return await prettier.format(result.css, config);
+    })
     .then(callback)
     .catch(error => {
       log(error);

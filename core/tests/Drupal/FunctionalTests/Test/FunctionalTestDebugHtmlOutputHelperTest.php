@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Test;
 
 use Drupal\Tests\BrowserTestBase;
@@ -23,6 +25,7 @@ class FunctionalTestDebugHtmlOutputHelperTest extends BrowserTestBase {
    */
   public function testCreateFunctionalTestDebugHtmlOutput(): void {
     $this->drupalGet('<front>');
+    $this->assertSession()->statusCodeEquals(200);
   }
 
 }

@@ -90,7 +90,7 @@ class TranslatableMarkup extends FormattableMarkup {
    * as user names or link URLs into translated text. Variable substitution
    * looks like this:
    * @code
-   * new TranslatableMarkup("@name's blog", array('@name' => $account->getDisplayName()));
+   * new TranslatableMarkup("@name's blog", ['@name' => $account->getDisplayName()]);
    * @endcode
    * Basically, you can put placeholders like @name into your string, and the
    * method will substitute the sanitized values at translation time. (See the
@@ -126,7 +126,7 @@ class TranslatableMarkup extends FormattableMarkup {
    *
    * @ingroup sanitization
    */
-  public function __construct($string, array $arguments = [], array $options = [], TranslationInterface $string_translation = NULL) {
+  public function __construct($string, array $arguments = [], array $options = [], ?TranslationInterface $string_translation = NULL) {
     if (!is_string($string)) {
       $message = $string instanceof TranslatableMarkup ? '$string ("' . $string->getUntranslatedString() . '") must be a string.' : '$string ("' . (string) $string . '") must be a string.';
       throw new \InvalidArgumentException($message);
@@ -200,7 +200,7 @@ class TranslatableMarkup extends FormattableMarkup {
   /**
    * Magic __sleep() method to avoid serializing the string translator.
    */
-  public function __sleep() {
+  public function __sleep(): array {
     return ['string', 'arguments', 'options'];
   }
 
@@ -224,8 +224,7 @@ class TranslatableMarkup extends FormattableMarkup {
    * @return int
    *   The length of the string.
    */
-  #[\ReturnTypeWillChange]
-  public function count() {
+  public function count(): int {
     return mb_strlen($this->render());
   }
 

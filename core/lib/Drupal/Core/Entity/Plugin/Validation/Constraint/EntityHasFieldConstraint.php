@@ -2,18 +2,19 @@
 
 namespace Drupal\Core\Entity\Plugin\Validation\Constraint;
 
-use Symfony\Component\Validator\Constraint;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Validation\Attribute\Constraint;
+use Symfony\Component\Validator\Constraint as SymfonyConstraint;
 
 /**
  * Checks if a value is an entity that has a specific field.
- *
- * @Constraint(
- *   id = "EntityHasField",
- *   label = @Translation("Entity has field", context = "Validation"),
- *   type = { "entity" },
- * )
  */
-class EntityHasFieldConstraint extends Constraint {
+#[Constraint(
+  id: 'EntityHasField',
+  label: new TranslatableMarkup('Entity has field', [], ['context' => 'Validation']),
+  type: ['entity']
+)]
+class EntityHasFieldConstraint extends SymfonyConstraint {
 
   /**
    * The default violation message.
@@ -34,19 +35,20 @@ class EntityHasFieldConstraint extends Constraint {
    *
    * @var string
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public $field_name;
 
   /**
    * {@inheritdoc}
    */
-  public function getDefaultOption() {
+  public function getDefaultOption(): ?string {
     return 'field_name';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getRequiredOptions() {
+  public function getRequiredOptions(): array {
     return (array) $this->getDefaultOption();
   }
 

@@ -6,6 +6,9 @@ use Drupal\node\Entity\NodeType;
 use Drupal\rdf\Entity\RdfMapping;
 use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
 
+/**
+ * Base class for testing RDF mapping for rest API.
+ */
 abstract class RdfMappingResourceTestBase extends ConfigEntityResourceTestBase {
 
   /**
@@ -19,6 +22,8 @@ abstract class RdfMappingResourceTestBase extends ConfigEntityResourceTestBase {
   protected static $entityTypeId = 'rdf_mapping';
 
   /**
+   * RDF entity.
+   *
    * @var \Drupal\rdf\RdfMappingInterface
    */
   protected $entity;

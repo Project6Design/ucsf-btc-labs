@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\driver_missing_dependency_test\Driver\Database\MissingDependency\Install;
 
 use Drupal\Core\Database\Install\Tasks as CoreTasks;
@@ -13,7 +15,7 @@ class Tasks extends CoreTasks {
    * {@inheritdoc}
    */
   public function name() {
-    return t('Fake driver by the driver_missing_dependency_test module');
+    return 'Fake driver by the driver_missing_dependency_test module';
   }
 
 }

@@ -45,6 +45,7 @@ abstract class OptionsWidgetBase extends WidgetBase {
   /**
    * Tracks whether the field has a value.
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   protected bool $has_value;
 
   /**
@@ -221,6 +222,8 @@ abstract class OptionsWidgetBase extends WidgetBase {
    * @return string|null
    *   Either a label of the empty option, or NULL.
    */
-  protected function getEmptyLabel() {}
+  protected function getEmptyLabel() {
+    return NULL;
+  }
 
 }

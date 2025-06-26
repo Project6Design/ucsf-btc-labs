@@ -37,6 +37,7 @@ class WebformSubmissionApiTest extends WebformBrowserTestBase {
     $values = [
       'webform_id' => 'contact',
       'data' => [
+        // cspell:ignore Dixisset
         'name' => 'Dixisset',
         'company' => 'Dixisset',
         'email' => 'test@test.com',
@@ -48,6 +49,7 @@ class WebformSubmissionApiTest extends WebformBrowserTestBase {
     $this->assertEquals($webform_submission->id(), $this->getLastSubmissionId($contact_webform));
 
     // Check validating a simple webform.
+    $email_validation_error = 'The email address <em class="placeholder">invalid</em> is not valid. Use the format user@example.com.';
     $values = [
       'webform_id' => 'contact',
       'data' => [
@@ -58,7 +60,7 @@ class WebformSubmissionApiTest extends WebformBrowserTestBase {
     WebformElementHelper::convertRenderMarkupToStrings($errors);
     $this->assertEquals($errors, [
       'name' => 'Your Name field is required.',
-      'email' => 'The email address <em class="placeholder">invalid</em> is not valid.',
+      'email' => $email_validation_error,
       'subject' => 'Subject field is required.',
       'message' => 'Message field is required.',
     ]);
@@ -104,6 +106,7 @@ class WebformSubmissionApiTest extends WebformBrowserTestBase {
         'sex' => 'Male',
         'email' => 'example@example.com',
         'phone' => '123-456-7890',
+        // cspell:disable-next-line
         'comments' => 'Huius, Lyco, oratione locuples, rebus ipsis ielunior. Duo Reges: constructio interrete. Sed haec in pueris; Sed utrum hortandus es nobis, Luci, inquit, an etiam tua sponte propensus es? Sapiens autem semper beatus est et est aliquando in dolore; Immo videri fortasse. Paulum, cum regem Persem captum adduceret, eodem flumine invectio? Et ille ridens: Video, inquit, quid agas;',
       ],
     ];
@@ -121,7 +124,7 @@ class WebformSubmissionApiTest extends WebformBrowserTestBase {
     WebformElementHelper::convertRenderMarkupToStrings($errors);
     // $this->debug($errors);
     $this->assertEquals($errors, [
-      'email' => 'The email address <em class="placeholder">invalid</em> is not valid.',
+      'email' => $email_validation_error,
     ]);
 
     // Check validating a multi-step form with invalid #options.
@@ -133,6 +136,7 @@ class WebformSubmissionApiTest extends WebformBrowserTestBase {
         'sex' => 'INVALID',
         'email' => 'example@example.com',
         'phone' => '123-456-7890',
+        // cspell:disable-next-line
         'comments' => 'Huius, Lyco, oratione locuples, rebus ipsis ielunior. Duo Reges: constructio interrete. Sed haec in pueris; Sed utrum hortandus es nobis, Luci, inquit, an etiam tua sponte propensus es? Sapiens autem semper beatus est et est aliquando in dolore; Immo videri fortasse. Paulum, cum regem Persem captum adduceret, eodem flumine invectio? Et ille ridens: Video, inquit, quid agas;',
       ],
     ];
@@ -140,9 +144,7 @@ class WebformSubmissionApiTest extends WebformBrowserTestBase {
     WebformElementHelper::convertRenderMarkupToStrings($errors);
     // $this->debug($errors);
     $this->assertEquals($errors, [
-      'sex' => (floatval(\Drupal::VERSION) >= 10.1)
-        ? 'The submitted value <em class="placeholder">INVALID</em> in the <em class="placeholder">Sex</em> element is not allowed.'
-        : 'An illegal choice has been detected. Please contact the site administrator.',
+      'sex' => 'The submitted value <em class="placeholder">INVALID</em> in the <em class="placeholder">Sex</em> element is not allowed.',
     ]);
 
     /* ********************************************************************** */
@@ -160,6 +162,7 @@ class WebformSubmissionApiTest extends WebformBrowserTestBase {
     $values = [
       'webform_id' => 'test_form_limit',
       'data' => [
+        // cspell:disable-next-line
         'name' => 'Oratione',
       ],
     ];

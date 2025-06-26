@@ -10,6 +10,7 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Cache\CacheFactoryInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Class SendGridReportsController.
@@ -17,6 +18,8 @@ use GuzzleHttp\Exception\ClientException;
  * @package Drupal\sendgrid_integration_reports\Controller
  */
 class Api {
+
+  use StringTranslationTrait;
 
   /**
    * Api Key of SendGrid.
@@ -106,7 +109,7 @@ class Api {
     // Display message one time if api key is not set.
     if (empty($this->apiKey)) {
       $this->loggerFactory->get('sendgrid_integration_reports')
-        ->warning(t('SendGrid Module is not setup with API key.'));
+        ->warning($this->t('SendGrid Module is not setup with API key.'));
       $this->messenger->addWarning('Sendgrid Module is not setup with an API key.');
     }
   }
@@ -241,8 +244,8 @@ class Api {
     catch (ClientException $e) {
       $code = Xss::filter($e->getCode());
       $this->loggerFactory->get('sendgrid_integration_reports')
-        ->error(t('SendGrid Reports module failed to receive data. HTTP Error Code @errno', ['@errno' => $code]));
-      $this->messenger->addError(t('SendGrid Reports module failed to receive data. See logs.'));
+        ->error($this->t('SendGrid Reports module failed to receive data. HTTP Error Code @errno', ['@errno' => $code]));
+      $this->messenger->addError($this->t('SendGrid Reports module failed to receive data. See logs.'));
       return FALSE;
     }
     // Sanitize return before using in Drupal.

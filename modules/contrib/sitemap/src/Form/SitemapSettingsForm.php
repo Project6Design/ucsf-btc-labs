@@ -2,10 +2,12 @@
 
 namespace Drupal\sitemap\Form;
 
-use Drupal\Core\Config\ConfigFactory;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
+use Drupal\Core\Routing\RequestContext;
+use Drupal\Core\Routing\RouteBuilderInterface;
 use Drupal\Core\Url;
 use Drupal\sitemap\SitemapManager;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -16,31 +18,32 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SitemapSettingsForm extends ConfigFormBase {
 
   /**
+   * The request context.
+   *
+   * @var \Drupal\Core\Routing\RequestContext
+   */
+  protected RequestContext $requestContext;
+
+  /**
+   * Service to build and manage the router table.
+   *
+   * @var \Drupal\Core\Routing\RouteBuilderInterface
+   */
+  protected RouteBuilderInterface $routeBuilder;
+
+  /**
    * The SitemapMap plugin manager.
    *
    * @var \Drupal\sitemap\SitemapManager
    */
-  protected $sitemapManager;
+  protected SitemapManager $sitemapManager;
 
   /**
    * An array of Sitemap plugins.
    *
    * @var \Drupal\sitemap\SitemapInterface[]
    */
-  protected $plugins = [];
-
-  /**
-   * Constructs a SitemapSettingsForm object.
-   *
-   * @param \Drupal\Core\Config\ConfigFactory $config_factory
-   *   The factory for configuration objects.
-   * @param \Drupal\sitemap\SitemapManager $sitemap_manager
-   *   The Sitemap plugin manager.
-   */
-  public function __construct(ConfigFactory $config_factory, SitemapManager $sitemap_manager) {
-    parent::__construct($config_factory);
-    $this->sitemapManager = $sitemap_manager;
-  }
+  protected array $plugins = [];
 
   /**
    * {@inheritdoc}
@@ -48,8 +51,13 @@ class SitemapSettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     $form = new static(
       $container->get('config.factory'),
-      $container->get('plugin.manager.sitemap')
+      $container->get('config.typed')
     );
+
+    $form->requestContext = $container->get('router.request_context');
+    $form->routeBuilder = $container->get('router.builder');
+    $form->sitemapManager = $container->get('plugin.manager.sitemap');
+
     return $form;
   }
 
@@ -71,6 +79,16 @@ class SitemapSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Page title'),
       '#default_value' => $config->get('page_title'),
       '#description' => $this->t('Page title that will be used on the @sitemap_page.', ['@sitemap_page' => Link::fromTextAndUrl($this->t('sitemap page'), Url::fromRoute('sitemap.page'))->toString()]),
+    ];
+
+    $form['path'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Path'),
+      '#default_value' => $config->get('path'),
+      '#size' => 40,
+      '#description' => $this->t('Optionally, specify a relative URL to display the sitemap on. Defaults to <code>/sitemap</code>.'),
+      '#field_prefix' => $this->requestContext->getCompleteBaseUrl(),
+      '#element_validate' => ['::isPathValid'],
     ];
 
     $sitemap_message = $config->get('message');
@@ -204,6 +222,11 @@ class SitemapSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->configFactory->getEditable('sitemap.settings');
 
+    // If the path changed, tell the router that a rebuild is needed.
+    if ($config->get('path') !== $form_state->getValue('path')) {
+      $this->routeBuilder->setRebuildNeeded();
+    }
+
     // Save config.
     foreach ($form_state->cleanValues()->getValues() as $key => $value) {
       if ($key == 'plugins') {
@@ -269,6 +292,77 @@ class SitemapSettingsForm extends ConfigFormBase {
     }
 
     return $order;
+  }
+
+  /**
+   * Form element validation handler for a path.
+   *
+   * @param array &$element
+   *   The form element to process.
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *   The form state.
+   * @param array $completeForm
+   *   The complete form structure.
+   *
+   * @see \Drupal\Core\Path\PathValidator::getUrl()
+   */
+  public static function isPathValid(array &$element, FormStateInterface $formState, array $completeForm) {
+    $path = trim($element['#value']);
+
+    // We can't control external URLs, so display an error if one is entered.
+    if (UrlHelper::isExternal($path)) {
+      $formState->setError($element, t('External paths are not allowed.'));
+      return;
+    }
+
+    // If left empty, set to default, "sitemap".
+    if (empty($path)) {
+      $path = '/sitemap';
+      $formState->setValueForElement($element, $path);
+    }
+    // If the user didn't add a slash to the beginning so it is stored
+    // consistently.
+    elseif ($path[0] !== '/') {
+      $formState->setValueForElement($element, '/' . $path);
+    }
+
+    // Parse the path into its components (path, query, fragment). Note that
+    // while we want to *store* the path with a leading slash (see above),
+    // UrlHelper prefers that we remove it before parsing.
+    $parsedUrl = UrlHelper::parse(ltrim($path, '/'));
+
+    // Symfony's router cannot make routes available at query components.
+    if (!empty($parsedUrl['query'])) {
+      $formState->setError($element, t('URL query components like %query are not allowed.', [
+        '%query' => implode('&', $parsedUrl['query']),
+      ]));
+    }
+
+    // Symfony's router cannot make routes available at fragments.
+    if (!empty($parsedUrl['fragment'])) {
+      $formState->setError($element, t('URL fragment components like %fragment are not allowed.', [
+        '%fragment' => $parsedUrl['fragment'],
+      ]));
+    }
+
+    // We cannot make the sitemap available at <front>, i.e.: /; rather, <front>
+    // needs to be set to the sitemap path.
+    if ($parsedUrl['path'] === '<front>' || $parsedUrl['path'] === '/') {
+      $formState->setError($element, t('Cannot set the path of the sitemap to the front page.'));
+    }
+    // We cannot make the sitemap available at <current>, which refers to the
+    // current path, whatever it may be.
+    elseif ($parsedUrl['path'] === '<current>') {
+      $formState->setError($element, t('Cannot set the path of the sitemap to the current path.'));
+    }
+    // The paths <none>, <nolink>, and <button> have special meanings in certain
+    // contexts; don't allow them.
+    elseif ($parsedUrl['path'] === '<none>'
+      || $parsedUrl['path'] === '<nolink>'
+      || $parsedUrl['path'] === '<button>'
+    ) {
+      $formState->setError($element, t('Cannot set the path of the sitemap to the reserved path %path.'));
+    }
   }
 
 }

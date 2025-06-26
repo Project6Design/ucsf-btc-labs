@@ -1,4 +1,9 @@
+parameters:
+  toolbar.skip_procedural_hook_scan: false
+
 services:
+  _defaults:
+    autoconfigure: true
   cache.toolbar:
     class: Drupal\Core\Cache\CacheBackendInterface
     tags:

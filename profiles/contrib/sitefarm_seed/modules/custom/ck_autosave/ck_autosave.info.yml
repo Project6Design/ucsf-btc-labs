@@ -1,7 +1,7 @@
 name: CkEditor Autosave
 type: module
 description: Implements the CKEditor Autosave plugin to save the text are to local storage
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^9 || ^10 || ^11
 package: CKEditor
 dependencies:
   - ckeditor

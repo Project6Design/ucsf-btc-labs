@@ -10,25 +10,30 @@
       "name": "Vardot",
       "homepage": "https://www.drupal.org/vardot",
       "role": "Maintainer"
+    },
+    {
+      "name": "Northern Commerce",
+      "homepage": "https://www.drupal.org/northern-commerce",
+      "role": "Maintainer"
     }
   ],
   "support": {
     "issues": "https://www.drupal.org/project/issues/anchor_link",
     "source": "http://cgit.drupalcode.org/anchor_link"
   },
-  "repositories": [
-    {
+  "repositories": {
+    "drupal": {
       "type": "composer",
       "url": "https://packages.drupal.org/8"
     }
-  ],
+  },
   "require": {
-    "drupal/core": "^8 || ^9 || ^10",
-    "drupal/fakeobjects": "~1.0"
+    "drupal/core": "^9 || ^10 || ^11",
+    "vardot/ckeditor5-anchor-drupal": "~2.0"
   },
   "extra": {
     "branch-alias": {
-      "dev-8.x-2.x": "8.2.x-dev"
+      "dev-3.0.x": "3.0.x-dev"
     }
   }
 }

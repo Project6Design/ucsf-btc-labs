@@ -25,7 +25,7 @@ class BlockUser extends ActionBase {
     if ($account !== FALSE && $account->isActive()) {
       // For efficiency manually save the original account before applying any
       // changes.
-      $account->original = clone $account;
+      $account->setOriginal(clone $account);
       $account->block();
       $account->save();
     }
@@ -34,7 +34,7 @@ class BlockUser extends ActionBase {
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\user\UserInterface $object */
     $access = $object->status->access('edit', $account, TRUE)
       ->andIf($object->access('update', $account, TRUE));

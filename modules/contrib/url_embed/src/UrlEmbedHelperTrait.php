@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\url_embed\UrlEmbedHelperTrait.
- */
-
 namespace Drupal\url_embed;
 
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -22,16 +17,16 @@ trait UrlEmbedHelperTrait {
   /**
    * The module handler service.
    *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface.
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
 
   /**
    * The URL embed service.
    *
-   * @var \Drupal\url_embed\UrlEmbedService.
+   * @var \Drupal\url_embed\UrlEmbedService
    */
-  protected $url_embed;
+  protected $urlEmbed;
 
   /**
    * Returns the module handler.
@@ -53,6 +48,7 @@ trait UrlEmbedHelperTrait {
    *   The module handler service.
    *
    * @return self
+   *   The current object.
    */
   public function setModuleHandler(ModuleHandlerInterface $module_handler) {
     $this->moduleHandler = $module_handler;
@@ -63,13 +59,13 @@ trait UrlEmbedHelperTrait {
    * Returns the URL embed service.
    *
    * @return \Drupal\url_embed\UrlEmbedInterface
-   *   The URL embed service..
+   *   The URL embed service.
    */
   protected function urlEmbed() {
-    if (!isset($this->url_embed)) {
-      $this->url_embed = \Drupal::service('url_embed');
+    if (!isset($this->urlEmbed)) {
+      $this->urlEmbed = \Drupal::service('url_embed');
     }
-    return $this->url_embed;
+    return $this->urlEmbed;
   }
 
   /**
@@ -79,9 +75,11 @@ trait UrlEmbedHelperTrait {
    *   The URL embed service.
    *
    * @return self
+   *   The current object.
    */
   public function setUrlEmbed(UrlEmbedInterface $url_embed) {
-    $this->url_embed = $url_embed;
+    $this->urlEmbed = $url_embed;
     return $this;
   }
+
 }

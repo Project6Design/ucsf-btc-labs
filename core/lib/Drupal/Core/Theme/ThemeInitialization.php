@@ -131,20 +131,20 @@ class ThemeInitialization implements ThemeInitializationInterface {
     if ($active_theme->getEngine()) {
       // Include the engine.
       include_once $this->root . '/' . $active_theme->getOwner();
-      foreach ($active_theme->getBaseThemeExtensions() as $base) {
+      foreach (array_reverse($active_theme->getBaseThemeExtensions()) as $base) {
         $base->load();
       }
       $active_theme->getExtension()->load();
     }
     else {
-      // include non-engine theme files
-      foreach ($active_theme->getBaseThemeExtensions() as $base) {
+      // Include non-engine theme files
+      foreach (array_reverse($active_theme->getBaseThemeExtensions()) as $base) {
         // Include the theme file or the engine.
         if ($base->owner) {
           include_once $this->root . '/' . $base->owner;
         }
       }
-      // and our theme gets one too.
+      // And our theme gets one too.
       if ($active_theme->getOwner()) {
         include_once $this->root . '/' . $active_theme->getOwner();
       }
@@ -178,7 +178,7 @@ class ThemeInitialization implements ThemeInitializationInterface {
     $values['libraries_override'] = [];
 
     // Get libraries overrides declared by base themes.
-    foreach ($base_themes as $base) {
+    foreach (array_reverse($base_themes) as $base) {
       if (!empty($base->info['libraries-override'])) {
         foreach ($base->info['libraries-override'] as $library => $override) {
           $values['libraries_override'][$base->getPath()][$library] = $override;
@@ -262,38 +262,13 @@ class ThemeInitialization implements ThemeInitializationInterface {
    * Gets all extensions.
    *
    * @return array
+   *   An associative array whose keys are the names of the extensions.
    */
   protected function getExtensions() {
     if (!isset($this->extensions)) {
       $this->extensions = array_merge($this->moduleHandler->getModuleList(), $this->themeHandler->listInfo());
     }
     return $this->extensions;
-  }
-
-  /**
-   * Gets CSS file where tokens have been resolved.
-   *
-   * @param string $css_file
-   *   CSS file which may contain tokens.
-   *
-   * @return string
-   *   CSS file where placeholders are replaced.
-   *
-   * @todo Remove in Drupal 9.0.x.
-   */
-  protected function resolveStyleSheetPlaceholders($css_file) {
-    $token_candidate = explode('/', $css_file)[0];
-    if (!preg_match('/@[A-z0-9_-]+/', $token_candidate)) {
-      return $css_file;
-    }
-
-    $token = substr($token_candidate, 1);
-
-    // Prime extensions.
-    $extensions = $this->getExtensions();
-    if (isset($extensions[$token])) {
-      return str_replace($token_candidate, $extensions[$token]->getPath(), $css_file);
-    }
   }
 
 }

@@ -3,6 +3,7 @@
 namespace Drupal\linkit\Plugin\Linkit\Matcher;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
 /**
@@ -67,10 +68,14 @@ class UserMatcher extends EntityMatcher {
       '#weight' => -90,
     ];
 
+    $roles = Role::loadMultiple();
+    unset($roles[RoleInterface::ANONYMOUS_ID]);
+    unset($roles[RoleInterface::AUTHENTICATED_ID]);
+
     $form['role_restrictions']['roles'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Restrict to the selected roles'),
-      '#options' => array_diff_key(user_role_names(TRUE), [RoleInterface::AUTHENTICATED_ID => RoleInterface::AUTHENTICATED_ID]),
+      '#options' => array_map(fn(RoleInterface $role) => $role->label(), $roles),
       '#default_value' => $this->configuration['roles'],
       '#description' => $this->t('If none of the checkboxes is checked, all roles are allowed.'),
       '#element_validate' => [[get_class($this), 'elementValidateFilter']],

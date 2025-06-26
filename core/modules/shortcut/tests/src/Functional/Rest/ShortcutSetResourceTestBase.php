@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\shortcut\Functional\Rest;
 
 use Drupal\shortcut\Entity\ShortcutSet;
 use Drupal\Tests\rest\Functional\EntityResource\ConfigEntityResourceTestBase;
 
 /**
- * ResourceTestBase for ShortcutSet entity.
+ * Resource test base for ShortcutSet entity.
  */
 abstract class ShortcutSetResourceTestBase extends ConfigEntityResourceTestBase {
 

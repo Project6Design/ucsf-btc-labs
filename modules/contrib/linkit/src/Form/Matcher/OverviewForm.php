@@ -58,7 +58,7 @@ class OverviewForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ProfileInterface $linkit_profile = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?ProfileInterface $linkit_profile = NULL) {
     $this->linkitProfile = $linkit_profile;
     $form['#attached']['library'][] = 'linkit/linkit.admin';
     $form['plugins'] = [

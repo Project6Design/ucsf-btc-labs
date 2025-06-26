@@ -21,7 +21,7 @@ class FileValidationConstraintValidator extends ConstraintValidator implements C
    *   The file validator.
    */
   public function __construct(
-    protected FileValidatorInterface $fileValidator
+    protected FileValidatorInterface $fileValidator,
   ) {}
 
   /**
@@ -34,7 +34,7 @@ class FileValidationConstraintValidator extends ConstraintValidator implements C
   /**
    * {@inheritdoc}
    */
-  public function validate($value, Constraint $constraint) {
+  public function validate($value, Constraint $constraint): void {
     // Get the file to execute validators.
     $target = $value->get('entity')->getTarget();
     if (!$target) {

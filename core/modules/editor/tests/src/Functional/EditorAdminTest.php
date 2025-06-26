@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\editor\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
@@ -16,9 +18,7 @@ use Drupal\Tests\BrowserTestBase;
 class EditorAdminTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['filter', 'editor'];
 
@@ -56,7 +56,7 @@ class EditorAdminTest extends BrowserTestBase {
   /**
    * Tests an existing format without any editors available.
    */
-  public function testNoEditorAvailable() {
+  public function testNoEditorAvailable(): void {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('admin/config/content/formats/manage/filtered_html');
 
@@ -80,7 +80,7 @@ class EditorAdminTest extends BrowserTestBase {
   /**
    * Tests adding a text editor to an existing text format.
    */
-  public function testAddEditorToExistingFormat() {
+  public function testAddEditorToExistingFormat(): void {
     $this->enableUnicornEditor();
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('admin/config/content/formats/manage/filtered_html');
@@ -101,7 +101,7 @@ class EditorAdminTest extends BrowserTestBase {
   /**
    * Tests adding a text editor to a new text format.
    */
-  public function testAddEditorToNewFormat() {
+  public function testAddEditorToNewFormat(): void {
     $this->addEditorToNewFormat('monoceros', 'Monoceros');
     $this->verifyUnicornEditorConfiguration('monoceros');
   }
@@ -109,7 +109,7 @@ class EditorAdminTest extends BrowserTestBase {
   /**
    * Tests format disabling.
    */
-  public function testDisableFormatWithEditor() {
+  public function testDisableFormatWithEditor(): void {
     $formats = ['monoceros' => 'Monoceros', 'tattoo' => 'Tattoo'];
 
     // Install the node module.
@@ -142,7 +142,7 @@ class EditorAdminTest extends BrowserTestBase {
     $this->drupalLogin($account);
 
     // The node edit page header.
-    $text = (string) new FormattableMarkup('<em>Edit @type</em> @title', ['@type' => $node_type->label(), '@title' => $node->label()]);
+    $text = sprintf('<em>Edit %s</em> %s', Html::escape($node_type->label()), Html::escape($node->label()));
 
     // Go to node edit form.
     $this->drupalGet('node/' . $node->id() . '/edit');
@@ -159,7 +159,7 @@ class EditorAdminTest extends BrowserTestBase {
   /**
    * Tests switching text editor to none does not throw a TypeError.
    */
-  public function testSwitchEditorToNone() {
+  public function testSwitchEditorToNone(): void {
     $this->enableUnicornEditor();
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('admin/config/content/formats/manage/filtered_html');
@@ -181,7 +181,7 @@ class EditorAdminTest extends BrowserTestBase {
    * @param string $format_name
    *   The format name.
    */
-  protected function addEditorToNewFormat($format_id, $format_name) {
+  protected function addEditorToNewFormat($format_id, $format_name): void {
     $this->enableUnicornEditor();
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('admin/config/content/formats/add');
@@ -197,7 +197,7 @@ class EditorAdminTest extends BrowserTestBase {
   /**
    * Enables the unicorn editor.
    */
-  protected function enableUnicornEditor() {
+  protected function enableUnicornEditor(): void {
     if (!$this->container->get('module_handler')->moduleExists('editor_test')) {
       $this->container->get('module_installer')->install(['editor_test']);
     }
@@ -209,7 +209,7 @@ class EditorAdminTest extends BrowserTestBase {
    * @return array
    *   Returns an edit array containing the values to be posted.
    */
-  protected function selectUnicornEditor() {
+  protected function selectUnicornEditor(): array {
     // Verify the <select> when a text editor is available.
     $select = $this->assertSession()->selectExists('editor[editor]');
     $this->assertFalse($select->hasAttribute('disabled'));
@@ -239,8 +239,8 @@ class EditorAdminTest extends BrowserTestBase {
    * @param bool $ponies_too
    *   The expected value of the ponies_too setting.
    */
-  protected function verifyUnicornEditorConfiguration($format_id, $ponies_too = TRUE) {
-    $editor = editor_load($format_id);
+  protected function verifyUnicornEditorConfiguration($format_id, $ponies_too = TRUE): void {
+    $editor = \Drupal::entityTypeManager()->getStorage('editor')->load($format_id);
     $settings = $editor->getSettings();
     $this->assertSame('unicorn', $editor->getEditor(), 'The text editor is configured correctly.');
     $this->assertSame($ponies_too, $settings['ponies_too'], 'The text editor settings are stored correctly.');

@@ -1,15 +1,9 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\url_embed\Tests\UrlEmbedTestBase.
- */
-
 namespace Drupal\Tests\url_embed\Functional;
 
-use Drupal\editor\Entity\Editor;
-use Drupal\filter\Entity\FilterFormat;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\filter\Entity\FilterFormat;
 
 /**
  * Base class for all url_embed tests.
@@ -21,7 +15,7 @@ abstract class UrlEmbedTestBase extends BrowserTestBase {
    *
    * @var array
    */
-  protected static $modules = array('url_embed', 'node', 'ckeditor');
+  protected static $modules = ['url_embed', 'node'];
 
   /**
    * {@inheritdoc}
@@ -45,15 +39,17 @@ abstract class UrlEmbedTestBase extends BrowserTestBase {
    */
   const FLICKR_OUTPUT_FIELD = '<a data-flickr-embed="true" href="https://www.flickr.com/photos/peste76/49945030047/" title="Ephemeral by der_peste (on/off), on Flickr"><img src="https://live.staticflickr.com/65535/49945030047_413c0dd459_b.jpg" width="1024" height="683" alt="Ephemeral"></a><script async src="https://embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>';
 
+
+  /**
+   * The expected output of the Flickr URL in a link field.
+   */
+  const FLICKR_OUTPUT_FIELD_RESPONSIVE = '<div class="responsive-embed" style="--responsive-embed-ratio: 66.699"><a data-flickr-embed="true" href="https://www.flickr.com/photos/peste76/49945030047/" title="Ephemeral by der_peste (on/off), on Flickr"><img src="https://live.staticflickr.com/65535/49945030047_413c0dd459_b.jpg" width="1024" height="683" alt="Ephemeral"></a><script async src="https://embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>';
+
+
   /**
    * The expected output of the Flickr URL in a WYSIWYG.
-   *
-   * Embeds rendered via the url_embed filter generate XHTML4 markup due to
-   * deficiencies with libxml2.
-   *
-   * @todo Remove once https://www.drupal.org/node/1333730 lands.
    */
-  const FLICKR_OUTPUT_WYSIWYG = '<a data-flickr-embed="true" href="https://www.flickr.com/photos/peste76/49945030047/" title="Ephemeral by der_peste (on/off), on Flickr"><img src="https://live.staticflickr.com/65535/49945030047_413c0dd459_b.jpg" width="1024" height="683" alt="Ephemeral" /></a><script async="" src="https://embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>';
+  const FLICKR_OUTPUT_WYSIWYG = '<a data-flickr-embed="true" href="https://www.flickr.com/photos/peste76/49945030047/" title="Ephemeral by der_peste (on/off), on Flickr"><img src="https://live.staticflickr.com/65535/49945030047_413c0dd459_b.jpg" width="1024" height="683" alt="Ephemeral"></a><script async src="https://embedr.flickr.com/assets/client-code.js" charset="utf-8"></script>';
 
   /**
    * A set up for all tests.
@@ -62,8 +58,7 @@ abstract class UrlEmbedTestBase extends BrowserTestBase {
     parent::setUp();
 
     // Create a page content type.
-    $this->drupalCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
-
+    $this->drupalCreateContentType(['type' => 'page', 'name' => 'Basic page']);
 
     // Create a text format and enable the url_embed filter.
     $format = FilterFormat::create([
@@ -77,29 +72,12 @@ abstract class UrlEmbedTestBase extends BrowserTestBase {
     ]);
     $format->save();
 
-    $editor_group = [
-      'name' => 'URL Embed',
-      'items' => [
-        'url',
-      ],
-    ];
-    $editor = Editor::create([
-      'format' => 'custom_format',
-      'editor' => 'ckeditor',
-      'settings' => [
-        'toolbar' => [
-          'rows' => [[$editor_group]],
-        ],
-      ],
-    ]);
-    $editor->save();
-
     // Create a user with required permissions.
-    $this->webUser = $this->drupalCreateUser(array(
+    $this->webUser = $this->drupalCreateUser([
       'access content',
       'create page content',
       'use text format custom_format',
-    ));
+    ]);
     $this->drupalLogin($this->webUser);
   }
 

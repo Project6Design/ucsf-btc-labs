@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\form_test;
 
 use Drupal\Core\Form\ConfigFormBase;
@@ -42,7 +44,7 @@ class FormTestControllerObject extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, Request $request = NULL, $custom_attributes = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?Request $request = NULL, $custom_attributes = NULL) {
     $form['element'] = ['#markup' => 'The FormTestControllerObject::buildForm() method was used for this form.'];
 
     $form['custom_attribute']['#markup'] = $custom_attributes;

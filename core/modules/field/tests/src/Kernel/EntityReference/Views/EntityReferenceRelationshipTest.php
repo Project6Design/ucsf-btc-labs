@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\EntityReference\Views;
 
 use Drupal\entity_test\Entity\EntityTestMulChanged;
@@ -16,7 +18,7 @@ use Drupal\views\Views;
  *
  * @group entity_reference
  *
- * @see core_field_views_data()
+ * @see \Drupal\views\Hook\ViewsViewsHooks::fieldViewsData()
  */
 class EntityReferenceRelationshipTest extends ViewsKernelTestBase {
 
@@ -37,9 +39,7 @@ class EntityReferenceRelationshipTest extends ViewsKernelTestBase {
   ];
 
   /**
-   * Modules to install.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'user',
@@ -80,7 +80,8 @@ class EntityReferenceRelationshipTest extends ViewsKernelTestBase {
     // @see \Drupal\Core\Entity\Sql\DefaultTableMapping::generateFieldTableName()
     $this->createEntityReferenceField('entity_test_mul_changed', 'entity_test_mul_changed', 'field_test_data_with_a_long_name', 'field_test_data_with_a_long_name', 'entity_test');
 
-    // Create reference from entity_test_mul to entity_test cardinality: infinite.
+    // Create reference from entity_test_mul to entity_test cardinality:
+    // infinite.
     $this->createEntityReferenceField('entity_test_mul', 'entity_test_mul', 'field_data_test_unlimited', 'field_data_test_unlimited', 'entity_test', 'default', [], FieldStorageConfig::CARDINALITY_UNLIMITED);
 
     ViewTestData::createTestViews(static::class, ['entity_reference_test_views']);
@@ -89,7 +90,7 @@ class EntityReferenceRelationshipTest extends ViewsKernelTestBase {
   /**
    * Tests using the views relationship.
    */
-  public function testNoDataTableRelationship() {
+  public function testNoDataTableRelationship(): void {
 
     // Create some test entities which link each other.
     $referenced_entity = EntityTestMul::create();
@@ -169,7 +170,7 @@ class EntityReferenceRelationshipTest extends ViewsKernelTestBase {
    *
    * @see entity_reference_field_views_data()
    */
-  public function testDataTableRelationship() {
+  public function testDataTableRelationship(): void {
 
     // Create some test entities which link each other.
     $referenced_entity = EntityTest::create();
@@ -250,7 +251,7 @@ class EntityReferenceRelationshipTest extends ViewsKernelTestBase {
    *
    * @see entity_reference_field_views_data()
    */
-  public function testDataTableRelationshipWithLongFieldName() {
+  public function testDataTableRelationshipWithLongFieldName(): void {
     // Create some test entities which link each other.
     $referenced_entity = EntityTest::create();
     $referenced_entity->save();
@@ -291,7 +292,7 @@ class EntityReferenceRelationshipTest extends ViewsKernelTestBase {
   /**
    * Tests group by with optional and empty relationship.
    */
-  public function testGroupByWithEmptyRelationships() {
+  public function testGroupByWithEmptyRelationships(): void {
     $entities = [];
     // Create 4 entities with name1 and 3 entities with name2.
     for ($i = 1; $i <= 4; $i++) {
@@ -352,7 +353,7 @@ class EntityReferenceRelationshipTest extends ViewsKernelTestBase {
   /**
    * Test that config entities don't get relationships added.
    */
-  public function testEntityReferenceConfigEntity() {
+  public function testEntityReferenceConfigEntity(): void {
     // Create reference from entity_test to a config entity.
     $this->createEntityReferenceField('entity_test', 'entity_test', 'field_test_config_entity', 'field_test_config_entity', 'user_role');
     Views::viewsData()->clear();

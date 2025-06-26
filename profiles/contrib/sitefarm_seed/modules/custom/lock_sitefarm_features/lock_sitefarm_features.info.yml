@@ -1,7 +1,7 @@
 name: Lock SiteFarm Features
 type: module
 description: Lock down SiteFarm Features so that they cannot be altered
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^9 || ^10 || ^11
 package: Custom UCD
 
 libraries:

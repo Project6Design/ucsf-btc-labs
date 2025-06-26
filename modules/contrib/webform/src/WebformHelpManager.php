@@ -5,13 +5,13 @@
 
 namespace Drupal\webform;
 
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\Core\Serialization\Yaml;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -867,7 +867,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
             'url' => 'https://www.webwash.net/moving-forward-webform-drupal-8/ ',
           ],
           [
-            'title' => $this->t('How to Make an Advanced Webform in Drupal 8 | OSTrainging'),
+            'title' => $this->t('How to Make an Advanced Webform in Drupal 8 | OSTraining'),
             'url' => 'https://www.ostraining.com/blog/drupal/how-to-make-a-complex-webform-in-drupal-8/',
           ],
         ],
@@ -884,6 +884,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
           ],
         ],
       ],
+      // cSpell:disable
       'about' => [
         'title' => $this->t('About Webform & the Drupal community'),
         'content' => $this->t('This screencast introduces you to the maintainer and community behind the Webform module.'),
@@ -1582,13 +1583,13 @@ class WebformHelpManager implements WebformHelpManagerInterface {
     // Promotions: Webform.
     $t_args = [
       ':href_involved' => 'https://www.drupal.org/getting-involved',
+      ':href_join' => 'https://www.drupal.org/association',
       ':href_opencollective' => 'https://opencollective.com/webform',
-      ':href_support' => 'https://www.jrockowitz.com',
     ];
     $help['promotion_webform'] = [
       'group' => 'promotions',
       'title' => $this->t('Promotions: Drupal Association'),
-      'content' => $this->t('If you enjoy and value Drupal and the Webform module consider <a href=":href_involved">getting involved in the Drupal community</a>, <a href=":href_opencollective">contributing funds to the Webform module\'s Open Collective</a>, and <a href=":href_support">hiring professional support</a>.', $t_args),
+      'content' => $this->t('If you enjoy and value Drupal and the Webform module consider <a href=":href_involved">getting involved in the Drupal community</a>, <a href=":href_join">joining the Drupal Association</a>, and <a href=":href_opencollective">contributing funds to the Webform module\'s Open Collective</a>.', $t_args),
       'message_type' => 'webform',
       'message_close' => TRUE,
       'message_storage' => WebformMessage::STORAGE_STATE,
@@ -1601,7 +1602,7 @@ class WebformHelpManager implements WebformHelpManagerInterface {
         'entity.webform.collection',
       ],
     ];
-
+    // cSpell:enable
     /* ********************************************************************** */
     // Installation.
     /* ********************************************************************** */
@@ -1624,7 +1625,8 @@ class WebformHelpManager implements WebformHelpManagerInterface {
       'message_type' => 'webform',
       'message_close' => TRUE,
       'message_storage' => WebformMessage::STORAGE_STATE,
-      'access' => $this->currentUser->hasPermission('administer webform'),
+      'access' => $this->currentUser->hasPermission('administer webform')
+        && !$this->configFactory->get('webform.settings')->get('ui.promotions_disabled'),
       'attached' => ['library' => ['webform/webform.promotions']],
       'routes' => [
         // @see /admin/modules

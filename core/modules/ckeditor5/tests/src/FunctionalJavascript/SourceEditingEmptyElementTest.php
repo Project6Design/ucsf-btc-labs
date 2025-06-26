@@ -8,15 +8,14 @@ use Drupal\ckeditor5\HTMLRestrictions;
 use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\ckeditor5\Plugin\Editor\CKEditor5;
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 
-// cspell:ignore gramma sourceediting
+// cspell:ignore sourceediting
 
 /**
  * @coversDefaultClass \Drupal\ckeditor5\Plugin\CKEditor5Plugin\SourceEditing
  * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getCKEditor5PluginConfig
  * @group ckeditor5
- * @group #slow
  * @internal
  */
 class SourceEditingEmptyElementTest extends SourceEditingTestBase {
@@ -61,7 +60,7 @@ class SourceEditingEmptyElementTest extends SourceEditingTestBase {
 
       // Verify the text format and editor are still a valid pair.
       $this->assertSame([], array_map(
-        function (ConstraintViolation $v) {
+        function (ConstraintViolationInterface $v) {
           return (string) $v->getMessage();
         },
         iterator_to_array(CKEditor5::validatePair(
@@ -86,7 +85,7 @@ class SourceEditingEmptyElementTest extends SourceEditingTestBase {
 
     // Verify the text format and editor are still a valid pair.
     $this->assertSame([], array_map(
-      function (ConstraintViolation $v) {
+      function (ConstraintViolationInterface $v) {
         return (string) $v->getMessage();
       },
       iterator_to_array(CKEditor5::validatePair(

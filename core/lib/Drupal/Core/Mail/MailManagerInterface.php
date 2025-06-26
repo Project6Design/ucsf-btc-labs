@@ -74,7 +74,7 @@ interface MailManagerInterface extends PluginManagerInterface {
    * message for sending later:
    *
    * @code
-   *   $params = array('current_conditions' => $data);
+   *   $params = ['current_conditions' => $data];
    *   $to = 'user@example.com';
    *   $message = \Drupal::service('plugin.manager.mail')->mail('example', 'notice', $to, $langcode, $params, FALSE);
    *   // Only add to the spool if sending was not canceled.
@@ -95,10 +95,10 @@ interface MailManagerInterface extends PluginManagerInterface {
    *   formatting of this string will be validated with the
    *   @link http://php.net/manual/filter.filters.validate.php PHP email validation filter. @endlink
    *   Some examples are:
-   *   - user@example.com
-   *   - user@example.com, anotheruser@example.com
-   *   - User <user@example.com>
-   *   - User <user@example.com>, Another User <anotheruser@example.com>
+   *   - "user@example.com".
+   *   - "user@example.com, anotheruser@example.com".
+   *   - "User <user@example.com>".
+   *   - "User <user@example.com>, Another User <anotheruser@example.com>".
    * @param string $langcode
    *   Language code to use to compose the email.
    * @param array $params

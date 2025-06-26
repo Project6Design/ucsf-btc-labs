@@ -10,7 +10,7 @@ use Drupal\social_media_links\PlatformBase;
  * @Platform(
  *   id = "mastodon",
  *   name = @Translation("Mastodon"),
- *   urlPrefix = "https://fintoot.space/",
+ *   urlPrefix = "https://",
  * )
  */
 class Mastodon extends PlatformBase {}

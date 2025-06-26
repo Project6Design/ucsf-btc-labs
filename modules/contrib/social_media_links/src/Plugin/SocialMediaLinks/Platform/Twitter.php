@@ -9,8 +9,10 @@ use Drupal\social_media_links\PlatformBase;
  *
  * @Platform(
  *   id = "twitter",
- *   name = @Translation("Twitter"),
- *   urlPrefix = "https://www.twitter.com/",
+ *   name = @Translation("X"),
+ *   iconName = "x-twitter",
+ *   description = @Translation("Previously known as Twitter."),
+ *   urlPrefix = "https://x.com/",
  * )
  */
 class Twitter extends PlatformBase {}

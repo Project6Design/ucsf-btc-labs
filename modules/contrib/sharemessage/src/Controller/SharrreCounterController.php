@@ -101,7 +101,7 @@ class SharrreCounterController extends ControllerBase {
     }
     catch (BadResponseException $e) {
       $error = $e->getResponse()->json();
-      watchdog_exception('sharrre', $e, $error['error']['message']);
+      \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.1.0', fn() => \Drupal\Core\Utility\Error::logException(\Drupal::logger('sharrre'), $e, $error['error']['message']), fn() => watchdog_exception('sharrre', $e, $error['error']['message']));
       return;
     }
 

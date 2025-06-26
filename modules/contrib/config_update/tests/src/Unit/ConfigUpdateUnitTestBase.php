@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\config_update\Unit;
 
+use Drupal\Component\EventDispatcher\Event;
 use Drupal\config_update\ConfigPreRevertEvent;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Tests\UnitTestCase;
-use Drupal\Component\EventDispatcher\Event;
 
 /**
  * Base class for unit testing in Config Update Manager.
@@ -76,11 +76,11 @@ abstract class ConfigUpdateUnitTestBase extends UnitTestCase {
 
     $manager
       ->method('getDefinition')
-      ->will($this->returnValueMap($map));
+      ->willReturnMap($map);
 
     $manager
       ->method('getStorage')
-      ->will($this->returnCallback([$this, 'mockGetStorage']));
+      ->willReturnCallback([$this, 'mockGetStorage']);
 
     return $manager;
   }
@@ -207,15 +207,21 @@ abstract class ConfigUpdateUnitTestBase extends UnitTestCase {
         ['in.extension.pre_revert',
           ['prop' => 'active.pre_revert_value', '_core' => 'core_for_in.extension'],
         ],
-        ['foo.bar.pre_revert', ['foo.bar.pre_revert' => 'active', 'id' => 'pre_revert', 'prop' => 'active.pre_revert_value', ]],
+        ['foo.bar.pre_revert',
+          [
+            'foo.bar.pre_revert' => 'active',
+            'id' => 'pre_revert',
+            'prop' => 'active.pre_revert_value',
+          ],
+        ],
       ];
       $storage
         ->method('read')
-        ->will($this->returnValueMap($map));
+        ->willReturnMap($map);
 
       $storage
         ->method('listAll')
-        ->will($this->returnValueMap($this->configStorageActiveInfo));
+        ->willReturnMap($this->configStorageActiveInfo);
     }
     elseif ($type == 'extension') {
       $storage = $this->getMockBuilder('Drupal\Core\Config\ExtensionInstallStorage')->disableOriginalConstructor()->getMock();
@@ -230,7 +236,7 @@ abstract class ConfigUpdateUnitTestBase extends UnitTestCase {
 
       $storage
         ->method('listAll')
-        ->will($this->returnValueMap($this->configStorageExtensionInfo));
+        ->willReturnMap($this->configStorageExtensionInfo);
       $map = [
         ['in.extension', ['in.extension' => 'extension']],
         ['in.both', ['in.both' => 'extension']],
@@ -239,13 +245,19 @@ abstract class ConfigUpdateUnitTestBase extends UnitTestCase {
         ['another', ['another' => 'extension', 'id' => 'one']],
         ['in.extension.pre_import', ['prop' => 'extension.pre_import_value']],
         ['in.extension.pre_revert', ['prop' => 'extension.pre_revert_value']],
-        ['foo.bar.pre_revert', ['foo.bar.pre_revert' => 'extension', 'id' => 'pre_revert', 'prop' => 'extension.pre_revert_value']],
+        ['foo.bar.pre_revert',
+          [
+            'foo.bar.pre_revert' => 'extension',
+            'id' => 'pre_revert',
+            'prop' => 'extension.pre_revert_value',
+          ],
+        ],
         ['missing2', FALSE],
         ['missing2.pre_import', FALSE],
       ];
       $storage
         ->method('read')
-        ->will($this->returnValueMap($map));
+        ->willReturnMap($map);
 
     }
     else {
@@ -261,7 +273,7 @@ abstract class ConfigUpdateUnitTestBase extends UnitTestCase {
 
       $storage
         ->method('listAll')
-        ->will($this->returnValueMap($this->configStorageOptionalInfo));
+        ->willReturnMap($this->configStorageOptionalInfo);
 
       $map = [
         ['in.optional', ['in.optional' => 'optional']],
@@ -270,7 +282,7 @@ abstract class ConfigUpdateUnitTestBase extends UnitTestCase {
       ];
       $storage
         ->method('read')
-        ->will($this->returnValueMap($map));
+        ->willReturnMap($map);
     }
     return $storage;
 
@@ -304,7 +316,7 @@ abstract class ConfigUpdateUnitTestBase extends UnitTestCase {
     $translation = $this->getMockBuilder('Drupal\Core\StringTranslation\TranslationInterface')->getMock();
     $translation
       ->method('translateString')
-      ->will($this->returnCallback([$this, 'mockTranslate']));
+      ->willReturnCallback([$this, 'mockTranslate']);
     return $translation;
   }
 
@@ -342,7 +354,7 @@ abstract class ConfigUpdateUnitTestBase extends UnitTestCase {
     $event = $this->getMockBuilder('Symfony\Component\EventDispatcher\EventDispatcherInterface')->getMock();
     $event
       ->method('dispatch')
-      ->will($this->returnCallback([$this, 'mockDispatch']));
+      ->willReturnCallback([$this, 'mockDispatch']);
 
     return $event;
   }
@@ -432,7 +444,7 @@ abstract class ConfigUpdateUnitTestBase extends UnitTestCase {
     $config = $this->getMockBuilder('Drupal\Core\Config\ConfigFactoryInterface')->getMock();
     $config
       ->method('getEditable')
-      ->will($this->returnCallback([$this, 'mockGetEditable']));
+      ->willReturnCallback([$this, 'mockGetEditable']);
 
     return $config;
   }
@@ -517,7 +529,7 @@ class MockConfig {
    * Gets a component of the configuration value.
    */
   public function get($key) {
-    return isset($this->value[$key]) ? $this->value[$key] : NULL;
+    return $this->value[$key] ?? NULL;
   }
 
   /**
@@ -533,7 +545,7 @@ class MockConfig {
    */
   public function setData($value) {
     // Retain the _core key.
-    $core = isset($this->value['_core']) ? $this->value['_core'] : '';
+    $core = $this->value['_core'] ?? '';
     $this->value = $value;
     if ($core) {
       $this->value['_core'] = $core;

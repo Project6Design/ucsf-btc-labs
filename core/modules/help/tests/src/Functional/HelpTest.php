@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\help\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -13,7 +14,7 @@ use Drupal\Tests\BrowserTestBase;
 class HelpTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
+   * Modules to install.
    *
    * The help_test module implements hook_help() but does not provide a module
    * overview page. The help_page_test module has a page section plugin that
@@ -38,11 +39,15 @@ class HelpTest extends BrowserTestBase {
 
   /**
    * The admin user that will be created.
+   *
+   * @var \Drupal\user\Entity\User|false
    */
   protected $adminUser;
 
   /**
    * The anonymous user that will be created.
+   *
+   * @var \Drupal\user\Entity\User|false
    */
   protected $anyUser;
 
@@ -64,10 +69,13 @@ class HelpTest extends BrowserTestBase {
   /**
    * Logs in users, tests help pages.
    */
-  public function testHelp() {
+  public function testHelp(): void {
     // Log in the root user to ensure as many admin links appear as possible on
     // the module overview pages.
-    $this->drupalLogin($this->rootUser);
+    $this->drupalLogin($this->drupalCreateUser([
+      'access help pages',
+      'access administration pages',
+    ]));
     $this->verifyHelp();
 
     // Log in the regular user.
@@ -90,13 +98,14 @@ class HelpTest extends BrowserTestBase {
 
     // Make sure links are properly added for modules implementing hook_help().
     foreach ($this->getModuleList() as $module => $name) {
-      $this->assertSession()->linkExists($name, 0, new FormattableMarkup('Link properly added to @name (admin/help/@module)', ['@module' => $module, '@name' => $name]));
+      $this->assertSession()->linkExists($name, 0, "Link properly added to $name (admin/help/$module)");
     }
 
     // Ensure a module which does not provide a module overview page is handled
     // correctly.
-    $this->clickLink(\Drupal::moduleHandler()->getName('help_test'));
-    $this->assertSession()->pageTextContains('No help is available for module ' . \Drupal::moduleHandler()->getName('help_test'));
+    $module_name = \Drupal::service('extension.list.module')->getName('help_test');
+    $this->clickLink($module_name);
+    $this->assertSession()->pageTextContains('No help is available for module ' . $module_name);
 
     // Verify that the order of topics is alphabetical by displayed module
     // name, by checking the order of some modules, including some that would
@@ -120,7 +129,7 @@ class HelpTest extends BrowserTestBase {
    * @param int $response
    *   (optional) An HTTP response code. Defaults to 200.
    */
-  protected function verifyHelp($response = 200) {
+  protected function verifyHelp($response = 200): void {
     $this->drupalGet('admin/index');
     $this->assertSession()->statusCodeEquals($response);
     if ($response == 200) {

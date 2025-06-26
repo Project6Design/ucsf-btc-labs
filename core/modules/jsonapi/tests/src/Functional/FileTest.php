@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
-use Drupal\Component\Serialization\Json;
+use Drupal\jsonapi\JsonApiSpec;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -15,7 +17,6 @@ use GuzzleHttp\RequestOptions;
  * JSON:API integration test for the "File" content entity type.
  *
  * @group jsonapi
- * @group #slow
  */
 class FileTest extends ResourceTestBase {
 
@@ -69,7 +70,7 @@ class FileTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpAuthorization($method) {
+  protected function setUpAuthorization($method): void {
     switch ($method) {
       case 'GET':
         $this->grantPermissionsToTestedRole(['access content']);
@@ -92,7 +93,7 @@ class FileTest extends ResourceTestBase {
   /**
    * Makes the current user the file owner.
    */
-  protected function makeCurrentUserFileOwner() {
+  protected function makeCurrentUserFileOwner(): void {
     $account = User::load(2);
     $this->entity->setOwnerId($account->id());
     $this->entity->setOwner($account);
@@ -132,16 +133,16 @@ class FileTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedDocument() {
+  protected function getExpectedDocument(): array {
     $self_url = Url::fromUri('base:/jsonapi/file/file/' . $this->entity->uuid())->setAbsolute()->toString(TRUE)->getGeneratedUrl();
     return [
       'jsonapi' => [
         'meta' => [
           'links' => [
-            'self' => ['href' => 'http://jsonapi.org/format/1.0/'],
+            'self' => ['href' => JsonApiSpec::SUPPORTED_SPECIFICATION_PERMALINK],
           ],
         ],
-        'version' => '1.0',
+        'version' => JsonApiSpec::SUPPORTED_SPECIFICATION_VERSION,
       ],
       'links' => [
         'self' => ['href' => $self_url],
@@ -188,7 +189,7 @@ class FileTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getPostDocument() {
+  protected function getPostDocument(): array {
     return [
       'data' => [
         'type' => 'file--file',
@@ -200,11 +201,16 @@ class FileTest extends ResourceTestBase {
   }
 
   /**
-   * {@inheritdoc}
+   * Tests POST/PATCH/DELETE for an individual resource.
    */
-  public function testPostIndividual() {
+  public function testIndividual(): void {
     // @todo https://www.drupal.org/node/1927648
-    $this->markTestSkipped();
+    // Add doTestPostIndividual().
+    $this->doTestPatchIndividual();
+    $this->entity = $this->resaveEntity($this->entity, $this->account);
+    $this->revokePermissions();
+    $this->config('jsonapi.settings')->set('read_only', TRUE)->save(TRUE);
+    $this->doTestDeleteIndividual();
   }
 
   /**
@@ -222,7 +228,7 @@ class FileTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testCollectionFilterAccess() {
+  public function testCollectionFilterAccess(): void {
     $label_field_name = 'filename';
     // Verify the expected behavior in the common case: when the file is public.
     $this->doTestCollectionFilterAccessBasedOnPermissions($label_field_name, 'access content');
@@ -239,7 +245,7 @@ class FileTest extends ResourceTestBase {
     $this->entity->setOwner($this->account);
     $this->entity->save();
     $response = $this->request('GET', $collection_filter_url, $request_options);
-    $doc = Json::decode((string) $response->getBody());
+    $doc = $this->getDocumentFromResponse($response);
     $this->assertCount(1, $doc['data']);
 
     // 0 results because the current user is no longer the file owner and the
@@ -247,7 +253,7 @@ class FileTest extends ResourceTestBase {
     $this->entity->setOwner(User::load(0));
     $this->entity->save();
     $response = $this->request('GET', $collection_filter_url, $request_options);
-    $doc = Json::decode((string) $response->getBody());
+    $doc = $this->getDocumentFromResponse($response);
     $this->assertCount(0, $doc['data']);
   }
 

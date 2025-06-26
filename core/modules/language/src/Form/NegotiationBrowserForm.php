@@ -71,9 +71,9 @@ class NegotiationBrowserForm extends ConfigFormBase {
       $existing_languages[$langcode] = $language->getName();
     }
 
-    // If we have no languages available, present the list of predefined languages
-    // only. If we do have already added languages, set up two option groups with
-    // the list of existing and then predefined languages.
+    // If we have no languages available, present the list of predefined
+    // languages only. If we do have already added languages, set up two option
+    // groups with the list of existing and then predefined languages.
     if (empty($existing_languages)) {
       $language_options = $this->languageManager->getStandardLanguageListWithoutConfigured();
     }
@@ -135,7 +135,7 @@ class NegotiationBrowserForm extends ConfigFormBase {
     $form['new_mapping']['browser_langcode'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Browser language code'),
-      '#description' => $this->t('Use language codes as <a href=":w3ctags">defined by the W3C</a> for interoperability. <em>Examples: "en", "en-gb" and "zh-hant".</em>', [':w3ctags' => 'http://www.w3.org/International/articles/language-tags/']),
+      '#description' => $this->t('Use language codes as <a href=":w3ctags">defined by the W3C</a> for interoperability. <em>Examples: "en", "en-gb" and "zh-hant".</em>', [':w3ctags' => 'https://www.w3.org/International/articles/language-tags/']),
       '#size' => 20,
     ];
     $form['new_mapping']['drupal_langcode'] = [

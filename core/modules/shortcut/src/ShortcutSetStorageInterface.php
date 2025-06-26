@@ -15,7 +15,7 @@ interface ShortcutSetStorageInterface extends ConfigEntityStorageInterface {
    *
    * @param \Drupal\shortcut\ShortcutSetInterface $shortcut_set
    *   An object representing the shortcut set.
-   * @param $account
+   * @param \Drupal\user\UserInterface $account
    *   A user account that will be assigned to use the set.
    */
   public function assignUser(ShortcutSetInterface $shortcut_set, $account);
@@ -25,7 +25,7 @@ interface ShortcutSetStorageInterface extends ConfigEntityStorageInterface {
    *
    * The user will go back to using whatever default set applies.
    *
-   * @param $account
+   * @param \Drupal\user\UserInterface $account
    *   A user account that will be removed from the shortcut set assignment.
    *
    * @return bool
@@ -53,6 +53,17 @@ interface ShortcutSetStorageInterface extends ConfigEntityStorageInterface {
    *   The name of the shortcut set assigned to this user.
    */
   public function getAssignedToUser($account);
+
+  /**
+   * Gets the shortcut set to be displayed for a given user account.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   The user account whose default shortcut set will be returned.
+   *
+   * @return \Drupal\shortcut\ShortcutSetInterface
+   *   An object representing the default shortcut set.
+   */
+  public function getDisplayedToUser(AccountInterface $account): ShortcutSetInterface;
 
   /**
    * Get the number of users who have this set assigned to them.

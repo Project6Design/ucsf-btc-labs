@@ -51,8 +51,8 @@ function hook_filter_secure_image_alter(&$image) {
  * @param \Drupal\filter\FilterFormatInterface $format
  *   The format object of the format being disabled.
  */
-function hook_filter_format_disable($format) {
-  mymodule_cache_rebuild();
+function hook_filter_format_disable($format): void {
+  my_module_cache_rebuild();
 }
 
 /**

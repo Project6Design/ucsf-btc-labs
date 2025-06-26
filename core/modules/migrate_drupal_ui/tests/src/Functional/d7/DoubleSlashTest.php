@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal_ui\Functional\d7;
 
 use Drupal\Tests\migrate_drupal_ui\Functional\MigrateUpgradeExecuteTestBase;
@@ -42,7 +44,7 @@ class DoubleSlashTest extends MigrateUpgradeExecuteTestBase {
   /**
    * Executes all steps of migrations upgrade.
    */
-  public function testMigrateUpgradeExecute() {
+  public function testMigrateUpgradeExecute(): void {
     // Change fid 1 to a filename that does not exist.
     $this->sourceDatabase
       ->update('file_managed')
@@ -80,35 +82,35 @@ class DoubleSlashTest extends MigrateUpgradeExecuteTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getSourceBasePath() {
+  protected function getSourceBasePath(): string {
     return __DIR__ . '/files';
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEntityCounts() {
+  protected function getEntityCounts(): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEntityCountsIncremental() {
+  protected function getEntityCountsIncremental(): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getAvailablePaths() {
+  protected function getAvailablePaths(): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getMissingPaths() {
+  protected function getMissingPaths(): array {
     return [];
   }
 

@@ -16,6 +16,11 @@ class NoMultilingualReviewPageTest extends NoMultilingualReviewPageTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'rdf',
   ];
@@ -31,7 +36,7 @@ class NoMultilingualReviewPageTest extends NoMultilingualReviewPageTestBase {
   /**
    * Tests that RDF is displayed in the will be upgraded list.
    */
-  public function testMigrateUpgradeReviewPage() {
+  public function testMigrateUpgradeReviewPage(): void {
     $this->prepare();
     // Start the upgrade process.
     $this->submitCredentialForm();

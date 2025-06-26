@@ -20,7 +20,7 @@ class ViewUIObjectTest extends UnitTestCase {
   /**
    * Tests entity method decoration.
    */
-  public function testEntityDecoration() {
+  public function testEntityDecoration(): void {
     $method_args = [];
     $method_args['setOriginalId'] = [12];
     $method_args['setStatus'] = [TRUE];
@@ -32,14 +32,23 @@ class ViewUIObjectTest extends UnitTestCase {
     foreach ($reflection->getMethods() as $reflection_method) {
       $interface_methods[] = $reflection_method->getName();
 
-      // EntityInterface::isNew() is missing from the list of methods, because it
-      // calls id(), which breaks the ->expect($this->once()) call. Call it later.
-      // EntityInterface::isSyncing() is only called during syncing process.
-      // EntityInterface::isUninstalling() is only called during uninstallation
-      // process. EntityInterface::getConfigDependencyName() and
+      // EntityInterface::isNew() is missing from the list of methods, because
+      // it calls id(), which breaks the ->expect($this->once()) call. Call it
+      // later. EntityInterface::isSyncing() is only called during syncing
+      // process. EntityInterface::isUninstalling() is only called during
+      // uninstallation process. EntityInterface::getConfigDependencyName() and
       // ConfigEntityInterface::calculateDependencies() are only used for
       // dependency management.
-      if (!in_array($reflection_method->getName(), ['isNew', 'isSyncing', 'isUninstalling', 'getConfigDependencyKey', 'getConfigDependencyName', 'calculateDependencies'])) {
+      if (!in_array(
+        $reflection_method->getName(),
+        [
+          'isNew',
+          'isSyncing',
+          'isUninstalling',
+          'getConfigDependencyKey',
+          'getConfigDependencyName',
+          'calculateDependencies',
+        ])) {
         if (count($reflection_method->getParameters()) == 0) {
           $method_args[$reflection_method->getName()] = [];
         }
@@ -75,7 +84,7 @@ class ViewUIObjectTest extends UnitTestCase {
   /**
    * Tests the isLocked method.
    */
-  public function testIsLocked() {
+  public function testIsLocked(): void {
     $storage = $this->getMockBuilder('Drupal\views\Entity\View')
       ->setConstructorArgs([[], 'view'])
       ->getMock();
@@ -115,7 +124,7 @@ class ViewUIObjectTest extends UnitTestCase {
   /**
    * Tests serialization of the ViewUI object.
    */
-  public function testSerialization() {
+  public function testSerialization(): void {
     $storage = new View([], 'view');
     $executable = $this->getMockBuilder('Drupal\views\ViewExecutable')
       ->disableOriginalConstructor()

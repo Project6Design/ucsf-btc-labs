@@ -16,18 +16,21 @@ class TelephoneFieldRdfaTest extends FieldRdfaTestBase {
    *
    * @var string
    */
-  protected $testValue;
+  protected string $testValue;
 
   /**
    * {@inheritdoc}
    */
-  protected $fieldType = 'telephone';
+  protected string $fieldType = 'telephone';
 
   /**
    * {@inheritdoc}
    */
   protected static $modules = ['telephone', 'text'];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -48,11 +51,14 @@ class TelephoneFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests the field formatters.
    */
-  public function testAllFormatters() {
+  public function testAllFormatters(): void {
     // Tests the plain formatter.
     $this->assertFormatterRdfa(['type' => 'string'], 'http://schema.org/telephone', ['value' => $this->testValue]);
     // Tests the telephone link formatter.
-    $this->assertFormatterRdfa(['type' => 'telephone_link'], 'http://schema.org/telephone', ['value' => 'tel:' . $this->testValue, 'type' => 'uri']);
+    $this->assertFormatterRdfa(['type' => 'telephone_link'], 'http://schema.org/telephone', [
+      'value' => 'tel:' . $this->testValue,
+      'type' => 'uri',
+    ]);
 
     $formatter = [
       'type' => 'telephone_link',

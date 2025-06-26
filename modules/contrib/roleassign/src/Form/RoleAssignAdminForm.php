@@ -5,11 +5,28 @@ namespace Drupal\roleassign\Form;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\user\RoleInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure RoleAssign settings.
  */
 class RoleAssignAdminForm extends ConfigFormBase {
+
+  /**
+   * Entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    $instance = parent::create($container);
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -34,8 +51,10 @@ class RoleAssignAdminForm extends ConfigFormBase {
      * - 'anonymous user'
      * - 'authenticated user'
      ******************************/
-    $roles = user_role_names(TRUE);
+    $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
+    unset($roles[RoleInterface::ANONYMOUS_ID]);
     unset($roles[RoleInterface::AUTHENTICATED_ID]);
+    $roles = array_map(fn(RoleInterface $role) => $role->label(), $roles);
 
     /******************************
      * Show checkboxes with roles

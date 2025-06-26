@@ -1,13 +1,13 @@
 name: Block Style Plugins
 type: module
-description: Plugin system for allowing modules or themes to add style configuration to blocks
-core_version_requirement: ^8.8 || ^9 || ^10
+description: Plugin system for allowing modules or themes to add style configuration to blocks.
+core_version_requirement: ^8.8 || ^9 || ^10 || ^11
 package: Styles
 dependencies:
   - drupal:block
   - drupal:block_content
 
-# Information added by Drupal.org packaging script on 2023-02-14
-version: '8.x-1.6'
+# Information added by Drupal.org packaging script on 2024-10-04
+version: '8.x-1.7'
 project: 'block_style_plugins'
-datestamp: 1676397044
+datestamp: 1728013448

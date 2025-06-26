@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Functional;
 
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
@@ -51,9 +53,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   ];
 
   /**
-   * Modules to install.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'language',
@@ -77,7 +77,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  public function setupBundle() {
+  public function setupBundle(): void {
     parent::setupBundle();
     $this->drupalCreateContentType(['type' => 'article', 'name' => 'article']);
     // Add a comment field to the article content type.
@@ -94,7 +94,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getTranslatorPermissions() {
+  protected function getTranslatorPermissions(): array {
     return array_merge(parent::getTranslatorPermissions(), ['post comments', 'administer comments', 'access comments']);
   }
 
@@ -139,7 +139,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  protected function doTestPublishedStatus() {
+  protected function doTestPublishedStatus(): void {
     $entity_type_manager = \Drupal::entityTypeManager();
     $storage = $entity_type_manager->getStorage($this->entityTypeId);
 
@@ -163,10 +163,9 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  protected function doTestAuthoringInfo() {
+  protected function doTestAuthoringInfo(): void {
     $storage = $this->container->get('entity_type.manager')
       ->getStorage($this->entityTypeId);
-    $storage->resetCache([$this->entityId]);
     $entity = $storage->load($this->entityId);
     $languages = $this->container->get('language_manager')->getLanguages();
     $values = [];
@@ -177,7 +176,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
       $user = $this->drupalCreateUser();
       $values[$langcode] = [
         'uid' => $user->id(),
-        'created' => REQUEST_TIME - mt_rand(0, 1000),
+        'created' => \Drupal::time()->getRequestTime() - mt_rand(0, 1000),
       ];
       /** @var \Drupal\Core\Datetime\DateFormatterInterface $date_formatter */
       $date_formatter = $this->container->get('date.formatter');
@@ -190,7 +189,6 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
       $this->submitForm($edit, $this->getFormSubmitAction($entity, $langcode));
     }
 
-    $storage->resetCache([$this->entityId]);
     $entity = $storage->load($this->entityId);
     foreach ($this->langcodes as $langcode) {
       $metadata = $this->manager->getTranslationMetadata($entity->getTranslation($langcode));
@@ -202,7 +200,7 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   /**
    * Tests translate link on comment content admin page.
    */
-  public function testTranslateLinkCommentAdminPage() {
+  public function testTranslateLinkCommentAdminPage(): void {
     $this->adminUser = $this->drupalCreateUser(array_merge(parent::getTranslatorPermissions(), ['access administration pages', 'administer comments', 'skip comment approval']));
     $this->drupalLogin($this->adminUser);
 
@@ -219,10 +217,9 @@ class CommentTranslationUITest extends ContentTranslationUITestBase {
   /**
    * {@inheritdoc}
    */
-  protected function doTestTranslationEdit() {
+  protected function doTestTranslationEdit(): void {
     $storage = $this->container->get('entity_type.manager')
       ->getStorage($this->entityTypeId);
-    $storage->resetCache([$this->entityId]);
     $entity = $storage->load($this->entityId);
     $languages = $this->container->get('language_manager')->getLanguages();
 

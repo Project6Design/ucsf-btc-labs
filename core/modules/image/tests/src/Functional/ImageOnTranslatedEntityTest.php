@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\image\Functional;
 
 use Drupal\file\Entity\File;
 use Drupal\Tests\content_translation\Traits\ContentTranslationTestTrait;
 use Drupal\Tests\TestFileCreationTrait;
+
+// cspell:ignore Scarlett Johansson ribisi
 
 /**
  * Uploads images to translated nodes.
@@ -52,7 +56,7 @@ class ImageOnTranslatedEntityTest extends ImageFieldTestBase {
 
     // Create an image field on the "Basic page" node type.
     $this->fieldName = $this->randomMachineName();
-    $this->createImageField($this->fieldName, 'basic_page', [], ['title_field' => 1]);
+    $this->createImageField($this->fieldName, 'node', 'basic_page', [], ['title_field' => 1]);
 
     // Create and log in user.
     $permissions = [
@@ -78,7 +82,7 @@ class ImageOnTranslatedEntityTest extends ImageFieldTestBase {
   /**
    * Tests synced file fields on translated nodes.
    */
-  public function testSyncedImages() {
+  public function testSyncedImages(): void {
     // Enable translation for "Basic page" nodes.
     $this->enableContentTranslation('node', 'basic_page');
     static::setFieldTranslatable('node', 'basic_page', $this->fieldName, TRUE);
@@ -115,12 +119,12 @@ class ImageOnTranslatedEntityTest extends ImageFieldTestBase {
     $this->submitForm($edit, 'Save (this translation)');
     // This inspects the HTML after the post of the translation, the image
     // should be displayed on the original node.
-    $this->assertSession()->responseContains('alt="Lost in translation image"');
-    $this->assertSession()->responseContains('title="Lost in translation image title"');
-    $second_fid = $this->getLastFileId();
-    // View the translated node.
-    $this->drupalGet('fr/node/' . $default_language_node->id());
     $this->assertSession()->responseContains('alt="Scarlett Johansson image"');
+    $this->assertSession()->responseContains('title="Scarlett Johansson image title"');
+    $second_fid = $this->getLastFileId();
+    // View the untranslated node.
+    $this->drupalGet('node/' . $default_language_node->id());
+    $this->assertSession()->responseContains('alt="Lost in translation image"');
 
     \Drupal::entityTypeManager()->getStorage('file')->resetCache();
 
@@ -155,12 +159,12 @@ class ImageOnTranslatedEntityTest extends ImageFieldTestBase {
     $this->assertTrue($file->isPermanent(), 'First file still exists and is permanent.');
     // This inspects the HTML after the post of the translation, the image
     // should be displayed on the original node.
-    $this->assertSession()->responseContains('alt="Lost in translation image"');
-    $this->assertSession()->responseContains('title="Lost in translation image title"');
-    // View the translated node.
-    $this->drupalGet('nl/node/' . $default_language_node->id());
     $this->assertSession()->responseContains('alt="Ada Lovelace image"');
     $this->assertSession()->responseContains('title="Ada Lovelace image title"');
+    // View untranslated node.
+    $this->drupalGet('node/' . $default_language_node->id());
+    $this->assertSession()->responseContains('alt="Lost in translation image"');
+    $this->assertSession()->responseContains('title="Lost in translation image title"');
 
     // Ensure the file status of the second file is permanent.
     $file = File::load($second_fid);

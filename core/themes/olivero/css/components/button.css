@@ -29,7 +29,6 @@
   font-family: var(--font-sans);
   font-size: var(--font-size-l);
   font-weight: 700;
-  -webkit-appearance: none;
   appearance: none;
   -webkit-font-smoothing: antialiased;
 }
@@ -136,8 +135,4 @@
 
 [dir="rtl"] .button--icon-back::before {
   transform: rotate(-45deg);
-}
-
-.shepherd-cancel-icon {
-  font-size: 1.5em;
 }

@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
  *
  * @coversDefaultClass \Drupal\Component\Datetime\Time
  * @group Datetime
+ * @group #slow
  * @runTestsInSeparateProcesses
  * @preserveGlobalState disabled
  */
@@ -52,7 +53,7 @@ class TimeWithNoRequestTest extends TestCase {
    *
    * @covers ::getRequestMicroTime
    */
-  public function testGetRequestMicroTimeImmutable() {
+  public function testGetRequestMicroTimeImmutable(): void {
     $requestTime = $this->time->getRequestMicroTime();
     usleep(20000);
     $this->assertSame($requestTime, $this->time->getRequestMicroTime());

@@ -5,10 +5,7 @@ namespace Drupal\photoswipe;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
-use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\Utility\Token;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -22,34 +19,6 @@ class PhotoswipePreprocessProcessor implements ContainerInjectionInterface {
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityTypeManager;
-
-  /**
-   * Token.
-   *
-   * @var \Drupal\Core\Utility\Token
-   */
-  protected $token;
-
-  /**
-   * Language manager.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
-
-  /**
-   * Renderer.
-   *
-   * @var \Drupal\Core\Render\RendererInterface
-   */
-  protected $renderer;
-
-  /**
-   * Logger.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelInterface
-   */
-  protected $logger;
 
   /**
    * Image DTO.
@@ -66,35 +35,30 @@ class PhotoswipePreprocessProcessor implements ContainerInjectionInterface {
   protected $fileUrlGenerator;
 
   /**
+   * The logger object.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   */
+  protected $logger;
+
+  /**
    * Constructs new PhotoswipePreprocessProcessor object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity manager.
-   * @param \Drupal\Core\Utility\Token $token
-   *   Token.
-   * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
-   *   Language manager.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $channelFactory
-   *   Chanel factory.
-   * @param \Drupal\Core\Render\RendererInterface $renderer
-   *   Renderer.
    * @param \Drupal\Core\File\FileUrlGeneratorInterface $fileUrlGenerator
    *   File url generator object.
+   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerFactory
+   *   The logger factory.
    */
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
-    Token $token,
-    LanguageManagerInterface $languageManager,
-    LoggerChannelFactoryInterface $channelFactory,
-    RendererInterface $renderer,
-    FileUrlGeneratorInterface $fileUrlGenerator
+    FileUrlGeneratorInterface $fileUrlGenerator,
+    LoggerChannelFactoryInterface $loggerFactory,
   ) {
     $this->entityTypeManager = $entityTypeManager;
-    $this->token = $token;
-    $this->languageManager = $languageManager;
-    $this->renderer = $renderer;
-    $this->logger = $channelFactory->get('photoswipe');
     $this->fileUrlGenerator = $fileUrlGenerator;
+    $this->logger = $loggerFactory->get('photoswipe');
   }
 
   /**
@@ -103,11 +67,8 @@ class PhotoswipePreprocessProcessor implements ContainerInjectionInterface {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager'),
-      $container->get('token'),
-      $container->get('language_manager'),
-      $container->get('logger.factory'),
-      $container->get('renderer'),
       $container->get('file_url_generator'),
+      $container->get('logger.factory'),
     );
   }
 
@@ -120,96 +81,38 @@ class PhotoswipePreprocessProcessor implements ContainerInjectionInterface {
   public function preprocess(array &$variables) {
     $this->imageDTO = ImageDTO::createFromVariables($variables);
     $image = $this->getRenderableImage($variables);
-
     $variables['image'] = $image;
     $variables['path'] = $this->getPath();
     $variables['attributes']['class'][] = 'photoswipe';
-    $variables['attributes']['data-size'] = $this->imageDTO->getWidth() . 'x' . $this->imageDTO->getHeight();
-    $variables['attributes']['data-overlay-title'] = $this->getCaption();
+    $variables['attributes']['data-pswp-width'] = $this->imageDTO->getWidth();
+    $variables['attributes']['data-pswp-height'] = $this->imageDTO->getHeight();
     if (isset($image['#style_name']) && $image['#style_name'] === 'hide') {
-      // Do not display if hidden is selected:
-      $variables['attributes']['class'][] = 'hidden';
+      // If hidden is selected simply unset the entire image, so that we only
+      // show the photoswipe anchor tag:
+      unset($variables['image']);
     }
-
   }
 
   /**
-   * Set the caption.
-   */
-  protected function getCaption() {
-    $settings = $this->imageDTO->getSettings();
-    if (isset($settings['photoswipe_caption'])) {
-      $caption_setting = $settings['photoswipe_caption'];
-      switch ($caption_setting) {
-        case 'alt':
-          $caption = $this->imageDTO->getAlt();
-          break;
-
-        case 'title':
-          $caption = $this->imageDTO->getTitle();
-          break;
-
-        // Backward compatibility for stored settings.
-        case 'node_title':
-        case 'entity_label':
-          $caption = $this->imageDTO->getEntity()->label() ?: $this->imageDTO->getAlt();
-          break;
-
-        case 'media_name':
-          $caption = $this->imageDTO->getItem()->getParent()->getEntity()->label();
-          break;
-
-        case 'custom':
-          $entity_type = $this->imageDTO->getEntity()->getEntityTypeId();
-          $caption = $this->token->replace($settings['photoswipe_caption_custom'],
-            [
-              $entity_type => $this->imageDTO->getEntity(),
-              'file' => $this->imageDTO->getItem(),
-            ],
-            [
-              'clear' => TRUE,
-              'langcode' => $this->languageManager->getCurrentLanguage()->getId(),
-            ]
-          );
-          break;
-
-        default:
-          // Assume the user wants to use another node field as the caption.
-          $field_view['#view_mode'] = ($settings['photoswipe_view_mode']) ? $settings['photoswipe_view_mode'] : 'default';
-          $entity = $this->imageDTO->getEntity();
-          if (!isset($entity->{$caption_setting})) {
-            // No such field exists we'd better warn and use something reliable.
-            $id = $this->imageDTO->getEntity()->id();
-            $msg = "'Photoswipe Caption' is unset for field view '@fv' on node: @nid.";
-            $this->logger->warning($msg, [
-              '@fv' => $field_view['#view_mode'],
-              '@nid' => $id,
-            ]);
-            // Fallback to alt text:
-            $caption = $this->imageDTO->getAlt();
-            break;
-          }
-          $field_view = $entity->{$caption_setting}->view();
-          $caption = $this->renderer->render($field_view);
-          break;
-      }
-    }
-    else {
-      $caption = $this->imageDTO->getAlt();
-    }
-    return $caption;
-  }
-
-  /**
+   * An associative array containing image variables.
    * Builds a renderable array for the given image.
    *
    * @param array $variables
-   *   An associative array containing image variables.
    *
    * @return array
    *   Renderable array containing the image.
    */
   protected function getRenderableImage(array $variables) {
+
+    // We need to merge the item attributes here, instead of doing it in
+    // "preprocess", as responsive images use the "responsive_image" key instead
+    // of "image":
+    $itemAttributes = $variables['item_attributes'];
+    // $this->imageDTO->getItem()->_attributes can be potentially NULL:
+    if ($this->imageDTO->getItem()->_attributes) {
+      $itemAttributes = array_merge($this->imageDTO->getItem()->_attributes, $itemAttributes);
+    }
+
     $image = [
       '#theme' => 'image_style',
       '#uri' => $this->imageDTO->getUri(),
@@ -217,12 +120,12 @@ class PhotoswipePreprocessProcessor implements ContainerInjectionInterface {
       '#title' => $this->imageDTO->getTitle(),
       '#width' => $this->imageDTO->getWidth(),
       '#height' => $this->imageDTO->getHeight(),
-      '#attributes' => $this->imageDTO->getItem()->_attributes,
-      '#style_name' => $this->imageDTO->getSettings()['photoswipe_node_style'],
+      '#attributes' => $itemAttributes,
+      '#style_name' => $this->imageDTO->getSettings()['photoswipe_thumbnail_style'],
     ];
 
-    if (isset($variables['delta']) && $variables['delta'] === 0 && !empty($this->imageDTO->getSettings()['photoswipe_node_style_first'])) {
-      $image['#style_name'] = $this->imageDTO->getSettings()['photoswipe_node_style_first'];
+    if (isset($variables['delta']) && $variables['delta'] === 0 && !empty($this->imageDTO->getSettings()['photoswipe_thumbnail_style_first'])) {
+      $image['#style_name'] = $this->imageDTO->getSettings()['photoswipe_thumbnail_style_first'];
     }
 
     // Render as a standard image if an image style is not given.
@@ -237,11 +140,19 @@ class PhotoswipePreprocessProcessor implements ContainerInjectionInterface {
    * Set image path.
    */
   protected function getPath() {
+    if ($this->imageDTO->getUri() === NULL) {
+      $this->logger->warning('Can not apply photoswipe on image. The referenced file does not exist.');
+      return NULL;
+    }
     $dimensions = $this->imageDTO->getDimensions();
     // Create the path to the image that will show in Photoswipe.
     if (($style_name = $this->imageDTO->getSettings()['photoswipe_image_style']) && !empty($dimensions)) {
       // Load the image style.
       $style = $this->entityTypeManager->getStorage('image_style')->load($style_name);
+      if (!$style) {
+        $this->logger->warning('Can not apply photoswipe on image. Image style "@style" does not exist.', ['@style' => $style_name]);
+        return NULL;
+      }
 
       /** @var \Drupal\image\ImageStyleInterface $style */
       // Set the dimensions:

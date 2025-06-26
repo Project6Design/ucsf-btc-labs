@@ -62,6 +62,7 @@ class TwigPhpStorageCache implements CacheInterface {
    * Gets the PHP code storage object to use for the compiled Twig files.
    *
    * @return \Drupal\Component\PhpStorage\PhpStorageInterface
+   *   The PhpStorage object used for storing the templates.
    */
   protected function storage() {
     if (!isset($this->storage)) {
@@ -112,7 +113,7 @@ class TwigPhpStorageCache implements CacheInterface {
     $this->storage()->save($key, $content);
     // Save the last mtime.
     $cid = 'twig:' . $key;
-    $this->cache->set($cid, REQUEST_TIME);
+    $this->cache->set($cid, \Drupal::time()->getRequestTime());
   }
 
   /**

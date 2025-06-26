@@ -27,7 +27,7 @@
   list-style: none;
   color: var(--color-text);
 
-  @nest [dir="rtl"] & {
+  [dir="rtl"] & {
     float: right;
   }
 }
@@ -103,8 +103,6 @@
   margin-block-start: calc(var(--vertical-tabs-border-size) * -1);
   padding: var(--space-s) var(--space-s) var(--space-s) calc(var(--space-l) - var(--vertical-tabs-menu-link--active-border-size));
   text-decoration: none;
-  word-wrap: break-word;
-  hyphens: auto;
   color: var(--color-text);
   border: var(--vertical-tabs-border-size) solid transparent;
   border-block-width: var(--vertical-tabs-border-size);
@@ -226,7 +224,7 @@
   margin-inline-start: var(--vertical-tabs-menu-width);
   border-top-left-radius: 0;
 
-  @nest [dir="rtl"] & {
+  [dir="rtl"] & {
     border-top-left-radius: var(--vertical-tabs-border-radius);
   }
 }

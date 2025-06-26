@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mysql\Functional;
 
 use Drupal\Core\Database\Database;
@@ -15,7 +17,7 @@ class InstallerIsolationLevelExistingSettingsTest extends InstallerExistingSetti
   /**
    * {@inheritdoc}
    */
-  protected function prepareEnvironment() {
+  protected function prepareEnvironment(): void {
     parent::prepareEnvironment();
 
     $connection_info = Database::getConnectionInfo();
@@ -28,7 +30,7 @@ class InstallerIsolationLevelExistingSettingsTest extends InstallerExistingSetti
   /**
    * Verifies that isolation_level is not set in the database settings.
    */
-  public function testInstaller() {
+  public function testInstaller(): void {
     $contents = file_get_contents($this->container->getParameter('app.root') . '/' . $this->siteDirectory . '/settings.php');
 
     // Test that isolation_level was not set.
@@ -50,13 +52,7 @@ class InstallerIsolationLevelExistingSettingsTest extends InstallerExistingSetti
     Database::closeConnection('default', 'default');
     $connection = Database::getConnection('default', 'default');
 
-    $query = 'SELECT @@SESSION.tx_isolation';
-    // The database variable "tx_isolation" has been removed in MySQL v8.0 and
-    // has been replaced by "transaction_isolation".
-    // @see https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_tx_isolation
-    if (!$connection->isMariaDb() && version_compare($connection->version(), '8.0.0-AnyName', '>')) {
-      $query = 'SELECT @@SESSION.transaction_isolation';
-    }
+    $query = $connection->isMariaDb() ? 'SELECT @@SESSION.tx_isolation' : 'SELECT @@SESSION.transaction_isolation';
 
     // Test that transaction level is REPEATABLE READ.
     $this->assertEquals('REPEATABLE-READ', $connection->query($query)->fetchField());

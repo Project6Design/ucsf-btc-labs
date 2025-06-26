@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Session;
 
 use Drupal\Component\Utility\Crypt;
@@ -32,9 +34,7 @@ class SessionHttpsTest extends BrowserTestBase {
   protected $secureSessionName;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['session_test'];
 
@@ -63,7 +63,7 @@ class SessionHttpsTest extends BrowserTestBase {
   /**
    * Tests HTTPS sessions.
    */
-  public function testHttpsSession() {
+  public function testHttpsSession(): void {
     $user = $this->drupalCreateUser(['access administration pages', 'administer site configuration']);
 
     /** @var \Symfony\Component\BrowserKit\CookieJar $browser_kit_cookie_jar */
@@ -122,7 +122,7 @@ class SessionHttpsTest extends BrowserTestBase {
    *
    * Note that the parents $session_id and $loggedInUser is not updated.
    */
-  protected function loginHttp(AccountInterface $account) {
+  protected function loginHttp(AccountInterface $account): void {
     $guzzle_cookie_jar = $this->getGuzzleCookieJar();
     $post = [
       'form_id' => 'user_login_form',
@@ -173,7 +173,7 @@ class SessionHttpsTest extends BrowserTestBase {
    *
    * Note that the parents $session_id and $loggedInUser is not updated.
    */
-  protected function loginHttps(AccountInterface $account) {
+  protected function loginHttps(AccountInterface $account): void {
     $guzzle_cookie_jar = $this->getGuzzleCookieJar();
     $post = [
       'form_id' => 'user_login_form',
@@ -230,7 +230,7 @@ class SessionHttpsTest extends BrowserTestBase {
    * @return string
    *   The internal path from the location header on the response.
    */
-  protected function getPathFromLocationHeader(ResponseInterface $response, $https = FALSE) {
+  protected function getPathFromLocationHeader(ResponseInterface $response, $https = FALSE): string {
     if ($https) {
       $base_url = str_replace('http://', 'https://', $this->baseUrl);
     }
@@ -268,26 +268,26 @@ class SessionHttpsTest extends BrowserTestBase {
   /**
    * Builds a URL for submitting a mock HTTPS request to HTTP test environments.
    *
-   * @param $url
+   * @param string $url
    *   A Drupal path such as 'user/login'.
    *
    * @return string
    *   URL prepared for the https.php mock front controller.
    */
-  protected function httpsUrl($url) {
+  protected function httpsUrl($url): string {
     return 'core/modules/system/tests/https.php/' . $url;
   }
 
   /**
    * Builds a URL for submitting a mock HTTP request to HTTPS test environments.
    *
-   * @param $url
+   * @param string $url
    *   A Drupal path such as 'user/login'.
    *
    * @return string
    *   URL prepared for the http.php mock front controller.
    */
-  protected function httpUrl($url) {
+  protected function httpUrl($url): string {
     return 'core/modules/system/tests/http.php/' . $url;
   }
 
@@ -312,7 +312,7 @@ class SessionHttpsTest extends BrowserTestBase {
    * @return string
    *   The form build ID for the user login form.
    */
-  protected function getUserLoginFormBuildId() {
+  protected function getUserLoginFormBuildId(): string {
     $this->drupalGet('user/login');
     return (string) $this->getSession()->getPage()->findField('form_build_id');
   }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\Kernel\Migrate\d7;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -31,7 +33,7 @@ class MigratePrivateFileTest extends MigrateDrupal7TestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getFileMigrationInfo() {
+  protected function getFileMigrationInfo(): array {
     return [
       'path' => 'private://sites/default/private/Babylon5.txt',
       'size' => 3,
@@ -43,7 +45,7 @@ class MigratePrivateFileTest extends MigrateDrupal7TestBase {
   /**
    * {@inheritdoc}
    */
-  public function register(ContainerBuilder $container) {
+  public function register(ContainerBuilder $container): void {
     parent::register($container);
     $container->register('stream_wrapper.private', 'Drupal\Core\StreamWrapper\PrivateStream')
       ->addTag('stream_wrapper', ['scheme' => 'private']);
@@ -52,7 +54,7 @@ class MigratePrivateFileTest extends MigrateDrupal7TestBase {
   /**
    * Tests that all expected files are migrated.
    */
-  public function testFileMigration() {
+  public function testFileMigration(): void {
     $this->assertEntity(3, 'Babylon5.txt', 'private://Babylon5.txt', 'text/plain', 3, 1486104045, 1486104045, '1');
   }
 

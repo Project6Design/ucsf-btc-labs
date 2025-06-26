@@ -15,6 +15,7 @@ use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
 use Drupal\image\Entity\ImageStyle;
@@ -106,7 +107,7 @@ class TwigTweakExtension extends AbstractExtension {
       new TwigFilter('image_style', [self::class, 'imageStyleFilter']),
       new TwigFilter('transliterate', [self::class, 'transliterateFilter']),
       new TwigFilter('check_markup', 'check_markup'),
-      new TwigFilter('format_size', 'format_size'),
+      new TwigFilter('format_size', [ByteSizeMarkup::class, 'create']),
       new TwigFilter('truncate', [Unicode::class, 'truncate']),
       new TwigFilter('view', [self::class, 'viewFilter']),
       new TwigFilter('with', [self::class, 'withFilter']),
@@ -197,7 +198,7 @@ class TwigTweakExtension extends AbstractExtension {
   /**
    * Returns the render array for a single entity field.
    */
-  public static function drupalField(string $field_name, string $entity_type, string $id, $view_mode = 'full', string $langcode = NULL, bool $check_access = TRUE): array {
+  public static function drupalField(string $field_name, string $entity_type, string $id, $view_mode = 'full', ?string $langcode = NULL, bool $check_access = TRUE): array {
     $entity = \Drupal::entityTypeManager()->getStorage($entity_type)->load($id);
     if ($entity) {
       return \Drupal::service('twig_tweak.field_view_builder')
@@ -232,7 +233,7 @@ class TwigTweakExtension extends AbstractExtension {
   /**
    * Builds an image.
    */
-  public static function drupalImage(string $selector, string $style = NULL, array $attributes = [], bool $responsive = FALSE, bool $check_access = TRUE): array {
+  public static function drupalImage(string $selector, ?string $style = NULL, array $attributes = [], bool $responsive = FALSE, bool $check_access = TRUE): array {
 
     // Determine selector type by its value.
     if (preg_match('/^\d+$/', $selector)) {
@@ -534,7 +535,7 @@ class TwigTweakExtension extends AbstractExtension {
    *   $string with non-US-ASCII characters transliterated to US-ASCII
    *   characters, and unknown characters replaced with $unknown_character.
    */
-  public static function transliterateFilter(string $text, string $langcode = 'en', string $unknown_character = '?', int $max_length = NULL) {
+  public static function transliterateFilter(string $text, string $langcode = 'en', string $unknown_character = '?', ?int $max_length = NULL) {
     return \Drupal::transliteration()->transliterate($text, $langcode, $unknown_character, $max_length);
   }
 
@@ -554,7 +555,7 @@ class TwigTweakExtension extends AbstractExtension {
    * @return array
    *   A render array to represent the object.
    */
-  public static function viewFilter(?object $object, $view_mode = 'default', string $langcode = NULL, bool $check_access = TRUE): array {
+  public static function viewFilter(?object $object, $view_mode = 'default', ?string $langcode = NULL, bool $check_access = TRUE): array {
     $build = [];
     if ($object instanceof FieldItemListInterface || $object instanceof FieldItemInterface) {
       $build = $object->view($view_mode);
@@ -687,7 +688,7 @@ class TwigTweakExtension extends AbstractExtension {
    * @return \Drupal\Core\Entity\EntityInterface
    *   The appropriate translation for the given language context.
    */
-  public static function entityTranslation(EntityInterface $entity, string $langcode = NULL): EntityInterface {
+  public static function entityTranslation(EntityInterface $entity, ?string $langcode = NULL): EntityInterface {
     return \Drupal::service('entity.repository')->getTranslationFromContext($entity, $langcode);
   }
 
@@ -717,6 +718,7 @@ class TwigTweakExtension extends AbstractExtension {
    */
   public static function phpFilter(array $context, string $code) {
     // Make Twig variables available in PHP code.
+    // @cspell:disable-next-line
     extract($context, EXTR_SKIP);
     ob_start();
     // phpcs:ignore Drupal.Functions.DiscouragedFunctions.Discouraged

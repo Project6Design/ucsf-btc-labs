@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Theme;
 
 use Drupal\Tests\BrowserTestBase;
@@ -36,7 +38,7 @@ class OliveroTest extends BrowserTestBase {
    *
    * @see olivero.libraries.yml
    */
-  public function testBaseLibraryAvailable() {
+  public function testBaseLibraryAvailable(): void {
     $this->drupalGet('');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->responseContains('olivero/css/base/base.css');
@@ -46,7 +48,7 @@ class OliveroTest extends BrowserTestBase {
   /**
    * Test Olivero's configuration schema.
    */
-  public function testConfigSchema() {
+  public function testConfigSchema(): void {
     // Required configuration.
     $this->drupalGet('');
     $this->assertSession()->statusCodeEquals(200);
@@ -71,7 +73,7 @@ class OliveroTest extends BrowserTestBase {
    *
    * @see olivero.libraries.yml
    */
-  public function testPreprocessBlock() {
+  public function testPreprocessBlock(): void {
     $this->drupalGet('');
     $this->assertSession()->statusCodeEquals(200);
 
@@ -119,7 +121,7 @@ class OliveroTest extends BrowserTestBase {
   /**
    * Tests that the Olivero theme can be uninstalled.
    */
-  public function testIsUninstallable() {
+  public function testIsUninstallable(): void {
     $this->drupalLogin($this->drupalCreateUser([
       'access administration pages',
       'administer themes',
@@ -158,6 +160,18 @@ class OliveroTest extends BrowserTestBase {
       $this->assertTrue($link->hasAttribute('pager-test'), 'Pager item has attribute pager-test');
       $this->assertTrue($link->hasClass('lizards'));
     }
+  }
+
+  /**
+   * Tests slogan of system branding block.
+   */
+  public function testSystemSiteBrandingSlogan(): void {
+    $this->config('system.site')
+      ->set('slogan', 'Community carpentry')
+      ->save();
+
+    $this->drupalGet('<front>');
+    $this->assertSession()->pageTextContains('Community carpentry');
   }
 
 }

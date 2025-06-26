@@ -3,11 +3,29 @@
 namespace Drupal\social_media_links_field\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\WidgetBase;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * It allows to link social media.
  */
-abstract class SocialMediaLinksFieldBaseWidget extends WidgetBase {
+abstract class SocialMediaLinksFieldBaseWidget extends WidgetBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * Social Media Links Platform Manager container.
+   *
+   * @var \Drupal\social_media_links\SocialMediaLinksPlatformManager
+   */
+  protected $socialMediaManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->socialMediaManager = $container->get('plugin.manager.social_media_links.platform');
+    return $instance;
+  }
 
   /**
    * Returns the available platforms as options array.
@@ -33,7 +51,7 @@ abstract class SocialMediaLinksFieldBaseWidget extends WidgetBase {
    *   $available_platforms
    */
   protected function getAvailablePlatforms() {
-    $platforms = \Drupal::service('plugin.manager.social_media_links.platform')->getPlatforms();
+    $platforms = $this->socialMediaManager->getPlatforms();
     $platform_settings = $this->fieldDefinition->getSetting('platforms');
 
     $available_platforms = [];
@@ -50,7 +68,7 @@ abstract class SocialMediaLinksFieldBaseWidget extends WidgetBase {
       $available_platforms = $platforms;
 
       foreach ($platforms as $platform_id => $platform) {
-        $available_platforms[$platform_id]['weight'] = isset($platform_settings[$platform_id]['weight']) ? $platform_settings[$platform_id]['weight'] : 0;
+        $available_platforms[$platform_id]['weight'] = $platform_settings[$platform_id]['weight'] ?? 0;
       }
     }
 

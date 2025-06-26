@@ -192,6 +192,8 @@ function _ik_constant_contact_subscribe_on_save_validate($form, &$form_state) {
  */
 function _ik_constant_contact_entity_subscribe_on_save($entity, $op = 'update') {
   $entityFields = $entity->getFields();
+  $cc = \Drupal::service('ik_constant_contact')->getConfig();
+  $ccAddressFields = $cc['address_subfields'];
   $data = $lists = [];
 
   foreach ($entityFields as $field_name => $field) {
@@ -222,20 +224,47 @@ function _ik_constant_contact_entity_subscribe_on_save($entity, $op = 'update') 
         $fieldMapping = $fieldDefinition->getSetting('field_mapping');
 
         foreach ($fieldMapping as $ccFieldName => $entityFieldName) {
-          $value = $entity->{$entityFieldName}->getValue();
+          if (!empty($entityFieldName)) {
+            $value = $entity->{$entityFieldName}->getValue();
 
-          if (is_array($value)) {
-            $value = $value[0]['value'];
+            // String and Datetime types
+            if (is_array($value) && isset($value[0]['value'])) {
+              $value = $value[0]['value'];
+
+              if (!empty($value) && ($ccFieldName === 'birthday')) {
+                $value = [
+                  'month' => date('m', strtotime($value)),
+                  'day' => date('d', strtotime($value)),
+                ];
+              }
+
+              else if (!empty($value) && ($ccFieldName === 'anniversary')) {
+                $value = date('Y-m-d', strtotime($value));
+              }
+            
+            // Address
+            } else if (is_array($value) && isset($value[0]['address_line1'])) {
+              $addressValue = [];
+
+              foreach ($ccAddressFields as $key => $fieldKey) {
+                $addressValue[$key] = $value[0][$fieldKey];
+              }
+
+              $value = $addressValue;
+            }
+
+            $data[$ccFieldName] = $value;
           }
-
-          $data[$ccFieldName] = $value;
         }
 
-        if ($op === 'delete') {
-          $response = $cc->unsubscribeContact($data, $lists);
-        }
-        else {
-          $response = $cc->submitContactForm($data, $lists);
+
+        if (count($lists) > 0) {
+          if ($op === 'delete') {
+            $response = $cc->unsubscribeContact($data, $lists);
+          }
+          else {
+            $response = $cc->submitContactForm($data, $lists);
+          }
         }
       }
     }

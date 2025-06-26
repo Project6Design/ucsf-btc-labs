@@ -6,21 +6,22 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\views\Attribute\ViewsStyle;
 use Drupal\views\Plugin\views\wizard\WizardInterface;
 
 /**
  * Style plugin to render each item as a row in a table.
  *
  * @ingroup views_style_plugins
- *
- * @ViewsStyle(
- *   id = "table",
- *   title = @Translation("Table"),
- *   help = @Translation("Displays rows in a table."),
- *   theme = "views_view_table",
- *   display_types = {"normal"}
- * )
  */
+#[ViewsStyle(
+  id: "table",
+  title: new TranslatableMarkup("Table"),
+  help: new TranslatableMarkup("Displays rows in a table."),
+  theme: "views_view_table",
+  display_types: ["normal"],
+)]
 class Table extends StylePluginBase implements CacheableDependencyInterface {
 
   /**
@@ -51,20 +52,26 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
 
   /**
    * Contains the current active sort column.
+   *
    * @var string
    */
   public $active;
 
   /**
    * Contains the current active sort order, either desc or asc.
+   *
    * @var string
    */
   public $order;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defineOptions() {
     $options = parent::defineOptions();
 
     $options['columns'] = ['default' => []];
+    $options['class'] = ['default' => ''];
     $options['default'] = ['default' => ''];
     $options['info'] = ['default' => []];
     $options['override'] = ['default' => TRUE];
@@ -103,7 +110,7 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
     $query = $this->view->getRequest()->query;
     $order = $query->get('order');
     if (!isset($order)) {
-      // check for a 'default' clickSort. If there isn't one, exit gracefully.
+      // Check for a 'default' clickSort. If there isn't one, exit gracefully.
       if (empty($this->options['default'])) {
         return;
       }
@@ -153,10 +160,10 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
    * - Any fields not currently represented must be added.
    * - Columns must be re-ordered to match the fields.
    *
-   * @param $columns
+   * @param string[][] $columns
    *   An array of all fields; the key is the id of the field and the
    *   value is the id of the column the field should be in.
-   * @param $fields
+   * @param string[] $fields
    *   The fields to use for the columns. If not provided, they will
    *   be requested from the current display. The running render should
    *   send the fields through, as they may be different than what the
@@ -209,6 +216,13 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
       return;
     }
 
+    $form['class'] = [
+      '#title' => $this->t('Table CSS classes'),
+      '#type' => 'textfield',
+      '#description' => $this->t('Classes to provide on the table. Separate multiple classes with a space. Example: classA classB'),
+      '#default_value' => $this->options['class'],
+    ];
+
     $form['override'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Override normal sorting if click sorting is used'),
@@ -217,7 +231,7 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
 
     $form['sticky'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Enable Drupal style "sticky" table headers (JavaScript)'),
+      '#title' => $this->t('Enable Drupal style "sticky" table headers'),
       '#default_value' => !empty($this->options['sticky']),
       '#description' => $this->t('(Sticky header effects will not be active for preview below, only on live output.)'),
     ];
@@ -318,7 +332,7 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
           '#return_value' => $field,
           '#parents' => ['style_options', 'default'],
           '#id' => $radio_id,
-          // because 'radio' doesn't fully support '#id' =(
+          // Because 'radio' doesn't fully support '#id' =(
           '#attributes' => ['id' => $radio_id],
           '#default_value' => $default,
           '#states' => [
@@ -381,7 +395,7 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
         ],
       ];
 
-      // markup for the field name
+      // Markup for the field name
       $form['info'][$field]['name'] = [
         '#markup' => $field_names[$field],
       ];
@@ -410,10 +424,16 @@ class Table extends StylePluginBase implements CacheableDependencyInterface {
     ];
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function evenEmpty() {
     return parent::evenEmpty() || !empty($this->options['empty_table']);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function wizardSubmit(&$form, FormStateInterface $form_state, WizardInterface $wizard, &$display_options, $display_type) {
     // If any of the displays use the table style, make sure that the fields
     // always have a labels by unsetting the override.

@@ -2,12 +2,11 @@
 
 namespace Drupal\Tests\url_embed\FunctionalJavascript;
 
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use Drupal\Tests\ckeditor5\Traits\CKEditor5TestTrait;
 use Drupal\ckeditor5\Plugin\Editor\CKEditor5;
 use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
-use Drupal\Tests\ckeditor5\Traits\CKEditor5TestTrait;
-use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\user\RoleInterface;
 use Symfony\Component\Validator\ConstraintViolation;
 
 /**
@@ -37,7 +36,7 @@ class UrlEmbedCKEditor5UITest extends WebDriverTestBase {
   protected static $modules = [
     'node',
     'ckeditor5',
-    'url_embed'
+    'url_embed',
   ];
 
   /**
@@ -110,8 +109,10 @@ class UrlEmbedCKEditor5UITest extends WebDriverTestBase {
     $xpath = new \DOMXPath($this->getEditorDataAsDom());
     $drupal_media = $xpath->query('//drupal-url')[0];
     // The upcasted version of the CKEditor content should be
-    // <drupal-url data-embed-url="https://www.youtube.com/watch?v=3pX4iPEPA9A" data-url-provider="YouTube"> </drupal-url>
+    // <drupal-url data-embed-url="https://www.youtube.com/watch?v=3pX4iPEPA9A"
+    // data-url-provider="YouTube"> </drupal-url>.
     $this->assertSame($youtube_url, $drupal_media->getAttribute('data-embed-url'));
     $this->assertSame('YouTube', $drupal_media->getAttribute('data-url-provider'));
   }
+
 }

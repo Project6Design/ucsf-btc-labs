@@ -1,14 +1,16 @@
 name: URL Embed
 type: module
 description: 'Allows URLs to be embedded using a text editor.'
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^10.1 || ^11
 package: Filters
+ckeditor5-stylesheets:
+  - css/url_embed.responsive.css
 dependencies:
   - drupal:editor
   - embed:embed
   - drupal:filter
 
-# Information added by Drupal.org packaging script on 2024-01-04
-version: '2.0.0-alpha2'
+# Information added by Drupal.org packaging script on 2025-06-03
+version: '3.0.0'
 project: 'url_embed'
-datestamp: 1704363830
+datestamp: 1748977668

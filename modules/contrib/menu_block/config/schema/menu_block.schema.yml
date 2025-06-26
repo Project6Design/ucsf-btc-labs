@@ -8,6 +8,9 @@ block.settings.menu_block:*:
     follow_parent:
       type: string
       label: 'Set initial visibility level to the active menu item, or its children'
+    display_empty:
+      type: boolean
+      label: 'Show block if menu tree contains no links'
     label_link:
       type: boolean
       label: 'If the block label should be a link'
@@ -26,6 +29,12 @@ block.settings.menu_block:*:
     parent:
       type: string
       label: 'Parent menu link'
+    render_parent:
+      type: boolean
+      label: 'Render parent menu link'
     suggestion:
       type: string
       label: 'Theme suggestion'
+    hide_on_nonactive:
+      type: boolean
+      label: 'Hide on pages not included in the menu'

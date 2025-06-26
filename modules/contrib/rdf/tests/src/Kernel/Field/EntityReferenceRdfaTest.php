@@ -2,9 +2,15 @@
 
 namespace Drupal\Tests\rdf\Kernel\Field;
 
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
+
+// Workaround to support tests against Drupal 10.1.x and below.
+// @todo Remove once we end support for Drupal 10.1.x and below.
+if (!trait_exists(EntityReferenceFieldCreationTrait::class)) {
+  class_alias('\Drupal\Tests\field\Traits\EntityReferenceTestTrait', EntityReferenceFieldCreationTrait::class);
+}
 
 /**
  * Tests the RDFa output of the entity reference field formatter.
@@ -13,26 +19,26 @@ use Drupal\user\RoleInterface;
  */
 class EntityReferenceRdfaTest extends FieldRdfaTestBase {
 
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
 
   /**
    * {@inheritdoc}
    */
-  protected $fieldType = 'entity_reference';
+  protected string $fieldType = 'entity_reference';
 
   /**
    * The entity type used in this test.
    *
    * @var string
    */
-  protected $entityType = 'entity_test';
+  protected string $entityType = 'entity_test';
 
   /**
    * The bundle used in this test.
    *
    * @var string
    */
-  protected $bundle = 'entity_test';
+  protected string $bundle = 'entity_test';
 
   /**
    * The term for testing.
@@ -46,6 +52,9 @@ class EntityReferenceRdfaTest extends FieldRdfaTestBase {
    */
   protected static $modules = ['text', 'filter'];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -83,13 +92,19 @@ class EntityReferenceRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests all the entity reference formatters.
    */
-  public function testAllFormatters() {
+  public function testAllFormatters(): void {
     $entity_uri = $this->getAbsoluteUri($this->targetEntity);
 
     // Tests the label formatter.
-    $this->assertFormatterRdfa(['type' => 'entity_reference_label'], 'http://schema.org/knows', ['value' => $entity_uri, 'type' => 'uri']);
+    $this->assertFormatterRdfa(['type' => 'entity_reference_label'], 'http://schema.org/knows', [
+      'value' => $entity_uri,
+      'type' => 'uri',
+    ]);
     // Tests the entity formatter.
-    $this->assertFormatterRdfa(['type' => 'entity_reference_entity_view'], 'http://schema.org/knows', ['value' => $entity_uri, 'type' => 'uri']);
+    $this->assertFormatterRdfa(['type' => 'entity_reference_entity_view'], 'http://schema.org/knows', [
+      'value' => $entity_uri,
+      'type' => 'uri',
+    ]);
   }
 
 }

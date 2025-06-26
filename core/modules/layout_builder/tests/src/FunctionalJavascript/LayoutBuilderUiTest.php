@@ -8,6 +8,8 @@ use Drupal\block_content\Entity\BlockContentType;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\Tests\contextual\FunctionalJavascript\ContextualLinkClickTrait;
 
+// cspell:ignore blocknodebundle fieldbody fieldlayout
+
 /**
  * Tests the Layout Builder UI.
  *
@@ -46,6 +48,10 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    if ($this->name() === 'testAddHighlights') {
+      $this->markTestSkipped("Skipped temporarily for random fails.");
+    }
+
     parent::setUp();
 
     $this->createContentType(['type' => 'bundle_with_section_field']);
@@ -66,7 +72,7 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
   /**
    * Tests that after removing sections reloading the page does not re-add them.
    */
-  public function testReloadWithNoSections() {
+  public function testReloadWithNoSections(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -90,14 +96,21 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
   /**
    * Tests the message indicating unsaved changes.
    */
-  public function testUnsavedChangesMessage() {
+  public function testUnsavedChangesMessage(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
-    // Make and then discard changes.
     $this->assertModifiedLayout(static::FIELD_UI_PREFIX . '/display/default/layout');
+    // Discard then cancel.
+    $page->pressButton('Discard changes');
+    $page->clickLink('Cancel');
+    $assert_session->addressEquals(static::FIELD_UI_PREFIX . '/display/default/layout');
+    $assert_session->pageTextContainsOnce('You have unsaved changes.');
+
+    // Discard then confirm.
     $page->pressButton('Discard changes');
     $page->pressButton('Confirm');
+    $assert_session->addressEquals(static::FIELD_UI_PREFIX . '/display/default');
     $assert_session->pageTextNotContains('You have unsaved changes.');
 
     // Make and then save changes.
@@ -136,7 +149,7 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
   /**
    * Tests that elements that open the dialog are properly highlighted.
    */
-  public function testAddHighlights() {
+  public function testAddHighlights(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -248,7 +261,7 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
   /**
    * Tests removing newly added extra field.
    */
-  public function testNewExtraField() {
+  public function testNewExtraField(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -290,7 +303,6 @@ class LayoutBuilderUiTest extends WebDriverTestBase {
    * Waits for the dialog to close and confirms no highlights are present.
    */
   private function assertHighlightNotExists(): void {
-    $this->markTestSkipped("Skipped temporarily for random fails.");
     $assert_session = $this->assertSession();
 
     $assert_session->assertNoElementAfterWait('css', '#drupal-off-canvas');

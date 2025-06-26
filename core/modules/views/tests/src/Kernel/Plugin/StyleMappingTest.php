@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Plugin;
 
 use Drupal\views\Views;
@@ -12,6 +14,9 @@ use Drupal\views\ViewExecutable;
  */
 class StyleMappingTest extends StyleTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = ['system'];
 
   /**
@@ -24,7 +29,7 @@ class StyleMappingTest extends StyleTestBase {
   /**
    * Verifies that the fields were mapped correctly.
    */
-  public function testMappedOutput() {
+  public function testMappedOutput(): void {
     $view = Views::getView('test_style_mapping');
     $output = (string) $this->mappedOutputHelper($view);
     $this->assertStringNotContainsString('job', $output, 'The job field is added to the view but not in the mapping.');
@@ -45,7 +50,7 @@ class StyleMappingTest extends StyleTestBase {
    * @return string
    *   The view rendered as HTML.
    */
-  protected function mappedOutputHelper(ViewExecutable $view) {
+  protected function mappedOutputHelper(ViewExecutable $view): string {
     $output = $view->preview();
     $rendered_output = (string) \Drupal::service('renderer')->renderRoot($output);
     $this->storeViewPreview($rendered_output);

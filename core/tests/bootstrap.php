@@ -7,7 +7,12 @@
  * @see phpunit.xml.dist
  */
 
-use Drupal\TestTools\PhpUnitCompatibility\ClassWriter;
+declare(strict_types=1);
+
+use Drupal\TestTools\ErrorHandler\BootstrapErrorHandler;
+use Drupal\TestTools\Extension\DeprecationBridge\DeprecationHandler;
+use PHPUnit\Runner\ErrorHandler as PhpUnitErrorHandler;
+use Symfony\Component\ErrorHandler\DebugClassLoader;
 
 /**
  * Finds all valid extension directories recursively within a given directory.
@@ -79,28 +84,15 @@ function drupal_phpunit_contrib_extension_directory_roots($root = NULL) {
  *   An associative array of extension directories, keyed by their namespace.
  */
 function drupal_phpunit_get_extension_namespaces($dirs) {
-  $suite_names = ['Unit', 'Kernel', 'Functional', 'Build', 'FunctionalJavascript'];
   $namespaces = [];
   foreach ($dirs as $extension => $dir) {
     if (is_dir($dir . '/src')) {
       // Register the PSR-4 directory for module-provided classes.
       $namespaces['Drupal\\' . $extension . '\\'][] = $dir . '/src';
     }
-    $test_dir = $dir . '/tests/src';
-    if (is_dir($test_dir)) {
-      foreach ($suite_names as $suite_name) {
-        $suite_dir = $test_dir . '/' . $suite_name;
-        if (is_dir($suite_dir)) {
-          // Register the PSR-4 directory for PHPUnit-based suites.
-          $namespaces['Drupal\\Tests\\' . $extension . '\\' . $suite_name . '\\'][] = $suite_dir;
-        }
-      }
-      // Extensions can have a \Drupal\Tests\extension\Traits namespace for
-      // cross-suite trait code.
-      $trait_dir = $test_dir . '/Traits';
-      if (is_dir($trait_dir)) {
-        $namespaces['Drupal\\Tests\\' . $extension . '\\Traits\\'][] = $trait_dir;
-      }
+    if (is_dir($dir . '/tests/src')) {
+      // Register the PSR-4 directory for PHPUnit-based suites.
+      $namespaces['Drupal\\Tests\\' . $extension . '\\'][] = $dir . '/tests/src';
     }
   }
   return $namespaces;
@@ -152,15 +144,13 @@ function drupal_phpunit_populate_class_loader() {
 }
 
 // Do class loader population.
-$loader = drupal_phpunit_populate_class_loader();
+drupal_phpunit_populate_class_loader();
 class_alias('\Drupal\Tests\DocumentElement', '\Behat\Mink\Element\DocumentElement', TRUE);
-
-ClassWriter::mutateTestBase($loader);
 
 // Set sane locale settings, to ensure consistent string, dates, times and
 // numbers handling.
 // @see \Drupal\Core\DrupalKernel::bootEnvironment()
-setlocale(LC_ALL, 'C');
+setlocale(LC_ALL, 'C.UTF-8', 'C');
 
 // Set appropriate configuration for multi-byte strings.
 mb_internal_encoding('utf-8');
@@ -173,13 +163,18 @@ mb_language('uni');
 // reduce the fragility of the testing system in general.
 date_default_timezone_set('Australia/Sydney');
 
-// Ensure ignored deprecation patterns listed in .deprecation-ignore.txt are
-// considered in testing.
-if (getenv('SYMFONY_DEPRECATIONS_HELPER') === FALSE) {
-  $deprecation_ignore_filename = realpath(__DIR__ . "/../.deprecation-ignore.txt");
-  putenv("SYMFONY_DEPRECATIONS_HELPER=ignoreFile=$deprecation_ignore_filename");
-}
+// Bootstrap the DeprecationHandler extension and the DebugClassloader to report
+// deprecations in PHPUnit 10+.
+if ($deprecationBridgeConfiguration = DeprecationHandler::getConfiguration()) {
+  DeprecationHandler::init($deprecationBridgeConfiguration['ignoreFile'] ?? NULL);
 
-// Drupal expects to be run from its root directory. This ensures all test types
-// are consistent.
-chdir(dirname(__DIR__, 2));
+  // Need to have an early error handler to manage deprecations triggered by
+  // DebugClassLoader, that occur before tests' setUp() methods are called.
+  // We pass an instance of the PHPUnit error handler to redirect any error not
+  // managed by our layer back to PHPUnit.
+  set_error_handler(new BootstrapErrorHandler(PhpUnitErrorHandler::instance()));
+
+  // Enable the DebugClassLoader to get deprecations for methods' signature
+  // changes.
+  DebugClassLoader::enable();
+}

@@ -79,7 +79,7 @@ class ConfigMapperManager extends DefaultPluginManager implements ConfigMapperMa
 
     $this->alterInfo('config_translation_info');
     // Config translation only uses an info hook discovery, cache by language.
-    $cache_key = 'config_translation_info_plugins' . ':' . $language_manager->getCurrentLanguage()->getId();
+    $cache_key = 'config_translation_info_plugins:' . $language_manager->getCurrentLanguage()->getId();
     $this->setCacheBackend($cache_backend, $cache_key);
   }
 
@@ -118,7 +118,7 @@ class ConfigMapperManager extends DefaultPluginManager implements ConfigMapperMa
   /**
    * {@inheritdoc}
    */
-  public function getMappers(RouteCollection $collection = NULL) {
+  public function getMappers(?RouteCollection $collection = NULL) {
     $mappers = [];
     foreach ($this->getDefinitions() as $id => $definition) {
       $mappers[$id] = $this->createInstance($id);

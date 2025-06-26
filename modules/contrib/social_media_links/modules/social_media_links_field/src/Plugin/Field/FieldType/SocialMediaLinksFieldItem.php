@@ -3,8 +3,8 @@
 namespace Drupal\social_media_links_field\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TypedData\DataDefinition;
 
 /**
@@ -118,7 +118,7 @@ class SocialMediaLinksFieldItem extends FieldItemBase {
 
       $element['platforms'][$platform_id]['enabled'] = [
         '#type' => 'checkbox',
-        '#default_value' => isset($platform_settings[$platform_id]['enabled']) ? $platform_settings[$platform_id]['enabled'] : FALSE,
+        '#default_value' => $platform_settings[$platform_id]['enabled'] ?? FALSE,
         '#title' => $platform['name']->render(),
         '#title_display' => 'after',
       ];
@@ -130,7 +130,7 @@ class SocialMediaLinksFieldItem extends FieldItemBase {
         '#description' => $this->t('The description is used for the title and WAI-ARIA attribute.'),
         '#size' => 40,
         '#placeholder' => $this->t('Find / Follow us on %platform', ['%platform' => $platform['name']->render()]),
-        '#default_value' => isset($platform_settings[$platform_id]['description']) ? $platform_settings[$platform_id]['description'] : '',
+        '#default_value' => $platform_settings[$platform_id]['description'] ?? '',
       ];
 
       $element['platforms'][$platform_id]['weight'] = [
@@ -163,7 +163,14 @@ class SocialMediaLinksFieldItem extends FieldItemBase {
     $platform_values = $this->platform_values;
 
     if (!empty($platform_values)) {
-      return FALSE;
+      // We need to check if all values are empty.
+      foreach ($platform_values as $platform_value) {
+        if (!empty($platform_value['value'])) {
+          // As soon as there's one value filled in, it's considered not empty.
+          return FALSE;
+        }
+      }
+      return TRUE;
     }
 
     return $value === NULL || $value === '' || $platform === NULL || $platform === '';

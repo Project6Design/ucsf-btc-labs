@@ -3,6 +3,7 @@
 namespace Drupal\Core\EventSubscriber;
 
 use Drupal\Component\Datetime\DateTimePlus;
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\CacheableResponseInterface;
 use Drupal\Core\Cache\Context\CacheContextsManager;
 use Drupal\Core\Config\ConfigFactoryInterface;
@@ -22,13 +23,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class FinishResponseSubscriber implements EventSubscriberInterface {
 
   /**
-   * The language manager object for retrieving the correct language code.
-   *
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected $languageManager;
-
-  /**
    * A config object for the system performance configuration.
    *
    * @var \Drupal\Core\Config\Config
@@ -36,54 +30,33 @@ class FinishResponseSubscriber implements EventSubscriberInterface {
   protected $config;
 
   /**
-   * A policy rule determining the cacheability of a request.
-   *
-   * @var \Drupal\Core\PageCache\RequestPolicyInterface
-   */
-  protected $requestPolicy;
-
-  /**
-   * A policy rule determining the cacheability of the response.
-   *
-   * @var \Drupal\Core\PageCache\ResponsePolicyInterface
-   */
-  protected $responsePolicy;
-
-  /**
-   * The cache contexts manager service.
-   */
-  protected CacheContextsManager $cacheContextsManager;
-
-  /**
-   * Whether to send cacheability headers for debugging purposes.
-   *
-   * @var bool
-   */
-  protected $debugCacheabilityHeaders = FALSE;
-
-  /**
    * Constructs a FinishResponseSubscriber object.
    *
-   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   * @param \Drupal\Core\Language\LanguageManagerInterface $languageManager
    *   The language manager object for retrieving the correct language code.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   A config factory for retrieving required config objects.
-   * @param \Drupal\Core\PageCache\RequestPolicyInterface $request_policy
+   * @param \Drupal\Core\PageCache\RequestPolicyInterface $requestPolicy
    *   A policy rule determining the cacheability of a request.
-   * @param \Drupal\Core\PageCache\ResponsePolicyInterface $response_policy
+   * @param \Drupal\Core\PageCache\ResponsePolicyInterface $responsePolicy
    *   A policy rule determining the cacheability of a response.
-   * @param \Drupal\Core\Cache\Context\CacheContextsManager $cache_contexts_manager
+   * @param \Drupal\Core\Cache\Context\CacheContextsManager $cacheContextsManager
    *   The cache contexts manager service.
-   * @param bool $http_response_debug_cacheability_headers
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
+   * @param bool $debugCacheabilityHeaders
    *   (optional) Whether to send cacheability headers for debugging purposes.
    */
-  public function __construct(LanguageManagerInterface $language_manager, ConfigFactoryInterface $config_factory, RequestPolicyInterface $request_policy, ResponsePolicyInterface $response_policy, CacheContextsManager $cache_contexts_manager, $http_response_debug_cacheability_headers = FALSE) {
-    $this->languageManager = $language_manager;
+  public function __construct(
+    protected LanguageManagerInterface $languageManager,
+    ConfigFactoryInterface $config_factory,
+    protected RequestPolicyInterface $requestPolicy,
+    protected ResponsePolicyInterface $responsePolicy,
+    protected CacheContextsManager $cacheContextsManager,
+    protected TimeInterface $time,
+    protected bool $debugCacheabilityHeaders = FALSE,
+  ) {
     $this->config = $config_factory->get('system.performance');
-    $this->requestPolicy = $request_policy;
-    $this->responsePolicy = $response_policy;
-    $this->cacheContextsManager = $cache_contexts_manager;
-    $this->debugCacheabilityHeaders = $http_response_debug_cacheability_headers;
   }
 
   /**
@@ -201,15 +174,23 @@ class FinishResponseSubscriber implements EventSubscriberInterface {
    * not Cache-Control, then 'private, must-revalidate' (in exactly this order)
    * is returned.
    *
-   * @see \Symfony\Component\HttpFoundation\ResponseHeaderBag::computeCacheControlValue()
-   *
    * @param \Symfony\Component\HttpFoundation\Response $response
    *   The response object.
    *
    * @return bool
    *   TRUE when Cache-Control header was set explicitly on the given response.
+   *
+   * @see \Symfony\Component\HttpFoundation\ResponseHeaderBag::computeCacheControlValue()
    */
   protected function isCacheControlCustomized(Response $response) {
+    // Symfony >= 3.2 explicitly removes the Cache-Control header for 301
+    // redirects which do not have a custom Cache-Control header. Treat those
+    // redirect responses as not customized.
+    // @see https://github.com/symfony/symfony/issues/17139
+    if ($response->getStatusCode() === 301 && !$response->headers->has('Cache-Control')) {
+      return FALSE;
+    }
+
     $cache_control = $response->headers->get('Cache-Control');
     return $cache_control != 'no-cache, private' && $cache_control != 'private, must-revalidate';
   }
@@ -257,8 +238,8 @@ class FinishResponseSubscriber implements EventSubscriberInterface {
     // In order to support HTTP cache-revalidation, ensure that there is a
     // Last-Modified and an ETag header on the response.
     if (!$response->headers->has('Last-Modified')) {
-      $timestamp = REQUEST_TIME;
-      $response->setLastModified(new \DateTime(gmdate(DateTimePlus::RFC7231, REQUEST_TIME)));
+      $timestamp = $this->time->getRequestTime();
+      $response->setLastModified(new \DateTime(gmdate(DateTimePlus::RFC7231, $this->time->getRequestTime())));
     }
     else {
       $timestamp = $response->getLastModified()->getTimestamp();

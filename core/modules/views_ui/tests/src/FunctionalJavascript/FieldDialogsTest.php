@@ -58,7 +58,7 @@ class FieldDialogsTest extends WebDriverTestBase {
   /**
    * Tests removing a field through the rearrange dialog.
    */
-  public function testRemoveFieldHandler() {
+  public function testRemoveFieldHandler(): void {
     $this->drupalGet('admin/structure/views/view/test_content_ajax');
     $page = $this->getSession()->getPage();
 
@@ -77,7 +77,7 @@ class FieldDialogsTest extends WebDriverTestBase {
   /**
    * Uses the 'And/Or Rearrange' link for fields to open a dialog.
    */
-  protected function openFieldDialog() {
+  protected function openFieldDialog(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
     $dropbutton = $page->find('css', '.views-ui-display-tab-bucket.field .dropbutton-toggle button');

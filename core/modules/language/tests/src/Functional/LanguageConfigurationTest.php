@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\language\Functional;
 
 use Drupal\Core\Url;
@@ -15,9 +17,7 @@ use Drupal\Tests\BrowserTestBase;
 class LanguageConfigurationTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['language'];
 
@@ -29,7 +29,7 @@ class LanguageConfigurationTest extends BrowserTestBase {
   /**
    * Functional tests for adding, editing and deleting languages.
    */
-  public function testLanguageConfiguration() {
+  public function testLanguageConfiguration(): void {
     // Ensure the after installing the language module the weight of the English
     // language is still 0.
     $this->assertEquals(0, ConfigurableLanguage::load('en')->getWeight(), 'The English language has a weight of 0.');
@@ -160,7 +160,7 @@ class LanguageConfigurationTest extends BrowserTestBase {
   /**
    * Functional tests for setting system language weight on adding, editing and deleting languages.
    */
-  public function testLanguageConfigurationWeight() {
+  public function testLanguageConfigurationWeight(): void {
     // User to add and remove language.
     $admin_user = $this->drupalCreateUser([
       'administer languages',
@@ -199,7 +199,7 @@ class LanguageConfigurationTest extends BrowserTestBase {
    *   description of the state of the check, for example: 'after re-ordering'.
    *   Defaults to 'by default'.
    */
-  protected function checkConfigurableLanguageWeight($state = 'by default') {
+  protected function checkConfigurableLanguageWeight($state = 'by default'): void {
     // Reset language list.
     \Drupal::languageManager()->reset();
     $max_configurable_language_weight = $this->getHighestConfigurableLanguageWeight();
@@ -214,7 +214,7 @@ class LanguageConfigurationTest extends BrowserTestBase {
    * @return int
    *   Maximum weight of configurable languages.
    */
-  protected function getHighestConfigurableLanguageWeight() {
+  protected function getHighestConfigurableLanguageWeight(): int {
     $max_weight = 0;
 
     $storage = $this->container->get('entity_type.manager')

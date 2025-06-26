@@ -1,7 +1,7 @@
 services:
   url_embed:
     class: Drupal\url_embed\UrlEmbed
-    arguments: [['config'], '@?config.factory']
+    arguments: ['@module_handler', ['config'], '@?config.factory']
   url_embed.dialog_access:
     class: Drupal\url_embed\Access\UrlEmbedAccessCheck
     tags:

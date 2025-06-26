@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal\Kernel\d6;
 
 use Drupal\field\Plugin\migrate\source\d6\FieldInstance;
@@ -84,7 +86,7 @@ class FieldDiscoveryTest extends MigrateDrupal6TestBase {
    *
    * @covers ::addAllFieldProcesses
    */
-  public function testAddAllFieldProcesses() {
+  public function testAddAllFieldProcesses(): void {
     $expected_process_keys = [
       'field_commander',
       'field_company',
@@ -126,7 +128,7 @@ class FieldDiscoveryTest extends MigrateDrupal6TestBase {
    * @covers ::addAllFieldProcesses
    * @dataProvider addAllFieldProcessesAltersData
    */
-  public function testAddAllFieldProcessesAlters($field_plugin_method, $expected_process) {
+  public function testAddAllFieldProcessesAlters($field_plugin_method, $expected_process): void {
     $this->assertFieldProcess($this->fieldDiscovery, $this->migrationPluginManager, FieldDiscoveryInterface::DRUPAL_6, $field_plugin_method, $expected_process);
   }
 
@@ -136,7 +138,7 @@ class FieldDiscoveryTest extends MigrateDrupal6TestBase {
    * @return array
    *   The data.
    */
-  public function addAllFieldProcessesAltersData() {
+  public static function addAllFieldProcessesAltersData() {
     return [
       'Field Formatter' => [
         'field_plugin_method' => 'alterFieldFormatterMigration',
@@ -219,7 +221,7 @@ class FieldDiscoveryTest extends MigrateDrupal6TestBase {
    *
    * @covers ::addAllFieldProcesses
    */
-  public function testAddFields() {
+  public function testAddFields(): void {
     $this->migrateFields();
     $field_discovery = $this->container->get('migrate_drupal.field_discovery');
     $migration_plugin_manager = $this->container->get('plugin.manager.migration');
@@ -276,7 +278,7 @@ class FieldDiscoveryTest extends MigrateDrupal6TestBase {
    *
    * @covers ::getAllFields
    */
-  public function testGetAllFields() {
+  public function testGetAllFields(): void {
     $field_discovery_test = new FieldDiscoveryTestClass($this->fieldPluginManager, $this->migrationPluginManager, $this->logger);
     $actual_fields = $field_discovery_test->getAllFields('6');
     $actual_node_types = array_keys($actual_fields['node']);
@@ -285,7 +287,7 @@ class FieldDiscoveryTest extends MigrateDrupal6TestBase {
     $this->assertSame(['employee', 'page', 'story', 'test_page', 'test_planet'], $actual_node_types);
     $this->assertCount(25, $actual_fields['node']['story']);
     foreach ($actual_fields['node'] as $bundle => $fields) {
-      foreach ($fields as $field_name => $field_info) {
+      foreach ($fields as $field_info) {
         $this->assertArrayHasKey('type', $field_info);
         $this->assertCount(22, $field_info);
         $this->assertEquals($bundle, $field_info['type_name']);
@@ -298,7 +300,7 @@ class FieldDiscoveryTest extends MigrateDrupal6TestBase {
    *
    * @covers ::getSourcePlugin
    */
-  public function testGetSourcePlugin() {
+  public function testGetSourcePlugin(): void {
     $this->assertSourcePlugin('6', FieldInstance::class, [
       'requirements_met' => TRUE,
       'id' => 'd6_field_instance',

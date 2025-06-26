@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\editor\Functional;
 
 use Drupal\editor\Entity\Editor;
@@ -16,9 +18,7 @@ use Drupal\Tests\BrowserTestBase;
 class EditorLoadingTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['filter', 'editor', 'editor_test', 'node'];
 
@@ -130,17 +130,13 @@ class EditorLoadingTest extends BrowserTestBase {
   /**
    * Tests loading of text editors.
    */
-  public function testLoading() {
+  public function testLoading(): void {
     // Only associate a text editor with the "Full HTML" text format.
     $editor = Editor::create([
       'format' => 'full_html',
       'editor' => 'unicorn',
       'image_upload' => [
         'status' => FALSE,
-        'scheme' => 'public',
-        'directory' => 'inline-images',
-        'max_size' => '',
-        'max_dimensions' => ['width' => '', 'height' => ''],
       ],
     ]);
     $editor->save();
@@ -182,16 +178,15 @@ class EditorLoadingTest extends BrowserTestBase {
     $select = $this->assertSession()->elementExists('css', 'select.js-filter-list');
     $this->assertSame('edit-body-0-value', $select->getAttribute('data-editor-for'));
 
-    // Load the editor image dialog form and make sure it does not fatal.
-    $this->drupalGet('editor/dialog/image/full_html');
-    $this->assertSession()->statusCodeEquals(200);
-
     $this->drupalLogout();
 
     // Also associate a text editor with the "Plain Text" text format.
     $editor = Editor::create([
       'format' => 'plain_text',
       'editor' => 'unicorn',
+      'image_upload' => [
+        'status' => FALSE,
+      ],
     ]);
     $editor->save();
 
@@ -250,17 +245,13 @@ class EditorLoadingTest extends BrowserTestBase {
   /**
    * Tests supported element types.
    */
-  public function testSupportedElementTypes() {
+  public function testSupportedElementTypes(): void {
     // Associate the unicorn text editor with the "Full HTML" text format.
     $editor = Editor::create([
       'format' => 'full_html',
       'editor' => 'unicorn',
       'image_upload' => [
         'status' => FALSE,
-        'scheme' => 'public',
-        'directory' => 'inline-images',
-        'max_size' => '',
-        'max_dimensions' => ['width' => '', 'height' => ''],
       ],
     ]);
     $editor->save();
@@ -292,6 +283,9 @@ class EditorLoadingTest extends BrowserTestBase {
     Editor::create([
       'format' => 'full_html',
       'editor' => 'trex',
+      'image_upload' => [
+        'status' => FALSE,
+      ],
     ])->save();
 
     $this->drupalGet('node/1/edit');
@@ -308,7 +302,10 @@ class EditorLoadingTest extends BrowserTestBase {
     $this->assertNotSame('edit-field-text-0-value', $select->getAttribute('data-editor-for'));
   }
 
-  protected function getThingsToCheck($field_name, $type = 'textarea') {
+  /**
+   * Gets the information to check for the given field.
+   */
+  protected function getThingsToCheck($field_name, $type = 'textarea'): array {
     $settings = $this->getDrupalSettings();
     return [
       // JavaScript settings.

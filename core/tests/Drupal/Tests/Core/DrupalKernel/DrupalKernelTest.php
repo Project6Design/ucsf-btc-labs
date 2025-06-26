@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\Core\DrupalKernel;
 
+use Composer\Autoload\ClassLoader;
 use Drupal\Core\DrupalKernel;
-use Drupal\Core\Test\TestKernel;
-use Drupal\Tests\Core\DependencyInjection\Fixture\BarClass;
 use Drupal\Tests\UnitTestCase;
 use org\bovigo\vfs\vfsStream;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @coversDefaultClass \Drupal\Core\DrupalKernel
@@ -23,7 +23,7 @@ class DrupalKernelTest extends UnitTestCase {
    * @covers ::setupTrustedHosts
    * @dataProvider providerTestTrustedHosts
    */
-  public function testTrustedHosts($host, $server_name, $message, $expected = FALSE) {
+  public function testTrustedHosts($host, $server_name, $message, $expected = FALSE): void {
     $request = new Request();
 
     $trusted_host_patterns = [
@@ -53,7 +53,7 @@ class DrupalKernelTest extends UnitTestCase {
   /**
    * Provides test data for testTrustedHosts().
    */
-  public function providerTestTrustedHosts() {
+  public static function providerTestTrustedHosts() {
     $data = [];
 
     // Tests canonical URL.
@@ -114,7 +114,7 @@ class DrupalKernelTest extends UnitTestCase {
    * @covers ::findSitePath
    * @runInSeparateProcess
    */
-  public function testFindSitePath() {
+  public function testFindSitePath(): void {
     $vfs_root = vfsStream::setup('drupal_root');
     $sites_php = <<<'EOD'
 <?php
@@ -140,16 +140,13 @@ EOD;
   }
 
   /**
-   * @covers ::getServiceIdMapping
-   * @group legacy
+   * @covers ::terminate
+   * @runInSeparateProcess
    */
-  public function testGetServiceIdMapping() {
-    $this->expectDeprecation("Drupal\Core\DrupalKernel::getServiceIdMapping() is deprecated in drupal:9.5.1 and is removed from drupal:11.0.0. Use the 'Drupal\Component\DependencyInjection\ReverseContainer' service instead. See https://www.drupal.org/node/3327942");
-    $this->expectDeprecation("Drupal\Core\DrupalKernel::collectServiceIdMapping() is deprecated in drupal:9.5.1 and is removed from drupal:11.0.0. Use the 'Drupal\Component\DependencyInjection\ReverseContainer' service instead. See https://www.drupal.org/node/3327942");
-    $service = new BarClass();
-    $container = TestKernel::setContainerWithKernel();
-    $container->set('bar', $service);
-    $this->assertEquals($container->get('kernel')->getServiceIdMapping()[$container->generateServiceIdHash($service)], 'bar');
+  public function testUnBootedTerminate(): void {
+    $kernel = new DrupalKernel('test', new ClassLoader());
+    $kernel->terminate(new Request(), new Response());
+    $this->assertTrue(TRUE, "\Drupal\Core\DrupalKernel::terminate() called without error on kernel which has not booted");
   }
 
 }
@@ -163,16 +160,16 @@ class FakeAutoloader {
    * Registers this instance as an autoloader.
    *
    * @param bool $prepend
-   *   Whether to prepend the autoloader or not
+   *   Whether to prepend the autoloader or not.
    */
-  public function register($prepend = FALSE) {
+  public function register($prepend = FALSE): void {
     spl_autoload_register([$this, 'loadClass'], TRUE, $prepend);
   }
 
   /**
    * Deregisters this instance as an autoloader.
    */
-  public function unregister() {
+  public function unregister(): void {
     spl_autoload_unregister([$this, 'loadClass']);
   }
 

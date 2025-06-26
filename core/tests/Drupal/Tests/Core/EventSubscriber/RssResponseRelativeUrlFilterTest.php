@@ -11,13 +11,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
+// cspell:ignore xfbml
+
 /**
  * @coversDefaultClass \Drupal\Core\EventSubscriber\RssResponseRelativeUrlFilter
  * @group event_subscriber
  */
 class RssResponseRelativeUrlFilterTest extends UnitTestCase {
 
-  public function providerTestOnResponse() {
+  public static function providerTestOnResponse() {
     $data = [];
 
     $valid_feed = <<<RSS
@@ -88,7 +90,7 @@ Drupal is an open source content management platform powering millions of websit
   js = d.createElement(s); js.id = id;
   js.src = "//connect.facebook.net/de_DE/sdk.js#xfbml=1&version=v2.3";
   fjs.parentNode.insertBefore(js, fjs);
-}(document, 'script', 'facebook-jssdk'));
+}(document, 'script', 'facebook-js-sdk'));
 //--><!]]]]]]><![CDATA[><![CDATA[>
 
 //--><!]]]]><![CDATA[>
@@ -114,7 +116,7 @@ RSS;
    * @param string $expected_content
    *   The expected content from the response.
    */
-  public function testOnResponse($content, $expected_content) {
+  public function testOnResponse($content, $expected_content): void {
     $event = new ResponseEvent(
       $this->prophesize(HttpKernelInterface::class)->reveal(),
       Request::create('/'),

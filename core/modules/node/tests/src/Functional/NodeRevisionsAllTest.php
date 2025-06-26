@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\Core\Database\Database;
@@ -109,7 +111,7 @@ class NodeRevisionsAllTest extends NodeTestBase {
   /**
    * Checks node revision operations.
    */
-  public function testRevisions() {
+  public function testRevisions(): void {
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
     $nodes = $this->nodes;
     $logs = $this->revisionLogs;
@@ -147,7 +149,6 @@ class NodeRevisionsAllTest extends NodeTestBase {
     $this->drupalGet("node/" . $node->id() . "/revisions/" . $nodes[1]->getRevisionId() . "/revert");
     $this->submitForm([], 'Revert');
     $this->assertSession()->pageTextContains("Basic page {$nodes[1]->getTitle()} has been reverted to the revision from {$this->container->get('date.formatter')->format($nodes[1]->getRevisionCreationTime())}.");
-    $node_storage->resetCache([$node->id()]);
     $reverted_node = $node_storage->load($node->id());
     $this->assertSame($nodes[1]->body->value, $reverted_node->body->value, 'Node reverted correctly.');
 
@@ -180,7 +181,7 @@ class NodeRevisionsAllTest extends NodeTestBase {
 
     // Set the revision timestamp to an older date to make sure that the
     // confirmation message correctly displays the stored revision date.
-    $old_revision_date = REQUEST_TIME - 86400;
+    $old_revision_date = \Drupal::time()->getRequestTime() - 86400;
     Database::getConnection()->update('node_revision')
       ->condition('vid', $nodes[2]->getRevisionId())
       ->fields([

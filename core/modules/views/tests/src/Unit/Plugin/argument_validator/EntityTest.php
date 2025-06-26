@@ -6,6 +6,7 @@ namespace Drupal\Tests\views\Unit\Plugin\argument_validator;
 
 use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Tests\Core\Entity\StubEntityBase;
 use Drupal\Tests\UnitTestCase;
 use Drupal\views\Plugin\views\argument_validator\Entity;
 
@@ -59,7 +60,10 @@ class EntityTest extends UnitTestCase {
     $this->entityTypeManager = $this->createMock(EntityTypeManagerInterface::class);
     $this->entityTypeBundleInfo = $this->createMock(EntityTypeBundleInfoInterface::class);
 
-    $mock_entity = $this->getMockForAbstractClass('Drupal\Core\Entity\EntityBase', [], '', FALSE, TRUE, TRUE, ['bundle', 'access']);
+    $mock_entity = $this->getMockBuilder(StubEntityBase::class)
+      ->disableOriginalConstructor()
+      ->onlyMethods(['bundle', 'access'])
+      ->getMock();
     $mock_entity->expects($this->any())
       ->method('bundle')
       ->willReturn('test_bundle');
@@ -71,7 +75,10 @@ class EntityTest extends UnitTestCase {
         ['test_op_3', NULL, FALSE, TRUE],
       ]);
 
-    $mock_entity_bundle_2 = $this->getMockForAbstractClass('Drupal\Core\Entity\EntityBase', [], '', FALSE, TRUE, TRUE, ['bundle', 'access']);
+    $mock_entity_bundle_2 = $this->getMockBuilder(StubEntityBase::class)
+      ->disableOriginalConstructor()
+      ->onlyMethods(['bundle', 'access'])
+      ->getMock();
     $mock_entity_bundle_2->expects($this->any())
       ->method('bundle')
       ->willReturn('test_bundle_2');
@@ -123,7 +130,7 @@ class EntityTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\argument_validator\Entity::validateArgument()
    */
-  public function testValidateArgumentNoAccess() {
+  public function testValidateArgumentNoAccess(): void {
     $options = [];
     $options['access'] = FALSE;
     $options['bundles'] = [];
@@ -143,7 +150,7 @@ class EntityTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\argument_validator\Entity::validateArgument()
    */
-  public function testValidateArgumentAccess() {
+  public function testValidateArgumentAccess(): void {
     $options = [];
     $options['access'] = TRUE;
     $options['bundles'] = [];
@@ -171,7 +178,7 @@ class EntityTest extends UnitTestCase {
   /**
    * Tests the validate argument method with bundle checking.
    */
-  public function testValidateArgumentBundle() {
+  public function testValidateArgumentBundle(): void {
     $options = [];
     $options['access'] = FALSE;
     $options['bundles'] = ['test_bundle' => 1];
@@ -190,9 +197,9 @@ class EntityTest extends UnitTestCase {
   /**
    * @covers ::calculateDependencies
    */
-  public function testCalculateDependencies() {
-    // Create an entity type manager, storage, entity type, and entity to mock the
-    // loading of entities providing bundles.
+  public function testCalculateDependencies(): void {
+    // Create an entity type manager, storage, entity type, and entity to mock
+    // the loading of entities providing bundles.
     $entity_type_manager = $this->createMock(EntityTypeManagerInterface::class);
     $storage = $this->createMock('Drupal\Core\Entity\EntityStorageInterface');
     $entity_type = $this->createMock('Drupal\Core\Entity\EntityTypeInterface');
@@ -238,7 +245,7 @@ class EntityTest extends UnitTestCase {
   /**
    * Tests the validate argument method with multiple argument splitting.
    */
-  public function testValidateArgumentMultiple() {
+  public function testValidateArgumentMultiple(): void {
     $options = [];
     $options['access'] = TRUE;
     $options['bundles'] = [];

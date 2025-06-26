@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
+use Drupal\jsonapi\JsonApiSpec;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Vocabulary;
 
@@ -9,7 +12,6 @@ use Drupal\taxonomy\Entity\Vocabulary;
  * JSON:API integration test for the "vocabulary" config entity type.
  *
  * @group jsonapi
- * @group #slow
  */
 class VocabularyTest extends ConfigEntityResourceTestBase {
 
@@ -43,7 +45,7 @@ class VocabularyTest extends ConfigEntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpAuthorization($method) {
+  protected function setUpAuthorization($method): void {
     $this->grantPermissionsToTestedRole(['administer taxonomy']);
   }
 
@@ -63,16 +65,16 @@ class VocabularyTest extends ConfigEntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedDocument() {
+  protected function getExpectedDocument(): array {
     $self_url = Url::fromUri('base:/jsonapi/taxonomy_vocabulary/taxonomy_vocabulary/' . $this->entity->uuid())->setAbsolute()->toString(TRUE)->getGeneratedUrl();
     return [
       'jsonapi' => [
         'meta' => [
           'links' => [
-            'self' => ['href' => 'http://jsonapi.org/format/1.0/'],
+            'self' => ['href' => JsonApiSpec::SUPPORTED_SPECIFICATION_PERMALINK],
           ],
         ],
-        'version' => '1.0',
+        'version' => JsonApiSpec::SUPPORTED_SPECIFICATION_VERSION,
       ],
       'links' => [
         'self' => ['href' => $self_url],
@@ -88,6 +90,7 @@ class VocabularyTest extends ConfigEntityResourceTestBase {
           'status' => TRUE,
           'dependencies' => [],
           'name' => 'Llama',
+          'new_revision' => FALSE,
           'description' => NULL,
           'weight' => 0,
           'drupal_internal__vid' => 'llama',
@@ -99,7 +102,7 @@ class VocabularyTest extends ConfigEntityResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getPostDocument() {
+  protected function getPostDocument(): array {
     // @todo Update in https://www.drupal.org/node/2300677.
     return [];
   }

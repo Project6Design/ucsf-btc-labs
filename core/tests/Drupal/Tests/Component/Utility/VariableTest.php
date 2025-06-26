@@ -23,7 +23,7 @@ class VariableTest extends TestCase {
    * @return array[]
    *   Sets of arguments to pass to the test method.
    */
-  public function providerCallableToString(): array {
+  public static function providerCallableToString(): array {
     $mock = VariableTestMock::class;
     return [
       'string' => [
@@ -91,21 +91,21 @@ class VariableTest extends TestCase {
    *     - The expected export string.
    *     - The variable to export.
    */
-  public function providerTestExport() {
+  public static function providerTestExport() {
     return [
       // Array.
       [
-        'array()',
+        '[]',
         [],
       ],
       [
         // non-associative.
-        "array(\n  1,\n  2,\n  3,\n  4,\n)",
+        "[\n  1,\n  2,\n  3,\n  4,\n]",
         [1, 2, 3, 4],
       ],
       [
         // associative.
-        "array(\n  'a' => 1,\n)",
+        "[\n  'a' => 1,\n]",
         ['a' => 1],
       ],
       // Bool.
@@ -132,12 +132,12 @@ class VariableTest extends TestCase {
         '\\',
       ],
       [
-        // Double-quote "
+        // Double-quote ".
         "'\"'",
         "\"",
       ],
       [
-        // Single-quote '
+        // Single-quote '.
         '"\'"',
         "'",
       ],
@@ -149,7 +149,7 @@ class VariableTest extends TestCase {
       // Object.
       [
         // A stdClass object.
-        '(object) array()',
+        '(object) []',
         new \stdClass(),
       ],
       [
@@ -166,20 +166,23 @@ class VariableTest extends TestCase {
   /**
    * Tests exporting variables.
    *
-   * @dataProvider providerTestExport
-   * @covers ::export
-   *
    * @param string $expected
    *   The expected exported variable.
    * @param mixed $variable
    *   The variable to be exported.
+   *
+   * @covers ::export
+   * @dataProvider providerTestExport
    */
-  public function testExport($expected, $variable) {
+  public function testExport($expected, $variable): void {
     $this->assertEquals($expected, Variable::export($variable));
   }
 
 }
 
+/**
+ * A class for testing Variable::callableToString().
+ */
 class VariableTestMock {
 
   /**

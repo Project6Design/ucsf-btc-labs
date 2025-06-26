@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Menu;
 
 use Drupal\Component\Utility\Html;
@@ -29,7 +31,7 @@ trait AssertBreadcrumbTrait {
    *   (optional) An associative array whose keys are link paths and whose
    *   values are link titles (not sanitized) of an expected active trail in a
    *   menu tree output on the page.
-   * @param $last_active
+   * @param bool $last_active
    *   (optional) Whether the last link in $tree is expected to be active (TRUE)
    *   or just to be in the active trail (FALSE).
    * @param string $active_trail_class
@@ -108,7 +110,7 @@ trait AssertBreadcrumbTrait {
   /**
    * Returns the breadcrumb contents of the current page in the internal browser.
    */
-  protected function getBreadcrumbParts() {
+  protected function getBreadcrumbParts(): array {
     $parts = [];
     $elements = $this->xpath('//nav[@aria-labelledby="system-breadcrumb"]//ol/li/a');
     if (!empty($elements)) {

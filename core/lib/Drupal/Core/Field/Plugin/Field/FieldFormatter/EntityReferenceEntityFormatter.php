@@ -4,24 +4,25 @@ namespace Drupal\Core\Field\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Entity\EntityDisplayRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'entity reference rendered entity' formatter.
- *
- * @FieldFormatter(
- *   id = "entity_reference_entity_view",
- *   label = @Translation("Rendered entity"),
- *   description = @Translation("Render the referenced entity."),
- *   field_types = {
- *     "entity_reference"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'entity_reference_entity_view',
+  label: new TranslatableMarkup('Rendered entity'),
+  description: new TranslatableMarkup('Render the referenced entity.'),
+  field_types: [
+    'entity_reference',
+  ],
+)]
 class EntityReferenceEntityFormatter extends EntityReferenceFormatterBase {
 
   /**
@@ -58,9 +59,9 @@ class EntityReferenceEntityFormatter extends EntityReferenceFormatterBase {
    * Each counter takes into account all the relevant information about the
    * field and the referenced entity that is being rendered.
    *
-   * @see \Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceEntityFormatter::viewElements()
-   *
    * @var array
+   *
+   * @see \Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceEntityFormatter::viewElements()
    */
   protected static $recursiveRenderDepth = [];
 
@@ -68,7 +69,7 @@ class EntityReferenceEntityFormatter extends EntityReferenceFormatterBase {
    * Constructs an EntityReferenceEntityFormatter instance.
    *
    * @param string $plugin_id
-   *   The plugin_id for the formatter.
+   *   The plugin ID for the formatter.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition

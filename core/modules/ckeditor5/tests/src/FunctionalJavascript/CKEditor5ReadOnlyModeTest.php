@@ -52,10 +52,9 @@ class CKEditor5ReadOnlyModeTest extends CKEditor5TestBase {
   /**
    * Test that disabling a CKEditor 5 field results in an uneditable editor.
    */
-  public function testReadOnlyMode() {
-    $page = $this->getSession()->getPage();
+  public function testReadOnlyMode(): void {
     $assert_session = $this->assertSession();
-    $this->addNewTextFormat($page, $assert_session);
+    $this->addNewTextFormat();
 
     // Check that both CKEditor 5 fields are editable.
     $this->drupalGet('node/add');

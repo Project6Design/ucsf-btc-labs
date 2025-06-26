@@ -24,6 +24,11 @@ class BlockExposedFilterAJAXTest extends WebDriverTestBase {
    */
   protected static $modules = ['node', 'views', 'block', 'views_test_config'];
 
+  /**
+   * The views to use for testing.
+   *
+   * @var string[]
+   */
   public static $testViews = ['test_block_exposed_ajax', 'test_block_exposed_ajax_with_page'];
 
   /**
@@ -51,7 +56,7 @@ class BlockExposedFilterAJAXTest extends WebDriverTestBase {
   /**
    * Tests if exposed filtering and reset works with a views block and ajax.
    */
-  public function testExposedFilteringAndReset() {
+  public function testExposedFilteringAndReset(): void {
     $node = $this->createNode();
     $block = $this->drupalPlaceBlock('views_block:test_block_exposed_ajax-block_1');
     $this->drupalGet($node->toUrl());

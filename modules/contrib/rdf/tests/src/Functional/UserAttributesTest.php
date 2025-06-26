@@ -34,6 +34,9 @@ class UserAttributesTest extends BrowserTestBase {
    */
   protected $baseUri;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     rdf_get_mapping('user', 'user')
@@ -58,7 +61,7 @@ class UserAttributesTest extends BrowserTestBase {
    * Creates a random user and ensures the default mapping for the user is
    * being used.
    */
-  public function testUserAttributesInMarkup() {
+  public function testUserAttributesInMarkup(): void {
     // Creates users that should and should not be truncated
     // by template_preprocess_username (20 characters)
     // one of these users tests right on the cusp (20).

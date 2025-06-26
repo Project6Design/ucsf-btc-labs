@@ -13,7 +13,13 @@
 exports.command = function drupalLogout({ silent = false } = {}, callback) {
   const self = this;
 
-  this.drupalRelativeURL('/user/logout');
+  this.drupalRelativeURL('/user/logout/confirm').submitForm(
+    '#user-logout-confirm',
+  );
+
+  // MongoDB needs a moment, because it is using a replica set and the
+  // members of the replica set need to synchronize.
+  this.pause(50);
 
   this.drupalUserIsLoggedIn((sessionExists) => {
     if (silent) {

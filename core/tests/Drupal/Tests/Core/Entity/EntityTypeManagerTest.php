@@ -20,6 +20,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -81,8 +82,9 @@ class EntityTypeManagerTest extends UnitTestCase {
     $this->cacheBackend = $this->prophesize(CacheBackendInterface::class);
     $this->translationManager = $this->prophesize(TranslationInterface::class);
     $this->entityLastInstalledSchemaRepository = $this->prophesize(EntityLastInstalledSchemaRepositoryInterface::class);
+    $container = $this->prophesize(Container::class);
 
-    $this->entityTypeManager = new TestEntityTypeManager(new \ArrayObject(), $this->moduleHandler->reveal(), $this->cacheBackend->reveal(), $this->translationManager->reveal(), $this->getClassResolverStub(), $this->entityLastInstalledSchemaRepository->reveal());
+    $this->entityTypeManager = new TestEntityTypeManager(new \ArrayObject(), $this->moduleHandler->reveal(), $this->cacheBackend->reveal(), $this->translationManager->reveal(), $this->getClassResolverStub(), $this->entityLastInstalledSchemaRepository->reveal(), $container->reveal());
     $this->discovery = $this->prophesize(DiscoveryInterface::class);
     $this->entityTypeManager->setDiscovery($this->discovery->reveal());
   }
@@ -93,12 +95,12 @@ class EntityTypeManagerTest extends UnitTestCase {
    * @param \Drupal\Core\Entity\EntityTypeInterface[]|\Prophecy\Prophecy\ProphecyInterface[] $definitions
    *   (optional) An array of entity type definitions.
    */
-  protected function setUpEntityTypeDefinitions($definitions = []) {
+  protected function setUpEntityTypeDefinitions($definitions = []): void {
     $class = get_class($this->createMock(EntityInterface::class));
     foreach ($definitions as $key => $entity_type) {
       // \Drupal\Core\Entity\EntityTypeInterface::getLinkTemplates() is called
-      // by \Drupal\Core\Entity\EntityTypeManager::processDefinition() so it must
-      // always be mocked.
+      // by \Drupal\Core\Entity\EntityTypeManager::processDefinition() so it
+      // must always be mocked.
       $entity_type->getLinkTemplates()->willReturn([]);
 
       // Give the entity type a legitimate class to return.
@@ -133,7 +135,7 @@ class EntityTypeManagerTest extends UnitTestCase {
    *
    * @dataProvider providerTestHasHandler
    */
-  public function testHasHandler($entity_type_id, $expected) {
+  public function testHasHandler($entity_type_id, $expected): void {
     $apple = $this->prophesize(EntityTypeInterface::class);
     $apple->hasHandlerClass('storage')->willReturn(TRUE);
 
@@ -155,7 +157,7 @@ class EntityTypeManagerTest extends UnitTestCase {
    * @return array
    *   Test data.
    */
-  public function providerTestHasHandler() {
+  public static function providerTestHasHandler() {
     return [
       ['apple', TRUE],
       ['banana', FALSE],
@@ -168,13 +170,12 @@ class EntityTypeManagerTest extends UnitTestCase {
    *
    * @covers ::getStorage
    */
-  public function testGetStorage() {
-    $class = $this->getTestHandlerClass();
+  public function testGetStorage(): void {
     $entity = $this->prophesize(EntityTypeInterface::class);
-    $entity->getHandlerClass('storage')->willReturn($class);
+    $entity->getHandlerClass('storage')->willReturn(StubEntityHandlerBase::class);
     $this->setUpEntityTypeDefinitions(['test_entity_type' => $entity]);
 
-    $this->assertInstanceOf($class, $this->entityTypeManager->getStorage('test_entity_type'));
+    $this->assertInstanceOf(StubEntityHandlerBase::class, $this->entityTypeManager->getStorage('test_entity_type'));
   }
 
   /**
@@ -182,13 +183,12 @@ class EntityTypeManagerTest extends UnitTestCase {
    *
    * @covers ::getListBuilder
    */
-  public function testGetListBuilder() {
-    $class = $this->getTestHandlerClass();
+  public function testGetListBuilder(): void {
     $entity = $this->prophesize(EntityTypeInterface::class);
-    $entity->getHandlerClass('list_builder')->willReturn($class);
+    $entity->getHandlerClass('list_builder')->willReturn(StubEntityHandlerBase::class);
     $this->setUpEntityTypeDefinitions(['test_entity_type' => $entity]);
 
-    $this->assertInstanceOf($class, $this->entityTypeManager->getListBuilder('test_entity_type'));
+    $this->assertInstanceOf(StubEntityHandlerBase::class, $this->entityTypeManager->getListBuilder('test_entity_type'));
   }
 
   /**
@@ -196,13 +196,12 @@ class EntityTypeManagerTest extends UnitTestCase {
    *
    * @covers ::getViewBuilder
    */
-  public function testGetViewBuilder() {
-    $class = $this->getTestHandlerClass();
+  public function testGetViewBuilder(): void {
     $entity = $this->prophesize(EntityTypeInterface::class);
-    $entity->getHandlerClass('view_builder')->willReturn($class);
+    $entity->getHandlerClass('view_builder')->willReturn(StubEntityHandlerBase::class);
     $this->setUpEntityTypeDefinitions(['test_entity_type' => $entity]);
 
-    $this->assertInstanceOf($class, $this->entityTypeManager->getViewBuilder('test_entity_type'));
+    $this->assertInstanceOf(StubEntityHandlerBase::class, $this->entityTypeManager->getViewBuilder('test_entity_type'));
   }
 
   /**
@@ -210,13 +209,12 @@ class EntityTypeManagerTest extends UnitTestCase {
    *
    * @covers ::getAccessControlHandler
    */
-  public function testGetAccessControlHandler() {
-    $class = $this->getTestHandlerClass();
+  public function testGetAccessControlHandler(): void {
     $entity = $this->prophesize(EntityTypeInterface::class);
-    $entity->getHandlerClass('access')->willReturn($class);
+    $entity->getHandlerClass('access')->willReturn(StubEntityHandlerBase::class);
     $this->setUpEntityTypeDefinitions(['test_entity_type' => $entity]);
 
-    $this->assertInstanceOf($class, $this->entityTypeManager->getAccessControlHandler('test_entity_type'));
+    $this->assertInstanceOf(StubEntityHandlerBase::class, $this->entityTypeManager->getAccessControlHandler('test_entity_type'));
   }
 
   /**
@@ -224,7 +222,7 @@ class EntityTypeManagerTest extends UnitTestCase {
    *
    * @covers ::getFormObject
    */
-  public function testGetFormObject() {
+  public function testGetFormObject(): void {
     $apple = $this->prophesize(EntityTypeInterface::class);
     $apple->getFormClass('default')->willReturn(TestEntityForm::class);
 
@@ -252,7 +250,7 @@ class EntityTypeManagerTest extends UnitTestCase {
    * @return array
    *   Test data.
    */
-  public function provideFormObjectInvalidOperationData(): array {
+  public static function provideFormObjectInvalidOperationData(): array {
     return [
       'missing_form_handler' => [
         'test_entity_type',
@@ -299,17 +297,16 @@ class EntityTypeManagerTest extends UnitTestCase {
    *
    * @covers ::getHandler
    */
-  public function testGetHandler() {
-    $class = get_class($this->getMockForAbstractClass(TestEntityHandlerBase::class));
+  public function testGetHandler(): void {
     $apple = $this->prophesize(EntityTypeInterface::class);
-    $apple->getHandlerClass('storage')->willReturn($class);
+    $apple->getHandlerClass('storage')->willReturn(StubEntityHandlerBase::class);
 
     $this->setUpEntityTypeDefinitions([
       'apple' => $apple,
     ]);
 
     $apple_controller = $this->entityTypeManager->getHandler('apple', 'storage');
-    $this->assertInstanceOf($class, $apple_controller);
+    $this->assertInstanceOf(StubEntityHandlerBase::class, $apple_controller);
     $this->assertInstanceOf(ModuleHandlerInterface::class, $apple_controller->moduleHandler);
     $this->assertInstanceOf(TranslationInterface::class, $apple_controller->stringTranslation);
   }
@@ -320,7 +317,7 @@ class EntityTypeManagerTest extends UnitTestCase {
    * @return array
    *   Test data.
    */
-  public function provideMissingHandlerData() : array {
+  public static function provideMissingHandlerData() : array {
     return [
       'missing_handler' => [
         'test_entity_type',
@@ -362,7 +359,7 @@ class EntityTypeManagerTest extends UnitTestCase {
   /**
    * @covers ::getRouteProviders
    */
-  public function testGetRouteProviders() {
+  public function testGetRouteProviders(): void {
     $apple = $this->prophesize(EntityTypeInterface::class);
     $apple->getRouteProviderClasses()->willReturn(['default' => TestRouteProvider::class]);
 
@@ -381,7 +378,7 @@ class EntityTypeManagerTest extends UnitTestCase {
    *
    * @covers ::processDefinition
    */
-  public function testProcessDefinition() {
+  public function testProcessDefinition(): void {
     $apple = $this->prophesize(EntityTypeInterface::class);
     $this->setUpEntityTypeDefinitions(['apple' => $apple]);
 
@@ -400,7 +397,7 @@ class EntityTypeManagerTest extends UnitTestCase {
    *
    * @dataProvider providerTestGetDefinition
    */
-  public function testGetDefinition($entity_type_id, $expected) {
+  public function testGetDefinition($entity_type_id, $expected): void {
     $entity = $this->prophesize(EntityTypeInterface::class);
 
     $this->setUpEntityTypeDefinitions([
@@ -423,7 +420,7 @@ class EntityTypeManagerTest extends UnitTestCase {
    * @return array
    *   Test data.
    */
-  public function providerTestGetDefinition() {
+  public static function providerTestGetDefinition() {
     return [
       ['apple', TRUE],
       ['banana', TRUE],
@@ -436,40 +433,13 @@ class EntityTypeManagerTest extends UnitTestCase {
    *
    * @covers ::getDefinition
    */
-  public function testGetDefinitionInvalidException() {
+  public function testGetDefinitionInvalidException(): void {
     $this->setUpEntityTypeDefinitions();
 
     $this->expectException(PluginNotFoundException::class);
     $this->expectExceptionMessage('The "pear" entity type does not exist.');
     $this->entityTypeManager->getDefinition('pear', TRUE);
   }
-
-  /**
-   * Gets a mock controller class name.
-   *
-   * @return string
-   *   A mock controller class name.
-   */
-  protected function getTestHandlerClass() {
-    return get_class($this->getMockForAbstractClass(EntityHandlerBase::class));
-  }
-
-}
-
-/**
- * Provides a test entity handler.
- */
-abstract class TestEntityHandlerBase extends EntityHandlerBase {
-
-  /**
-   * {@inheritdoc}
-   */
-  public $moduleHandler;
-
-  /**
-   * {@inheritdoc}
-   */
-  public $stringTranslation;
 
 }
 
@@ -484,7 +454,7 @@ class TestEntityTypeManager extends EntityTypeManager {
    * @param \Drupal\Component\Plugin\Discovery\DiscoveryInterface $discovery
    *   The discovery object.
    */
-  public function setDiscovery(DiscoveryInterface $discovery) {
+  public function setDiscovery(DiscoveryInterface $discovery): void {
     $this->discovery = $discovery;
   }
 

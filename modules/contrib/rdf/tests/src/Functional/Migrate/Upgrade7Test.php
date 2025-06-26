@@ -16,6 +16,11 @@ class Upgrade7Test extends MigrateUpgradeTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'rdf',
     'migrate_drupal_ui',
@@ -50,7 +55,7 @@ class Upgrade7Test extends MigrateUpgradeTestBase {
     return [
       'action' => 21,
       'base_field_override' => 2,
-      'block' => 31,
+      'block' => 46,
       'block_content' => 0,
       'block_content_type' => 1,
       'comment' => 0,
@@ -74,12 +79,11 @@ class Upgrade7Test extends MigrateUpgradeTestBase {
       'node_type' => 4,
       'path_alias' => 0,
       'rdf_mapping' => 8,
-      'search_page' => 2,
+      'search_page' => 3,
       'shortcut' => 4,
       'shortcut_set' => 1,
       'taxonomy_term' => 1,
       'taxonomy_vocabulary' => 2,
-      'tour' => 2,
       'user' => 2,
       'user_role' => 4,
       'view' => 14,

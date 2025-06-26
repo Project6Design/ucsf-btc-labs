@@ -2,6 +2,7 @@
 
 namespace Drupal\user\Controller;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Utility\Xss;
 use Drupal\Core\Controller\ControllerBase;
@@ -71,8 +72,17 @@ class UserController extends ControllerBase {
    *   A logger instance.
    * @param \Drupal\Core\Flood\FloodInterface $flood
    *   The flood service.
+   * @param \Drupal\Component\Datetime\TimeInterface|null $time
+   *   The time service.
    */
-  public function __construct(DateFormatterInterface $date_formatter, UserStorageInterface $user_storage, UserDataInterface $user_data, LoggerInterface $logger, FloodInterface $flood) {
+  public function __construct(
+    DateFormatterInterface $date_formatter,
+    UserStorageInterface $user_storage,
+    UserDataInterface $user_data,
+    LoggerInterface $logger,
+    FloodInterface $flood,
+    protected TimeInterface $time,
+  ) {
     $this->dateFormatter = $date_formatter;
     $this->userStorage = $user_storage;
     $this->userData = $user_data;
@@ -89,7 +99,8 @@ class UserController extends ControllerBase {
       $container->get('entity_type.manager')->getStorage('user'),
       $container->get('user.data'),
       $container->get('logger.factory')->get('user'),
-      $container->get('flood')
+      $container->get('flood'),
+      $container->get('datetime.time'),
     );
   }
 
@@ -249,7 +260,7 @@ class UserController extends ControllerBase {
 
     user_login_finalize($user);
     $this->logger->info('User %name used one-time login link at time %timestamp.', ['%name' => $user->getDisplayName(), '%timestamp' => $timestamp]);
-    $this->messenger()->addStatus($this->t('You have just used your one-time login link. It is no longer necessary to use this link to log in. It is recommended that you set your password.'));
+    $this->messenger()->addStatus($this->t('You have used a one-time login link. You can set your new password now.'));
     // Let the user's password be changed without the current password
     // check.
     $token = Crypt::randomBytesBase64(55);
@@ -288,7 +299,8 @@ class UserController extends ControllerBase {
    *   If $uid is for a blocked user or invalid user ID.
    */
   protected function determineErrorRedirect(?UserInterface $user, int $timestamp, string $hash): ?RedirectResponse {
-    $current = REQUEST_TIME;
+    // The current user is not logged in, so check the parameters.
+    $current = $this->time->getRequestTime();
     // Verify that the user exists and is active.
     if ($user === NULL || !$user->isActive()) {
       // Blocked or invalid user ID, so deny access. The parameters will be in
@@ -371,7 +383,7 @@ class UserController extends ControllerBase {
    *   The user account name as a render array or an empty string if $user is
    *   NULL.
    */
-  public function userTitle(UserInterface $user = NULL) {
+  public function userTitle(?UserInterface $user = NULL) {
     return $user ? ['#markup' => $user->getDisplayName(), '#allowed_tags' => Xss::getHtmlTagList()] : '';
   }
 

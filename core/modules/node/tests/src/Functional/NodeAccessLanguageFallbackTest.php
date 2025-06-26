@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -49,7 +51,7 @@ class NodeAccessLanguageFallbackTest extends NodeTestBase {
   /**
    * Tests node access fallback handling with multiple node languages.
    */
-  public function testNodeAccessLanguageFallback() {
+  public function testNodeAccessLanguageFallback(): void {
     // The node_access_test module allows nodes to be marked private. We need to
     // ensure that system honors the fallback system of node access properly.
     // Note that node_access_test_language is language-sensitive and does not
@@ -118,10 +120,10 @@ class NodeAccessLanguageFallbackTest extends NodeTestBase {
    * @param int $count
    *   The number of rows expected by the query (equal to the translation
    *   count).
-   * @param $langcode
+   * @param string $langcode
    *   The expected language code set as the fallback property.
    */
-  public function checkRecords($count, $langcode = 'hu') {
+  public function checkRecords($count, $langcode = 'hu'): void {
     $select = \Drupal::database()
       ->select('node_access', 'na')
       ->fields('na', ['nid', 'fallback', 'langcode', 'grant_view'])

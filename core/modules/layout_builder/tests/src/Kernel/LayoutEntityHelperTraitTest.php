@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\layout_builder\Kernel;
 
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
@@ -22,7 +24,6 @@ use Prophecy\Argument;
  * @coversDefaultClass \Drupal\layout_builder\LayoutEntityHelperTrait
  *
  * @group layout_builder
- * @group #slow
  */
 class LayoutEntityHelperTraitTest extends KernelTestBase {
 
@@ -49,7 +50,7 @@ class LayoutEntityHelperTraitTest extends KernelTestBase {
   /**
    * Data provider for testGetSectionStorageForEntity().
    */
-  public function providerTestGetSectionStorageForEntity() {
+  public static function providerTestGetSectionStorageForEntity() {
     $data = [];
     $data['entity_view_display'] = [
       'entity_view_display',
@@ -79,7 +80,7 @@ class LayoutEntityHelperTraitTest extends KernelTestBase {
    *
    * @dataProvider providerTestGetSectionStorageForEntity
    */
-  public function testGetSectionStorageForEntity($entity_type_id, $values, $expected_context_keys) {
+  public function testGetSectionStorageForEntity($entity_type_id, $values, $expected_context_keys): void {
     $section_storage_manager = $this->prophesize(SectionStorageManagerInterface::class);
     $section_storage_manager->load('')->willReturn(NULL);
     $section_storage_manager->findByContext(Argument::cetera())->will(function ($arguments) {
@@ -122,7 +123,7 @@ class LayoutEntityHelperTraitTest extends KernelTestBase {
   /**
    * Data provider for testOriginalEntityUsesDefaultStorage().
    */
-  public function providerTestOriginalEntityUsesDefaultStorage() {
+  public static function providerTestOriginalEntityUsesDefaultStorage() {
     return [
       'original uses default' => [
         [
@@ -183,14 +184,14 @@ class LayoutEntityHelperTraitTest extends KernelTestBase {
    *
    * @dataProvider providerTestOriginalEntityUsesDefaultStorage
    */
-  public function testOriginalEntityUsesDefaultStorage($entity_storages, $is_new, $has_original, $expected) {
+  public function testOriginalEntityUsesDefaultStorage($entity_storages, $is_new, $has_original, $expected): void {
     $this->assertFalse($is_new && $has_original);
     $entity = EntityTest::create(['name' => 'updated']);
     if (!$is_new) {
       $entity->save();
       if ($has_original) {
         $original_entity = EntityTest::create(['name' => 'original']);
-        $entity->original = $original_entity;
+        $entity->setOriginal($original_entity);
       }
 
     }
@@ -219,7 +220,7 @@ class LayoutEntityHelperTraitTest extends KernelTestBase {
   /**
    * @covers ::getEntitySections
    */
-  public function testGetEntitySections() {
+  public function testGetEntitySections(): void {
     $entity = EntityTest::create(['name' => 'updated']);
     $section_storage_manager = $this->prophesize(SectionStorageManagerInterface::class);
     $section_storage_manager->load('')->willReturn(NULL);

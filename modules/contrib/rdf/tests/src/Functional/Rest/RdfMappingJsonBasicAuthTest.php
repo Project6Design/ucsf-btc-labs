@@ -5,6 +5,8 @@ namespace Drupal\Tests\rdf\Functional\Rest;
 use Drupal\Tests\rest\Functional\BasicAuthResourceTestTrait;
 
 /**
+ * Tests JSON Basic authentication for RDF mappings.
+ *
  * @group rest
  */
 class RdfMappingJsonBasicAuthTest extends RdfMappingResourceTestBase {

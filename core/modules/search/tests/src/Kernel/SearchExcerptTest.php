@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\search\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -12,9 +14,7 @@ use Drupal\KernelTests\KernelTestBase;
 class SearchExcerptTest extends KernelTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['search', 'search_langcode_test'];
 
@@ -27,7 +27,7 @@ class SearchExcerptTest extends KernelTestBase {
    * contains either highlighted keywords or the original marked
    * up string if no keywords matched the string.
    */
-  public function testSearchExcerpt() {
+  public function testSearchExcerpt(): void {
     // Make some text with entities and tags.
     $text = 'The <strong>quick</strong> <a href="#">brown</a> fox &amp; jumps <h2>over</h2> the lazy dog';
     $expected = 'The quick brown fox &amp; jumps over the lazy dog';
@@ -75,9 +75,7 @@ class SearchExcerptTest extends KernelTestBase {
    * and compares them with strings that contain the original un-simplified
    * word.
    */
-  public function testSearchExcerptSimplified() {
-    $start_time = microtime(TRUE);
-
+  public function testSearchExcerptSimplified(): void {
     // cSpell:disable
     $lorem1 = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vitae arcu at leo cursus laoreet. Curabitur dui tortor, adipiscing malesuada tempor in, bibendum ac diam. Cras non tellus a libero pellentesque condimentum. What is a Drupalism? Suspendisse ac lacus libero. Ut non est vel nisl faucibus interdum nec sed leo. Pellentesque sem risus, vulputate eu semper eget, auctor in libero.';
     $lorem2 = 'Ut fermentum est vitae metus convallis scelerisque. Phasellus pellentesque rhoncus tellus, eu dignissim purus posuere id. Quisque eu fringilla ligula. Morbi ullamcorper, lorem et mattis egestas, tortor neque pretium velit, eget eleifend odio turpis eu purus. Donec vitae metus quis leo pretium tincidunt a pulvinar sem. Morbi adipiscing laoreet mauris vel placerat. Nullam elementum, nisl sit amet scelerisque malesuada, dolor nunc hendrerit quam, eu ultrices erat est in orci.';
@@ -99,7 +97,7 @@ class SearchExcerptTest extends KernelTestBase {
     $result = $this->doSearchExcerpt('"Number 1234567890"', $text);
     $this->assertStringContainsString('<strong>Number: 123456.7890</strong>', $result, 'Phrase with punctuated and numeric keyword is highlighted with simplified match');
 
-    $result = $this->doSearchExcerpt('"Hyphenated onetwo"', $text);
+    $result = $this->doSearchExcerpt('"Hyphenated OneTwo"', $text);
     $this->assertStringContainsString('<strong>Hyphenated: one-two</strong>', $result, 'Phrase with punctuated and hyphenated keyword is highlighted with simplified match');
 
     $result = $this->doSearchExcerpt('"abc def"', $text);
@@ -192,7 +190,7 @@ class SearchExcerptTest extends KernelTestBase {
    */
   protected function doSearchExcerpt($keys, $render_array, $langcode = NULL) {
     $render_array = search_excerpt($keys, $render_array, $langcode);
-    $text = (string) \Drupal::service('renderer')->renderPlain($render_array);
+    $text = (string) \Drupal::service('renderer')->renderInIsolation($render_array);
     // The search_excerpt() function adds some extra spaces -- not
     // important for HTML formatting or this test. Remove these for comparison.
     return preg_replace('| +|', ' ', $text);

@@ -3,14 +3,14 @@
 namespace Drupal\url_embed\Access;
 
 use Drupal\Core\Access\AccessResult;
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Routing\Access\AccessInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\editor\EditorInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * Routing requirement access check for URL Embed
+ * Routing requirement access check for URL Embed.
  */
 class UrlEmbedAccessCheck implements AccessInterface {
 
@@ -103,4 +103,5 @@ class UrlEmbedAccessCheck implements AccessInterface {
     return AccessResult::allowedIf($has_button)
       ->addCacheableDependency($editor);
   }
+
 }

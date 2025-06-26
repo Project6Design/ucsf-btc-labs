@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\pgsql\Kernel\pgsql;
 
 use Drupal\KernelTests\Core\Database\DriverSpecificSchemaTestBase;
 
-// cSpell:ignore relkind objid refobjid regclass attname attrelid attnum
-// cSpell:ignore refobjsubid
+// cSpell:ignore attname attnum attrelid objid refobjid refobjsubid regclass
+// cspell:ignore relkind relname
 
 /**
  * Tests schema API for the PostgreSQL driver.
@@ -17,7 +19,7 @@ class SchemaTest extends DriverSpecificSchemaTestBase {
   /**
    * {@inheritdoc}
    */
-  public function checkSchemaComment(string $description, string $table, string $column = NULL): void {
+  public function checkSchemaComment(string $description, string $table, ?string $column = NULL): void {
     $this->assertSame($description, $this->schema->getComment($table, $column), 'The comment matches the schema description.');
   }
 
@@ -234,7 +236,7 @@ class SchemaTest extends DriverSpecificSchemaTestBase {
   }
 
   /**
-   * @covers \Drupal\Core\Database\Driver\pgsql\Schema::extensionExists
+   * @covers \Drupal\pgsql\Driver\Database\pgsql\Schema::extensionExists
    */
   public function testPgsqlExtensionExists(): void {
     // Test the method for a non existing extension.
@@ -308,6 +310,91 @@ class SchemaTest extends DriverSpecificSchemaTestBase {
   }
 
   /**
+   * Tests the method tableExists().
+   */
+  public function testTableExists(): void {
+    $table_name = 'test_table';
+    $table_specification = [
+      'fields' => [
+        'id'  => [
+          'type' => 'int',
+          'default' => NULL,
+        ],
+      ],
+    ];
+    $this->schema->createTable($table_name, $table_specification);
+    $prefixed_table_name = $this->connection->getPrefix($table_name) . $table_name;
+
+    // Three different calls to the method Schema::tableExists() with an
+    // unprefixed table name.
+    $this->assertTrue($this->schema->tableExists($table_name));
+    $this->assertTrue($this->schema->tableExists($table_name, TRUE));
+    $this->assertFalse($this->schema->tableExists($table_name, FALSE));
+
+    // Three different calls to the method Schema::tableExists() with a
+    // prefixed table name.
+    $this->assertFalse($this->schema->tableExists($prefixed_table_name));
+    $this->assertFalse($this->schema->tableExists($prefixed_table_name, TRUE));
+    $this->assertTrue($this->schema->tableExists($prefixed_table_name, FALSE));
+  }
+
+  /**
+   * Tests renaming a table where the new index name is equal to the table name.
+   */
+  public function testRenameTableWithNewIndexNameEqualsTableName(): void {
+    // Special table names for colliding with the PostgreSQL new index name.
+    $table_name_old = 'some_new_table_name__id__idx';
+    $table_name_new = 'some_new_table_name';
+    $table_specification = [
+      'fields' => [
+        'id'  => [
+          'type' => 'int',
+          'default' => NULL,
+        ],
+      ],
+      'indexes' => [
+        'id' => ['id'],
+      ],
+    ];
+    $this->schema->createTable($table_name_old, $table_specification);
+
+    // Renaming the table can fail for PostgreSQL, when a new index name is
+    // equal to the old table name.
+    $this->schema->renameTable($table_name_old, $table_name_new);
+
+    $this->assertTrue($this->schema->tableExists($table_name_new));
+  }
+
+  /**
+   * Tests renaming a table which name contains drupal_ with multiple indexes.
+   */
+  public function testRenameTableWithNameContainingDrupalUnderscoreAndMultipleIndexes(): void {
+    $table_name_old = 'field_drupal_foo';
+    $table_name_new = 'field_drupal_bar';
+    $table_specification = [
+      'fields' => [
+        'one'  => [
+          'type' => 'int',
+          'default' => NULL,
+        ],
+        'two'  => [
+          'type' => 'int',
+          'default' => NULL,
+        ],
+      ],
+      'indexes' => [
+        'one' => ['one'],
+        'two' => ['two'],
+      ],
+    ];
+    $this->schema->createTable($table_name_old, $table_specification);
+
+    $this->schema->renameTable($table_name_old, $table_name_new);
+
+    $this->assertTrue($this->schema->tableExists($table_name_new));
+  }
+
+  /**
    * Tests column name escaping in field constraints.
    */
   public function testUnsignedField(): void {
@@ -323,6 +410,7 @@ class SchemaTest extends DriverSpecificSchemaTestBase {
       'primary key' => ['order'],
     ];
     $this->schema->createTable($table_name, $table_spec);
+    $this->assertTrue($this->schema->tableExists($table_name));
   }
 
 }

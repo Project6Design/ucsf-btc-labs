@@ -6,7 +6,6 @@
  */
 
 use Drupal\Component\Utility\Html;
-use Drupal\node\NodeInterface;
 use Drupal\system\MenuInterface;
 use Drupal\taxonomy\VocabularyInterface;
 
@@ -109,7 +108,8 @@ function sitemap_theme_suggestions_menu_alter(array &$suggestions, array $variab
  *
  * Implementation note: the normal way to count field instances is through
  * field_attach_query(), but taxonomy.module has a special denormalized
- * table taxonomy_index which we can use for more speed. THX to taxonews.
+ * table taxonomy_index which we can use for more speed. Thanks to the taxonews
+ * module.
  *
  * @param string $tid
  *   The term's ID.
@@ -146,16 +146,6 @@ function sitemap_taxonomy_vocabulary_delete(VocabularyInterface $vocabulary) {
 function sitemap_menu_delete(MenuInterface $menu) {
   // @todo fix this.
   // _sitemap_clear_plugin_cache();
-}
-
-/**
- * Implements hook_ENTITY_TYPE_delete().
- */
-function sitemap_node_delete(NodeInterface $node) {
-  if (\Drupal::moduleHandler()->moduleExists('book')) {
-    // @todo Can we tell if the deleted node was a parent book node?
-    _sitemap_clear_plugin_cache();
-  }
 }
 
 /**

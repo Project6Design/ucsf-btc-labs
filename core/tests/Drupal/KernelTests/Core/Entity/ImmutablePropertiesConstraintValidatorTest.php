@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\block_content\Entity\BlockContentType;
@@ -54,7 +56,7 @@ class ImmutablePropertiesConstraintValidatorTest extends KernelTestBase {
 
     $this->expectException(LogicException::class);
     $this->expectExceptionMessage("The entity does not have a 'non_existent' property.");
-    $violations = $this->container->get(TypedDataManagerInterface::class)
+    $this->container->get(TypedDataManagerInterface::class)
       ->create($definition, $entity)
       ->validate();
   }

@@ -2,8 +2,8 @@
 
 namespace Drupal\config_update;
 
-use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -206,7 +206,7 @@ class ConfigReverter implements ConfigRevertInterface, ConfigDeleteInterface {
       $config->delete();
     }
     else {
-      // Delete a config entity instance, updating all its dependants.
+      // Delete a config entity instance, updating all its dependents.
       $definition = $this->entityManager->getDefinition($type);
       $id = $config->get($definition->getKey('id'));
       $entity_storage = $this->entityManager->getStorage($type);

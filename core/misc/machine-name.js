@@ -5,7 +5,7 @@
  * @internal
  */
 
-(function ($, Drupal, drupalSettings, slugify) {
+(function ($, Drupal, drupalSettings, transliterateLibrary) {
   /**
    * Trims string by a character.
    *
@@ -142,11 +142,7 @@
         }
         // Skip processing upon a form validation error on a non-empty
         // machine name.
-        if (
-          $target.hasClass('error') &&
-          $target[0].value &&
-          $target[0].value.trim().length
-        ) {
+        if ($target.hasClass('error') && $target[0].value?.trim().length) {
           return;
         }
         // Figure out the maximum length for the machine name.
@@ -294,21 +290,17 @@
         drupalSettings.transliteration_language_overrides[
           drupalSettings.langcode
         ];
-      const normalizedLanguageOverrides = {};
+      const replace = {};
       if (languageOverrides) {
         Object.keys(languageOverrides).forEach((key) => {
           // Updates the keys from hexadecimal to strings.
-          normalizedLanguageOverrides[String.fromCharCode(key)] =
-            languageOverrides[key];
+          replace[String.fromCharCode(key)] = languageOverrides[key];
         });
       }
-      slugify.config({
-        separator: settings.replace,
-        allowedChars: settings.replace_pattern,
-        replace: normalizedLanguageOverrides,
-      });
 
-      return prepareMachineName(slugify(source), settings);
+      const transliteratedSource = transliterateLibrary(source, { replace });
+
+      return prepareMachineName(transliteratedSource, settings);
     },
   };
-})(jQuery, Drupal, drupalSettings, slugify);
+})(jQuery, Drupal, drupalSettings, transliterate);

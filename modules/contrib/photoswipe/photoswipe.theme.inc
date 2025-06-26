@@ -15,6 +15,7 @@ use Drupal\photoswipe\PhotoswipeResponsivePreprocessProcessor;
  *   An associative array containing:
  *   - item: An ImageItem object.
  *   - display_settings: optional image styles.
+ *   - third_party_settings: optional third party settings.
  *
  * @ingroup themeable
  */
@@ -31,6 +32,7 @@ function template_preprocess_photoswipe_image_formatter(array &$variables) {
  *   An associative array containing:
  *   - item: An ImageItem object.
  *   - display_settings: optional image styles.
+ *   - third_party_settings: optional third party settings.
  *
  * @ingroup themeable
  */

@@ -223,7 +223,7 @@ class QuickEditImageTest extends QuickEditJavascriptTestBase {
    * @return array
    *   Test cases.
    */
-  public function providerTestImageInPlaceEditor(): array {
+  public static function providerTestImageInPlaceEditor(): array {
     return [
       'with permission' => [TRUE],
       'without permission' => [FALSE],

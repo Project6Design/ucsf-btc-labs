@@ -1,7 +1,7 @@
 name: Share Message
 type: module
 description: 'Sharing module using AddThis widgets and entity based storage.'
-core_version_requirement: ^9.3 || ^10
+core_version_requirement: ^10.1 || ^11
 configure: sharemessage.settings
 
 test_dependencies:

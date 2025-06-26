@@ -21,6 +21,13 @@ class SitemapFrontpageTest extends SitemapBrowserTestBase {
   protected static $modules = ['sitemap'];
 
   /**
+   * The user account to use when running the test.
+   *
+   * @var \Drupal\user\Entity\User|false
+   */
+  protected $user;
+
+  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {

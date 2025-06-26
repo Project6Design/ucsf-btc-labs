@@ -7,13 +7,10 @@
     "issues": "https://www.drupal.org/project/issues/url_embed",
     "irc": "irc://irc.freenode.org/drupal-media"
   },
-  "license": "GPL-2.0+",
+  "license": "GPL-2.0-or-later",
   "require": {
-    "drupal/core": "^9 || ^10",
+    "drupal/core": "^10.1 || ^11",
     "embed/embed": "^4.4",
     "drupal/embed": "^1.4"
-  },
-  "require-dev": {
-    "drupal/ckeditor": "^1"
   }
 }

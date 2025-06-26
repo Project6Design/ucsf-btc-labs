@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal_ui\Functional\d7;
 
 use Drupal\Tests\migrate_drupal_ui\Functional\MultilingualReviewPageTestBase;
@@ -24,7 +26,6 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
     'language',
     'content_translation',
     'telephone',
-    'statistics',
     'syslog',
     'update',
     // Test migrations states.
@@ -43,14 +44,14 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getSourceBasePath() {
+  protected function getSourceBasePath(): string {
     return __DIR__ . '/files';
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getAvailablePaths() {
+  protected function getAvailablePaths(): array {
     return [
       'Block languages',
       'Blog',
@@ -110,7 +111,6 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
       'Search',
       'Search embedded form',
       'Shortcut',
-      'Statistics',
       'String translation',
       'Stylizer',
       'Synchronize translations',
@@ -138,7 +138,7 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getMissingPaths() {
+  protected function getMissingPaths(): array {
     return [
       // Action is set not_finished in migrate_state_not_finished_test.
       'Aggregator',
@@ -165,7 +165,7 @@ class MultilingualReviewPageTest extends MultilingualReviewPageTestBase {
       'RDF',
       'References',
       'References UUID',
-      // @todo Remove tracker in https://www.drupal.org/project/drupal/issues/3261452
+      'Statistics',
       'Tracker',
       'Translation redirect',
       'Translation sets',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Functional;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -77,7 +79,7 @@ trait TaxonomyTranslationTestTrait {
       ],
       'auto_create' => TRUE,
     ];
-    $this->createEntityReferenceField('node', 'article', $this->termFieldName, NULL, 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+    $this->createEntityReferenceField('node', 'article', $this->termFieldName, '', 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
     $field_storage = FieldStorageConfig::loadByName('node', $this->termFieldName);
     $field_storage->setTranslatable(FALSE);
     $field_storage->save();

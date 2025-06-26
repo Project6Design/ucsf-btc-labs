@@ -14,7 +14,7 @@ class NumberFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests the integer formatter.
    */
-  public function testIntegerFormatter() {
+  public function testIntegerFormatter(): void {
     $this->fieldType = 'integer';
     $testValue = 3;
     $this->createTestField();
@@ -29,7 +29,7 @@ class NumberFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests the integer formatter with settings.
    */
-  public function testIntegerFormatterWithSettings() {
+  public function testIntegerFormatterWithSettings(): void {
     $this->fieldType = 'integer';
     $formatter = [
       'type' => 'number_integer',
@@ -55,7 +55,7 @@ class NumberFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests the float formatter.
    */
-  public function testFloatFormatter() {
+  public function testFloatFormatter(): void {
     $this->fieldType = 'float';
     $testValue = 3.33;
     $this->createTestField();
@@ -70,7 +70,7 @@ class NumberFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests the float formatter with settings.
    */
-  public function testFloatFormatterWithSettings() {
+  public function testFloatFormatterWithSettings(): void {
     $this->fieldType = 'float';
     $formatter = [
       'type' => 'number_decimal',
@@ -97,7 +97,7 @@ class NumberFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests the float formatter with a scale. Scale is not exercised.
    */
-  public function testFloatFormatterWithScale() {
+  public function testFloatFormatterWithScale(): void {
     $this->fieldType = 'float';
     $formatter = [
       'type' => 'number_decimal',
@@ -118,7 +118,7 @@ class NumberFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests the float formatter with a scale. Scale is exercised.
    */
-  public function testFloatFormatterWithScaleExercised() {
+  public function testFloatFormatterWithScaleExercised(): void {
     $this->fieldType = 'float';
     $formatter = [
       'type' => 'number_decimal',
@@ -139,7 +139,7 @@ class NumberFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests the decimal formatter.
    */
-  public function testDecimalFormatter() {
+  public function testDecimalFormatter(): void {
     $this->fieldType = 'decimal';
     $testValue = 3.33;
     $this->createTestField();
@@ -154,7 +154,7 @@ class NumberFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests the decimal formatter with settings.
    */
-  public function testDecimalFormatterWithSettings() {
+  public function testDecimalFormatterWithSettings(): void {
     $this->fieldType = 'decimal';
     $formatter = [
       'type' => 'number_decimal',
@@ -181,7 +181,7 @@ class NumberFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Creates the RDF mapping for the field.
    */
-  protected function createTestEntity($testValue) {
+  protected function createTestEntity($testValue): void {
     // Add the mapping.
     $mapping = rdf_get_mapping('entity_test', 'entity_test');
     $mapping->setFieldMapping($this->fieldName, [

@@ -1,4 +1,9 @@
+parameters:
+  ban.skip_procedural_hook_scan: true
+
 services:
+  _defaults:
+    autoconfigure: true
   ban.ip_manager:
     class: Drupal\ban\BanIpManager
     arguments: ['@database']

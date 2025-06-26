@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\action_test\Plugin\Action;
 
 use Drupal\Core\Access\AccessResult;
@@ -26,7 +28,7 @@ class NoType extends ActionBase {
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     $result = AccessResult::allowed();
     return $return_as_object ? $result : $result->isAllowed();
   }

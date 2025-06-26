@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Queue;
 
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
@@ -20,9 +22,7 @@ class QueueSerializationTest extends KernelTestBase implements FormInterface {
   use DependencySerializationTrait;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['system', 'user'];
 
@@ -42,7 +42,7 @@ class QueueSerializationTest extends KernelTestBase implements FormInterface {
    * Process callback.
    *
    * @param array $element
-   *   Form element
+   *   Form element.
    *
    * @return array
    *   Processed element.
@@ -67,7 +67,7 @@ class QueueSerializationTest extends KernelTestBase implements FormInterface {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
     $form_state->setRebuild();
   }
 
@@ -91,7 +91,7 @@ class QueueSerializationTest extends KernelTestBase implements FormInterface {
   /**
    * Tests queue injection serialization.
    */
-  public function testQueueSerialization() {
+  public function testQueueSerialization(): void {
     $form_state = new FormState();
     $form_state->setRequestMethod('POST');
     $form_state->setCached();

@@ -36,14 +36,17 @@ class SqlBaseTest extends UnitTestCase {
    */
   protected $display;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
-    $this->pager = $this->getMockBuilder('Drupal\views\Plugin\views\pager\SqlBase')
+    $this->pager = $this->getMockBuilder(StubSqlBase::class)
       ->disableOriginalConstructor()
-      ->getMockForAbstractClass();
+      ->onlyMethods([])
+      ->getMock();
 
-    /** @var \Drupal\views\ViewExecutable|\PHPUnit\Framework\MockObject\MockObject $view */
     $this->view = $this->getMockBuilder('Drupal\views\ViewExecutable')
       ->disableOriginalConstructor()
       ->getMock();
@@ -68,13 +71,13 @@ class SqlBaseTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\pager\SqlBase::query()
    */
-  public function testQuery() {
+  public function testQuery(): void {
     $request = new Request([
       'items_per_page' => 'All',
     ]);
     $this->view->expects($this->any())
       ->method('getRequest')
-      ->will($this->returnValue($request));
+      ->willReturn($request);
 
     $options = [];
     $this->pager->init($this->view, $this->display, $options);

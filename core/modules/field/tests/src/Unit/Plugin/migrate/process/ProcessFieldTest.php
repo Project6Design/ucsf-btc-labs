@@ -24,26 +24,36 @@ use Prophecy\Prophecy\ObjectProphecy;
 class ProcessFieldTest extends MigrateTestCase {
 
   /**
+   * The migrate field manager.
+   *
    * @var \Drupal\migrate_drupal\Plugin\MigrateFieldPluginManagerInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected MigrateFieldPluginManagerInterface|ObjectProphecy $fieldManager;
 
   /**
+   * The migrate field plugin.
+   *
    * @var \Drupal\migrate_drupal\Plugin\MigrateFieldInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected MigrateFieldInterface|ObjectProphecy $fieldPlugin;
 
   /**
+   * The migration executable.
+   *
    * @var \Drupal\migrate\MigrateExecutable|\Prophecy\Prophecy\ObjectProphecy
    */
   protected MigrateExecutable|ObjectProphecy $migrateExecutable;
 
   /**
+   * The migration.
+   *
    * @var \Drupal\migrate\Plugin\MigrationInterface|\Prophecy\Prophecy\ObjectProphecy
    */
   protected MigrationInterface|ObjectProphecy $migration;
 
   /**
+   * The row object.
+   *
    * @var \Drupal\migrate\Row|\Prophecy\Prophecy\ObjectProphecy
    */
   protected Row|ObjectProphecy $row;
@@ -81,7 +91,7 @@ class ProcessFieldTest extends MigrateTestCase {
    * @covers ::transform
    * @dataProvider providerTestTransform
    */
-  public function testTransform($method, $value, $expected_value, $migrate_exception = '', $plugin_not_found = FALSE) {
+  public function testTransform($method, $value, $expected_value, $migrate_exception = '', $plugin_not_found = FALSE): void {
     if ($method) {
       $this->fieldPlugin->$method($this->row->reveal())->willReturn($expected_value);
     }
@@ -111,7 +121,7 @@ class ProcessFieldTest extends MigrateTestCase {
    *   - The MigrateException message to expect.
    *   - Whether the field plugin is not found.
    */
-  public function providerTestTransform() {
+  public static function providerTestTransform() {
     return [
       // Tests the getFieldType() method.
       [

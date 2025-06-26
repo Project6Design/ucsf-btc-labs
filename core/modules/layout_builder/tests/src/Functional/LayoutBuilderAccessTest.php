@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\layout_builder\Functional;
 
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
@@ -57,8 +59,6 @@ class LayoutBuilderAccessTest extends BrowserTestBase {
   /**
    * Tests Layout Builder access for an entity type that has bundles.
    *
-   * @dataProvider providerTestAccessWithBundles
-   *
    * @param array $permissions
    *   An array of permissions to grant to the user.
    * @param bool $default_access
@@ -69,8 +69,10 @@ class LayoutBuilderAccessTest extends BrowserTestBase {
    *   Whether access is expected for an editable override.
    * @param array $permission_dependencies
    *   An array of expected permission dependencies.
+   *
+   * @dataProvider providerTestAccessWithBundles
    */
-  public function testAccessWithBundles(array $permissions, $default_access, $non_editable_access, $editable_access, array $permission_dependencies) {
+  public function testAccessWithBundles(array $permissions, $default_access, $non_editable_access, $editable_access, array $permission_dependencies): void {
     $permissions[] = 'edit own bundle_with_section_field content';
     $permissions[] = 'access content';
     $user = $this->drupalCreateUser($permissions);
@@ -141,7 +143,7 @@ class LayoutBuilderAccessTest extends BrowserTestBase {
   /**
    * Provides test data for ::testAccessWithBundles().
    */
-  public function providerTestAccessWithBundles() {
+  public static function providerTestAccessWithBundles() {
     // Data provider values are:
     // - the permissions to grant to the user
     // - whether access is expected for the defaults
@@ -185,7 +187,7 @@ class LayoutBuilderAccessTest extends BrowserTestBase {
    *
    * @dataProvider providerTestAccessWithoutBundles
    */
-  public function testAccessWithoutBundles(array $permissions, $default_access, $non_editable_access, $editable_access, array $permission_dependencies) {
+  public function testAccessWithoutBundles(array $permissions, $default_access, $non_editable_access, $editable_access, array $permission_dependencies): void {
     $permissions[] = 'access user profiles';
     $user = $this->drupalCreateUser($permissions);
     $this->drupalLogin($user);
@@ -235,7 +237,7 @@ class LayoutBuilderAccessTest extends BrowserTestBase {
   /**
    * Provides test data for ::testAccessWithoutBundles().
    */
-  public function providerTestAccessWithoutBundles() {
+  public static function providerTestAccessWithoutBundles() {
     // Data provider values are:
     // - the permissions to grant to the user
     // - whether access is expected for the defaults

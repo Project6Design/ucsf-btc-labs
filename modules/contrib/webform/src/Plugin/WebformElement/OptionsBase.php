@@ -154,7 +154,7 @@ abstract class OptionsBase extends WebformElementBase {
   /**
    * {@inheritdoc}
    */
-  public function prepare(array &$element, WebformSubmissionInterface $webform_submission = NULL) {
+  public function prepare(array &$element, ?WebformSubmissionInterface $webform_submission = NULL) {
     $is_wrapper_fieldset = in_array($element['#type'], ['checkboxes', 'radios', 'webform_entity_checkboxes', 'webform_entity_radios', 'webform_term_checkboxes', 'webform_toggles', 'webform_buttons']);
     if ($is_wrapper_fieldset) {
       // Issue #2396145: Option #description_display for webform element fieldset
@@ -213,7 +213,7 @@ abstract class OptionsBase extends WebformElementBase {
 
     // Make sure submitted value is not lost if the element's #options were
     // altered after the submission was completed.
-    // This only applies to the main webforom element with a #webform_key
+    // This only applies to the main webform element with a #webform_key
     // and not a webform composite's sub elements.
     $is_completed = $webform_submission && $webform_submission->isCompleted();
     $has_default_value = (isset($element['#default_value']) && $element['#default_value'] !== '' && $element['#default_value'] !== NULL);
@@ -251,7 +251,7 @@ abstract class OptionsBase extends WebformElementBase {
   /**
    * {@inheritdoc}
    */
-  protected function prepareElementValidateCallbacks(array &$element, WebformSubmissionInterface $webform_submission = NULL) {
+  protected function prepareElementValidateCallbacks(array &$element, ?WebformSubmissionInterface $webform_submission = NULL) {
     if ($this->hasMultipleValues($element)) {
       $element['#element_validate'][] = [get_class($this), 'validateMultipleOptions'];
     }

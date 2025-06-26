@@ -9,10 +9,10 @@ use Drupal\Core\DependencyInjection\ClassResolverInterface;
 use Drupal\Core\Entity\Exception\InvalidLinkTemplateException;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
-use Drupal\Core\Plugin\Discovery\AnnotatedClassDiscovery;
+use Drupal\Core\Entity\Attribute\EntityType;
+use Drupal\Core\Plugin\Discovery\AttributeDiscoveryWithAnnotations;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Manages entity type plugin definitions.
@@ -33,9 +33,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
  * @see hook_entity_type_alter()
  * @see hook_entity_type_build()
  */
-class EntityTypeManager extends DefaultPluginManager implements EntityTypeManagerInterface, ContainerAwareInterface {
-
-  use ContainerAwareTrait;
+class EntityTypeManager extends DefaultPluginManager implements EntityTypeManagerInterface {
 
   /**
    * Contains instantiated handlers keyed by handler type and entity type.
@@ -70,7 +68,7 @@ class EntityTypeManager extends DefaultPluginManager implements EntityTypeManage
    *
    * @param \Traversable $namespaces
    *   An object that implements \Traversable which contains the root paths
-   *   keyed by the corresponding namespace to look for plugin implementations,
+   *   keyed by the corresponding namespace to look for plugin implementations.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
    * @param \Drupal\Core\Cache\CacheBackendInterface $cache
@@ -81,14 +79,16 @@ class EntityTypeManager extends DefaultPluginManager implements EntityTypeManage
    *   The class resolver.
    * @param \Drupal\Core\Entity\EntityLastInstalledSchemaRepositoryInterface $entity_last_installed_schema_repository
    *   The entity last installed schema repository.
+   * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
+   *   The service container.
    */
-  public function __construct(\Traversable $namespaces, ModuleHandlerInterface $module_handler, CacheBackendInterface $cache, TranslationInterface $string_translation, ClassResolverInterface $class_resolver, EntityLastInstalledSchemaRepositoryInterface $entity_last_installed_schema_repository) {
-    parent::__construct('Entity', $namespaces, $module_handler, 'Drupal\Core\Entity\EntityInterface');
+  public function __construct(\Traversable $namespaces, ModuleHandlerInterface $module_handler, CacheBackendInterface $cache, TranslationInterface $string_translation, ClassResolverInterface $class_resolver, EntityLastInstalledSchemaRepositoryInterface $entity_last_installed_schema_repository, protected ContainerInterface $container) {
+    parent::__construct('Entity', $namespaces, $module_handler, EntityInterface::class);
 
     $this->setCacheBackend($cache, 'entity_type', ['entity_types']);
     $this->alterInfo('entity_type');
 
-    $this->discovery = new AnnotatedClassDiscovery('Entity', $namespaces, 'Drupal\Core\Entity\Annotation\EntityType');
+    $this->discovery = new AttributeDiscoveryWithAnnotations($this->subdir, $this->namespaces, EntityType::class, 'Drupal\Core\Entity\Annotation\EntityType');
     $this->stringTranslation = $string_translation;
     $this->classResolver = $class_resolver;
     $this->entityLastInstalledSchemaRepository = $entity_last_installed_schema_repository;
@@ -272,7 +272,7 @@ class EntityTypeManager extends DefaultPluginManager implements EntityTypeManage
   /**
    * {@inheritdoc}
    */
-  public function createHandlerInstance($class, EntityTypeInterface $definition = NULL) {
+  public function createHandlerInstance($class, ?EntityTypeInterface $definition = NULL) {
     if (is_subclass_of($class, 'Drupal\Core\Entity\EntityHandlerInterface')) {
       $handler = $class::createInstance($this->container, $definition);
     }

@@ -2,13 +2,15 @@
 
 namespace Drupal\Core\State;
 
-use Drupal\Core\Asset\AssetQueryString;
+use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Cache\CacheCollector;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
+use Drupal\Core\Lock\LockBackendInterface;
 
 /**
  * Provides the state system using a key value store.
  */
-class State implements StateInterface {
+class State extends CacheCollector implements StateInterface {
 
   /**
    * Information about all deprecated state, keyed by legacy state key.
@@ -19,12 +21,7 @@ class State implements StateInterface {
    *
    * @var array
    */
-  private static array $deprecatedState = [
-    'system.css_js_query_string' => [
-      'replacement' => AssetQueryString::STATE_KEY,
-      'message' => 'The \'system.css_js_query_string\' state is deprecated in drupal:10.2.0. Use \Drupal\Core\Asset\AssetQueryStringInterface::get() and ::reset() instead. See https://www.drupal.org/node/3358337.',
-    ],
-  ];
+  private static array $deprecatedState = [];
 
   /**
    * The key value store to use.
@@ -34,19 +31,17 @@ class State implements StateInterface {
   protected $keyValueStore;
 
   /**
-   * Static state cache.
-   *
-   * @var array
-   */
-  protected $cache = [];
-
-  /**
    * Constructs a State object.
    *
    * @param \Drupal\Core\KeyValueStore\KeyValueFactoryInterface $key_value_factory
    *   The key value store to use.
+   * @param \Drupal\Core\Cache\CacheBackendInterface $cache
+   *   The cache backend.
+   * @param \Drupal\Core\Lock\LockBackendInterface $lock
+   *   The lock backend.
    */
-  public function __construct(KeyValueFactoryInterface $key_value_factory) {
+  public function __construct(KeyValueFactoryInterface $key_value_factory, CacheBackendInterface $cache, LockBackendInterface $lock) {
+    parent::__construct('state', $cache, $lock);
     $this->keyValueStore = $key_value_factory->get('state');
   }
 
@@ -61,8 +56,17 @@ class State implements StateInterface {
       @trigger_error(self::$deprecatedState[$key]['message'], E_USER_DEPRECATED);
       $key = self::$deprecatedState[$key]['replacement'];
     }
-    $values = $this->getMultiple([$key]);
-    return $values[$key] ?? $default;
+    return parent::get($key) ?? $default;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function resolveCacheMiss($key) {
+    $value = $this->keyValueStore->get($key);
+    $this->storage[$key] = $value;
+    $this->persist($key);
+    return $value;
   }
 
   /**
@@ -70,31 +74,8 @@ class State implements StateInterface {
    */
   public function getMultiple(array $keys) {
     $values = [];
-    $load = [];
     foreach ($keys as $key) {
-      // Check if we have a value in the cache.
-      if (isset($this->cache[$key])) {
-        $values[$key] = $this->cache[$key];
-      }
-      // Load the value if we don't have an explicit NULL value.
-      elseif (!array_key_exists($key, $this->cache)) {
-        $load[] = $key;
-      }
-    }
-
-    if ($load) {
-      $loaded_values = $this->keyValueStore->getMultiple($load);
-      foreach ($load as $key) {
-        // If we find a value, even one that is NULL, add it to the cache and
-        // return it.
-        if (\array_key_exists($key, $loaded_values)) {
-          $values[$key] = $loaded_values[$key];
-          $this->cache[$key] = $loaded_values[$key];
-        }
-        else {
-          $this->cache[$key] = NULL;
-        }
-      }
+      $values[$key] = $this->get($key);
     }
 
     return $values;
@@ -109,42 +90,52 @@ class State implements StateInterface {
       @trigger_error(self::$deprecatedState[$key]['message'], E_USER_DEPRECATED);
       $key = self::$deprecatedState[$key]['replacement'];
     }
-    $this->cache[$key] = $value;
     $this->keyValueStore->set($key, $value);
+    // If another request had a cache miss before this request, and also hasn't
+    // written to cache yet, then it may already have read this value from the
+    // database and could write that value to the cache to the end of the
+    // request. To avoid this race condition, write to the cache immediately
+    // after calling parent::set(). This allows the race condition detection in
+    // CacheCollector::set() to work.
+    parent::set($key, $value);
+    $this->persist($key);
+    static::updateCache();
   }
 
   /**
    * {@inheritdoc}
    */
   public function setMultiple(array $data) {
-    foreach ($data as $key => $value) {
-      $this->cache[$key] = $value;
-    }
     $this->keyValueStore->setMultiple($data);
+    foreach ($data as $key => $value) {
+      parent::set($key, $value);
+      $this->persist($key);
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function delete($key) {
-    $this->deleteMultiple([$key]);
+    $this->keyValueStore->delete($key);
+    parent::delete($key);
   }
 
   /**
    * {@inheritdoc}
    */
   public function deleteMultiple(array $keys) {
-    foreach ($keys as $key) {
-      unset($this->cache[$key]);
-    }
     $this->keyValueStore->deleteMultiple($keys);
+    foreach ($keys as $key) {
+      parent::delete($key);
+    }
   }
 
   /**
    * {@inheritdoc}
    */
   public function resetCache() {
-    $this->cache = [];
+    $this->clear();
   }
 
 }

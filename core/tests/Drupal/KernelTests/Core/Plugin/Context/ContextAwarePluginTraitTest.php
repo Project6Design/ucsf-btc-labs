@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Plugin\Context;
 
 use Drupal\Component\Plugin\ConfigurableInterface;
@@ -17,6 +19,8 @@ use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\Plugin\DataType\StringData;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
+
+// cspell:ignore sisko
 
 /**
  * @coversDefaultClass \Drupal\Core\Plugin\ContextAwarePluginTrait
@@ -53,14 +57,14 @@ class ContextAwarePluginTraitTest extends KernelTestBase {
   /**
    * @covers ::getContextDefinitions
    */
-  public function testGetContextDefinitions() {
+  public function testGetContextDefinitions(): void {
     $this->assertIsArray($this->plugin->getContextDefinitions());
   }
 
   /**
    * @covers ::getContextDefinition
    */
-  public function testGetContextDefinition() {
+  public function testGetContextDefinition(): void {
     // The context is not defined, so an exception will be thrown.
     $this->expectException(ContextException::class);
     $this->expectExceptionMessage('The person context is not a valid context.');
@@ -70,7 +74,7 @@ class ContextAwarePluginTraitTest extends KernelTestBase {
   /**
    * @covers ::getContextValue
    */
-  public function testGetContextValue() {
+  public function testGetContextValue(): void {
     $this->plugin->setContextValue('nato_letter', 'Alpha');
     $this->assertSame('Alpha', $this->plugin->getContextValue('nato_letter'));
   }
@@ -78,7 +82,7 @@ class ContextAwarePluginTraitTest extends KernelTestBase {
   /**
    * @covers ::setContextValue
    */
-  public function testSetContextValue() {
+  public function testSetContextValue(): void {
     $typed_data_manager = $this->prophesize(TypedDataManagerInterface::class);
     $container = new ContainerBuilder();
     $container->set('typed_data_manager', $typed_data_manager->reveal());
@@ -93,12 +97,18 @@ class ContextAwarePluginTraitTest extends KernelTestBase {
 
 }
 
+/**
+ * A plugin definition test class.
+ */
 class TestContextAwarePluginDefinition extends PluginDefinition implements ContextAwarePluginDefinitionInterface {
 
   use ContextAwarePluginDefinitionTrait;
 
 }
 
+/**
+ * Context aware plugin test class.
+ */
 class TestContextAwarePlugin extends PluginBase implements ContextAwarePluginInterface {
 
   use ContextAwarePluginTrait {
@@ -115,13 +125,16 @@ class TestContextAwarePlugin extends PluginBase implements ContextAwarePluginInt
   /**
    * {@inheritdoc}
    */
-  public function setContext($name, ComponentContextInterface $context) {
+  public function setContext($name, ComponentContextInterface $context): void {
     $this->setContextTrait($name, $context);
     $this->setContextCalled = TRUE;
   }
 
 }
 
+/**
+ * Configurable context aware plugin test class.
+ */
 class TestConfigurableContextAwarePlugin extends PluginBase implements ConfigurableInterface, ContextAwarePluginInterface {
 
   use ContextAwarePluginTrait;

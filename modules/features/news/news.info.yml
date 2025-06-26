@@ -1,7 +1,7 @@
 name: News
 description: 'Provides News content type and related configuration. '
 type: module
-core_version_requirement: ^8 || ^9 || ^10
+core_version_requirement: ^8 || ^9 || ^10 || ^11
 dependencies:
   - block
   - datetime

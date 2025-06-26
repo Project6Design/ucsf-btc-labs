@@ -5,17 +5,12 @@
  * Post update functions for Filter.
  */
 
-use Drupal\Core\Config\Entity\ConfigEntityUpdater;
-use Drupal\filter\Entity\FilterFormat;
-
 /**
- * Sorts filter format filter configuration.
+ * Implements hook_removed_post_updates().
  */
-function filter_post_update_sort_filters(?array &$sandbox = NULL): void {
-  $config_entity_updater = \Drupal::classResolver(ConfigEntityUpdater::class);
-  $config_entity_updater->update($sandbox, 'filter_format', function (FilterFormat $format): bool {
-    $sorted_filters = $filters = array_keys($format->get('filters'));
-    sort($sorted_filters);
-    return $sorted_filters !== $filters;
-  });
+function filter_removed_post_updates(): array {
+  return [
+    'filter_post_update_sort_filters' => '11.0.0',
+    'filter_post_update_consolidate_filter_config' => '11.0.0',
+  ];
 }

@@ -25,6 +25,7 @@ class Linkit extends Plugin {
     const editor = this.editor;
     const options = editor.config.get('linkit');
     const linkFormView = editor.plugins.get('LinkUI').formView;
+    const linkitInput = linkFormView.urlInputView.fieldView.element;
     let wasAutocompleteAdded = false;
 
     linkFormView.extendTemplate({
@@ -48,7 +49,7 @@ class Linkit extends Plugin {
       let selected;
 
       initializeAutocomplete(
-        linkFormView.urlInputView.fieldView.element,
+        linkitInput,
         {
           ...options,
           selectHandler: (event, { item }) => {
@@ -79,11 +80,7 @@ class Linkit extends Plugin {
             selected = false;
           },
           closeHandler: (event) => {
-            if (!selected) {
-              this.set('entityType', null);
-              this.set('entityUuid', null);
-              this.set('entitySubstitution', null);
-            }
+            // Upon close, ensure there is no selection (#3447669).
             selected = false;
           },
         },
@@ -99,12 +96,21 @@ class Linkit extends Plugin {
     const linkFormView = editor.plugins.get('LinkUI').formView;
     const linkCommand = editor.commands.get('link');
 
+    // Only selections from autocomplete set converter attributes.
+    const linkit = editor.plugins.get('Linkit');
+    linkFormView.urlInputView.fieldView.element.addEventListener('input', function (evt) {
+      linkit.set('entityType', null);
+      linkit.set('entityUuid', null);
+      linkit.set('entitySubstitution', null);
+    });
+
     this.listenTo(linkFormView, 'submit', () => {
       const values = {
-        'data-entity-type': this.entityType,
-        'data-entity-uuid': this.entityUuid,
-        'data-entity-substitution': this.entitySubstitution,
+        'linkDataEntityType': this.entityType,
+        'linkDataEntityUuid': this.entityUuid,
+        'linkDataEntitySubstitution': this.entitySubstitution,
       }
+      const decoratorsArgIndex = 1;
       // Stop the execution of the link command caused by closing the form.
       // Inject the extra attribute value. The highest priority listener here
       // injects the argument (here below 👇).
@@ -114,13 +120,15 @@ class Linkit extends Plugin {
       // - The normal (default) priority listener in ckeditor5-link sets
       //   (creates) the actual link.
       linkCommand.once('execute', (evt, args) => {
-        if (args.length < 3) {
-          args.push(values);
-        } else if (args.length === 3) {
-          Object.assign(args[2], values);
-        } else {
-          throw Error('The link command has more than 3 arguments.')
+        // Assume decorators is the second argument provided to the
+        // linkCommand.execute() call.
+        if (!(typeof args[decoratorsArgIndex] === 'object')) {
+          // This is either an object or null because decorators are optional.
+          args[decoratorsArgIndex] = values;
+          return;
         }
+        // An object exists, so we need to merge the values.
+        Object.assign(args[decoratorsArgIndex], values);
       }, { priority: 'highest' });
     }, { priority: 'high' });
   }
@@ -128,10 +136,9 @@ class Linkit extends Plugin {
   _handleDataLoadingIntoExtraFormField() {
     const editor = this.editor;
     const linkCommand = editor.commands.get('link');
-
-    this.bind('entityType').to(linkCommand, 'data-entity-type');
-    this.bind('entityUuid').to(linkCommand, 'data-entity-uuid');
-    this.bind('entitySubstitution').to(linkCommand, 'data-entity-substitution');
+    this.bind('entityType').to(linkCommand, 'linkDataEntityType');
+    this.bind('entityUuid').to(linkCommand, 'linkDataEntityUuid');
+    this.bind('entitySubstitution').to(linkCommand, 'linkDataEntitySubstitution');
   }
 
   /**

@@ -27,7 +27,7 @@ class RdfaAttributesTest extends KernelTestBase {
     $mapping = ['properties' => $properties];
     $expected_attributes = ['property' => $properties];
 
-    $this->_testAttributes($expected_attributes, $mapping);
+    $this->testAttributes($expected_attributes, $mapping);
   }
 
   /**
@@ -46,7 +46,7 @@ class RdfaAttributesTest extends KernelTestBase {
       'property' => $properties,
     ];
 
-    $this->_testAttributes($expected_attributes, $mapping);
+    $this->testAttributes($expected_attributes, $mapping);
   }
 
   /**
@@ -70,7 +70,7 @@ class RdfaAttributesTest extends KernelTestBase {
       'content' => $iso_date,
     ];
 
-    $this->_testAttributes($expected_attributes, $mapping, ['value' => $date]);
+    $this->testAttributes($expected_attributes, $mapping, ['value' => $date]);
   }
 
   /**
@@ -94,7 +94,7 @@ class RdfaAttributesTest extends KernelTestBase {
       'content' => $content,
     ];
 
-    $this->_testAttributes($expected_attributes, $mapping, $data);
+    $this->testAttributes($expected_attributes, $mapping, $data);
   }
 
   /**
@@ -109,7 +109,7 @@ class RdfaAttributesTest extends KernelTestBase {
     ];
     $expected_attributes = ['rel' => $properties];
 
-    $this->_testAttributes($expected_attributes, $mapping);
+    $this->testAttributes($expected_attributes, $mapping);
   }
 
   /**
@@ -119,10 +119,10 @@ class RdfaAttributesTest extends KernelTestBase {
    *   The expected return of rdf_rdfa_attributes.
    * @param array $field_mapping
    *   The field mapping to merge into the RDF mapping config.
-   * @param mixed $data
+   * @param mixed|null $data
    *   The data to pass into the datatype callback, if specified.
    */
-  protected function _testAttributes($expected_attributes, $field_mapping, $data = NULL) {
+  protected function testAttributes(array $expected_attributes, array $field_mapping, mixed $data = NULL): void {
     $mapping = rdf_get_mapping('node', 'article')
       ->setFieldMapping('field_test', $field_mapping)
       ->getPreparedFieldMapping('field_test');

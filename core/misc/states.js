@@ -93,15 +93,16 @@
    */
   Drupal.behaviors.states = {
     attach(context, settings) {
-      const $states = $(context).find('[data-drupal-states]');
-      const il = $states.length;
+      // Uses once to avoid duplicates if attach is called multiple times.
+      const elements = once('states', '[data-drupal-states]', context);
+      const il = elements.length;
       for (let i = 0; i < il; i++) {
         const config = JSON.parse(
-          $states[i].getAttribute('data-drupal-states'),
+          elements[i].getAttribute('data-drupal-states'),
         );
         Object.keys(config || {}).forEach((state) => {
           new states.Dependent({
-            element: $($states[i]),
+            element: $(elements[i]),
             state: states.State.sanitize(state),
             constraints: config[state],
           });
@@ -149,6 +150,7 @@
    *
    * @prop {function} RegExp
    * @prop {function} Function
+   * @prop {function} Array
    * @prop {function} Number
    */
   states.Dependent.comparisons = {
@@ -158,6 +160,15 @@
     Function(reference, value) {
       // The "reference" variable is a comparison function.
       return reference(value);
+    },
+    Array(reference, value) {
+      // Make sure value is an array.
+      if (!Array.isArray(value)) {
+        return false;
+      }
+
+      // The arrays values should match.
+      return JSON.stringify(reference.sort()) === JSON.stringify(value.sort());
     },
     Number(reference, value) {
       // If "reference" is a number and "value" is a string, then cast
@@ -304,7 +315,7 @@
      */
     verifyConstraints(constraints, selector) {
       let result;
-      if ($.isArray(constraints)) {
+      if (Array.isArray(constraints)) {
         // This constraint is an array (OR or XOR).
         const hasXor = $.inArray('xor', constraints) === -1;
         const len = constraints.length;
@@ -681,11 +692,14 @@
   $document.on('state:disabled', (e) => {
     // Only act when this change was triggered by a dependency and not by the
     // element monitoring itself.
+    const tagsSupportDisable =
+      'button, fieldset, optgroup, option, select, textarea, input';
     if (e.trigger) {
       $(e.target)
         .closest('.js-form-item, .js-form-submit, .js-form-wrapper')
         .toggleClass('form-disabled', e.value)
-        .find('select, input, textarea')
+        .find(tagsSupportDisable)
+        .addBack(tagsSupportDisable)
         .prop('disabled', e.value);
     }
   });
@@ -705,7 +719,7 @@
       if (e.value) {
         const label = `label${e.target.id ? `[for=${e.target.id}]` : ''}`;
         const $label = $(e.target)
-          .attr({ required: 'required', 'aria-required': 'true' })
+          .attr({ required: 'required' })
           .closest('.js-form-item, .js-form-wrapper')
           .find(label);
         // Avoids duplicate required markers on initialization.
@@ -714,7 +728,7 @@
         }
       } else {
         $(e.target)
-          .removeAttr('required aria-required')
+          .removeAttr('required')
           .closest('.js-form-item, .js-form-wrapper')
           .find('label.js-form-required')
           .removeClass('js-form-required form-required');

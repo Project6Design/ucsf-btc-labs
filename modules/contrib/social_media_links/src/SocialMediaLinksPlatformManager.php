@@ -2,9 +2,9 @@
 
 namespace Drupal\social_media_links;
 
-use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
  * Manager class for the platform plugins.
@@ -66,7 +66,7 @@ class SocialMediaLinksPlatformManager extends DefaultPluginManager {
 
     $platforms = $this->getPlatforms();
     foreach ($platforms as $platform_id => $platform) {
-      $platforms[$platform_id]['weight'] = isset($settings['platforms'][$platform_id]['weight']) ? $settings['platforms'][$platform_id]['weight'] : $default_weight++;
+      $platforms[$platform_id]['weight'] = $settings['platforms'][$platform_id]['weight'] ?? $default_weight++;
     }
 
     uasort($platforms, [

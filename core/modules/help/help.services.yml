@@ -1,4 +1,9 @@
+parameters:
+  help.skip_procedural_hook_scan: false
+
 services:
+  _defaults:
+    autoconfigure: true
   plugin.manager.help_section:
     class: Drupal\help\HelpSectionManager
     parent: default_plugin_manager

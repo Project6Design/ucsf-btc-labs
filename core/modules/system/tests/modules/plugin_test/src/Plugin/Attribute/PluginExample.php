@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\plugin_test\Plugin\Attribute;
 
 use Drupal\Component\Plugin\Attribute\Plugin;
@@ -20,7 +22,7 @@ class PluginExample extends Plugin {
    */
   public function __construct(
     public readonly string $id,
-    public readonly ?string $custom = NULL
+    public readonly ?string $custom = NULL,
   ) {}
 
 }

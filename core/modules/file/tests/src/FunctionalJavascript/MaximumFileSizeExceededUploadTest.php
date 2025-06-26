@@ -46,10 +46,10 @@ class MaximumFileSizeExceededUploadTest extends WebDriverTestBase {
   /**
    * The original value of the 'display_errors' PHP configuration option.
    *
+   * @var string
+   *
    * @todo Remove this when issue #2905597 is fixed.
    * @see https://www.drupal.org/node/2905597
-   *
-   * @var string
    */
   protected $originalDisplayErrorsValue;
 
@@ -97,7 +97,7 @@ class MaximumFileSizeExceededUploadTest extends WebDriverTestBase {
   /**
    * Tests that uploading files exceeding maximum size are handled correctly.
    */
-  public function testUploadFileExceedingMaximumFileSize() {
+  public function testUploadFileExceedingMaximumFileSize(): void {
     $session = $this->getSession();
 
     // Create a test file that exceeds the maximum POST size with 1 kilobyte.

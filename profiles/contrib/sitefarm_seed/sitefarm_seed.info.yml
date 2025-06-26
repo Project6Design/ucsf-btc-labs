@@ -2,7 +2,7 @@ name: SiteFarm Seed
 type: profile
 description: 'A fast and feature-rich Drupal base install profile.'
 # version: VERSION
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^9 || ^10 || ^11
 
 # Required modules
 dependencies:
@@ -30,7 +30,6 @@ dependencies:
   - options
   - page_cache
   - path
-  - quickedit
   - rdf
   - search
   - shortcut
@@ -38,7 +37,6 @@ dependencies:
   - taxonomy
   - text
   - toolbar
-  - tour
   - url_embed
   - views
   - views_ui

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Routing;
 
 use Drupal\Core\Cache\Cache;
@@ -7,6 +9,7 @@ use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\router_test\TestControllers;
 use Drupal\Tests\BrowserTestBase;
+use Symfony\Component\Routing\Alias;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Drupal\Core\Url;
 
@@ -14,14 +17,11 @@ use Drupal\Core\Url;
  * Functional class for the full integrated routing system.
  *
  * @group Routing
- * @group #slow
  */
 class RouterTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['router_test'];
 
@@ -33,7 +33,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Confirms that our FinishResponseSubscriber logic works properly.
    */
-  public function testFinishResponseSubscriber() {
+  public function testFinishResponseSubscriber(): void {
     $renderer_required_cache_contexts = ['languages:' . LanguageInterface::TYPE_INTERFACE, 'theme', 'user.permissions'];
     $expected_cache_contexts = Cache::mergeContexts($renderer_required_cache_contexts, ['url.query_args:' . MainContentViewSubscriber::WRAPPER_FORMAT, 'user.roles:authenticated']);
     sort($expected_cache_contexts);
@@ -54,7 +54,6 @@ class RouterTest extends BrowserTestBase {
     $this->drupalGet('router_test/test2');
     $this->assertSession()->pageTextContains('test2');
     // Check expected headers from FinishResponseSubscriber.
-    $headers = $session->getResponseHeaders();
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache-Contexts', implode(' ', $expected_cache_contexts));
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache-Tags', 'config:user.role.anonymous http_response rendered');
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache-Max-Age', '-1 (Permanent)');
@@ -93,11 +92,13 @@ class RouterTest extends BrowserTestBase {
     $this->assertSession()->responseHeaderDoesNotExist('X-Drupal-Cache-Contexts');
     $this->assertSession()->responseHeaderDoesNotExist('X-Drupal-Cache-Tags');
     $this->assertSession()->responseHeaderDoesNotExist('X-Drupal-Cache-Max-Age');
-    // 5. controller result: CacheableResponse object, globally cacheable route access.
+    // 5. controller result: CacheableResponse object, globally cacheable route
+    // access.
     $this->drupalGet('router_test/test21');
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache-Contexts', '');
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache-Tags', 'http_response');
-    // 6. controller result: CacheableResponse object, per-role cacheable route access.
+    // 6. controller result: CacheableResponse object, per-role cacheable route
+    // access.
     $this->drupalGet('router_test/test22');
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache-Contexts', 'user.roles');
     $this->assertSession()->responseHeaderEquals('X-Drupal-Cache-Tags', 'http_response');
@@ -120,7 +121,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Confirms that multiple routes with the same path do not cause an error.
    */
-  public function testDuplicateRoutePaths() {
+  public function testDuplicateRoutePaths(): void {
     // Tests two routes with exactly the same path. The route with the maximum
     // fit and lowest sorting route name will match, regardless of the order the
     // routes are declared.
@@ -148,7 +149,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Confirms that placeholders in paths work correctly.
    */
-  public function testControllerPlaceholders() {
+  public function testControllerPlaceholders(): void {
     // Test with 0 and a random value.
     $values = ["0", $this->randomMachineName()];
     foreach ($values as $value) {
@@ -169,7 +170,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Confirms that default placeholders in paths work correctly.
    */
-  public function testControllerPlaceholdersDefaultValues() {
+  public function testControllerPlaceholdersDefaultValues(): void {
     $this->drupalGet('router_test/test4');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextContains('Lassie');
@@ -186,7 +187,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Confirms that default placeholders in paths work correctly.
    */
-  public function testControllerPlaceholdersDefaultValuesProvided() {
+  public function testControllerPlaceholdersDefaultValuesProvided(): void {
     $this->drupalGet('router_test/test4/barf');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextContains('barf');
@@ -205,7 +206,7 @@ class RouterTest extends BrowserTestBase {
    *
    * @see \Drupal\router_test\RouteSubscriber
    */
-  public function testDynamicRoutes() {
+  public function testDynamicRoutes(): void {
     // Test the altered route.
     $this->drupalGet('router_test/test6');
     $this->assertSession()->statusCodeEquals(200);
@@ -215,7 +216,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Checks that a request with text/html response gets rendered as a page.
    */
-  public function testControllerResolutionPage() {
+  public function testControllerResolutionPage(): void {
     $this->drupalGet('/router_test/test10');
 
     $this->assertSession()->pageTextContains('abcde');
@@ -232,7 +233,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Checks the generate method on the URL generator using the front router.
    */
-  public function testUrlGeneratorFront() {
+  public function testUrlGeneratorFront(): void {
     $front_url = Url::fromRoute('<front>', [], ['absolute' => TRUE]);
     // Compare to the site base URL.
     $base_url = Url::fromUri('base:/', ['absolute' => TRUE]);
@@ -242,7 +243,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Tests that a page trying to match a path will succeed.
    */
-  public function testRouterMatching() {
+  public function testRouterMatching(): void {
     $this->drupalGet('router_test/test14/1');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextContains('User route "entity.user.canonical" was matched.');
@@ -265,7 +266,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Tests that a PSR-7 response works.
    */
-  public function testRouterResponsePsr7() {
+  public function testRouterResponsePsr7(): void {
     $this->drupalGet('/router_test/test23');
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->pageTextContains('test23');
@@ -274,7 +275,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Tests the user account on the DIC.
    */
-  public function testUserAccount() {
+  public function testUserAccount(): void {
     $account = $this->drupalCreateUser();
     $this->drupalLogin($account);
 
@@ -292,11 +293,11 @@ class RouterTest extends BrowserTestBase {
   /**
    * Checks that an ajax request gets rendered as an Ajax response, by mime.
    */
-  public function testControllerResolutionAjax() {
+  public function testControllerResolutionAjax(): void {
     // This will fail with a JSON parse error if the request is not routed to
     // The correct controller.
     $options['query'][MainContentViewSubscriber::WRAPPER_FORMAT] = 'drupal_ajax';
-    $headers[] = 'X-Requested-With: XMLHttpRequest';
+    $headers = ['X-Requested-With' => 'XMLHttpRequest'];
     $this->drupalGet('/router_test/test10', $options, $headers);
 
     $this->assertSession()->responseHeaderEquals('Content-Type', 'application/json');
@@ -307,13 +308,13 @@ class RouterTest extends BrowserTestBase {
   /**
    * Tests that routes no longer exist for a module that has been uninstalled.
    */
-  public function testRouterUninstallInstall() {
+  public function testRouterUninstallInstall(): void {
     \Drupal::service('module_installer')->uninstall(['router_test']);
     try {
       \Drupal::service('router.route_provider')->getRouteByName('router_test.1');
       $this->fail('Route was delete on uninstall.');
     }
-    catch (RouteNotFoundException $e) {
+    catch (RouteNotFoundException) {
       // Expected exception; just continue testing.
     }
     // Install the module again.
@@ -325,7 +326,7 @@ class RouterTest extends BrowserTestBase {
   /**
    * Ensure that multiple successive slashes are redirected.
    */
-  public function testSuccessiveSlashes() {
+  public function testSuccessiveSlashes(): void {
     $request = $this->container->get('request_stack')->getCurrentRequest();
 
     // Test a simple path with successive leading slashes.
@@ -343,6 +344,54 @@ class RouterTest extends BrowserTestBase {
     $url = $request->getUriForPath('/////////////////////////////////////////////////router_test/test1') . '?qs=test&destination=http://www.example.com%5c@drupal8alt.test';
     $this->drupalGet($url);
     $this->assertSession()->addressEquals($request->getUriForPath('/router_test/test1') . '?qs=test');
+  }
+
+  /**
+   * Tests route aliasing.
+   */
+  public function testRouteAlias(): void {
+    $request = \Drupal::request();
+    $route_provider = \Drupal::service('router.route_provider');
+
+    // Check a simple aliased route.
+    $aliased_route_url = Url::fromRoute('router_test.alias');
+    $this->drupalGet($aliased_route_url);
+    $this->assertSession()->addressEquals($request->getUriForPath('/router_test/test1'));
+
+    $routes = $route_provider->getRoutesByNames(['router_test.alias']);
+    $aliased_route = reset($routes);
+    $this->assertTrue($aliased_route instanceof Alias);
+    $this->assertFalse($aliased_route->isDeprecated());
+
+    // Check that loading an aliased route by name returns the actual route.
+    $actual_route = $route_provider->getRouteByName('router_test.alias');
+    $this->assertFalse($actual_route instanceof Alias);
+    $this->assertEquals('/router_test/test1', $actual_route->getPath());
+  }
+
+  /**
+   * Tests route aliasing with deprecation.
+   *
+   * @group legacy
+   */
+  public function testRouteAliasWithDeprecation(): void {
+    $request = \Drupal::request();
+    $route_provider = \Drupal::service('router.route_provider');
+
+    // Check an aliased route with a deprecation message.
+    $deprecated_route_url = Url::fromRoute('router_test.deprecated');
+    $this->expectDeprecation('The "router_test.deprecated" route is deprecated in drupal:11.2.0 and will be removed in drupal:12.0.0. Use the "router_test.1" route instead.');
+    $this->drupalGet($deprecated_route_url);
+    $this->assertSession()->addressEquals($request->getUriForPath('/router_test/test1'));
+
+    $routes = $route_provider->getRoutesByNames(['router_test.deprecated']);
+    $deprecated_route = reset($routes);
+    $this->assertTrue($deprecated_route instanceof Alias);
+    $this->assertTrue($deprecated_route->isDeprecated());
+    $deprecation = $deprecated_route->getDeprecation('router_test.deprecated');
+    $this->assertEquals('drupal/core', $deprecation['package']);
+    $this->assertEquals('11.2.0', $deprecation['version']);
+    $this->assertEquals('The "router_test.deprecated" route is deprecated in drupal:11.2.0 and will be removed in drupal:12.0.0. Use the "router_test.1" route instead.', $deprecation['message']);
   }
 
 }

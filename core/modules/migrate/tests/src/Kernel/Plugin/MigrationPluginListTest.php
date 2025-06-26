@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate\Kernel\Plugin;
 
 use Drupal\Core\Database\Database;
@@ -25,11 +27,10 @@ class MigrationPluginListTest extends KernelTestBase {
   protected static $modules = [
     'migrate',
     // Test with all modules containing Drupal migrations.
+    // @todo Remove Ban in https://www.drupal.org/project/drupal/issues/3488827
     'ban',
     'block',
     'block_content',
-    // @todo Remove book in https://www.drupal.org/project/drupal/issues/3376101
-    'book',
     'comment',
     'contact',
     'content_translation',
@@ -37,8 +38,6 @@ class MigrationPluginListTest extends KernelTestBase {
     'field',
     'file',
     'filter',
-    // @todo Remove forum in https://www.drupal.org/project/drupal/issues/3261653
-    'forum',
     'image',
     'language',
     'locale',
@@ -49,13 +48,10 @@ class MigrationPluginListTest extends KernelTestBase {
     'path',
     'search',
     'shortcut',
-    'statistics',
     'syslog',
     'system',
     'taxonomy',
     'text',
-    // @todo Remove tracker in https://www.drupal.org/project/drupal/issues/3261452
-    'tracker',
     'update',
     'user',
   ];
@@ -72,7 +68,7 @@ class MigrationPluginListTest extends KernelTestBase {
   /**
    * @covers ::getDefinitions
    */
-  public function testGetDefinitions() {
+  public function testGetDefinitions(): void {
     // Create an entity reference field to make sure that migrations derived by
     // EntityReferenceTranslationDeriver do not get discovered without
     // migrate_drupal enabled.
@@ -101,6 +97,7 @@ class MigrationPluginListTest extends KernelTestBase {
 
     // Enable migrate_drupal to test that the plugins can now be discovered.
     $this->enableModules(['migrate_drupal']);
+    $this->installConfig(['migrate_drupal']);
 
     // Make sure retrieving these migration plugins in the absence of a database
     // connection does not throw any errors.
@@ -116,7 +113,7 @@ class MigrationPluginListTest extends KernelTestBase {
         try {
           $source_plugin->checkRequirements();
         }
-        catch (RequirementsException $e) {
+        catch (RequirementsException) {
           unset($source_plugins[$id]);
         }
       }

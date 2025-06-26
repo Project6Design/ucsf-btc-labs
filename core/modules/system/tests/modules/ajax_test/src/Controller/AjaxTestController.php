@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\ajax_test\Controller;
 
 use Drupal\Component\Serialization\Json;
@@ -455,6 +457,42 @@ class AjaxTestController {
    */
   public function httpMethodsDialog(): array {
     return ['#markup' => 'Modal dialog contents'];
+  }
+
+  /**
+   * Provides an Ajax link that open in dialog.
+   *
+   * @return array
+   *   The AJAX link.
+   */
+  public function linkPageDialog(): array {
+    return [
+      '#type' => 'link',
+      '#title' => 'Modal link',
+      '#url' => Url::fromRoute('ajax_test.link_page.dialog_contents'),
+      '#attributes' => [
+        'class' => [
+          'use-ajax',
+        ],
+        'data-dialog-type' => 'dialog',
+      ],
+      '#attached' => [
+        'library' => [
+          'core/drupal.dialog.ajax',
+        ],
+      ],
+    ];
+  }
+
+  /**
+   * Provides a title to the page.
+   *
+   * @return string
+   *   The page title.
+   */
+  public function linkPageDialogTitle(): string {
+    $title = 'Dialog link page title';
+    return $title;
   }
 
 }

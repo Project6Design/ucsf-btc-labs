@@ -14,20 +14,23 @@ class DateTimeFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $fieldType = 'datetime';
+  protected string $fieldType = 'datetime';
 
   /**
    * The 'value' property value for testing.
    *
    * @var string
    */
-  protected $testValue = '2014-01-28T06:01:01';
+  protected string $testValue = '2014-01-28T06:01:01';
 
   /**
    * {@inheritdoc}
    */
   protected static $modules = ['datetime'];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -47,8 +50,12 @@ class DateTimeFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests the default formatter.
    */
-  public function testDefaultFormatter() {
-    $this->assertFormatterRdfa(['type' => 'datetime_default'], 'http://schema.org/dateCreated', ['value' => $this->testValue . 'Z', 'type' => 'literal', 'datatype' => 'http://www.w3.org/2001/XMLSchema#dateTime']);
+  public function testDefaultFormatter(): void {
+    $this->assertFormatterRdfa(['type' => 'datetime_default'], 'http://schema.org/dateCreated', [
+      'value' => $this->testValue . 'Z',
+      'type' => 'literal',
+      'datatype' => 'http://www.w3.org/2001/XMLSchema#dateTime',
+    ]);
   }
 
 }

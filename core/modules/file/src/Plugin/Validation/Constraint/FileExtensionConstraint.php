@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Drupal\file\Plugin\Validation\Constraint;
 
-use Symfony\Component\Validator\Constraint;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Validation\Attribute\Constraint;
+use Symfony\Component\Validator\Constraint as SymfonyConstraint;
 
 /**
  * File extension constraint.
- *
- * @Constraint(
- *   id = "FileExtension",
- *   label = @Translation("File Extension", context = "Validation"),
- *   type = "file"
- * )
  */
-class FileExtensionConstraint extends Constraint {
+#[Constraint(
+  id: 'FileExtension',
+  label: new TranslatableMarkup('File Extension', [], ['context' => 'Validation']),
+  type: 'file'
+)]
+class FileExtensionConstraint extends SymfonyConstraint {
 
   /**
    * The error message.
@@ -34,7 +35,7 @@ class FileExtensionConstraint extends Constraint {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultOption(): string {
+  public function getDefaultOption(): ?string {
     return 'extensions';
   }
 

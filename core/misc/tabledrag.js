@@ -198,7 +198,18 @@
         }
       });
     });
+    this.dragOrientation = this.indentEnabled ? 'drag' : 'drag-y';
     if (this.indentEnabled) {
+      // If a tabledrag has indents but only has leaf rows are present, it's not
+      // hierarchical from an end-user point of view.
+      const countNestableRows = $table
+        .find('> tr.draggable, > tbody > tr.draggable')
+        .not('.tabledrag-leaf').length;
+      // There are no rows that accept nesting in this table, show a vertical
+      // drag icon.
+      if (countNestableRows === 0) {
+        this.dragOrientation = 'drag-y';
+      }
       /**
        * Total width of indents, set in makeDraggable.
        *
@@ -225,7 +236,6 @@
         $indentation.get(1).offsetLeft - $indentation.get(0).offsetLeft;
       testRow.remove();
     }
-
     // Make each applicable row draggable.
     // Match immediate children of the parent element to allow nesting.
     $table.find('> tr.draggable, > tbody > tr.draggable').each(function () {
@@ -499,7 +509,10 @@
     // Add a class to the title link.
     $item.find('td:first-of-type').find('a').addClass('menu-item__link');
     // Create the handle.
-    const $handle = $(Drupal.theme('tableDragHandle'));
+    const $handle = $(Drupal.theme('tableDragHandle', this.dragOrientation));
+    if (this.dragOrientation === 'drag-y') {
+      $handle.addClass('tabledrag-handle-y');
+    }
     // Insert the handle after indentations (if any).
     const $indentationLast = $item
       .find('td:first-of-type')
@@ -762,7 +775,7 @@
     $(item).addClass('drag');
 
     // Set the document to use the move cursor during drag.
-    $('body').addClass('drag');
+    $('body').addClass(this.dragOrientation);
     if (self.oldRowElement) {
       $(self.oldRowElement).removeClass('drag-previous');
     }
@@ -894,7 +907,7 @@
     // Functionality specific only to pointerup events.
     if (self.dragObject !== null) {
       self.dragObject = null;
-      $('body').removeClass('drag');
+      $('body').removeClass(self.dragOrientation);
       clearInterval(self.scrollInterval);
     }
   };
@@ -1051,8 +1064,7 @@
       const nextRow = $nextRow.get(0);
       sourceRow = changedRow;
       if (
-        previousRow &&
-        previousRow.matches('.draggable') &&
+        previousRow?.matches('.draggable') &&
         $previousRow.find(`.${group}`).length
       ) {
         if (this.indentEnabled) {
@@ -1066,8 +1078,7 @@
           sourceRow = previousRow;
         }
       } else if (
-        nextRow &&
-        nextRow.matches('.draggable') &&
+        nextRow?.matches('.draggable') &&
         $nextRow.find(`.${group}`).length
       ) {
         if (this.indentEnabled) {
@@ -1234,12 +1245,7 @@
         ? de.clientHeight
         : b.offsetHeight);
     this.windowHeight = windowHeight;
-    let scrollY;
-    if (document.all) {
-      scrollY = !de.scrollTop ? b.scrollTop : de.scrollTop;
-    } else {
-      scrollY = window.pageYOffset ? window.pageYOffset : window.scrollY;
-    }
+    const scrollY = window.scrollY;
     this.scrollY = scrollY;
     const trigger = this.scrollSettings.trigger;
     let delta = 0;
@@ -1760,8 +1766,12 @@
        * @return {string}
        *   HTML markup for a tableDrag handle.
        */
-      tableDragHandle() {
-        return `<a href="#" title="${Drupal.t('Drag to re-order')}"
+      tableDragHandle(dragOrientation = 'drag') {
+        const title =
+          dragOrientation === 'drag-y'
+            ? Drupal.t('Change order')
+            : Drupal.t('Move in any direction');
+        return `<a href="#" title="${title}"
         class="tabledrag-handle"><div class="handle"></div></a>`;
       },
     },

@@ -70,9 +70,9 @@ class SitemapTaxonomyTest extends SitemapTaxonomyTestBase {
       'status' => TRUE,
       'parent' => $term2->id(),
     ]);
-    // The level-3 word 'sphynx' should appear when show_disabled is FALSE.
+    // The level-3 word 'sphinx' should appear when show_disabled is FALSE.
     $this->createTerm($this->vocabulary, [
-      'name' => 'sphynx',
+      'name' => 'sphinx',
       'status' => TRUE,
       'parent' => $term3->id(),
     ]);
@@ -129,7 +129,7 @@ class SitemapTaxonomyTest extends SitemapTaxonomyTestBase {
     $this->assertSession()->pageTextContains('over');
     $this->assertSession()->pageTextNotContains('lazy');
     $this->assertSession()->pageTextContains('dog');
-    $this->assertSession()->pageTextContains('sphynx');
+    $this->assertSession()->pageTextContains('sphinx');
     $this->assertSession()->pageTextNotContains('waltz');
     $this->assertSession()->pageTextNotContains('black');
     $this->assertSession()->pageTextNotContains('quartz');
@@ -168,7 +168,7 @@ class SitemapTaxonomyTest extends SitemapTaxonomyTestBase {
     $this->assertSession()->pageTextContains('over');
     $this->assertSession()->pageTextContains('lazy');
     $this->assertSession()->pageTextContains('dog');
-    $this->assertSession()->pageTextContains('sphynx');
+    $this->assertSession()->pageTextContains('sphinx');
     $this->assertSession()->pageTextContains('waltz');
     $this->assertSession()->pageTextContains('black');
     $this->assertSession()->pageTextContains('quartz');

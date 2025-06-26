@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\url_embed\Plugin\CKEditor5Plugin;
 
-use Drupal\ckeditor5\Plugin\CKEditor5PluginDefault;
-use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
-use Drupal\Component\Utility\Html;
 use Drupal\Core\Access\CsrfTokenGenerator;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Url;
+use Drupal\ckeditor5\Plugin\CKEditor5PluginDefault;
+use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;
 use Drupal\editor\EditorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -52,7 +51,7 @@ class UrlEmbed extends CKEditor5PluginDefault implements ContainerFactoryPluginI
     string $plugin_id,
     CKEditor5PluginDefinition $plugin_definition,
     CsrfTokenGenerator $csrf_token_generator,
-    EntityTypeManagerInterface $entity_type_manager
+    EntityTypeManagerInterface $entity_type_manager,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->csrfTokenGenerator = $csrf_token_generator;
@@ -93,9 +92,10 @@ class UrlEmbed extends CKEditor5PluginDefault implements ContainerFactoryPluginI
     $embedded_content_dialog_url = Url::fromRoute('url_embed.cke5dialog', [
       'editor' => $editor->id(),
     ])
-    ->toString(TRUE)
-    ->getGeneratedUrl();
+      ->toString(TRUE)
+      ->getGeneratedUrl();
     $plugin_config['urlEmbed']['dialogURL'] = $embedded_content_dialog_url;
     return $plugin_config;
   }
+
 }

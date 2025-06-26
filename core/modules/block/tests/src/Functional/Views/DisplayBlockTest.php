@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block\Functional\Views;
 
 use Drupal\Component\Serialization\Json;
@@ -25,9 +27,7 @@ class DisplayBlockTest extends ViewTestBase {
   use AssertBlockAppearsTrait;
 
   /**
-   * Modules to install.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'node',
@@ -61,7 +61,7 @@ class DisplayBlockTest extends ViewTestBase {
   /**
    * Tests default and content block categories.
    */
-  public function testBlockCategory() {
+  public function testBlockCategory(): void {
     $this->drupalLogin($this->drupalCreateUser([
       'administer views',
       'administer blocks',
@@ -143,7 +143,7 @@ class DisplayBlockTest extends ViewTestBase {
   /**
    * Tests removing a block display.
    */
-  public function testDeleteBlockDisplay() {
+  public function testDeleteBlockDisplay(): void {
     // To test all combinations possible we first place create two instances
     // of the block display of the first view.
     $block_1 = $this->drupalPlaceBlock('views_block:test_view_block-block_1', ['label' => 'test_view_block-block_1:1']);
@@ -196,7 +196,7 @@ class DisplayBlockTest extends ViewTestBase {
   /**
    * Tests the block form for a Views block.
    */
-  public function testViewsBlockForm() {
+  public function testViewsBlockForm(): void {
     $this->drupalLogin($this->drupalCreateUser(['administer blocks']));
     $default_theme = $this->config('system.theme')->get('default');
     $this->drupalGet('admin/structure/block/add/views_block:test_view_block-block_1/' . $default_theme);
@@ -219,8 +219,8 @@ class DisplayBlockTest extends ViewTestBase {
       $this->drupalGet('admin/structure/block/add/views_block:test_view_block-block_1/' . $default_theme);
       $this->submitForm($edit, 'Save block');
       $block = $storage->load($default_theme . '_views_block__test_view_block_block_1_' . $i);
-      // This will only return a result if our new block has been created with the
-      // expected machine name.
+      // This will only return a result if our new block has been created with
+      // the expected machine name.
       $this->assertNotEmpty($block, 'The expected block was loaded.');
     }
 
@@ -260,18 +260,19 @@ class DisplayBlockTest extends ViewTestBase {
   /**
    * Tests the actual rendering of the views block.
    */
-  public function testBlockRendering() {
+  public function testBlockRendering(): void {
     // Create a block and set a custom title.
     $block = $this->drupalPlaceBlock('views_block:test_view_block-block_1', [
       'label' => 'test_view_block-block_1:1',
       'views_label' => 'Custom title',
       'region' => 'sidebar_first',
     ]);
-    $block_title_xpath = $this->assertSession()->buildXPathQuery('//aside[contains(@class, "layout-sidebar-first")]//div[@id = :id]/h2', [
+    $block_xpath = $this->assertSession()->buildXPathQuery('//aside[contains(@class, "layout-sidebar-first")]//div[@id = :id]', [
       ':id' => 'block-' . $block->id(),
     ]);
     $this->drupalGet('');
-    $this->assertSession()->elementTextEquals('xpath', $block_title_xpath, 'Custom title');
+    $this->assertSession()->elementTextEquals('xpath', "{$block_xpath}/h2", 'Custom title');
+    $this->assertSession()->elementTextEquals('xpath', "{$block_xpath}//footer", 'Custom title');
 
     // Don't override the title anymore.
     $plugin = $block->getPlugin();
@@ -279,22 +280,23 @@ class DisplayBlockTest extends ViewTestBase {
     $block->save();
 
     $this->drupalGet('');
-    $this->assertSession()->elementTextEquals('xpath', $block_title_xpath, 'test_view_block');
+    $this->assertSession()->elementTextEquals('xpath', "{$block_xpath}/h2", 'test_view_block');
+    $this->assertSession()->elementTextEquals('xpath', "{$block_xpath}//footer", 'test_view_block');
 
     // Hide the title.
     $block->getPlugin()->setConfigurationValue('label_display', FALSE);
     $block->save();
 
     $this->drupalGet('');
-    $this->assertSession()->elementNotExists('xpath', $block_title_xpath);
+    $this->assertSession()->elementNotExists('xpath', "{$block_xpath}/h2");
 
-    $this->assertCacheTags(array_merge($block->getCacheTags(), ['block_view', 'config:block_list', 'config:system.site', 'config:views.view.test_view_block', 'http_response', 'rendered']));
+    $this->assertCacheTags(array_merge($block->getCacheTags(), ['block_view', 'config:block_list', 'config:system.site', 'config:views.view.test_view_block', 'http_response', 'CACHE_MISS_IF_UNCACHEABLE_HTTP_METHOD:form', 'rendered']));
   }
 
   /**
    * Tests the various test cases of empty block rendering.
    */
-  public function testBlockEmptyRendering() {
+  public function testBlockEmptyRendering(): void {
     $url = new Url('test_page_test.test_page');
     // Remove all views_test_data entries.
     \Drupal::database()->truncate('views_test_data')->execute();
@@ -377,7 +379,7 @@ class DisplayBlockTest extends ViewTestBase {
   /**
    * Tests the contextual links on a Views block.
    */
-  public function testBlockContextualLinks() {
+  public function testBlockContextualLinks(): void {
     $this->drupalLogin($this->drupalCreateUser([
       'administer views',
       'access contextual links',

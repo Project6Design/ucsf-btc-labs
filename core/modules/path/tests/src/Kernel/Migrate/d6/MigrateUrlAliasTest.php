@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\path\Kernel\Migrate\d6;
 
 use Drupal\path_alias\PathAliasInterface;
@@ -11,6 +13,7 @@ use Drupal\Tests\Traits\Core\PathAliasTestTrait;
 /**
  * URL alias migration.
  *
+ * @group #slow
  * @group migrate_drupal_6
  */
 class MigrateUrlAliasTest extends MigrateDrupal6TestBase {
@@ -68,7 +71,7 @@ class MigrateUrlAliasTest extends MigrateDrupal6TestBase {
   /**
    * Tests the URL alias migration.
    */
-  public function testUrlAlias() {
+  public function testUrlAlias(): void {
     $this->executeMigrations([
       'd6_node',
       'd6_node_translation',
@@ -80,7 +83,7 @@ class MigrateUrlAliasTest extends MigrateDrupal6TestBase {
   /**
    * Tests the URL alias migration using the node complete migration.
    */
-  public function testNodeCompleteUrlAlias() {
+  public function testNodeCompleteUrlAlias(): void {
     $this->executeMigrations([
       'd6_node_complete',
       'd6_url_alias',
@@ -91,7 +94,7 @@ class MigrateUrlAliasTest extends MigrateDrupal6TestBase {
   /**
    * Checks the migration results.
    */
-  protected function checkUrlMigration() {
+  protected function checkUrlMigration(): void {
     $id_map = $this->getMigration('d6_url_alias')->getIdMap();
     // Test that the field exists.
     $conditions = [

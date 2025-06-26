@@ -2,14 +2,15 @@
 
 namespace Drupal\Tests\rdf\Functional;
 
-use Drupal\Core\Url;
 use Drupal\comment\CommentInterface;
 use Drupal\comment\CommentManagerInterface;
+use Drupal\comment\Entity\Comment;
+use Drupal\Core\Url;
 use Drupal\Tests\comment\Functional\CommentTestBase;
 use Drupal\Tests\rdf\Traits\RdfParsingTrait;
 use Drupal\user\Entity\User;
 use Drupal\user\RoleInterface;
-use Drupal\comment\Entity\Comment;
+use Drupal\user\UserInterface;
 
 /**
  * Tests the RDFa markup of comments.
@@ -52,6 +53,9 @@ class CommentAttributesTest extends CommentTestBase {
    */
   protected $nodeUri;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -130,7 +134,7 @@ class CommentAttributesTest extends CommentTestBase {
   /**
    * Tests the presence of the RDFa markup for the number of comments.
    */
-  public function testNumberOfCommentsRdfaMarkup() {
+  public function testNumberOfCommentsRdfaMarkup(): void {
     // Posts 2 comments on behalf of registered user.
     $this->saveComment($this->node->id(), $this->webUser->id());
     $this->saveComment($this->node->id(), $this->webUser->id());
@@ -154,7 +158,7 @@ class CommentAttributesTest extends CommentTestBase {
   /**
    * Tests comment author link markup has not been broken by RDF.
    */
-  public function testCommentRdfAuthorMarkup() {
+  public function testCommentRdfAuthorMarkup(): void {
     // Set to test the altered display name.
     \Drupal::state()->set('user_hooks_test_user_format_name_alter', TRUE);
 
@@ -178,7 +182,7 @@ class CommentAttributesTest extends CommentTestBase {
    * Tests presence of RDFa markup for the title, date and author and homepage
    * on comments from registered and anonymous users.
    */
-  public function testCommentRdfaMarkup() {
+  public function testCommentRdfaMarkup(): void {
     // Set to test the altered display name.
     \Drupal::state()->set('user_hooks_test_user_format_name_alter', TRUE);
 
@@ -187,11 +191,11 @@ class CommentAttributesTest extends CommentTestBase {
 
     // Tests comment #1 with access to the user profile.
     $this->drupalLogin($this->webUser);
-    $this->_testBasicCommentRdfaMarkup($comment1);
+    $this->testBasicCommentRdfaMarkup($comment1);
 
     // Tests comment #1 with no access to the user profile (as anonymous user).
     $this->drupalLogout();
-    $this->_testBasicCommentRdfaMarkup($comment1);
+    $this->testBasicCommentRdfaMarkup($comment1);
 
     // Posts comment #2 as anonymous user.
     $anonymous_user = [];
@@ -202,11 +206,11 @@ class CommentAttributesTest extends CommentTestBase {
 
     $anonymous = User::load(0);
     // Tests comment #2 as anonymous user.
-    $this->_testBasicCommentRdfaMarkup($comment2, $anonymous);
+    $this->testBasicCommentRdfaMarkup($comment2, $anonymous);
 
     // Tests comment #2 as logged in user.
     $this->drupalLogin($this->webUser);
-    $this->_testBasicCommentRdfaMarkup($comment2, $anonymous);
+    $this->testBasicCommentRdfaMarkup($comment2, $anonymous);
   }
 
   /**
@@ -251,11 +255,11 @@ class CommentAttributesTest extends CommentTestBase {
    *
    * @param \Drupal\comment\CommentInterface $comment
    *   Comment object.
-   * @param array|null $account
+   * @param \Drupal\user\UserInterface|null $account
    *   (optional) An array containing information about an anonymous user.
    *   Defaults to NULL.
    */
-  public function _testBasicCommentRdfaMarkup(CommentInterface $comment, $account = NULL) {
+  protected function testBasicCommentRdfaMarkup(CommentInterface $comment, UserInterface $account = NULL): void {
     $this->drupalGet($this->node->toUrl());
     $comment_uri = $comment->toUrl('canonical', ['absolute' => TRUE])->toString();
 
@@ -338,20 +342,20 @@ class CommentAttributesTest extends CommentTestBase {
   /**
    * Creates a comment entity.
    *
-   * @param $nid
+   * @param int $nid
    *   Node id which will hold the comment.
-   * @param $uid
+   * @param int $uid
    *   User id of the author of the comment. Can be NULL if $contact provided.
-   * @param $contact
+   * @param array|null $contact
    *   Set to NULL for no contact info, TRUE to ignore success checking, and
    *   array of values to set contact info.
-   * @param $pid
+   * @param int $pid
    *   Comment id of the parent comment in a thread.
    *
    * @return \Drupal\comment\Entity\Comment
    *   The saved comment.
    */
-  public function saveComment($nid, $uid, $contact = NULL, $pid = 0) {
+  public function saveComment(int $nid, int $uid, array $contact = NULL, int $pid = 0): Comment {
     $values = [
       'entity_id' => $nid,
       'entity_type' => 'node',

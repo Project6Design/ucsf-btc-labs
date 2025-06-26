@@ -2,16 +2,17 @@
 
 namespace Drupal\config_update_ui\Controller;
 
-use Drupal\Core\Controller\ControllerBase;
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Diff\DiffFormatter;
-use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Extension\ThemeHandlerInterface;
-use Drupal\Core\Site\Settings;
-use Drupal\Core\Url;
 use Drupal\config_update\ConfigDiffInterface;
 use Drupal\config_update\ConfigListByProviderInterface;
 use Drupal\config_update\ConfigRevertInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Diff\DiffFormatter;
+use Drupal\Core\Extension\ModuleExtensionList;
+use Drupal\Core\Extension\ThemeHandlerInterface;
+use Drupal\Core\Site\Settings;
+use Drupal\Core\Url;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -48,11 +49,11 @@ class ConfigUpdateController extends ControllerBase {
   protected $diffFormatter;
 
   /**
-   * The module handler.
+   * The module extension list.
    *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   * @var \Drupal\Core\Extension\ModuleExtensionList
    */
-  protected $moduleHandler;
+  protected $moduleExtensionList;
 
   /**
    * The theme handler.
@@ -69,6 +70,13 @@ class ConfigUpdateController extends ControllerBase {
   protected $configFactory;
 
   /**
+   * Logger interface.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $logger;
+
+  /**
    * Constructs a ConfigUpdateController object.
    *
    * @param \Drupal\config_update\ConfigDiffInterface $config_diff
@@ -79,22 +87,25 @@ class ConfigUpdateController extends ControllerBase {
    *   The config reverter.
    * @param \Drupal\Core\Diff\DiffFormatter $diff_formatter
    *   The diff formatter to use.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler.
+   * @param \Drupal\Core\Extension\ModuleExtensionList $module_extension_list
+   *   The module extension list.
    * @param \Drupal\Core\Extension\ThemeHandlerInterface $theme_handler
    *   The theme handler.
    * @param \drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory.
+   * @param \Psr\Log\LoggerInterface $logger
+   *   The logger instance.
    */
-  public function __construct(ConfigDiffInterface $config_diff, ConfigListByProviderInterface $config_list, ConfigRevertInterface $config_update, DiffFormatter $diff_formatter, ModuleHandlerInterface $module_handler, ThemeHandlerInterface $theme_handler, ConfigFactoryInterface $config_factory) {
+  public function __construct(ConfigDiffInterface $config_diff, ConfigListByProviderInterface $config_list, ConfigRevertInterface $config_update, DiffFormatter $diff_formatter, ModuleExtensionList $module_extension_list, ThemeHandlerInterface $theme_handler, ConfigFactoryInterface $config_factory, LoggerInterface $logger) {
     $this->configDiff = $config_diff;
     $this->configList = $config_list;
     $this->configRevert = $config_update;
     $this->diffFormatter = $diff_formatter;
     $this->diffFormatter->show_header = FALSE;
-    $this->moduleHandler = $module_handler;
+    $this->moduleExtensionList = $module_extension_list;
     $this->themeHandler = $theme_handler;
     $this->configFactory = $config_factory;
+    $this->logger = $logger;
   }
 
   /**
@@ -106,9 +117,10 @@ class ConfigUpdateController extends ControllerBase {
       $container->get('config_update.config_list'),
       $container->get('config_update.config_update'),
       $container->get('diff.formatter'),
-      $container->get('module_handler'),
+      $container->get('extension.list.module'),
       $container->get('theme_handler'),
-      $container->get('config.factory')
+      $container->get('config.factory'),
+      $container->get('logger.factory')->get('config_update_ui')
     );
   }
 
@@ -132,7 +144,12 @@ class ConfigUpdateController extends ControllerBase {
     $build = [];
     $definition = $this->configList->getType($config_type);
     $config_type_label = ($definition) ? $definition->getLabel() : $this->t('Simple configuration');
-    $build['#title'] = $this->t('Config difference for @type @name', ['@type' => $config_type_label, '@name' => $config_name]);
+    $build['#title'] = $this->t('Config difference for @type @name',
+      [
+        '@type' => $config_type_label,
+        '@name' => $config_name,
+      ]
+    );
     $build['#attached']['library'][] = 'system/diff';
 
     $rows = $this->diffFormatter->format($diff);
@@ -158,7 +175,12 @@ class ConfigUpdateController extends ControllerBase {
     $links = [];
     if (!empty($rows)) {
       $links['revert'] = [
-        'url' => Url::fromRoute('config_update_ui.revert', ['config_type' => $config_type, 'config_name' => $config_name]),
+        'url' => Url::fromRoute('config_update_ui.revert',
+          [
+            'config_type' => $config_type,
+            'config_name' => $config_name,
+          ]
+        ),
         'title' => $this->t('Revert to source'),
       ];
     }
@@ -304,12 +326,12 @@ class ConfigUpdateController extends ControllerBase {
 
     // Make a list of installed modules.
     $profile = $this->getProfileName();
-    $modules = $this->moduleHandler->getModuleList();
+    $modules = $this->moduleExtensionList->getList();
     $links = [];
     foreach ($modules as $machine_name => $module) {
       if ($machine_name != $profile && $this->configList->providerHasConfig('module', $machine_name)) {
         $links['report_module_' . $machine_name] = [
-          'title' => $this->moduleHandler->getName($machine_name),
+          'title' => $this->moduleExtensionList->getName($machine_name),
           'url' => Url::fromRoute('config_update_ui.report', ['report_type' => 'module', 'name' => $machine_name]),
         ];
       }
@@ -354,7 +376,7 @@ class ConfigUpdateController extends ControllerBase {
     // Profile is just one option.
     if ($this->configList->providerHasConfig('profile', $profile)) {
       $links['report_profile_' . $profile] = [
-        'title' => $this->moduleHandler->getName($profile),
+        'title' => $this->moduleExtensionList->getName($profile),
         'url' => Url::fromRoute('config_update_ui.report', ['report_type' => 'profile']),
       ];
       $build['links']['#rows'][] = [
@@ -407,12 +429,12 @@ class ConfigUpdateController extends ControllerBase {
         break;
 
       case 'module':
-        $list = $this->moduleHandler->getModuleList();
+        $list = $this->moduleExtensionList->getList();
         if (!isset($list[$value])) {
           return NULL;
         }
 
-        $label = $this->t('@name module', ['@name' => $this->moduleHandler->getName($value)]);
+        $label = $this->t('@name module', ['@name' => $this->moduleExtensionList->getName($value)]);
         break;
 
       case 'theme':
@@ -426,7 +448,7 @@ class ConfigUpdateController extends ControllerBase {
 
       case 'profile':
         $profile = $this->getProfileName();
-        $label = $this->t('@name profile', ['@name' => $this->moduleHandler->getName($profile)]);
+        $label = $this->t('@name profile', ['@name' => $this->moduleExtensionList->getName($profile)]);
         break;
 
       default:
@@ -434,7 +456,7 @@ class ConfigUpdateController extends ControllerBase {
     }
 
     // List the active and extension-provided config.
-    list($active_list, $install_list, $optional_list) = $this->configList->listConfig($report_type, $value);
+    [$active_list, $install_list, $optional_list] = $this->configList->listConfig($report_type, $value);
 
     // Build the report.
     $build = [];
@@ -554,8 +576,7 @@ class ConfigUpdateController extends ControllerBase {
       }
 
       if (empty($config)) {
-        // @todo Inject this dependency in the constructor.
-        \Drupal::logger('config_update_ui')->error('Malformed config file @config_name.', ['@config_name' => $name]);
+        $this->logger->error('Malformed config file @config_name.', ['@config_name' => $name]);
         continue;
       }
 
@@ -592,7 +613,7 @@ class ConfigUpdateController extends ControllerBase {
       if (!empty($provider)) {
         switch ($provider[0]) {
           case 'profile':
-            $provider_name = $this->moduleHandler->getName($provider[1]);
+            $provider_name = $this->moduleExtensionList->getName($provider[1]);
             if ($provider_name) {
               $provider_name = $this->t('@name profile', ['@name' => $provider_name]);
             }
@@ -602,7 +623,7 @@ class ConfigUpdateController extends ControllerBase {
             break;
 
           case 'module':
-            $provider_name = $this->moduleHandler->getName($provider[1]);
+            $provider_name = $this->moduleExtensionList->getName($provider[1]);
             if ($provider_name) {
               $provider_name = $this->t('@name module', ['@name' => $provider_name]);
             }

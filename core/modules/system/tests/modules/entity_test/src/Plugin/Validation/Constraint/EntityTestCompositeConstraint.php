@@ -1,21 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\entity_test\Plugin\Validation\Constraint;
 
 use Drupal\Core\Entity\Plugin\Validation\Constraint\CompositeConstraintBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Validation\Attribute\Constraint;
 
 /**
  * Constraint with multiple fields.
- *
- * @Constraint(
- *   id = "EntityTestComposite",
- *   label = @Translation("Constraint with multiple fields."),
- *   type = "entity"
- * )
  */
+#[Constraint(
+  id: 'EntityTestComposite',
+  label: new TranslatableMarkup('Constraint with multiple fields.'),
+  type: ['entity']
+)]
 class EntityTestCompositeConstraint extends CompositeConstraintBase {
 
-  public $message = 'Multiple fields are validated';
+  /**
+   * The default violation message.
+   */
+  public string $message = 'Multiple fields are validated';
 
   /**
    * {@inheritdoc}

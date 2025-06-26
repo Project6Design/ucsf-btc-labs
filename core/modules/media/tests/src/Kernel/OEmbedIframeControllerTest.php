@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Kernel;
 
 use Drupal\Core\Render\HtmlResponse;
@@ -26,6 +28,7 @@ class OEmbedIframeControllerTest extends MediaKernelTestBase {
    * Data provider for testBadHashParameter().
    *
    * @return array
+   *   An array of test cases.OffCanvasDialogTest.php
    */
   public static function providerBadHashParameter() {
     return [
@@ -48,7 +51,7 @@ class OEmbedIframeControllerTest extends MediaKernelTestBase {
    *
    * @covers ::render
    */
-  public function testBadHashParameter($hash) {
+  public function testBadHashParameter($hash): void {
     /** @var callable $controller */
     $controller = $this->container
       ->get('controller_resolver')
@@ -72,7 +75,7 @@ class OEmbedIframeControllerTest extends MediaKernelTestBase {
    *
    * @covers ::render
    */
-  public function testResourcePassedToPreprocess() {
+  public function testResourcePassedToPreprocess(): void {
     $hash = $this->container->get('media.oembed.iframe_url_helper')
       ->getHash('', 0, 0);
 

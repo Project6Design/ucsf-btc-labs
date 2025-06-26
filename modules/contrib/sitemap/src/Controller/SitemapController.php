@@ -18,36 +18,23 @@ class SitemapController implements ContainerInjectionInterface {
    *
    * @var \Drupal\Core\Config\ConfigFactoryInterface
    */
-  protected $configFactory;
+  protected ConfigFactoryInterface $configFactory;
 
   /**
    * The SitemapMap plugin manager.
    *
    * @var \Drupal\sitemap\SitemapManager
    */
-  protected $sitemapManager;
-
-  /**
-   * Constructs update status data.
-   *
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   *   The configuration factory.
-   * @param \Drupal\sitemap\SitemapManager $sitemap_manager
-   *   The SitemapMap plugin manager.
-   */
-  public function __construct(ConfigFactoryInterface $config_factory, SitemapManager $sitemap_manager) {
-    $this->configFactory = $config_factory;
-    $this->sitemapManager = $sitemap_manager;
-  }
+  protected SitemapManager $sitemapManager;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('config.factory'),
-      $container->get('plugin.manager.sitemap')
-    );
+    $instance = new static();
+    $instance->configFactory = $container->get('config.factory');
+    $instance->sitemapManager = $container->get('plugin.manager.sitemap');
+    return $instance;
   }
 
   /**

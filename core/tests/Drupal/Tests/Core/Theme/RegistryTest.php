@@ -8,6 +8,8 @@ use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Theme\ActiveTheme;
 use Drupal\Core\Theme\Registry;
 use Drupal\Tests\UnitTestCase;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Drupal\theme_test\Hook\ThemeTestHooks;
 
 /**
  * @coversDefaultClass \Drupal\Core\Theme\Registry
@@ -79,6 +81,13 @@ class RegistryTest extends UnitTestCase {
   protected $moduleList;
 
   /**
+   * The kernel.
+   *
+   * @var \Symfony\Component\HttpKernel\HttpKernelInterface|\PHPUnit\Framework\MockObject\MockObject
+   */
+  protected $kernel;
+
+  /**
    * The list of functions that get_defined_functions() should provide.
    *
    * @var array
@@ -99,7 +108,8 @@ class RegistryTest extends UnitTestCase {
     $this->runtimeCache = $this->createMock('Drupal\Core\Cache\CacheBackendInterface');
     $this->themeManager = $this->createMock('Drupal\Core\Theme\ThemeManagerInterface');
     $this->moduleList = $this->createMock(ModuleExtensionList::class);
-    $this->registry = new Registry($this->root, $this->cache, $this->lock, $this->moduleHandler, $this->themeHandler, $this->themeInitialization, $this->runtimeCache, $this->moduleList);
+    $this->kernel = $this->createMock(HttpKernelInterface::class);
+    $this->registry = new Registry($this->root, $this->cache, $this->lock, $this->moduleHandler, $this->themeHandler, $this->themeInitialization, $this->runtimeCache, $this->moduleList, $this->kernel);
     $this->registry->setThemeManager($this->themeManager);
   }
 
@@ -114,7 +124,7 @@ class RegistryTest extends UnitTestCase {
   /**
    * Tests getting the theme registry defined by a module.
    */
-  public function testGetRegistryForModule() {
+  public function testGetRegistryForModule(): void {
     $test_theme = new ActiveTheme([
       'name' => 'test_theme',
       'path' => 'core/modules/system/tests/themes/test_theme/test_theme.info.yml',
@@ -146,15 +156,22 @@ class RegistryTest extends UnitTestCase {
     // Include the module and theme files so that hook_theme can be called.
     include_once $this->root . '/core/modules/system/tests/modules/theme_test/theme_test.module';
     include_once $this->root . '/core/tests/fixtures/test_stable/test_stable.theme';
-    $this->moduleHandler->expects($this->atLeastOnce())
+    $themeTestTheme = new ThemeTestHooks();
+    $this->moduleHandler->expects($this->exactly(2))
+      ->method('invoke')
+      ->with('theme_test', 'theme')
+      ->willReturn($themeTestTheme->theme(NULL, NULL, NULL, NULL));
+    $this->moduleHandler->expects($this->atMost(50))
       ->method('invokeAllWith')
-      ->with('theme')
-      ->willReturnCallback(function (string $hook, callable $callback) {
-        $callback(function () {}, 'theme_test');
-      });
-    $this->moduleHandler->expects($this->atLeastOnce())
+      // $callback is documented on ModuleHandlerInterface::invokeAllWith().
+      // The first argument expects a callable, but it doesn't matter what it
+      // is, use pi() as a canary in case code changes, and it begins to use it.
+      // The second argument is the module name and for that theme_test is
+      // always correct here.
+      ->willReturnCallback(fn (string $hook, callable $callback) => $callback('pi', 'theme_test'));
+    $this->moduleHandler->expects($this->exactly(2))
       ->method('getModuleList')
-      ->willReturn([]);
+      ->willReturn(['theme_test' => NULL]);
     $this->moduleList->expects($this->exactly(2))
       ->method('getPath')
       ->with('theme_test')
@@ -196,7 +213,7 @@ class RegistryTest extends UnitTestCase {
    * @param array $expected
    *   The expected results.
    */
-  public function testPostProcessExtension($defined_functions, $hooks, $expected) {
+  public function testPostProcessExtension($defined_functions, $hooks, $expected): void {
     static::$functions['user'] = $defined_functions;
 
     $theme = $this->prophesize(ActiveTheme::class);
@@ -218,7 +235,7 @@ class RegistryTest extends UnitTestCase {
   /**
    * Provides test data to ::testPostProcessExtension().
    */
-  public function providerTestPostProcessExtension() {
+  public static function providerTestPostProcessExtension() {
     // This is test data for unit testing
     // \Drupal\Core\Theme\Registry::postProcessExtension(), not what happens
     // before it. Therefore, for all test data:

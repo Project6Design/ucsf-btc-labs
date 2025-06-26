@@ -2,6 +2,7 @@
 
 namespace Drupal\user\Form;
 
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -46,11 +47,17 @@ class UserPermissionsForm extends FormBase {
    *   The role storage.
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
    *   The module handler.
+   * @param \Drupal\Core\Extension\ModuleExtensionList|null $moduleExtensionList
+   *   The module extension list.
    */
-  public function __construct(PermissionHandlerInterface $permission_handler, RoleStorageInterface $role_storage, ModuleHandlerInterface $module_handler) {
+  public function __construct(PermissionHandlerInterface $permission_handler, RoleStorageInterface $role_storage, ModuleHandlerInterface $module_handler, protected ?ModuleExtensionList $moduleExtensionList = NULL) {
     $this->permissionHandler = $permission_handler;
     $this->roleStorage = $role_storage;
     $this->moduleHandler = $module_handler;
+    if ($this->moduleExtensionList === NULL) {
+      @trigger_error('Calling ' . __METHOD__ . '() without the $moduleExtensionList argument is deprecated in drupal:10.3.0 and will be required in drupal:12.0.0. See https://www.drupal.org/node/3310017', E_USER_DEPRECATED);
+      $this->moduleExtensionList = \Drupal::service('extension.list.module');
+    }
   }
 
   /**
@@ -60,7 +67,8 @@ class UserPermissionsForm extends FormBase {
     return new static(
       $container->get('user.permissions'),
       $container->get('entity_type.manager')->getStorage('user_role'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('extension.list.module'),
     );
   }
 
@@ -78,7 +86,7 @@ class UserPermissionsForm extends FormBase {
    *   An array of role objects.
    */
   protected function getRoles() {
-    return $this->roleStorage->loadMultiple();
+    return $this->roleStorage->loadMultipleOverrideFree();
   }
 
   /**
@@ -165,6 +173,7 @@ class UserPermissionsForm extends FormBase {
 
     $form['permissions'] = [
       '#type' => 'table',
+      '#empty' => $this->t('No permissions found.'),
       '#header' => [$this->t('Permission')],
       '#id' => 'permissions',
       '#attributes' => ['class' => ['permissions', 'js-permissions']],
@@ -179,14 +188,14 @@ class UserPermissionsForm extends FormBase {
 
     foreach ($this->permissionsByProvider() as $provider => $permissions) {
       // Module name.
-      $form['permissions'][$provider] = [
+      $form['permissions']['module_' . $provider] = [
         [
           '#wrapper_attributes' => [
             'colspan' => count($role_names) + 1,
             'class' => ['module'],
             'id' => 'module-' . $provider,
           ],
-          '#markup' => $this->moduleHandler->getName($provider),
+          '#markup' => $this->moduleExtensionList->getName($provider),
         ],
       ];
       foreach ($permissions as $perm => $perm_item) {

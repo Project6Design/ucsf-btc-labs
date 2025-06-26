@@ -8,7 +8,7 @@ use Drupal\Component\Annotation\PluginID;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversDefaultClass \Drupal\Component\Annotation\PluginId
+ * @coversDefaultClass \Drupal\Component\Annotation\PluginID
  * @group Annotation
  */
 class PluginIdTest extends TestCase {
@@ -16,7 +16,7 @@ class PluginIdTest extends TestCase {
   /**
    * @covers ::get
    */
-  public function testGet() {
+  public function testGet(): void {
     // Assert plugin starts empty.
     $plugin = new PluginID();
     $this->assertEquals([
@@ -39,7 +39,7 @@ class PluginIdTest extends TestCase {
   /**
    * @covers ::getId
    */
-  public function testGetId() {
+  public function testGetId(): void {
     $plugin = new PluginID();
     $plugin->value = 'example';
     $this->assertEquals('example', $plugin->getId());

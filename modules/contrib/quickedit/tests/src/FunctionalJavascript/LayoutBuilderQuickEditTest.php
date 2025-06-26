@@ -185,7 +185,7 @@ class LayoutBuilderQuickEditTest extends QuickEditJavascriptTestBase {
   /**
    * DataProvider for testEnableDisableLayoutBuilder().
    */
-  public function providerEnableDisableLayoutBuilder() {
+  public static function providerEnableDisableLayoutBuilder() {
     return [
       'use revisions, not admin' => [TRUE],
       'do not use revisions, not admin' => [FALSE],

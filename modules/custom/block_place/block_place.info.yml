@@ -2,7 +2,7 @@ name: Place Blocks
 type: module
 description: 'Allow administrators to place blocks from any Drupal page'
 package: Other
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^9 || ^10 || ^11
 dependencies:
   - drupal:block
   - drupal:system

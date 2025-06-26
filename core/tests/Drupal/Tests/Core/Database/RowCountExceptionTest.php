@@ -23,10 +23,11 @@ class RowCountExceptionTest extends UnitTestCase {
    * Data provider for ::testExceptionMessage()
    *
    * @return array
+   *   An array of test data for ::testExceptionMessage().
    */
-  public function providerTestExceptionMessage() {
+  public static function providerTestExceptionMessage() {
     return [
-      [static::DEFAULT_EXCEPTION_MESSAGE, ''],
+      [self::DEFAULT_EXCEPTION_MESSAGE, ''],
       ['test', 'test'],
     ];
   }
@@ -35,7 +36,7 @@ class RowCountExceptionTest extends UnitTestCase {
    * @covers ::__construct
    * @dataProvider providerTestExceptionMessage
    */
-  public function testExceptionMessage($expected, $message) {
+  public function testExceptionMessage($expected, $message): void {
     $e = new RowCountException($message);
     $this->assertSame($expected, $e->getMessage());
   }
@@ -44,9 +45,9 @@ class RowCountExceptionTest extends UnitTestCase {
    * @covers ::__construct
    * @group legacy
    */
-  public function testExceptionMessageNull() {
+  public function testExceptionMessageNull(): void {
     $e = new RowCountException(NULL);
-    $this->assertSame(static::DEFAULT_EXCEPTION_MESSAGE, $e->getMessage());
+    $this->assertSame(self::DEFAULT_EXCEPTION_MESSAGE, $e->getMessage());
   }
 
 }

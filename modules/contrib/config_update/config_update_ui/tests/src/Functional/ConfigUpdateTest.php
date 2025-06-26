@@ -398,9 +398,8 @@ class ConfigUpdateTest extends BrowserTestBase {
     $session->linkExists('Search');
     $session->linkExists('Field');
     $session->linkNotExists('Configuration Update Base');
-    // @todo: this test fails since #2922511. Investigate.
-	  // $session->linkNotExists('Configuration Update Reports');
-
+    // @todo this test fails since #2922511. Investigate.
+    // $session->linkNotExists('Configuration Update Reports');
     // Themes.
     $session->linkNotExists('Stark');
 

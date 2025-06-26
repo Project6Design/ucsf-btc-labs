@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\UpdateSystem;
 
 use Drupal\Core\Url;
@@ -54,7 +56,7 @@ class UpdatePathLastRemovedTest extends BrowserTestBase {
   /**
    * Tests that a module with a too old schema version can not be updated.
    */
-  public function testLastRemovedVersion() {
+  public function testLastRemovedVersion(): void {
     /** @var \Drupal\Core\Update\UpdateHookRegistry $update_registry */
     $update_registry = \Drupal::service('update.update_hook_registry');
 
@@ -75,7 +77,7 @@ class UpdatePathLastRemovedTest extends BrowserTestBase {
 
     // Update the installed version of system and then assert that now,
     // the test module is shown instead.
-    $update_registry->setInstalledVersion('user', 9301);
+    $update_registry->setInstalledVersion('user', 10000);
     $this->drupalGet($this->updateUrl);
 
     $assert_session->pageTextNotContains('The version of Drupal you are trying to update from is too old');

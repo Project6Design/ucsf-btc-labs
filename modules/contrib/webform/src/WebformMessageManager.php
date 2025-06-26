@@ -137,7 +137,7 @@ class WebformMessageManager implements WebformMessageManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function setWebformSubmission(WebformSubmissionInterface $webform_submission = NULL) {
+  public function setWebformSubmission(?WebformSubmissionInterface $webform_submission = NULL) {
     $this->webformSubmission = $webform_submission;
     if ($webform_submission) {
       $this->webform = $webform_submission->getWebform();
@@ -148,14 +148,14 @@ class WebformMessageManager implements WebformMessageManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function setWebform(WebformInterface $webform = NULL) {
+  public function setWebform(?WebformInterface $webform = NULL) {
     $this->webform = $webform;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function setSourceEntity(EntityInterface $entity = NULL) {
+  public function setSourceEntity(?EntityInterface $entity = NULL) {
     $this->sourceEntity = $entity;
   }
 
@@ -181,7 +181,7 @@ class WebformMessageManager implements WebformMessageManagerInterface {
    */
   public function display($key, $type = 'status') {
     if ($build = $this->build($key)) {
-      $this->messenger->addMessage($this->renderer->renderPlain($build), $type);
+      $this->messenger->addMessage($this->renderer->renderInIsolation($build), $type);
     }
   }
 
@@ -190,7 +190,7 @@ class WebformMessageManager implements WebformMessageManagerInterface {
    */
   public function render($key) {
     $build = $this->build($key);
-    return ($build) ? $this->renderer->renderPlain($build) : NULL;
+    return ($build) ? $this->renderer->renderInIsolation($build) : NULL;
   }
 
   /**
@@ -356,7 +356,8 @@ class WebformMessageManager implements WebformMessageManagerInterface {
     $webform_settings = ($this->webform) ? $this->webform->getSettings() : [];
     if (!empty($webform_settings[$key])) {
       $value = $webform_settings[$key];
-      if ($value === '[none]' || $value === (string) $this->t('[none]')) {
+      $none_value = trim(strip_tags($value));
+      if ($none_value === '[none]' || $none_value === (string) $this->t('[none]')) {
         return FALSE;
       }
       else {

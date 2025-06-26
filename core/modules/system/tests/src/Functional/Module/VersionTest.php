@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Module;
 
 /**
  * Tests module version dependencies.
  *
  * @group Module
+ * @group #slow
  */
 class VersionTest extends ModuleTestBase {
 
@@ -17,9 +20,10 @@ class VersionTest extends ModuleTestBase {
   /**
    * Tests version dependencies.
    */
-  public function testModuleVersions() {
+  public function testModuleVersions(): void {
     $dependencies = [
-      // Alternating between being compatible and incompatible with 8.x-2.4-beta3.
+      // Alternating between being compatible and incompatible with
+      // 8.x-2.4-beta3.
       // The first is always a compatible.
       'common_test',
       // Branch incompatibility.

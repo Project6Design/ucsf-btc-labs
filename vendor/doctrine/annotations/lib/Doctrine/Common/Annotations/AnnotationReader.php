@@ -12,7 +12,10 @@ use ReflectionProperty;
 use function array_merge;
 use function class_exists;
 use function extension_loaded;
+use function filter_var;
 use function ini_get;
+
+use const FILTER_VALIDATE_BOOLEAN;
 
 /**
  * A reader for docblock annotations.
@@ -48,20 +51,16 @@ class AnnotationReader implements Reader
 
     /**
      * Add a new annotation to the globally ignored annotation names with regard to exception handling.
-     *
-     * @param string $name
      */
-    public static function addGlobalIgnoredName($name)
+    public static function addGlobalIgnoredName(string $name)
     {
         self::$globalIgnoredNames[$name] = true;
     }
 
     /**
      * Add a new annotation to the globally ignored annotation namespaces with regard to exception handling.
-     *
-     * @param string $namespace
      */
-    public static function addGlobalIgnoredNamespace($namespace)
+    public static function addGlobalIgnoredNamespace(string $namespace)
     {
         self::$globalIgnoredNamespaces[$namespace] = true;
     }
@@ -109,13 +108,17 @@ class AnnotationReader implements Reader
     public function __construct(?DocParser $parser = null)
     {
         if (
-            extension_loaded('Zend Optimizer+') && (ini_get('zend_optimizerplus.save_comments') === '0' ||
-            ini_get('opcache.save_comments') === '0')
+            extension_loaded('Zend Optimizer+') &&
+            (filter_var(ini_get('zend_optimizerplus.save_comments'), FILTER_VALIDATE_BOOLEAN)  === false ||
+            filter_var(ini_get('opcache.save_comments'), FILTER_VALIDATE_BOOLEAN) === false)
         ) {
             throw AnnotationException::optimizerPlusSaveComments();
         }
 
-        if (extension_loaded('Zend OPcache') && ini_get('opcache.save_comments') === 0) {
+        if (
+            extension_loaded('Zend OPcache') &&
+            filter_var(ini_get('opcache.save_comments'), FILTER_VALIDATE_BOOLEAN) === false
+        ) {
             throw AnnotationException::optimizerPlusSaveComments();
         }
 

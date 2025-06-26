@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Kernel;
 
 use Drupal\Core\Form\FormState;
@@ -7,6 +9,8 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
+
+// cspell:ignore sisko
 
 /**
  * Tests media source plugins related logic.
@@ -23,7 +27,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests that metadata is correctly mapped irrespective of how media is saved.
    */
-  public function testSave() {
+  public function testSave(): void {
     $field_storage = FieldStorageConfig::create([
       'entity_type' => 'media',
       'field_name' => 'field_to_map_to',
@@ -89,7 +93,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests default media name functionality.
    */
-  public function testDefaultName() {
+  public function testDefaultName(): void {
     // Make sure that the default name is set if not provided by the user.
     /** @var \Drupal\media\MediaInterface $media */
     $media = Media::create(['bundle' => $this->testMediaType->id()]);
@@ -118,8 +122,10 @@ class MediaSourceTest extends MediaKernelTestBase {
 
     // Change the default name attribute and see if it is used to set the name.
     $name = 'Old Major';
-    \Drupal::state()->set('media_source_test_attributes', ['alternative_name' => ['title' => 'Alternative name', 'value' => $name]]);
-    \Drupal::state()->set('media_source_test_definition', ['default_name_metadata_attribute' => 'alternative_name']);
+    \Drupal::state()
+      ->set('media_source_test_attributes', ['alternative_name' => ['title' => 'Alternative name', 'value' => $name]]);
+    \Drupal::state()
+      ->set('media_source_test_definition', ['default_name_metadata_attribute' => 'alternative_name']);
     /** @var \Drupal\media\MediaInterface $media */
     $media = Media::create(['bundle' => $this->testMediaType->id()]);
     $media_source = $media->getSource();
@@ -133,7 +139,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests metadata mapping functionality.
    */
-  public function testMetadataMapping() {
+  public function testMetadataMapping(): void {
     $field_name = 'field_to_map_to';
     $attribute_name = 'attribute_to_map';
     $storage = FieldStorageConfig::create([
@@ -214,7 +220,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests the getSourceFieldValue() method.
    */
-  public function testGetSourceFieldValue() {
+  public function testGetSourceFieldValue(): void {
     /** @var \Drupal\media\MediaInterface $media */
     $media = Media::create([
       'bundle' => $this->testMediaType->id(),
@@ -232,7 +238,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests the thumbnail functionality.
    */
-  public function testThumbnail() {
+  public function testThumbnail(): void {
     file_put_contents('public://thumbnail1.jpg', '');
     file_put_contents('public://thumbnail2.jpg', '');
 
@@ -382,7 +388,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests the media item constraints functionality.
    */
-  public function testConstraints() {
+  public function testConstraints(): void {
     // Test entity constraints.
     \Drupal::state()->set('media_source_test_entity_constraints', [
       'MediaTestConstraint' => [],
@@ -449,7 +455,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests logic related to the automated source field creation.
    */
-  public function testSourceFieldCreation() {
+  public function testSourceFieldCreation(): void {
     /** @var \Drupal\media\MediaTypeInterface $type */
     $type = MediaType::create([
       'id' => 'test_type',
@@ -512,6 +518,43 @@ class MediaSourceTest extends MediaKernelTestBase {
     $this->assertEquals('Test source with constraints', $field->label(), 'Incorrect label is used.');
     $this->assertSame('test_constraints_type', $field->getTargetBundle(), 'Field is not targeting correct bundle.');
 
+    // Test a source with a long machine name.
+    $type = MediaType::create([
+      'id' => 'test_type_fail',
+      'label' => 'Test type - Fail',
+      'source' => 'test_source_with_a_really_long_name',
+    ]);
+    $type->save();
+
+    /** @var \Drupal\field\Entity\FieldConfig $field */
+    $field = $type->getSource()->createSourceField($type);
+    /** @var \Drupal\field\Entity\FieldStorageConfig $field_storage */
+    $field_storage = $field->getFieldStorageDefinition();
+    $field_storage->save();
+    // Field configuration depends on the field storage, which must be saved first.
+    $field->save();
+
+    // Test long field name is truncated.
+    $this->assertSame('field_media_test_source_with_a_r', $field_storage->getName(), 'Incorrect field name is used.');
+
+    $type = MediaType::create([
+      'id' => 'test_type_fail_2',
+      'label' => 'Test type - Fail 2',
+      'source' => 'test_source_with_a_really_long_name',
+    ]);
+    $type->save();
+
+    /** @var \Drupal\field\Entity\FieldConfig $field */
+    $field = $type->getSource()->createSourceField($type);
+    /** @var \Drupal\field\Entity\FieldStorageConfig $field_storage */
+    $field_storage = $field->getFieldStorageDefinition();
+    $field_storage->save();
+    // Field configuration depends on the field storage, which must be saved first.
+    $field->save();
+
+    // Test long field name is truncated.
+    $this->assertSame('field_media_test_source_with_a_1', $field_storage->getName(), 'Incorrect field name is used.');
+
     // Test that new source fields respect the configured field prefix, no
     // prefix at all if that's what's configured.
     $this->installConfig('field_ui');
@@ -534,7 +577,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests configuration form submit handler on the base media source plugin.
    */
-  public function testSourceConfigurationSubmit() {
+  public function testSourceConfigurationSubmit(): void {
     /** @var \Drupal\media\MediaSourceManager $manager */
     $manager = $this->container->get('plugin.manager.media.source');
     $form = [];
@@ -569,7 +612,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests different display options for the source field.
    */
-  public function testDifferentSourceFieldDisplays() {
+  public function testDifferentSourceFieldDisplays(): void {
     $id = 'test_different_displays';
     $field_name = 'field_media_different_display';
 
@@ -590,7 +633,7 @@ class MediaSourceTest extends MediaKernelTestBase {
   /**
    * Tests hidden source field in media type.
    */
-  public function testHiddenSourceField() {
+  public function testHiddenSourceField(): void {
     $id = 'test_hidden_source_field';
     $field_name = 'field_media_hidden';
 
@@ -612,7 +655,7 @@ class MediaSourceTest extends MediaKernelTestBase {
    * @param string $field_name
    *   Source field name.
    */
-  protected function createMediaTypeViaForm($source_plugin_id, $field_name) {
+  protected function createMediaTypeViaForm($source_plugin_id, $field_name): void {
     /** @var \Drupal\media\MediaTypeInterface $type */
     $type = MediaType::create(['source' => $source_plugin_id]);
 

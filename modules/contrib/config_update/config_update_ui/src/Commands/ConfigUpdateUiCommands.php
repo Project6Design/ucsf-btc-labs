@@ -2,7 +2,6 @@
 
 namespace Drupal\config_update_ui\Commands;
 
-use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\Component\Diff\DiffFormatter;
 use Drupal\config_update\ConfigDiffer;
 use Drupal\config_update\ConfigListerWithProviders;
@@ -102,7 +101,7 @@ class ConfigUpdateUiCommands extends DrushCommands {
    * @aliases cra,config-added-report
    */
   public function addedReport(string $name) {
-    list($activeList, $installList, $optionalList) = $this->configList->listConfig('type', $name);
+    [$activeList, $installList, $optionalList] = $this->configList->listConfig('type', $name);
     $addedItems = array_diff($activeList, $installList, $optionalList);
     if (!count($addedItems)) {
       $this->logger->success(dt('No added config.'));
@@ -136,7 +135,7 @@ class ConfigUpdateUiCommands extends DrushCommands {
    * @aliases crm,config-missing-report
    */
   public function missingReport(string $type, string $name) {
-    list($activeList, $installList, $optionalList) = $this->configList->listConfig($type, $name);
+    [$activeList, $installList] = $this->configList->listConfig($type, $name);
     $missingItems = array_diff($installList, $activeList);
     if (!count($missingItems)) {
       $this->logger->success(dt('No missing config.'));
@@ -170,7 +169,7 @@ class ConfigUpdateUiCommands extends DrushCommands {
    * @aliases cri,config-inactive-report
    */
   public function inactiveReport(string $type, string $name) {
-    list($activeList, $installList, $optionalList) = $this->configList->listConfig($type, $name);
+    [$activeList, $optionalList] = $this->configList->listConfig($type, $name);
     $inactiveItems = array_diff($optionalList, $activeList);
     if (!count($inactiveItems)) {
       $this->logger->success(dt('No inactive config.'));
@@ -228,7 +227,8 @@ class ConfigUpdateUiCommands extends DrushCommands {
    *   The formatted diff output.
    *
    * @usage drush config-diff block.block.olivero_search
-   *   Displays the config differences for the search block in the Olivero theme.
+   *   Displays the config differences for the search block
+   *   in the Olivero theme.
    *
    * @command config:diff
    * @aliases cfd,config-diff
@@ -364,7 +364,7 @@ class ConfigUpdateUiCommands extends DrushCommands {
    *   An array of differing configuration items.
    */
   protected function getDifferentItems(string $type, string $name): array {
-    list($activeList, $installList, $optionalList) = $this->configList->listConfig($type, $name);
+    [$activeList, $installList, $optionalList] = $this->configList->listConfig($type, $name);
     $addedItems = array_diff($activeList, $installList, $optionalList);
     $activeAndAddedItems = array_diff($activeList, $addedItems);
     $differentItems = [];

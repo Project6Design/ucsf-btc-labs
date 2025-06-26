@@ -106,7 +106,7 @@ class SocialMediaLinksPlatforms extends FormElement {
       '#title' => $selected_platform['name']->render(),
       '#title_display' => 'invisible',
       '#size' => 40,
-      '#default_value' => isset($value['value']) ? $value['value'] : '',
+      '#default_value' => $value['value'] ?? '',
       '#field_prefix' => $selected_platform['instance']->getUrlPrefix(),
       '#field_suffix' => $selected_platform['instance']->getUrlSuffix(),
       '#element_validate' => [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\text\Kernel;
 
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -20,7 +22,7 @@ class TextItemBaseTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['filter', 'text', 'entity_test', 'field'];
+  protected static $modules = ['filter', 'text', 'entity_test', 'field', 'user'];
 
   /**
    * Tests creation of sample values.
@@ -28,7 +30,7 @@ class TextItemBaseTest extends KernelTestBase {
    * @covers ::generateSampleValue
    * @dataProvider providerTextFieldSampleValue
    */
-  public function testTextFieldSampleValue($max_length) {
+  public function testTextFieldSampleValue($max_length): void {
     // Create a text field.
     $field_definition = BaseFieldDefinition::create('text')
       ->setTargetEntityTypeId('foo');
@@ -44,7 +46,7 @@ class TextItemBaseTest extends KernelTestBase {
   /**
    * Data provider for testTextFieldSampleValue.
    */
-  public function providerTextFieldSampleValue() {
+  public static function providerTextFieldSampleValue() {
     return [
       [
         1,
@@ -64,7 +66,9 @@ class TextItemBaseTest extends KernelTestBase {
   /**
    * @covers ::calculateDependencies
    */
-  public function testCalculateDependencies() {
+  public function testCalculateDependencies(): void {
+    $this->installEntitySchema('user');
+    $this->installEntitySchema('entity_test');
     $format = FilterFormat::create([
       'format' => 'test_format',
       'name' => 'Test format',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal_ui\Functional\d7;
 
 use Drupal\Core\Database\Database;
@@ -92,7 +94,7 @@ class FilePathTest extends MigrateUpgradeTestBase {
    *
    * @dataProvider providerTestFilePath
    */
-  public function testFilePath(string $file_private_path, string $file_public_path, string $file_temporary_path, string $private, string $public, string $temporary) {
+  public function testFilePath(string $file_private_path, string $file_public_path, string $file_temporary_path, string $private, string $public, string $temporary): void {
     $this->sourceFileScheme['private'] = $file_private_path;
     $this->sourceFileScheme['public'] = $file_public_path;
     $this->sourceFileScheme['temporary'] = $file_temporary_path;
@@ -165,7 +167,7 @@ class FilePathTest extends MigrateUpgradeTestBase {
    * @return string[][]
    *   An array of test data.
    */
-  public function providerTestFilePath() {
+  public static function providerTestFilePath() {
     return [
       'All source base paths are at temporary' => [
         'sites/default/private',
@@ -220,7 +222,7 @@ class FilePathTest extends MigrateUpgradeTestBase {
    *
    * The resulting directory is /bar/sites/default/files/foo.txt.
    */
-  protected function makeFiles() {
+  protected function makeFiles(): void {
     // Get file information from the source database.
     foreach ($this->getManagedFiles() as $file) {
       $this->assertSame(1, preg_match('/^(private|public|temporary):/', $file['uri'], $matches));
@@ -258,10 +260,7 @@ class FilePathTest extends MigrateUpgradeTestBase {
   }
 
   /**
-   * Gets the file data.
-   *
-   * @return string[][]
-   *   Data from the source file_managed table.
+   * {@inheritdoc}
    */
   public function getManagedFiles() {
     return [
@@ -287,35 +286,35 @@ class FilePathTest extends MigrateUpgradeTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getEntityCounts() {
+  protected function getEntityCounts(): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEntityCountsIncremental() {
+  protected function getEntityCountsIncremental(): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getAvailablePaths() {
+  protected function getAvailablePaths(): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getMissingPaths() {
+  protected function getMissingPaths(): array {
     return [];
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getSourceBasePath() {
+  protected function getSourceBasePath(): string {
     return '';
   }
 

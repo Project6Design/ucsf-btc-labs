@@ -94,7 +94,7 @@ class ThemeExperimentalConfirmForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $theme = $form_state->getBuildInfo()['args'][0] ? $form_state->getBuildInfo()['args'][0] : NULL;
+    $theme = $form_state->getBuildInfo()['args'][0] ?: NULL;
     $all_themes = $this->themeList->getList();
     if (!isset($all_themes[$theme])) {
       return $this->redirect('system.themes_page');
@@ -113,7 +113,7 @@ class ThemeExperimentalConfirmForm extends ConfirmFormBase {
     $items = [];
     if (!empty($dependencies)) {
       // Display a list of required themes that have to be installed as well.
-      $items[] = $this->formatPlural(count($dependencies), 'You must enable the @required theme to install @theme.', 'You must enable the @required themes to install @theme.', [
+      $items[] = $this->formatPlural(count($dependencies), 'You must install the @required theme to install @theme.', 'You must install the @required themes to install @theme.', [
         '@theme' => $get_label($theme),
         // It is safe to implode this because theme names are not translated
         // markup and so will not be double-escaped.

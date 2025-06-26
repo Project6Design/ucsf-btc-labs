@@ -187,7 +187,7 @@
       }
 
       $.each(items, function (index, item) {
-        if ( $.isFunction(self._renderItemData) ) {
+        if (typeof self._renderItemData === "function") {
           self._renderItemData(ul, item);
         }
       });

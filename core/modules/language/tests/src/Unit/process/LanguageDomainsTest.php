@@ -16,11 +16,6 @@ class LanguageDomainsTest extends MigrateProcessTestCase {
   /**
    * {@inheritdoc}
    */
-  protected $backupGlobalsBlacklist = ['base_url'];
-
-  /**
-   * {@inheritdoc}
-   */
   protected function setUp(): void {
     $configuration = [
       'key' => 'language',
@@ -44,7 +39,7 @@ class LanguageDomainsTest extends MigrateProcessTestCase {
   /**
    * @covers ::transform
    */
-  public function testTransform() {
+  public function testTransform(): void {
     $source = [
       ['language' => 'en', 'domain' => ''],
       ['language' => 'fr', 'domain' => 'fr.example.com'],

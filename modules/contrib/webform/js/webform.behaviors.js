@@ -5,8 +5,6 @@
 
 (function ($, Drupal) {
 
-  'use strict';
-
   // Trigger Drupal's attaching of behaviors after the page is
   // completely loaded.
   // @see https://stackoverflow.com/questions/37838430/detect-if-page-is-load-from-back-button
@@ -31,7 +29,7 @@
     if (backButton) {
       var attachBehaviors = Drupal.attachBehaviors;
       Drupal.attachBehaviors = function (context, settings) {
-        setTimeout(function (context, settings) {
+        setTimeout(function () {
           attachBehaviors(context, settings);
         }, 300);
       };

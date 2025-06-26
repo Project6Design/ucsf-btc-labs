@@ -6,6 +6,8 @@ use Drupal\Tests\rest\Functional\CookieResourceTestTrait;
 use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrait;
 
 /**
+ * Tests XML Cookie for RDF mappings.
+ *
  * @group rest
  */
 class RdfMappingXmlCookieTest extends RdfMappingResourceTestBase {

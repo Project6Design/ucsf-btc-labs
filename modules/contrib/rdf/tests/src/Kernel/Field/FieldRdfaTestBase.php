@@ -2,11 +2,15 @@
 
 namespace Drupal\Tests\rdf\Kernel\Field;
 
+use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\Tests\field\Kernel\FieldKernelTestBase;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Tests\field\Kernel\FieldKernelTestBase;
 use Drupal\Tests\rdf\Traits\RdfParsingTrait;
 
+/**
+ * Abstract class for testing RDF fields.
+ */
 abstract class FieldRdfaTestBase extends FieldKernelTestBase {
 
   use RdfParsingTrait;
@@ -16,21 +20,21 @@ abstract class FieldRdfaTestBase extends FieldKernelTestBase {
    *
    * @var string
    */
-  protected $fieldType;
+  protected string $fieldType;
 
   /**
    * The name of the field to create for testing.
    *
    * @var string
    */
-  protected $fieldName = 'field_test';
+  protected string $fieldName = 'field_test';
 
   /**
    * The URI to identify the entity.
    *
    * @var string
    */
-  protected $uri = 'http://ex.com';
+  protected string $uri = 'http://ex.com';
 
   /**
    * The entity to render for testing.
@@ -44,7 +48,7 @@ abstract class FieldRdfaTestBase extends FieldKernelTestBase {
    *
    * @var bool
    */
-  protected $debug = FALSE;
+  protected bool $debug = FALSE;
 
   /**
    * Modules to enable.
@@ -54,9 +58,11 @@ abstract class FieldRdfaTestBase extends FieldKernelTestBase {
   protected static $modules = ['rdf'];
 
   /**
+   * Test value.
+   *
    * @var string
    */
-  protected $testValue;
+  protected string $testValue;
 
   /**
    * Helper function to test the formatter's RDFa.
@@ -76,7 +82,7 @@ abstract class FieldRdfaTestBase extends FieldKernelTestBase {
    *   Defaults to 'literal'.
    *   - datatype: (optional) The datatype of the value (e.g. xsd:dateTime).
    */
-  protected function assertFormatterRdfa($formatter, $property, $expected_rdf_value) {
+  protected function assertFormatterRdfa(array $formatter, string $property, array $expected_rdf_value): void {
     $expected_rdf_value += ['type' => 'literal'];
 
     // The field formatter will be rendered inside the entity. Set the field
@@ -99,7 +105,7 @@ abstract class FieldRdfaTestBase extends FieldKernelTestBase {
    * @param array $field_settings
    *   (optional) An array of field settings.
    */
-  protected function createTestField($field_settings = []) {
+  protected function createTestField(array $field_settings = []): void {
     FieldStorageConfig::create([
       'field_name' => $this->fieldName,
       'entity_type' => 'entity_test',
@@ -122,7 +128,7 @@ abstract class FieldRdfaTestBase extends FieldKernelTestBase {
    * @return string
    *   The absolute URI.
    */
-  protected function getAbsoluteUri($entity) {
+  protected function getAbsoluteUri(ContentEntityBase $entity): string {
     return $entity->toUrl('canonical', ['absolute' => TRUE])->toString();
   }
 
@@ -135,16 +141,14 @@ abstract class FieldRdfaTestBase extends FieldKernelTestBase {
    * @return array
    *   An array containing simplexml objects.
    */
-  protected function parseContent($content) {
+  protected function parseContent(string $content) {
     $htmlDom = new \DOMDocument();
     @$htmlDom->loadHTML('<?xml encoding="UTF-8">' . $content);
-    $elements = simplexml_import_dom($htmlDom);
-
-    return $elements;
+    return simplexml_import_dom($htmlDom);
   }
 
   /**
-   * Performs an xpath search on a certain content.
+   * Performs a xpath search on a certain content.
    *
    * The search is relative to the root element of the $content variable.
    *
@@ -160,7 +164,7 @@ abstract class FieldRdfaTestBase extends FieldKernelTestBase {
    *   format and return values see the SimpleXML documentation,
    *   http://php.net/manual/function.simplexml-element-xpath.php.
    */
-  protected function xpathContent($content, $xpath, array $arguments = []) {
+  protected function xpathContent(string $content, string $xpath, array $arguments = []) {
     if ($elements = $this->parseContent($content)) {
       $xpath = $this->buildXPathQuery($xpath, $arguments);
       $result = $elements->xpath($xpath);

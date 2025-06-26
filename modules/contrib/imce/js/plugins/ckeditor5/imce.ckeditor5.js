@@ -13,6 +13,16 @@
     init() {
       this.editor.ui.on('ready', function () {
         const plugins = this.editor.plugins;
+        // Image -- v44.0.0+.
+        if (plugins.has('ImageInsertViaUrlUI')) {
+          const dialog = plugins.get('Dialog');
+          if (dialog) {
+            dialog.once('show:insertImageViaUrl', (evt, data) => {
+              const el = data.content.element.getElementsByClassName('ck-input-text')[0];
+              imceInput.processCKEditor5Input(el, 'image');
+            });
+          }
+        }
         // Image.
         if (plugins.has('ImageInsertUI')) {
           const view = plugins.get('ImageInsertUI').dropdownView;
@@ -30,11 +40,12 @@
           const process = () => {
             const el = ui.formView?.urlInputView?.fieldView?.element;
             if (el) {
+              ui._balloon?.view?.off('change:isVisible', process);
               imceInput.processCKEditor5Input(el, 'link');
               return true;
             }
           };
-          process() || ui._balloon?.view?.once('change:isVisible', process);
+          process() || ui._balloon?.view?.on('change:isVisible', process);
         }
       });
     }

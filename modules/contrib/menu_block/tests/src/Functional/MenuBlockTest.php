@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\menu_block\Functional;
 
 use Drupal\menu_block\Plugin\Block\MenuBlock;
@@ -182,6 +184,8 @@ class MenuBlockTest extends BrowserTestBase {
     $this->assertSession()
       ->pageTextContains('Make the initial visibility level follow the active menu item.');
     $this->assertSession()->pageTextContains('Theme hook suggestion');
+    $this->assertSession()
+      ->pageTextContains('Hide on pages not included in menu');
   }
 
   /**
@@ -200,6 +204,7 @@ class MenuBlockTest extends BrowserTestBase {
       'settings[parent]' => 'main:',
       'settings[follow]' => TRUE,
       'settings[follow_parent]' => 'active',
+      'settings[hide_on_nonactive]' => TRUE,
       'settings[suggestion]' => 'main',
       'region' => 'primary_menu',
     ], 'Save block');
@@ -212,6 +217,7 @@ class MenuBlockTest extends BrowserTestBase {
     $this->assertSame('main:', $block_settings['parent']);
     $this->assertTrue($block_settings['follow']);
     $this->assertSame('active', $block_settings['follow_parent']);
+    $this->assertTrue($block_settings['hide_on_nonactive']);
     $this->assertSame('main', $block_settings['suggestion']);
   }
 
@@ -249,6 +255,76 @@ class MenuBlockTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains('child-2 menu item');
     $this->assertSession()->pageTextNotContains('parent menu item');
     $this->assertSession()->pageTextNotContains('child-1-1 menu item');
+  }
+
+  /**
+   * Tests the menu_block render_parent option.
+   */
+  public function testMenuBlockRenderParent() {
+    $block_id = 'main';
+    $this->drupalGet('admin/structure/block/add/menu_block:main');
+    $this->submitForm([
+      'id' => $block_id,
+      'settings[label]' => 'Render Parent Navigation',
+      'settings[label_display]' => TRUE,
+      'settings[level]' => 2,
+      'settings[render_parent]' => TRUE,
+      'region' => 'primary_menu',
+    ], 'Save block');
+
+    // Check if parent menu item is rendered with children.
+    $this->drupalGet('menu-block-test/hierarchy/parent');
+    $this->assertSession()->pageTextContains('parent menu item');
+    $this->assertSession()->pageTextContains('child-1 menu item');
+    $this->assertSession()->pageTextContains('child-2 menu item');
+
+    // Check if parent item is displayed as we move down the tree.
+    $this->drupalGet('menu-block-test/hierarchy/parent/child-1');
+    $this->assertSession()->pageTextContains('parent menu item');
+    $this->assertSession()->pageTextContains('child-1 menu item');
+    $this->assertSession()->pageTextContains('child-1-1 menu item');
+    $this->assertSession()->pageTextContains('child-1-2 menu item');
+    $this->assertSession()->pageTextContains('child-2 menu item');
+
+    // Check if parent item is displayed with limited depth.
+    $this->drupalGet('admin/structure/block/manage/' . $block_id);
+    $this->submitForm([
+      'settings[depth]' => 1,
+    ], 'Save block');
+
+    $this->drupalGet('menu-block-test/hierarchy/parent/child-1/child-1-1');
+    $this->assertSession()->pageTextContains('parent menu item');
+    $this->assertSession()->pageTextContains('child-1 menu item');
+    $this->assertSession()->pageTextContains('child-2 menu item');
+    $this->assertSession()->pageTextNotContains('child-1-1 menu item');
+    $this->assertSession()->pageTextNotContains('child-1-2 menu item');
+
+    // Check if parent item is rendered when a fixed parent item is set.
+    $this->drupalGet('admin/structure/block/manage/' . $block_id);
+    $this->submitForm([
+      'settings[level]' => 1,
+      'settings[depth]' => 0,
+      'settings[parent]' => 'main:' . $this->links['child-1'],
+    ], 'Save block');
+
+    $this->drupalGet('menu-block-test/hierarchy/parent/child-1');
+    $this->assertSession()->pageTextNotContains('parent menu item');
+    $this->assertSession()->pageTextContains('child-1 menu item');
+    $this->assertSession()->pageTextContains('child-1-1 menu item');
+    $this->assertSession()->pageTextContains('child-1-2 menu item');
+
+    // Ensure the menu block is not visible when level > 1 and fixed parent is
+    // not in the active trail.
+    $this->drupalGet('admin/structure/block/manage/' . $block_id);
+    $this->submitForm([
+      'settings[level]' => 2,
+    ], 'Save block');
+
+    $this->drupalGet('menu-block-test/hierarchy/parent/child-2');
+    $this->assertSession()->pageTextNotContains('Render Parent Navigation');
+    $this->assertSession()->pageTextNotContains('parent menu item');
+    $this->assertSession()->pageTextNotContains('child-1 menu item');
+    $this->assertSession()->pageTextNotContains('child-2 menu item');
   }
 
   /**
@@ -604,6 +680,64 @@ class MenuBlockTest extends BrowserTestBase {
         $this->assertStringNotContainsString('<a href="', $block_label->getHtml(), "Test case '$case_id' should not have a link in the block title.");
       }
     }
+  }
+
+  /**
+   * Tests the menu_block hide_on_nonactive option.
+   */
+  public function testMenuHideOnNonactive() {
+    // Add new menu block.
+    $block_id = 'main';
+    $this->drupalGet('admin/structure/block/add/menu_block:main');
+    $this->submitForm([
+      'id' => $block_id,
+      'settings[label]' => 'Main navigation',
+      'settings[label_display]' => FALSE,
+      'settings[level]' => 1,
+      'settings[hide_on_nonactive]' => TRUE,
+      'region' => 'primary_menu',
+    ], 'Save block');
+
+    // The front page IS NOT in the menu. No menu should appear.
+    $this->drupalGet('<front>');
+    $this->assertSession()->pageTextNotContains('parent menu item');
+    $this->assertSession()->pageTextNotContains('child-1 menu item');
+    $this->assertSession()->pageTextNotContains('child-1-1 menu item');
+    $this->assertSession()->pageTextNotContains('child-2 menu item');
+
+    // The 'parent' page IS in the menu. Parent and first children should show.
+    $this->drupalGet('menu-block-test/hierarchy/parent');
+    $this->assertSession()->pageTextContains('parent menu item');
+    $this->assertSession()->pageTextContains('child-1 menu item');
+    $this->assertSession()->pageTextContains('child-2 menu item');
+    $this->assertSession()->pageTextNotContains('child-1-1 menu item');
+
+    // The 'parent_2' IS NOT in the menu. No menu should appear.
+    $this->drupalGet('/menu-block-test/hierarchy/parent_2');
+    $this->assertSession()->pageTextNotContains('parent menu item');
+    $this->assertSession()->pageTextNotContains('child-1 menu item');
+    $this->assertSession()->pageTextNotContains('child-1-1 menu item');
+    $this->assertSession()->pageTextNotContains('child-2 menu item');
+
+    // Disable 'hide_on_nonactive'.
+    $this->drupalGet('admin/structure/block/manage/' . $block_id);
+    $this->submitForm([
+      'settings[hide_on_nonactive]' => FALSE,
+    ], 'Save block');
+
+    // Now the menu should appear on the front page again.
+    $this->drupalGet('<front>');
+    $this->assertSession()->pageTextContains('parent menu item');
+    $this->assertSession()->pageTextNotContains('child-1 menu item');
+    $this->assertSession()->pageTextNotContains('child-1-1 menu item');
+    $this->assertSession()->pageTextNotContains('child-2 menu item');
+
+    // And the menu should appear on parent_2 again.
+    $this->drupalGet('/menu-block-test/hierarchy/parent_2');
+    $this->assertSession()->pageTextContains('parent menu item');
+    $this->assertSession()->pageTextNotContains('child-1 menu item');
+    $this->assertSession()->pageTextNotContains('child-1-1 menu item');
+    $this->assertSession()->pageTextNotContains('child-2 menu item');
   }
 
 }

@@ -15,6 +15,8 @@ use Drupal\text\Plugin\migrate\field\d7\TextField;
 class TextFieldTest extends UnitTestCase {
 
   /**
+   * The migration field plugin.
+   *
    * @var \Drupal\migrate_drupal\Plugin\MigrateFieldInterface
    */
   protected $plugin;
@@ -31,7 +33,7 @@ class TextFieldTest extends UnitTestCase {
   /**
    * Data provider for testGetFieldFormatterType().
    */
-  public function getFieldFormatterTypeProvider() {
+  public static function getFieldFormatterTypeProvider() {
     return [
       ['text', 'text_plain', 'string'],
       ['text_long', 'text_default', 'basic_string'],
@@ -44,7 +46,7 @@ class TextFieldTest extends UnitTestCase {
    * @covers ::getFieldType
    * @dataProvider getFieldFormatterTypeProvider
    */
-  public function testGetFieldFormatterType($type, $formatter_type, $expected) {
+  public function testGetFieldFormatterType($type, $formatter_type, $expected): void {
     $row = new Row();
     $row->setSourceProperty('type', $type);
     $row->setSourceProperty('formatter/type', $formatter_type);

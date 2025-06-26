@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\File;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -11,9 +13,7 @@ use Drupal\KernelTests\KernelTestBase;
 abstract class FileTestBase extends KernelTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['system'];
 
@@ -41,7 +41,11 @@ abstract class FileTestBase extends KernelTestBase {
     // file_default_scheme(). As we are creating the configuration here remove
     // the global override.
     unset($GLOBALS['config']['system.file']);
-    \Drupal::configFactory()->getEditable('system.file')->set('default_scheme', 'public')->save();
+    \Drupal::configFactory()->getEditable('system.file')
+      ->set('default_scheme', 'public')
+      ->set('allow_insecure_uploads', FALSE)
+      ->set('temporary_maximum_age', 21600)
+      ->save();
   }
 
   /**
@@ -79,11 +83,11 @@ abstract class FileTestBase extends KernelTestBase {
   /**
    * Helper function to test the permissions of a file.
    *
-   * @param $filepath
+   * @param string $filepath
    *   String file path.
-   * @param $expected_mode
+   * @param int $expected_mode
    *   Octal integer like 0664 or 0777.
-   * @param $message
+   * @param string|null $message
    *   Optional message.
    */
   public function assertFilePermissions($filepath, $expected_mode, $message = NULL) {
@@ -106,7 +110,7 @@ abstract class FileTestBase extends KernelTestBase {
     }
 
     if (!isset($message)) {
-      $message = t('Expected file permission to be %expected, actually were %actual.', ['%actual' => decoct($actual_mode), '%expected' => decoct($expected_mode)]);
+      $message = sprintf('Expected file permission to be %s, actually were %s.', decoct($actual_mode), decoct($expected_mode));
     }
     $this->assertEquals($expected_mode, $actual_mode, $message);
   }
@@ -114,11 +118,11 @@ abstract class FileTestBase extends KernelTestBase {
   /**
    * Helper function to test the permissions of a directory.
    *
-   * @param $directory
+   * @param string $directory
    *   String directory path.
-   * @param $expected_mode
+   * @param int $expected_mode
    *   Octal integer like 0664 or 0777.
-   * @param $message
+   * @param string|null $message
    *   Optional message.
    */
   public function assertDirectoryPermissions($directory, $expected_mode, $message = NULL) {
@@ -142,7 +146,7 @@ abstract class FileTestBase extends KernelTestBase {
     }
 
     if (!isset($message)) {
-      $message = t('Expected directory permission to be %expected, actually were %actual.', ['%actual' => decoct($actual_mode), '%expected' => decoct($expected_mode)]);
+      $message = sprintf('Expected directory permission to be %s, actually were %s.', decoct($expected_mode), decoct($actual_mode));
     }
     $this->assertEquals($expected_mode, $actual_mode, $message);
   }
@@ -170,13 +174,13 @@ abstract class FileTestBase extends KernelTestBase {
   /**
    * Create a file and return the URI of it.
    *
-   * @param $filepath
+   * @param string|null $filepath
    *   Optional string specifying the file path. If none is provided then a
    *   randomly named file will be created in the site's files directory.
-   * @param $contents
+   * @param string|null $contents
    *   Optional contents to save into the file. If a NULL value is provided an
    *   arbitrary string will be used.
-   * @param $scheme
+   * @param string|null $scheme
    *   Optional string indicating the stream scheme to use. Drupal core includes
    *   public, private, and temporary. The public wrapper is the default.
    *

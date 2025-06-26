@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Kernel\Entity;
 
 use Drupal\Component\Utility\Html;
@@ -14,6 +16,7 @@ use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
  * Tests entity reference selection plugins.
  *
  * @group entity_reference
+ * @group #slow
  */
 class EntityReferenceSelectionReferenceableTest extends KernelTestBase {
 
@@ -93,8 +96,6 @@ class EntityReferenceSelectionReferenceableTest extends KernelTestBase {
   /**
    * Tests referenceable entities with no target entity type 'label' key.
    *
-   * @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface::getReferenceableEntities()
-   *
    * @param mixed $match
    *   The input text to be checked.
    * @param string $match_operator
@@ -109,8 +110,10 @@ class EntityReferenceSelectionReferenceableTest extends KernelTestBase {
    *   The total number (unlimited) of entities to be retrieved.
    *
    * @dataProvider providerTestCases
+   *
+   * @see \Drupal\Core\Entity\EntityReferenceSelection\SelectionInterface::getReferenceableEntities()
    */
-  public function testReferenceablesWithNoLabelKey($match, $match_operator, $limit, $count_limited, array $items, $count_all) {
+  public function testReferenceablesWithNoLabelKey($match, $match_operator, $limit, $count_limited, array $items, $count_all): void {
     // Test ::getReferenceableEntities().
     $referenceables = $this->selectionHandler->getReferenceableEntities($match, $match_operator, $limit);
 
@@ -140,8 +143,9 @@ class EntityReferenceSelectionReferenceableTest extends KernelTestBase {
    * Provides test cases for ::testReferenceablesWithNoLabelKey() test.
    *
    * @return array[]
+   *   An array of test cases.
    */
-  public function providerTestCases() {
+  public static function providerTestCases() {
     return [
       // All referenceables, no limit. Expecting 9 items.
       [NULL, 'CONTAINS', 0, 9, static::$labels, 9],

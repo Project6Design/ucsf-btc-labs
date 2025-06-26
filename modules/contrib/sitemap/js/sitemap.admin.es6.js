@@ -35,7 +35,7 @@
 
         // Bind click handler to this checkbox to conditionally show and hide
         // the filter's tableDrag row and vertical tab pane.
-        $checkbox.on('click.fitlerUpdate', () => {
+        $checkbox.on('click.filterUpdate', () => {
           if ($checkbox.is(':checked')) {
             $row.show();
             if (filterSettingsTab) {

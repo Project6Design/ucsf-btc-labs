@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\dialog_renderer_test\Controller;
 
 use Drupal\Component\Serialization\Json;
@@ -126,7 +128,9 @@ class TestController {
           'class' => ['use-ajax'],
           'data-dialog-type' => 'modal',
           'data-dialog-options' => Json::encode([
-            'dialogClass' => 'no-close',
+            'classes' => [
+              'ui-dialog' => 'no-close',
+            ],
           ]),
         ],
         '#attached' => [

@@ -2,12 +2,13 @@
 
 /**
  * @file
- * Admin page callbacks for the system module.
  */
 
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\Xss;
 use Drupal\Core\Link;
 use Drupal\Core\Render\Element;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 
@@ -16,7 +17,7 @@ use Drupal\Core\Url;
  *
  * Default template: admin-block-content.html.twig.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - content: List of administrative menu items. Each menu item contains:
  *     - url: Path to the admin section.
@@ -24,7 +25,7 @@ use Drupal\Core\Url;
  *     - description: Description of the administrative menu item.
  *     - options: URL options. See \Drupal\Core\Url::fromUri() for details.
  */
-function template_preprocess_admin_block_content(&$variables) {
+function template_preprocess_admin_block_content(&$variables): void {
   if (!empty($variables['content'])) {
     $variables['compact'] = system_admin_compact_mode();
     foreach ($variables['content'] as $key => $item) {
@@ -44,14 +45,14 @@ function template_preprocess_admin_block_content(&$variables) {
  *
  * Default template: admin-page.html.twig.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - blocks: An array of blocks to display. Each array should include a
  *     'title', a 'description', a formatted 'content' and a 'position' which
  *     will control which container it will be in. This is usually 'left' or
  *     'right'.
  */
-function template_preprocess_admin_page(&$variables) {
+function template_preprocess_admin_page(&$variables): void {
   $variables['system_compact_link'] = [
     '#type' => 'system_compact_link',
   ];
@@ -76,11 +77,11 @@ function template_preprocess_admin_page(&$variables) {
  *
  * Default template: system-admin-index.html.twig.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - menu_items: An array of modules to be displayed.
  */
-function template_preprocess_system_admin_index(&$variables) {
+function template_preprocess_system_admin_index(&$variables): void {
   $variables['system_compact_link'] = [
     '#type' => 'system_compact_link',
   ];
@@ -101,6 +102,7 @@ function template_preprocess_system_admin_index(&$variables) {
             '#theme' => 'admin_block_content',
             '#content' => $items,
           ],
+          // phpcs:ignore Drupal.Semantics.FunctionT.NotLiteralString
           'description' => t($description),
         ],
       ];
@@ -113,7 +115,7 @@ function template_preprocess_system_admin_index(&$variables) {
  *
  * Default template: system-modules-details.html.twig.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - form: A render element representing the form. The main form element
  *     represents a package, and child elements of the form are individual
@@ -130,7 +132,7 @@ function template_preprocess_system_admin_index(&$variables) {
  *
  * @see \Drupal\system\Form\ModulesListForm
  */
-function template_preprocess_system_modules_details(&$variables) {
+function template_preprocess_system_modules_details(&$variables): void {
   $form = $variables['form'];
 
   // Identify modules that are depended on by themes.
@@ -203,7 +205,7 @@ function template_preprocess_system_modules_details(&$variables) {
  *
  * Default template: system-modules-uninstall.html.twig.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - form: A render element representing the form. Child elements of the form
  *     are individual modules. Each module is an associative array containing
@@ -218,7 +220,7 @@ function template_preprocess_system_modules_details(&$variables) {
  *
  * @ingroup themeable
  */
-function template_preprocess_system_modules_uninstall(&$variables) {
+function template_preprocess_system_modules_uninstall(&$variables): void {
   $form = $variables['form'];
   $variables['modules'] = [];
 
@@ -250,12 +252,12 @@ function template_preprocess_system_modules_uninstall(&$variables) {
  *
  * Default template: system-themes-page.html.twig.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - theme_groups: An associative array containing groups of themes.
  *   - theme_group_titles: An associative array containing titles of themes.
  */
-function template_preprocess_system_themes_page(&$variables) {
+function template_preprocess_system_themes_page(&$variables): void {
   $groups = [];
   $theme_groups = $variables['theme_groups'];
   $variables['attributes']['id'] = 'system-themes-page';
@@ -296,7 +298,8 @@ function template_preprocess_system_themes_page(&$variables) {
       }
 
       // Localize the theme description.
-      $current_theme['description'] = t($theme->info['description']);
+      // phpcs:ignore Drupal.Semantics.FunctionT.NotLiteralString
+      $current_theme['description'] = Markup::create(Xss::filterAdmin(t($theme->info['description'])));
 
       $current_theme['attributes'] = new Attribute();
       $current_theme['name'] = $theme->info['name'];
@@ -336,11 +339,11 @@ function template_preprocess_system_themes_page(&$variables) {
       }
       elseif (!empty($theme->module_dependencies_disabled)) {
         if (!empty($theme->insufficient_module_permissions)) {
-          $current_theme['incompatible'] = t('This theme requires the listed modules to operate correctly. They must first be enabled by a user with permissions to do so.');
+          $current_theme['incompatible'] = t('This theme requires the listed modules to operate correctly. They must first be installed by a user with permissions to do so.');
         }
         else {
           $modules_url = (string) Url::fromRoute('system.modules_list')->toString();
-          $current_theme['incompatible'] = t('This theme requires the listed modules to operate correctly. They must first be enabled via the <a href=":modules_url">Extend page</a>.', [
+          $current_theme['incompatible'] = t('This theme requires the listed modules to operate correctly. They must first be installed via the <a href=":modules_url">Extend page</a>.', [
             ':modules_url' => $modules_url,
           ]);
         }

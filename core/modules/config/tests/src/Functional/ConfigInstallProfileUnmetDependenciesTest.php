@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config\Functional;
 
 use Drupal\FunctionalTests\Installer\InstallerTestBase;
@@ -38,7 +40,7 @@ class ConfigInstallProfileUnmetDependenciesTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function prepareEnvironment() {
+  protected function prepareEnvironment(): void {
     parent::prepareEnvironment();
     $this->copyTestingOverrides();
   }
@@ -46,7 +48,7 @@ class ConfigInstallProfileUnmetDependenciesTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUpSettings() {
+  public function setUpSettings(): void {
     // During set up an UnmetDependenciesException should be thrown, which will
     // be re-thrown by TestHttpClientMiddleware as a standard Exception.
     try {
@@ -60,7 +62,7 @@ class ConfigInstallProfileUnmetDependenciesTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  public function setUpSite() {
+  public function setUpSite(): void {
     // This step can no longer be reached.
   }
 
@@ -70,10 +72,10 @@ class ConfigInstallProfileUnmetDependenciesTest extends InstallerTestBase {
    * So we can change the configuration to include a dependency that can not be
    * met. File API functions are not available yet.
    */
-  protected function copyTestingOverrides() {
+  protected function copyTestingOverrides(): void {
     $dest = $this->siteDirectory . '/profiles/testing_config_overrides';
     mkdir($dest, 0777, TRUE);
-    $source = DRUPAL_ROOT . '/core/profiles/testing_config_overrides';
+    $source = DRUPAL_ROOT . '/core/profiles/tests/testing_config_overrides';
     $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS), \RecursiveIteratorIterator::SELF_FIRST);
     foreach ($iterator as $item) {
       if ($item->isDir()) {
@@ -94,7 +96,7 @@ class ConfigInstallProfileUnmetDependenciesTest extends InstallerTestBase {
   /**
    * Confirms that the installation succeeded.
    */
-  public function testInstalled() {
+  public function testInstalled(): void {
     if ($this->expectedException) {
       $this->assertStringContainsString('Configuration objects provided by <em class="placeholder">testing_config_overrides</em> have unmet dependencies: <em class="placeholder">system.action.user_block_user_action (does_not_exist)</em>', $this->expectedException->getMessage());
       $this->assertStringContainsString('Drupal\Core\Config\UnmetDependenciesException', $this->expectedException->getMessage());

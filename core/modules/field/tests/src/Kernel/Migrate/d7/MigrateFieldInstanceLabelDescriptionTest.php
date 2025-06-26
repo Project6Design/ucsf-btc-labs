@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\Migrate\d7;
 
 use Drupal\Core\Database\Database;
@@ -62,7 +64,7 @@ class MigrateFieldInstanceLabelDescriptionTest extends MigrateDrupal7TestBase im
   /**
    * {@inheritdoc}
    */
-  public static function migrateDumpAlter(KernelTestBase $test) {
+  public static function migrateDumpAlter(KernelTestBase $test): void {
     $db = Database::getConnection('default', 'migrate');
     // Alter the database to test the migration is successful when a translated
     // field is deleted but the translation data for that field remains in both
@@ -76,7 +78,7 @@ class MigrateFieldInstanceLabelDescriptionTest extends MigrateDrupal7TestBase im
   /**
    * Tests migration of file variables to file.settings.yml.
    */
-  public function testFieldInstanceLabelDescriptionTranslationMigration() {
+  public function testFieldInstanceLabelDescriptionTranslationMigration(): void {
     $language_manager = $this->container->get('language_manager');
 
     // Check that the deleted field with translations was skipped.

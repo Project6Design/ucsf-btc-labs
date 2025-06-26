@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal\Kernel\d7;
 
 use Drupal\comment\Entity\CommentType;
@@ -16,6 +18,7 @@ use Drupal\field_discovery_test\FieldDiscoveryTestClass;
  * Test FieldDiscovery Service against Drupal 7.
  *
  * @group migrate_drupal
+ * @group #slow
  * @coversDefaultClass \Drupal\migrate_drupal\FieldDiscovery
  */
 class FieldDiscoveryTest extends MigrateDrupal7TestBase {
@@ -115,7 +118,7 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
    *
    * @covers ::addAllFieldProcesses
    */
-  public function testAddAllFieldProcesses() {
+  public function testAddAllFieldProcesses(): void {
     $expected_process_keys = [
       'comment_body',
       'field_integer',
@@ -170,7 +173,7 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
    * @covers ::addAllFieldProcesses
    * @dataProvider addAllFieldProcessesAltersData
    */
-  public function testAddAllFieldProcessesAlters($field_plugin_method, $expected_process) {
+  public function testAddAllFieldProcessesAlters($field_plugin_method, $expected_process): void {
     $this->assertFieldProcess($this->fieldDiscovery, $this->migrationPluginManager, FieldDiscoveryInterface::DRUPAL_7, $field_plugin_method, $expected_process);
   }
 
@@ -180,7 +183,7 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
    * @return array
    *   The data.
    */
-  public function addAllFieldProcessesAltersData() {
+  public static function addAllFieldProcessesAltersData() {
     return [
       'Field Instance' => [
         'field_plugin_method' => 'alterFieldInstanceMigration',
@@ -320,7 +323,7 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
    *
    * @covers ::getAllFields
    */
-  public function testGetAllFields() {
+  public function testGetAllFields(): void {
     $field_discovery_test = new FieldDiscoveryTestClass($this->fieldPluginManager, $this->migrationPluginManager, $this->logger);
     $actual_fields = $field_discovery_test->getAllFields('7');
     $this->assertSame(['comment', 'node', 'user', 'taxonomy_term'], array_keys($actual_fields));
@@ -332,7 +335,7 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
     $this->assertCount(23, $actual_fields['node']['test_content_type']);
     foreach ($actual_fields as $entity_type_id => $bundles) {
       foreach ($bundles as $bundle => $fields) {
-        foreach ($fields as $field_name => $field_info) {
+        foreach ($fields as $field_info) {
           $this->assertArrayHasKey('field_definition', $field_info);
           $this->assertEquals($entity_type_id, $field_info['entity_type']);
           $this->assertEquals($bundle, $field_info['bundle']);
@@ -346,7 +349,7 @@ class FieldDiscoveryTest extends MigrateDrupal7TestBase {
    *
    * @covers ::getSourcePlugin
    */
-  public function testGetSourcePlugin() {
+  public function testGetSourcePlugin(): void {
     $this->assertSourcePlugin('7', FieldInstance::class, [
       'requirements_met' => TRUE,
       'id' => 'd7_field_instance',

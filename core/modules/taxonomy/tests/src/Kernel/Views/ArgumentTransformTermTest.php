@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Kernel\Views;
 
 use Drupal\TestTools\Random;
@@ -22,12 +24,12 @@ class ArgumentTransformTermTest extends TaxonomyTestBase {
   /**
    * Tests term argument transformation of hyphens and spaces.
    *
-   * @dataProvider termArgumentTransformationProvider
-   *
    * @param string $name
    *   The name of the taxonomy term to use for the test.
+   *
+   * @dataProvider termArgumentTransformationProvider
    */
-  public function testTermArgumentTransformation($name) {
+  public function testTermArgumentTransformation($name): void {
     /** @var \Drupal\taxonomy\TermInterface $term */
     $term = $this->createTerm(['name' => $name]);
 

@@ -88,7 +88,7 @@ class QuickEditImageControllerTest extends BrowserTestBase {
     $this->drupalGet('quickedit/image/info/node/' . $node->id() . '/' . $this->fieldName . '/' . $node->language()->getId() . '/default');
     $this->assertSession()->statusCodeEquals(403);
 
-    /** @var \Symfony\Component\BrowserKit\Client $client */
+    /** @var \Symfony\Component\BrowserKit\AbstractBrowser $client */
     $client = $this->getSession()->getDriver()->getClient();
     $client->request('POST', '/quickedit/image/upload/node/' . $node->id() . '/' . $this->fieldName . '/' . $node->language()->getId() . '/default');
     $this->assertEquals('403', $client->getResponse()->getStatusCode());

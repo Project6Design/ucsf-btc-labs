@@ -29,7 +29,7 @@ class HandlerBaseTest extends UnitTestCase {
   /**
    * @covers ::getEntityType
    */
-  public function testGetEntityTypeForFieldOnBaseTable() {
+  public function testGetEntityTypeForFieldOnBaseTable(): void {
     $handler = new TestHandler([], 'test_handler', []);
     $handler->init($this->executable, $this->display);
 
@@ -51,7 +51,7 @@ class HandlerBaseTest extends UnitTestCase {
   /**
    * @covers ::getEntityType
    */
-  public function testGetEntityTypeForFieldWithRelationship() {
+  public function testGetEntityTypeForFieldWithRelationship(): void {
     $handler = new TestHandler([], 'test_handler', []);
 
     $options = ['relationship' => 'test_relationship'];
@@ -60,7 +60,13 @@ class HandlerBaseTest extends UnitTestCase {
     $this->display->expects($this->atLeastOnce())
       ->method('getOption')
       ->with('relationships')
-      ->willReturn(['test_relationship' => ['table' => 'test_entity_type_table', 'id' => 'test_relationship', 'field' => 'test_relationship']]);
+      ->willReturn([
+        'test_relationship' => [
+          'table' => 'test_entity_type_table',
+          'id' => 'test_relationship',
+          'field' => 'test_relationship',
+        ],
+      ]);
 
     $this->view->expects($this->any())
       ->method('get')

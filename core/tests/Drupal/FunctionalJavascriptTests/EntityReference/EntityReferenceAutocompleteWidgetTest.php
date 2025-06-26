@@ -58,14 +58,21 @@ class EntityReferenceAutocompleteWidgetTest extends WebDriverTestBase {
   /**
    * Tests that the default autocomplete widget return the correct results.
    */
-  public function testEntityReferenceAutocompleteWidget() {
+  public function testEntityReferenceAutocompleteWidget(): void {
     /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
     $display_repository = \Drupal::service('entity_display.repository');
 
     // Create an entity reference field and use the default 'CONTAINS' match
     // operator.
     $field_name = 'field_test';
-    $this->createEntityReferenceField('node', 'page', $field_name, $field_name, 'node', 'default', ['target_bundles' => ['page'], 'sort' => ['field' => 'title', 'direction' => 'DESC']]);
+    $this->createEntityReferenceField(
+      'node',
+      'page',
+      $field_name,
+      $field_name,
+      'node',
+      'default',
+      ['target_bundles' => ['page'], 'sort' => ['field' => 'title', 'direction' => 'DESC']]);
     $form_display = $display_repository->getFormDisplay('node', 'page');
     $form_display->setComponent($field_name, [
       'type' => 'entity_reference_autocomplete',
@@ -164,7 +171,7 @@ class EntityReferenceAutocompleteWidgetTest extends WebDriverTestBase {
    * Ensures that the entity the autocomplete widget stores the entity it is
    * rendered on, and is available in the autocomplete results' AJAX request.
    */
-  public function testEntityReferenceAutocompleteWidgetAttachedEntity() {
+  public function testEntityReferenceAutocompleteWidgetAttachedEntity(): void {
     $user = $this->drupalCreateUser([
       'administer entity_test content',
     ]);
@@ -207,7 +214,7 @@ class EntityReferenceAutocompleteWidgetTest extends WebDriverTestBase {
    * @param string $field_name
    *   The field name.
    */
-  protected function doAutocomplete($field_name) {
+  protected function doAutocomplete($field_name): void {
     $autocomplete_field = $this->getSession()->getPage()->findField($field_name . '[0][target_id]');
     $autocomplete_field->setValue('Test');
     $this->getSession()->getDriver()->keyDown($autocomplete_field->getXpath(), ' ');

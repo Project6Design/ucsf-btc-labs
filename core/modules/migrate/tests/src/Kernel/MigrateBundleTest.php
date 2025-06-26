@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate\Kernel;
 
 use Drupal\migrate\MigrateExecutable;
@@ -14,9 +16,7 @@ use Drupal\taxonomy\Entity\Vocabulary;
 class MigrateBundleTest extends MigrateTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['taxonomy', 'text', 'user', 'system'];
 
@@ -36,7 +36,7 @@ class MigrateBundleTest extends MigrateTestBase {
   /**
    * Tests setting the bundle in the destination.
    */
-  public function testDestinationBundle() {
+  public function testDestinationBundle(): void {
     $term_data_rows = [
       ['id' => 1, 'name' => 'Category 1'],
     ];
@@ -73,7 +73,7 @@ class MigrateBundleTest extends MigrateTestBase {
   /**
    * Tests setting the bundle in the process pipeline.
    */
-  public function testProcessBundle() {
+  public function testProcessBundle(): void {
     $term_data_rows = [
       ['id' => 1, 'vocab' => 'categories', 'name' => 'Category 1'],
       ['id' => 2, 'vocab' => 'tags', 'name' => 'Tag 1'],
@@ -100,7 +100,8 @@ class MigrateBundleTest extends MigrateTestBase {
 
     $term_migration = \Drupal::service('plugin.manager.migration')->createStubMigration($definition);
 
-    // Import and validate the term entities were created with the correct bundle.
+    // Import and validate the term entities were created with the correct
+    // bundle.
     $term_executable = new MigrateExecutable($term_migration, $this);
     $term_executable->import();
     /** @var \Drupal\taxonomy\Entity\Term $term */
@@ -113,7 +114,7 @@ class MigrateBundleTest extends MigrateTestBase {
   /**
    * Tests setting bundles both in process and destination.
    */
-  public function testMixedBundles() {
+  public function testMixedBundles(): void {
     $term_data_rows = [
       ['id' => 1, 'vocab' => 'categories', 'name' => 'Category 1'],
       ['id' => 2, 'name' => 'Tag 1'],
@@ -142,7 +143,8 @@ class MigrateBundleTest extends MigrateTestBase {
 
     $term_migration = \Drupal::service('plugin.manager.migration')->createStubMigration($definition);
 
-    // Import and validate the term entities were created with the correct bundle.
+    // Import and validate the term entities were created with the correct
+    // bundle.
     $term_executable = new MigrateExecutable($term_migration, $this);
     $term_executable->import();
     /** @var \Drupal\taxonomy\Entity\Term $term */

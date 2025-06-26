@@ -5,8 +5,8 @@ namespace Drupal\config_update;
 use Drupal\Core\Config\ExtensionInstallStorage;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Site\Settings;
 use Drupal\Core\Extension\Extension;
+use Drupal\Core\Site\Settings;
 
 /**
  * Provides methods related to config listing.
@@ -32,9 +32,9 @@ class ConfigLister implements ConfigListInterface {
   protected $definitions = [];
 
   /**
-   * The entity manager.
+   * The entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
   protected $entityManager;
 
@@ -106,7 +106,7 @@ class ConfigLister implements ConfigListInterface {
    */
   public function getType($name) {
     $definitions = $this->listTypes();
-    return isset($definitions[$name]) ? $definitions[$name] : NULL;
+    return $definitions[$name] ?? NULL;
   }
 
   /**
@@ -175,7 +175,7 @@ class ConfigLister implements ConfigListInterface {
     }
 
     // This only seems to be a problem in unit tests, where a mock object
-    // is returning NULL instead of an empy array for some reason.
+    // is returning NULL instead of an empty array for some reason.
     if (!is_array($optional_list)) {
       $optional_list = [];
     }
@@ -199,7 +199,9 @@ class ConfigLister implements ConfigListInterface {
    */
   protected function listProvidedItems($type, $name, $do_optional = FALSE) {
     // @todo Inject this dependency in the constructor.
+    // @phpstan-ignore-next-line as it's a dynamic service call.
     $pathname = \Drupal::service("extension.list.$type")->getPathname($name);
+    // @phpstan-ignore-next-line as $this->root failing on previous major.
     $component = new Extension(\Drupal::root(), $type, $pathname);
     if ($do_optional) {
       $names = $this->extensionOptionalConfigStorage->getComponentNames([$component]);

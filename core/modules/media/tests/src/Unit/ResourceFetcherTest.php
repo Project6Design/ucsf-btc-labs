@@ -16,9 +16,9 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
 
 /**
- * @group media
- *
  * @coversDefaultClass \Drupal\media\OEmbed\ResourceFetcher
+ *
+ * @group media
  */
 class ResourceFetcherTest extends UnitTestCase {
 
@@ -37,15 +37,17 @@ class ResourceFetcherTest extends UnitTestCase {
     ]);
     $response = new Response(200, $headers, $body);
 
+    $non_default_timeout = 10;
     $client = $this->prophesize(Client::class);
-    $client->request('GET', $url, [RequestOptions::TIMEOUT => 5])
+    $client->request('GET', $url, [RequestOptions::TIMEOUT => $non_default_timeout])
       ->shouldBeCalled()
       ->willReturn($response);
 
     $fetcher = new ResourceFetcher(
       $client->reveal(),
       $this->createMock('\Drupal\media\OEmbed\ProviderRepositoryInterface'),
-      new NullBackend('default')
+      new NullBackend('default'),
+      $non_default_timeout
     );
     $fetcher->fetchResource($url);
   }

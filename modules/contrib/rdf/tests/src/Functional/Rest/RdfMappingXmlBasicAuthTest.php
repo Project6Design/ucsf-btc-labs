@@ -6,6 +6,8 @@ use Drupal\Tests\rest\Functional\BasicAuthResourceTestTrait;
 use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrait;
 
 /**
+ * Tests XML Basic authentication for RDF mappings.
+ *
  * @group rest
  */
 class RdfMappingXmlBasicAuthTest extends RdfMappingResourceTestBase {

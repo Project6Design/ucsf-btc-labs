@@ -1,0 +1,14 @@
+{
+    "name": "drupal/fitvids",
+    "description": "Uses the FitVids.js library for fluid width video embeds.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "require": {
+        "drupal/core": "^9.2 || ^10 || ^11"
+    },
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/fitvids",
+        "source": "https://git.drupalcode.org/project/fitvids"
+    }
+}

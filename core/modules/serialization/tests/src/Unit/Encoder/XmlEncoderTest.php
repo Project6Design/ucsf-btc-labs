@@ -24,6 +24,8 @@ class XmlEncoderTest extends UnitTestCase {
   protected $encoder;
 
   /**
+   * The Symfony XML encoder.
+   *
    * @var \Symfony\Component\Serializer\Encoder\XmlEncoder|\PHPUnit\Framework\MockObject\MockObject
    */
   protected $baseEncoder;
@@ -49,7 +51,7 @@ class XmlEncoderTest extends UnitTestCase {
   /**
    * Tests the supportsEncoding() method.
    */
-  public function testSupportsEncoding() {
+  public function testSupportsEncoding(): void {
     $this->assertTrue($this->encoder->supportsEncoding('xml'));
     $this->assertFalse($this->encoder->supportsEncoding('json'));
   }
@@ -57,7 +59,7 @@ class XmlEncoderTest extends UnitTestCase {
   /**
    * Tests the supportsDecoding() method.
    */
-  public function testSupportsDecoding() {
+  public function testSupportsDecoding(): void {
     $this->assertTrue($this->encoder->supportsDecoding('xml'));
     $this->assertFalse($this->encoder->supportsDecoding('json'));
   }
@@ -65,7 +67,7 @@ class XmlEncoderTest extends UnitTestCase {
   /**
    * Tests the encode() method.
    */
-  public function testEncode() {
+  public function testEncode(): void {
     $this->baseEncoder->expects($this->once())
       ->method('encode')
       ->with($this->testArray, 'test', [])
@@ -77,7 +79,7 @@ class XmlEncoderTest extends UnitTestCase {
   /**
    * Tests the decode() method.
    */
-  public function testDecode() {
+  public function testDecode(): void {
     $this->baseEncoder->expects($this->once())
       ->method('decode')
       ->with('test', 'test', [])
@@ -89,7 +91,7 @@ class XmlEncoderTest extends UnitTestCase {
   /**
    * @covers ::getBaseEncoder
    */
-  public function testDefaultEncoderHasSerializer() {
+  public function testDefaultEncoderHasSerializer(): void {
     // The serializer should be set on the Drupal encoder, which should then
     // set it on our default encoder.
     $encoder = new XmlEncoder();
@@ -103,8 +105,14 @@ class XmlEncoderTest extends UnitTestCase {
 
 }
 
+/**
+ * Test class used for the encoding test.
+ */
 class TestObject {
 
+  /**
+   * Return the characters "A".
+   */
   public function getA() {
     return 'A';
   }

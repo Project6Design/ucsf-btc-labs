@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Kernel;
 
 use Drupal\comment\CommentInterface;
@@ -27,9 +29,7 @@ class CommentFieldAccessTest extends EntityKernelTestBase {
   use GeneratePermutationsTrait;
 
   /**
-   * Modules to install.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['comment', 'entity_test', 'user'];
 
@@ -93,7 +93,7 @@ class CommentFieldAccessTest extends EntityKernelTestBase {
   /**
    * Tests permissions on comment fields.
    */
-  public function testAccessToAdministrativeFields() {
+  public function testAccessToAdministrativeFields(): void {
     // Create a comment type.
     $comment_type = CommentType::create([
       'id' => 'comment',
@@ -222,8 +222,20 @@ class CommentFieldAccessTest extends EntityKernelTestBase {
 
     // Generate permutations.
     $combinations = [
-      'comment' => [$comment1, $comment2, $comment3, $comment4, $comment5],
-      'user' => [$comment_admin_user, $comment_enabled_user, $comment_no_edit_user, $comment_disabled_user, $anonymous_user],
+      'comment' => [
+        $comment1,
+        $comment2,
+        $comment3,
+        $comment4,
+        $comment5,
+      ],
+      'user' => [
+        $comment_admin_user,
+        $comment_enabled_user,
+        $comment_no_edit_user,
+        $comment_disabled_user,
+        $anonymous_user,
+      ],
     ];
     $permutations = $this->generatePermutations($combinations);
 

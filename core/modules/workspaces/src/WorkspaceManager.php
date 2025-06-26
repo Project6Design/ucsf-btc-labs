@@ -4,8 +4,6 @@ namespace Drupal\workspaces;
 
 use Drupal\Core\Cache\MemoryCache\MemoryCacheInterface;
 use Drupal\Core\DependencyInjection\ClassResolverInterface;
-use Drupal\Core\Entity\EntityPublishedInterface;
-use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Site\Settings;
@@ -22,142 +20,13 @@ class WorkspaceManager implements WorkspaceManagerInterface {
   use StringTranslationTrait;
 
   /**
-   * An array of which entity types are supported.
-   *
-   * @var string[]
-   */
-  protected $supported = [
-    'workspace' => FALSE,
-  ];
-
-  /**
-   * The request stack.
-   *
-   * @var \Symfony\Component\HttpFoundation\RequestStack
-   */
-  protected $requestStack;
-
-  /**
-   * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
-   */
-  protected $entityTypeManager;
-
-  /**
-   * The entity memory cache service.
-   *
-   * @var \Drupal\Core\Cache\MemoryCache\MemoryCacheInterface
-   */
-  protected $entityMemoryCache;
-
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
-
-  /**
-   * The state service.
-   *
-   * @var \Drupal\Core\State\StateInterface
-   */
-  protected $state;
-
-  /**
-   * A logger instance.
-   *
-   * @var \Psr\Log\LoggerInterface
-   */
-  protected $logger;
-
-  /**
-   * The class resolver.
-   *
-   * @var \Drupal\Core\DependencyInjection\ClassResolverInterface
-   */
-  protected $classResolver;
-
-  /**
-   * The workspace association service.
-   *
-   * @var \Drupal\workspaces\WorkspaceAssociationInterface
-   */
-  protected $workspaceAssociation;
-
-  /**
-   * The workspace negotiator service IDs.
-   *
-   * @var array
-   */
-  protected $negotiatorIds;
-
-  /**
    * The current active workspace or FALSE if there is no active workspace.
    *
    * @var \Drupal\workspaces\WorkspaceInterface|false
    */
   protected $activeWorkspace;
 
-  /**
-   * Constructs a new WorkspaceManager.
-   *
-   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
-   *   The request stack.
-   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
-   *   The entity type manager.
-   * @param \Drupal\Core\Cache\MemoryCache\MemoryCacheInterface $entity_memory_cache
-   *   The entity memory cache service.
-   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
-   *   The current user.
-   * @param \Drupal\Core\State\StateInterface $state
-   *   The state service.
-   * @param \Psr\Log\LoggerInterface $logger
-   *   A logger instance.
-   * @param \Drupal\Core\DependencyInjection\ClassResolverInterface $class_resolver
-   *   The class resolver.
-   * @param \Drupal\workspaces\WorkspaceAssociationInterface $workspace_association
-   *   The workspace association service.
-   * @param array $negotiator_ids
-   *   The workspace negotiator service IDs.
-   */
-  public function __construct(RequestStack $request_stack, EntityTypeManagerInterface $entity_type_manager, MemoryCacheInterface $entity_memory_cache, AccountProxyInterface $current_user, StateInterface $state, LoggerInterface $logger, ClassResolverInterface $class_resolver, WorkspaceAssociationInterface $workspace_association, array $negotiator_ids) {
-    $this->requestStack = $request_stack;
-    $this->entityTypeManager = $entity_type_manager;
-    $this->entityMemoryCache = $entity_memory_cache;
-    $this->currentUser = $current_user;
-    $this->state = $state;
-    $this->logger = $logger;
-    $this->classResolver = $class_resolver;
-    $this->workspaceAssociation = $workspace_association;
-    $this->negotiatorIds = $negotiator_ids;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function isEntityTypeSupported(EntityTypeInterface $entity_type) {
-    $entity_type_id = $entity_type->id();
-    if (!isset($this->supported[$entity_type_id])) {
-      // Only entity types which are revisionable and publishable can belong
-      // to a workspace.
-      $this->supported[$entity_type_id] = $entity_type->entityClassImplements(EntityPublishedInterface::class) && $entity_type->isRevisionable();
-    }
-    return $this->supported[$entity_type_id];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSupportedEntityTypes() {
-    $entity_types = [];
-    foreach ($this->entityTypeManager->getDefinitions() as $entity_type_id => $entity_type) {
-      if ($this->isEntityTypeSupported($entity_type)) {
-        $entity_types[$entity_type_id] = $entity_type;
-      }
-    }
-    return $entity_types;
+  public function __construct(protected RequestStack $requestStack, protected EntityTypeManagerInterface $entityTypeManager, protected MemoryCacheInterface $entityMemoryCache, protected AccountProxyInterface $currentUser, protected StateInterface $state, protected LoggerInterface $logger, protected ClassResolverInterface $classResolver, protected WorkspaceAssociationInterface $workspaceAssociation, protected WorkspaceInformationInterface $workspaceInfo, protected array $negotiatorIds = []) {
   }
 
   /**
@@ -173,21 +42,34 @@ class WorkspaceManager implements WorkspaceManagerInterface {
   public function getActiveWorkspace() {
     if (!isset($this->activeWorkspace)) {
       $request = $this->requestStack->getCurrentRequest();
+
       foreach ($this->negotiatorIds as $negotiator_id) {
+        /** @var \Drupal\workspaces\Negotiator\WorkspaceIdNegotiatorInterface $negotiator */
         $negotiator = $this->classResolver->getInstanceFromDefinition($negotiator_id);
+
         if ($negotiator->applies($request)) {
+          if ($workspace_id = $negotiator->getActiveWorkspaceId($request)) {
+            /** @var \Drupal\workspaces\WorkspaceInterface $negotiated_workspace */
+            $negotiated_workspace = $this->entityTypeManager
+              ->getStorage('workspace')
+              ->load($workspace_id);
+          }
+
           // By default, 'view' access is checked when a workspace is activated,
           // but it should also be checked when retrieving the currently active
           // workspace.
-          if (($negotiated_workspace = $negotiator->getActiveWorkspace($request)) && $negotiated_workspace->access('view')) {
+          if (isset($negotiated_workspace) && $negotiated_workspace->access('view')) {
+            // Notify the negotiator that its workspace has been selected.
+            $negotiator->setActiveWorkspace($negotiated_workspace);
+
             $active_workspace = $negotiated_workspace;
             break;
           }
         }
       }
 
-      // If no negotiator was able to determine the active workspace, default to
-      // the live version of the site.
+      // If no negotiator was able to provide a valid workspace, default to the
+      // live version of the site.
       $this->activeWorkspace = $active_workspace ?? FALSE;
     }
 
@@ -252,14 +134,18 @@ class WorkspaceManager implements WorkspaceManagerInterface {
     $this->activeWorkspace = $workspace ?: FALSE;
 
     // Clear the static entity cache for the supported entity types.
-    $cache_tags_to_invalidate = array_map(function ($entity_type_id) {
-      return 'entity.memory_cache:' . $entity_type_id;
-    }, array_keys($this->getSupportedEntityTypes()));
+    $cache_tags_to_invalidate = [];
+    foreach (array_keys($this->workspaceInfo->getSupportedEntityTypes()) as $entity_type_id) {
+      $this->entityTypeManager->getStorage($entity_type_id)->resetCache();
+      $cache_tags_to_invalidate[] = 'entity.memory_cache:' . $entity_type_id;
+    }
     $this->entityMemoryCache->invalidateTags($cache_tags_to_invalidate);
 
     // Clear the static cache for path aliases. We can't inject the path alias
     // manager service because it would create a circular dependency.
-    \Drupal::service('path_alias.manager')->cacheClear();
+    if (\Drupal::hasService('path_alias.manager')) {
+      \Drupal::service('path_alias.manager')->cacheClear();
+    }
   }
 
   /**
@@ -296,13 +182,6 @@ class WorkspaceManager implements WorkspaceManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function shouldAlterOperations(EntityTypeInterface $entity_type) {
-    return $this->isEntityTypeSupported($entity_type) && $this->hasActiveWorkspace();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function purgeDeletedWorkspacesBatch() {
     $deleted_workspace_ids = $this->state->get('workspace.deleted', []);
 
@@ -318,7 +197,7 @@ class WorkspaceManager implements WorkspaceManagerInterface {
     $workspace_id = reset($deleted_workspace_ids);
 
     $all_associated_revisions = [];
-    foreach (array_keys($this->getSupportedEntityTypes()) as $entity_type_id) {
+    foreach (array_keys($this->workspaceInfo->getSupportedEntityTypes()) as $entity_type_id) {
       $all_associated_revisions[$entity_type_id] = $this->workspaceAssociation->getAssociatedRevisions($workspace_id, $entity_type_id);
     }
     $all_associated_revisions = array_filter($all_associated_revisions);
@@ -359,7 +238,7 @@ class WorkspaceManager implements WorkspaceManagerInterface {
     // request a fresh list of tracked entities. If it is empty, we can go ahead
     // and remove the deleted workspace ID entry from state.
     $has_associated_revisions = FALSE;
-    foreach (array_keys($this->getSupportedEntityTypes()) as $entity_type_id) {
+    foreach (array_keys($this->workspaceInfo->getSupportedEntityTypes()) as $entity_type_id) {
       if (!empty($this->workspaceAssociation->getAssociatedRevisions($workspace_id, $entity_type_id))) {
         $has_associated_revisions = TRUE;
         break;

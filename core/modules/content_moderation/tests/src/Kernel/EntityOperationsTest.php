@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\content_moderation\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -44,7 +46,7 @@ class EntityOperationsTest extends KernelTestBase {
   /**
    * Creates a page node type to test with, ensuring that it's moderated.
    */
-  protected function createNodeType() {
+  protected function createNodeType(): void {
     $node_type = NodeType::create([
       'type' => 'page',
       'name' => 'Page',
@@ -58,7 +60,7 @@ class EntityOperationsTest extends KernelTestBase {
   /**
    * Verifies that the process of saving pending revisions works as expected.
    */
-  public function testPendingRevisions() {
+  public function testPendingRevisions(): void {
     // Create a new node in draft.
     $page = Node::create([
       'type' => 'page',
@@ -132,7 +134,7 @@ class EntityOperationsTest extends KernelTestBase {
   /**
    * Verifies that a newly-created node can go straight to published.
    */
-  public function testPublishedCreation() {
+  public function testPublishedCreation(): void {
     // Create a new node in draft.
     $page = Node::create([
       'type' => 'page',
@@ -154,7 +156,7 @@ class EntityOperationsTest extends KernelTestBase {
   /**
    * Verifies that an unpublished state may be made the default revision.
    */
-  public function testArchive() {
+  public function testArchive(): void {
     $page = Node::create([
       'type' => 'page',
       'title' => $this->randomString(),

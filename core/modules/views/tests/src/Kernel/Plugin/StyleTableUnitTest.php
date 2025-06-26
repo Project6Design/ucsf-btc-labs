@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Plugin;
 
 use Drupal\views\Views;
@@ -24,7 +26,7 @@ class StyleTableUnitTest extends PluginKernelTestBase {
   /**
    * Tests the table style.
    */
-  public function testTable() {
+  public function testTable(): void {
     $view = Views::getView('test_table');
 
     $view->setDisplay('default');
@@ -146,7 +148,7 @@ class StyleTableUnitTest extends PluginKernelTestBase {
    * @param \Drupal\views\ViewExecutable $view
    *   The executable to prepare.
    */
-  protected function prepareView(ViewExecutable $view) {
+  protected function prepareView(ViewExecutable $view): void {
     $view->setDisplay();
     $view->initStyle();
     $view->initHandlers();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Datetime;
 
 use Drupal\Core\Datetime\DrupalDateTime;
@@ -18,7 +20,10 @@ use Drupal\Tests\BrowserTestBase;
 class TimestampTest extends BrowserTestBase {
 
   /**
-   * An array of display options to pass to EntityDisplayRepositoryInterface::getViewDisplay().
+   * An array of display options.
+   *
+   * These options are passed to
+   * EntityDisplayRepositoryInterface::getViewDisplay().
    *
    * @var array
    */
@@ -104,7 +109,7 @@ class TimestampTest extends BrowserTestBase {
   /**
    * Tests the "datetime_timestamp" widget.
    */
-  public function testWidget() {
+  public function testWidget(): void {
     // Build up a date in the UTC timezone.
     $value = '2012-12-31 00:00:00';
     $date = new DrupalDateTime($value, 'UTC');
@@ -166,7 +171,8 @@ class TimestampTest extends BrowserTestBase {
     $this->drupalGet('entity_test/add');
     $date_format = DateFormat::load('html_date')->getPattern();
     $time_format = DateFormat::load('html_time')->getPattern();
-    // Make sure the default field value is set as the default value in the widget.
+    // Make sure the default field value is set as the default value in the
+    // widget.
     $this->assertSession()->fieldExists('field_timestamp[0][value][date]');
     $this->assertSession()->fieldValueEquals('field_timestamp[0][value][date]', $date->format($date_format));
     $this->assertSession()->fieldExists('field_timestamp[0][value][time]');

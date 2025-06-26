@@ -7,6 +7,13 @@ which are a native replacement for annotations. As such, this library is
 considered feature complete, and should receive exclusively bugfixes and
 security fixes.
 
+We do not recommend using this library in new projects and encourage authors
+of downstream libraries to offer support for attributes as an alternative to
+Doctrine Annotations.
+
+Have a look at [our blog](https://www.doctrine-project.org/2022/11/04/annotations-to-attributes.html)
+to learn more.
+
 Introduction
 ============
 
@@ -38,7 +45,7 @@ You can install the Annotation component with composer:
 
 .. code-block::
 
-    $ composer require doctrine/annotations
+    $ composer require doctrine/annotations
 
 Create an annotation class
 ==========================
@@ -73,10 +80,6 @@ annotations of a class. A common one is
 .. code-block:: php
 
     use Doctrine\Common\Annotations\AnnotationReader;
-    use Doctrine\Common\Annotations\AnnotationRegistry;
-
-    // Deprecated and will be removed in 2.0 but currently needed
-    AnnotationRegistry::registerLoader('class_exists');
 
     $reflectionClass = new ReflectionClass(Foo::class);
     $property = $reflectionClass->getProperty('bar');
@@ -88,10 +91,6 @@ annotations of a class. A common one is
     );
 
     echo $myAnnotation->myProperty; // result: "value"
-
-Note that ``AnnotationRegistry::registerLoader('class_exists')`` only works
-if you already have an autoloader configured (i.e. composer autoloader).
-Otherwise, :ref:`please take a look to the other annotation autoload mechanisms <annotations>`.
 
 A reader has multiple methods to access the annotations of a class or
 function.

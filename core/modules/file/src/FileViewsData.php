@@ -15,7 +15,7 @@ class FileViewsData extends EntityViewsData {
   public function getViewsData() {
     $data = parent::getViewsData();
 
-    // @TODO There is no corresponding information in entity metadata.
+    // @todo There is no corresponding information in entity metadata.
     $data['file_managed']['table']['base']['help'] = $this->t('Files maintained by Drupal and various modules.');
     $data['file_managed']['table']['base']['defaults']['field'] = 'filename';
     $data['file_managed']['table']['wizard_id'] = 'file_managed';
@@ -270,9 +270,9 @@ class FileViewsData extends EntityViewsData {
       ],
     ];
 
-    // Provide basic fields from the {file_usage} table to all of the base tables
-    // we've declared joins to, because there is no 'skip base' property on these
-    // fields.
+    // Provide basic fields from the {file_usage} table to all of the base
+    // tables we've declared joins to, because there is no 'skip base' property
+    // on these fields.
     $data['file_usage']['module'] = [
       'title' => $this->t('Module'),
       'help' => $this->t('The module managing this file relationship.'),

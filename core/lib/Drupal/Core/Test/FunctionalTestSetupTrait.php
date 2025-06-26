@@ -22,6 +22,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Yaml\Yaml as SymfonyYaml;
 use Drupal\Core\Routing\RouteObjectInterface;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -59,6 +61,15 @@ trait FunctionalTestSetupTrait {
   protected $apcuEnsureUniquePrefix = FALSE;
 
   /**
+   * Set to TRUE to make user 1 a super user.
+   *
+   * @var bool
+   *
+   * @see \Drupal\Core\Session\SuperUserAccessPolicy
+   */
+  protected bool $usesSuperUserAccessPolicy;
+
+  /**
    * Prepares site settings and services before installation.
    */
   protected function prepareSettings() {
@@ -67,7 +78,7 @@ trait FunctionalTestSetupTrait {
     // installation.
     // Not using File API; a potential error must trigger a PHP warning.
     $directory = DRUPAL_ROOT . '/' . $this->siteDirectory;
-    copy(DRUPAL_ROOT . '/sites/default/default.settings.php', $directory . '/settings.php');
+    copy(DRUPAL_ROOT . '/core/assets/scaffold/files/default.settings.php', $directory . '/settings.php');
 
     // The public file system path is created during installation. Additionally,
     // during tests:
@@ -125,15 +136,28 @@ trait FunctionalTestSetupTrait {
     $settings_services_file = DRUPAL_ROOT . '/' . $this->originalSite . '/testing.services.yml';
     if (!file_exists($settings_services_file)) {
       // Otherwise, use the default services as a starting point for overrides.
-      $settings_services_file = DRUPAL_ROOT . '/sites/default/default.services.yml';
+      $settings_services_file = DRUPAL_ROOT . '/core/assets/scaffold/files/default.services.yml';
     }
-    // Copy the testing-specific service overrides in place.
-    copy($settings_services_file, $directory . '/services.yml');
+
+    // Put the testing-specific service overrides in place.
+    $yaml = new SymfonyYaml();
+    $content = file_get_contents($settings_services_file);
+    // Disable session garbage collection since test environments do not last
+    // long enough to have stale sessions. This prevents random delete queries
+    // from running during tests.
+    $services = $yaml->parse($content);
+    $services['parameters']['session.storage.options']['gc_probability'] = 0;
+    // Disable the super user access policy so that we are sure our tests check
+    // for the right permissions.
+    if (!isset($this->usesSuperUserAccessPolicy)) {
+      $test_file_name = (new \ReflectionClass($this))->getFileName();
+      // @todo Decide in https://www.drupal.org/project/drupal/issues/3437926
+      //   how to remove this fallback behavior.
+      $this->usesSuperUserAccessPolicy = !str_starts_with($test_file_name, $this->root . DIRECTORY_SEPARATOR . 'core');
+    }
+    $services['parameters']['security.enable_super_user'] = $this->usesSuperUserAccessPolicy;
     if ($this->strictConfigSchema) {
       // Add a listener to validate configuration schema on save.
-      $yaml = new SymfonyYaml();
-      $content = file_get_contents($directory . '/services.yml');
-      $services = $yaml->parse($content);
       $test_file_name = (new \ReflectionClass($this))->getFileName();
       // @todo Decide in https://www.drupal.org/project/drupal/issues/3395099 when/how to trigger deprecation errors or even failures for contrib modules.
       $is_core_test = str_starts_with($test_file_name, DRUPAL_ROOT . DIRECTORY_SEPARATOR . 'core');
@@ -142,8 +166,19 @@ trait FunctionalTestSetupTrait {
         'arguments' => ['@config.typed', $this->getConfigSchemaExclusions(), $is_core_test],
         'tags' => [['name' => 'event_subscriber']],
       ];
-      file_put_contents($directory . '/services.yml', $yaml->dump($services));
     }
+    // Register test middleware.
+    $services['services']['testing.http_client.middleware'] = [
+      'class' => 'Drupal\Core\Test\HttpClientMiddleware\TestHttpClientMiddleware',
+      'tags' => [['name' => 'http_client_middleware']],
+    ];
+    $services['services']['testing.http_middleware.wait_terminate_middleware'] = [
+      'class' => 'Drupal\Core\Test\StackMiddleware\TestWaitTerminateMiddleware',
+      'arguments' => ['@lock', '%drupal.test_wait_terminate%'],
+      'tags' => [['name' => 'http_middleware', 'priority' => -1024]],
+    ];
+    $services['parameters']['drupal.test_wait_terminate'] = FALSE;
+    file_put_contents($directory . '/services.yml', $yaml->dump($services));
     // Since Drupal is bootstrapped already, install_begin_request() will not
     // bootstrap again. Hence, we have to reload the newly written custom
     // settings.php manually.
@@ -174,7 +209,7 @@ trait FunctionalTestSetupTrait {
    *
    * @param string $name
    *   The name of the parameter.
-   * @param string $value
+   * @param string|array|bool $value
    *   The value of the parameter.
    */
   protected function setContainerParameter($name, $value) {
@@ -209,10 +244,6 @@ trait FunctionalTestSetupTrait {
   protected function rebuildContainer() {
     // Rebuild the kernel and bring it back to a fully bootstrapped state.
     $this->container = $this->kernel->rebuildContainer();
-
-    // Make sure the URL generator has a request object, otherwise calls to
-    // $this->drupalGet() will fail.
-    $this->prepareRequestForGenerator();
   }
 
   /**
@@ -253,6 +284,7 @@ trait FunctionalTestSetupTrait {
    */
   protected function prepareRequestForGenerator($clean_urls = TRUE, $override_server_vars = []) {
     $request = Request::createFromGlobals();
+    $request->setSession(new Session(new MockArraySessionStorage()));
     $base_path = $request->getBasePath();
     if ($clean_urls) {
       $request_path = $base_path ? $base_path . '/user' : 'user';
@@ -264,9 +296,11 @@ trait FunctionalTestSetupTrait {
     $server = array_merge($request->server->all(), $override_server_vars);
 
     $request = Request::create($request_path, 'GET', [], [], [], $server);
-    // Ensure the request time is REQUEST_TIME to ensure that API calls
-    // in the test use the right timestamp.
-    $request->server->set('REQUEST_TIME', REQUEST_TIME);
+    $request->setSession(new Session(new MockArraySessionStorage()));
+
+    // Ensure the request time is \Drupal::time()->getRequestTime() to ensure
+    // that API calls in the test use the right timestamp.
+    $request->server->set('REQUEST_TIME', \Drupal::time()->getRequestTime());
 
     $this->container->get('request_stack')->push($request);
     // The request context is normally set by the router_listener from within
@@ -420,16 +454,18 @@ trait FunctionalTestSetupTrait {
     // not already specified.
     $profile = $container->getParameter('install_profile');
 
-    $default_sync_path = $container->get('extension.list.profile')->getPath($profile) . '/config/sync';
-    $profile_config_storage = new FileStorage($default_sync_path, StorageInterface::DEFAULT_COLLECTION);
-    if (!isset($this->defaultTheme) && $profile_config_storage->exists('system.theme')) {
-      $this->defaultTheme = $profile_config_storage->read('system.theme')['default'];
-    }
+    if (!empty($profile)) {
+      $default_sync_path = $container->get('extension.list.profile')->getPath($profile) . '/config/sync';
+      $profile_config_storage = new FileStorage($default_sync_path, StorageInterface::DEFAULT_COLLECTION);
+      if (!isset($this->defaultTheme) && $profile_config_storage->exists('system.theme')) {
+        $this->defaultTheme = $profile_config_storage->read('system.theme')['default'];
+      }
 
-    $default_install_path = $container->get('extension.list.profile')->getPath($profile) . '/' . InstallStorage::CONFIG_INSTALL_DIRECTORY;
-    $profile_config_storage = new FileStorage($default_install_path, StorageInterface::DEFAULT_COLLECTION);
-    if (!isset($this->defaultTheme) && $profile_config_storage->exists('system.theme')) {
-      $this->defaultTheme = $profile_config_storage->read('system.theme')['default'];
+      $default_install_path = $container->get('extension.list.profile')->getPath($profile) . '/' . InstallStorage::CONFIG_INSTALL_DIRECTORY;
+      $profile_config_storage = new FileStorage($default_install_path, StorageInterface::DEFAULT_COLLECTION);
+      if (!isset($this->defaultTheme) && $profile_config_storage->exists('system.theme')) {
+        $this->defaultTheme = $profile_config_storage->read('system.theme')['default'];
+      }
     }
 
     // Require a default theme to be specified at this point.
@@ -563,7 +599,7 @@ trait FunctionalTestSetupTrait {
     ];
 
     // If we only have one db driver available, we cannot set the driver.
-    if (count($this->getDatabaseTypes()) == 1) {
+    if (count(Database::getDriverList()->getInstallableList()) == 1) {
       unset($parameters['forms']['install_settings_form']['driver']);
     }
     return $parameters;
@@ -573,7 +609,8 @@ trait FunctionalTestSetupTrait {
    * Sets up the base URL based upon the environment variable.
    *
    * @throws \Exception
-   *   Thrown when no SIMPLETEST_BASE_URL environment variable is provided or uses an invalid scheme.
+   *   Thrown when no SIMPLETEST_BASE_URL environment variable is provided or
+   *   uses an invalid scheme.
    */
   protected function setupBaseUrl() {
     global $base_url;
@@ -646,7 +683,6 @@ trait FunctionalTestSetupTrait {
     $this->publicFilesDirectory = $this->siteDirectory . '/files';
     $this->privateFilesDirectory = $this->siteDirectory . '/private';
     $this->tempFilesDirectory = $this->siteDirectory . '/temp';
-    $this->translationFilesDirectory = $this->siteDirectory . '/translations';
 
     // Ensure the configImporter is refreshed for each test.
     $this->configImporter = NULL;
@@ -692,29 +728,6 @@ trait FunctionalTestSetupTrait {
     $callbacks = &drupal_register_shutdown_function();
     $this->originalShutdownCallbacks = $callbacks;
     $callbacks = [];
-  }
-
-  /**
-   * Returns all supported database driver installer objects.
-   *
-   * This wraps DatabaseDriverList::getInstallableList() for use without a
-   * current container.
-   *
-   * @return \Drupal\Core\Database\Install\Tasks[]
-   *   An array of available database driver installer objects.
-   */
-  protected function getDatabaseTypes() {
-    if (isset($this->originalContainer) && $this->originalContainer) {
-      \Drupal::setContainer($this->originalContainer);
-    }
-    $database_types = [];
-    foreach (Database::getDriverList()->getInstallableList() as $name => $driver) {
-      $database_types[$name] = $driver->getInstallTasks();
-    }
-    if (isset($this->originalContainer) && $this->originalContainer) {
-      \Drupal::unsetContainer();
-    }
-    return $database_types;
   }
 
 }

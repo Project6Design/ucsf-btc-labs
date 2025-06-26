@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\mysql\Kernel\mysql\Console;
 
 use Drupal\Core\Command\DbDumpCommand;
@@ -41,7 +43,7 @@ class DbDumpCommandTest extends DriverSpecificKernelTestBase {
   /**
    * Tests the command directly.
    */
-  public function testDbDumpCommand() {
+  public function testDbDumpCommand(): void {
     $command = new DbDumpCommand();
     $command_tester = new CommandTester($command);
     $command_tester->execute([]);
@@ -61,7 +63,7 @@ class DbDumpCommandTest extends DriverSpecificKernelTestBase {
   /**
    * Tests schema only option.
    */
-  public function testSchemaOnly() {
+  public function testSchemaOnly(): void {
     $command = new DbDumpCommand();
     $command_tester = new CommandTester($command);
     $command_tester->execute(['--schema-only' => 'router']);
@@ -74,7 +76,8 @@ class DbDumpCommandTest extends DriverSpecificKernelTestBase {
     $this->assertStringNotContainsString("'path' => 'test", $output, 'Insert path field not found');
     $this->assertStringNotContainsString("'pattern_outline' => 'test", $output, 'Insert pattern_outline field not found');
 
-    // Assert that insert statement doesn't exist for wildcard schema only match.
+    // Assert that insert statement doesn't exist for wildcard schema only
+    // match.
     $command_tester->execute(['--schema-only' => 'route.*']);
     $output = $command_tester->getDisplay();
     $this->assertStringContainsString("createTable('router", $output, 'Table router found');
@@ -87,7 +90,7 @@ class DbDumpCommandTest extends DriverSpecificKernelTestBase {
   /**
    * Tests insert count option.
    */
-  public function testInsertCount() {
+  public function testInsertCount(): void {
     $command = new DbDumpCommand();
     $command_tester = new CommandTester($command);
     $command_tester->execute(['--insert-count' => '1']);

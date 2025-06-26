@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\entity_test\Entity\EntityTestCompositeConstraint;
@@ -15,6 +16,9 @@ use Drupal\KernelTests\KernelTestBase;
  */
 class FieldWidgetConstraintValidatorTest extends KernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'entity_test',
     'field',
@@ -36,7 +40,7 @@ class FieldWidgetConstraintValidatorTest extends KernelTestBase {
   /**
    * Tests widget constraint validation.
    */
-  public function testValidation() {
+  public function testValidation(): void {
     $entity_type = 'entity_test_constraint_violation';
     $entity = $this->container->get('entity_type.manager')
       ->getStorage($entity_type)
@@ -66,7 +70,7 @@ class FieldWidgetConstraintValidatorTest extends KernelTestBase {
    * Gets the form errors for a given entity.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity
+   *   The entity.
    * @param array $hidden_fields
    *   (optional) A list of hidden fields.
    *
@@ -104,7 +108,7 @@ class FieldWidgetConstraintValidatorTest extends KernelTestBase {
   /**
    * Tests widget constraint validation with composite constraints.
    */
-  public function testValidationWithCompositeConstraint() {
+  public function testValidationWithCompositeConstraint(): void {
     // First provide a valid value, this should cause no validation.
     $entity = EntityTestCompositeConstraint::create([
       'name' => 'valid-value',
@@ -141,13 +145,13 @@ class FieldWidgetConstraintValidatorTest extends KernelTestBase {
     $errors = $this->getErrorsForEntity($entity, ['name']);
     $this->assertFalse(isset($errors['name']));
     $this->assertTrue(isset($errors['type']));
-    $this->assertEquals(new FormattableMarkup('The validation failed because the value conflicts with the value in %field_name, which you cannot access.', ['%field_name' => 'name']), $errors['type']);
+    $this->assertEquals('The validation failed because the value conflicts with the value in name, which you cannot access.', $errors['type']);
   }
 
   /**
    * Tests entity level constraint validation.
    */
-  public function testEntityLevelConstraintValidation() {
+  public function testEntityLevelConstraintValidation(): void {
     $entity = EntityTestCompositeConstraint::create([
       'name' => 'entity-level-violation',
     ]);

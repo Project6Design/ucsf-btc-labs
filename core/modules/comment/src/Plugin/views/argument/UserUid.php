@@ -3,6 +3,7 @@
 namespace Drupal\comment\Plugin\views\argument;
 
 use Drupal\Core\Database\Connection;
+use Drupal\views\Attribute\ViewsArgument;
 use Drupal\views\Plugin\views\argument\ArgumentPluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -12,9 +13,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Accepts a user ID to check for nodes that the user posted or commented on.
  *
  * @ingroup views_argument_handlers
- *
- * @ViewsArgument("argument_comment_user_uid")
- */
+  */
+#[ViewsArgument(
+  id: 'argument_comment_user_uid',
+)]
 class UserUid extends ArgumentPluginBase {
 
   /**
@@ -30,7 +32,7 @@ class UserUid extends ArgumentPluginBase {
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
+   *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Database\Connection $database
@@ -49,6 +51,9 @@ class UserUid extends ArgumentPluginBase {
     return new static($configuration, $plugin_id, $plugin_definition, $container->get('database'));
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function title() {
     if (!$this->argument) {
       $title = \Drupal::config('user.settings')->get('anonymous');
@@ -63,6 +68,9 @@ class UserUid extends ArgumentPluginBase {
     return $title;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   protected function defaultActions($which = NULL) {
     // Disallow summary views on this argument.
     if (!$which) {
@@ -77,6 +85,9 @@ class UserUid extends ArgumentPluginBase {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function query($group_by = FALSE) {
     $this->ensureMyTable();
 

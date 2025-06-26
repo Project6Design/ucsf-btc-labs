@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config_translation\Functional;
 
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
 
-// cspell:ignore viewsviewfiles
+// cspell:ignore anonyme viewsviewfiles
 
 /**
  * Translate settings and entities to various languages.
@@ -22,7 +24,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
    * names involved building up one configuration translation form. Test that
    * the translations are saved for all configuration names properly.
    */
-  public function testAccountSettingsConfigurationTranslation() {
+  public function testAccountSettingsConfigurationTranslation(): void {
     $this->drupalLogin($this->adminUser);
 
     $this->drupalGet('admin/config/people/accounts');
@@ -56,7 +58,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
   /**
    * Tests source and target language edge cases.
    */
-  public function testSourceAndTargetLanguage() {
+  public function testSourceAndTargetLanguage(): void {
     $this->drupalLogin($this->adminUser);
 
     // Loading translation page for not-specified language (und)
@@ -102,7 +104,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
   /**
    * Tests plural source elements in configuration translation forms.
    */
-  public function testPluralConfigStringsSourceElements() {
+  public function testPluralConfigStringsSourceElements(): void {
     $this->drupalLogin($this->adminUser);
 
     // Languages to test, with various number of plural forms.
@@ -113,7 +115,8 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
     ];
 
     foreach ($languages as $langcode => $data) {
-      // Import a .po file to add a new language with a given number of plural forms
+      // Import a .po file to add a new language with a given number of plural
+      // forms.
       $name = \Drupal::service('file_system')->tempnam('temporary://', $langcode . '_') . '.po';
       file_put_contents($name, $this->getPoFile($data['plurals']));
       $this->drupalGet('admin/config/regional/translate/import');
@@ -146,7 +149,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
   /**
    * Tests translation of plural strings with multiple plural forms in config.
    */
-  public function testPluralConfigStrings() {
+  public function testPluralConfigStrings(): void {
     $this->drupalLogin($this->adminUser);
 
     // First import a .po file with multiple plural forms.
@@ -161,7 +164,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
 
     // Translate the files view, as this one uses numeric formatters.
     $description = 'Singular form';
-    $field_value = '1 place';
+    $field_value = '@count place';
     $field_value_plural = '@count places';
     $translation_url = 'admin/structure/views/view/files/translate/sl/add';
     $this->drupalGet($translation_url);
@@ -195,7 +198,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
   /**
    * Tests translation storage in locale storage.
    */
-  public function testLocaleDBStorage() {
+  public function testLocaleDBStorage(): void {
     // Enable import of translations. By default this is disabled for automated
     // tests.
     $this->config('locale.settings')
@@ -232,7 +235,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
     $translation = $this->getTranslation('user.settings', 'anonymous', 'fr');
     $this->assertEquals('Anonyme', $translation->getString());
 
-    // revert custom translations to base translation.
+    // Revert custom translations to base translation.
     $edit = [
       'translation[config_names][user.settings][anonymous]' => 'Anonymous',
     ];
@@ -247,7 +250,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
   /**
    * Tests the single language existing.
    */
-  public function testSingleLanguageUI() {
+  public function testSingleLanguageUI(): void {
     $this->drupalLogin($this->adminUser);
 
     // Delete French language
@@ -277,7 +280,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
   /**
    * Tests the config_translation_info_alter() hook.
    */
-  public function testAlterInfo() {
+  public function testAlterInfo(): void {
     $this->drupalLogin($this->adminUser);
 
     $this->container->get('state')->set('config_translation_test_config_translation_info_alter', TRUE);
@@ -293,7 +296,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
   /**
    * Tests the sequence data type translation.
    */
-  public function testSequenceTranslation() {
+  public function testSequenceTranslation(): void {
     $this->drupalLogin($this->adminUser);
     /** @var \Drupal\Core\Config\ConfigFactoryInterface $config_factory */
     $config_factory = $this->container->get('config.factory');

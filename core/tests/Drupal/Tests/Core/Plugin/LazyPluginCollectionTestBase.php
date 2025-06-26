@@ -66,7 +66,7 @@ abstract class LazyPluginCollectionTestBase extends UnitTestCase {
    *   called. For example, $this->any(), $this->once(), $this->exactly(6).
    *   Defaults to $this->never().
    */
-  protected function setupPluginCollection(InvocationOrder $create_count = NULL) {
+  protected function setupPluginCollection(?InvocationOrder $create_count = NULL) {
     $this->pluginInstances = [];
     $map = [];
     foreach ($this->getPluginDefinitions() as $plugin_id => $definition) {
@@ -105,6 +105,7 @@ abstract class LazyPluginCollectionTestBase extends UnitTestCase {
    *   The plugin definition.
    *
    * @return \Drupal\Component\Plugin\PluginInspectionInterface|\PHPUnit\Framework\MockObject\MockObject
+   *   The mocked plugin object.
    */
   protected function getPluginMock($plugin_id, array $definition) {
     // Create a mock plugin instance.

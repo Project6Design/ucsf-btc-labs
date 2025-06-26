@@ -1,7 +1,7 @@
-photoswipe.admin_settings:
+photoswipe.settings:
   path: '/admin/config/media/photoswipe'
   defaults:
-    _title: 'PhotoSwipe'
-    _form: '\Drupal\photoswipe\Form\PhotoswipeAdminSettings'
+    _title: 'PhotoSwipe Settings'
+    _form: '\Drupal\photoswipe\Form\PhotoswipeSettings'
   requirements:
     _permission: 'administer site configuration'

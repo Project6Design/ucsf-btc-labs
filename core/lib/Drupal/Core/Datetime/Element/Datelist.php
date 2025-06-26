@@ -2,19 +2,20 @@
 
 namespace Drupal\Core\Datetime\Element;
 
+use Drupal\Component\Utility\FilterArray;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Component\Utility\Variable;
 use Drupal\Core\Datetime\DateHelper;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Security\DoTrustedCallbackTrait;
 use Drupal\Core\Security\StaticTrustedCallbackHelper;
 
 /**
  * Provides a datelist element.
- *
- * @FormElement("datelist")
  */
+#[FormElement('datelist')]
 class Datelist extends DateElementBase {
 
   use DoTrustedCallbackTrait;
@@ -23,14 +24,13 @@ class Datelist extends DateElementBase {
    * {@inheritdoc}
    */
   public function getInfo() {
-    $class = static::class;
     return [
       '#input' => TRUE,
       '#element_validate' => [
-        [$class, 'validateDatelist'],
+        [static::class, 'validateDatelist'],
       ],
       '#process' => [
-        [$class, 'processDatelist'],
+        [static::class, 'processDatelist'],
       ],
       '#theme' => 'datetime_form',
       '#theme_wrappers' => ['datetime_wrapper'],
@@ -68,7 +68,7 @@ class Datelist extends DateElementBase {
         try {
           $date = DrupalDateTime::createFromArray($input, $element['#date_timezone']);
         }
-        catch (\Exception $e) {
+        catch (\Exception) {
           $form_state->setError($element, t('Selected combination of day and month is not valid.'));
         }
         if ($date instanceof DrupalDateTime && !$date->hasErrors()) {
@@ -131,15 +131,15 @@ class Datelist extends DateElementBase {
    *
    * Required settings:
    *   - #default_value: A DrupalDateTime object, adjusted to the proper local
-   *     timezone. Converting a date stored in the database from UTC to the local
-   *     zone and converting it back to UTC before storing it is not handled here.
-   *     This element accepts a date as the default value, and then converts the
-   *     user input strings back into a new date object on submission. No timezone
-   *     adjustment is performed.
+   *     timezone. Converting a date stored in the database from UTC to the
+   *     local zone and converting it back to UTC before storing it is not
+   *     handled here. This element accepts a date as the default value, and
+   *     then converts the user input strings back into a new date object on
+   *     submission. No timezone adjustment is performed.
    * Optional properties include:
    *   - #date_part_order: Array of date parts indicating the parts and order
    *     that should be used in the selector, optionally including 'ampm' for
-   *     12 hour time. Default is array('year', 'month', 'day', 'hour', 'minute').
+   *     12 hour time. Default is ['year', 'month', 'day', 'hour', 'minute'].
    *   - #date_text_parts: Array of date parts that should be presented as
    *     text fields instead of drop-down selectors. Default is an empty array.
    *   - #date_date_callbacks: Array of optional callbacks for the date element.
@@ -158,15 +158,15 @@ class Datelist extends DateElementBase {
    *
    * Example usage:
    * @code
-   *   $form = array(
+   *   $form = [
    *     '#type' => 'datelist',
    *     '#default_value' => new DrupalDateTime('2000-01-01 00:00:00'),
-   *     '#date_part_order' => array('month', 'day', 'year', 'hour', 'minute', 'ampm'),
-   *     '#date_text_parts' => array('year'),
+   *     '#date_part_order' => ['month', 'day', 'year', 'hour', 'minute', 'ampm'],
+   *     '#date_text_parts' => ['year'],
    *     '#date_year_range' => '2010:2020',
    *     '#date_increment' => 15,
    *     '#date_timezone' => 'Asia/Kolkata'
-   *   );
+   *   ];
    * @endcode
    *
    * @param array $element
@@ -177,6 +177,7 @@ class Datelist extends DateElementBase {
    *   The complete form structure.
    *
    * @return array
+   *   An expanded DateList element.
    */
   public static function processDatelist(&$element, FormStateInterface $form_state, &$complete_form) {
     // Load translated date part labels from the appropriate calendar plugin.
@@ -253,7 +254,6 @@ class Datelist extends DateElementBase {
       $element[$part] = [
         '#type' => in_array($part, $text_parts) ? 'textfield' : 'select',
         '#title' => $title,
-        '#title_display' => 'invisible',
         '#value' => $value,
         '#attributes' => $element['#attributes'],
         '#options' => $options,
@@ -345,20 +345,24 @@ class Datelist extends DateElementBase {
     // The object key does not represent an input value, see
     // \Drupal\Core\Datetime\Element\Datelist::valueCallback().
     unset($input['object']);
-    // Filters out empty array values, any valid value would have a string length.
-    $filtered_input = array_filter($input, 'strlen');
+    // Filters out empty array values, any valid value would have a string
+    // length.
+    $filtered_input = FilterArray::removeEmptyStrings($input);
     return array_diff($parts, array_keys($filtered_input));
   }
 
   /**
    * Rounds minutes and seconds to nearest requested value.
    *
-   * @param $date
+   * @param mixed $date
    *   The date.
-   * @param $increment
+   * @param int $increment
    *   The value to round to.
    *
    * @return \Drupal\Core\Datetime\DrupalDateTime
+   *   The Drupal date time object with the minutes and seconds rounded when the
+   *   input date is a DrupalDateTime instance. Otherwise the date is returned
+   *   unchanged.
    */
   protected static function incrementRound(&$date, $increment) {
     // Round minutes and seconds, if necessary.

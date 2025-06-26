@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\field\Entity\FieldStorageConfig;
@@ -16,9 +18,7 @@ use Drupal\Tests\BrowserTestBase;
 class NodeFieldMultilingualTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['node', 'language'];
 
@@ -50,17 +50,17 @@ class NodeFieldMultilingualTest extends BrowserTestBase {
     ConfigurableLanguage::createFromLangcode('it')->save();
 
     // Enable URL language detection and selection.
-    $edit = ['language_interface[enabled][language-url]' => '1'];
-    $this->drupalGet('admin/config/regional/language/detection');
-    $this->submitForm($edit, 'Save settings');
+    $this->config('language.types')->set('negotiation.language_interface.enabled', [
+      'language-url' => -8,
+      'language-selected' => 12,
+    ])->save();
 
     // Set "Basic page" content type to use multilingual support.
-    $edit = [
-      'language_configuration[language_alterable]' => TRUE,
-    ];
-    $this->drupalGet('admin/structure/types/manage/page');
-    $this->submitForm($edit, 'Save');
-    $this->assertSession()->pageTextContains("The content type Basic page has been updated.");
+    \Drupal::entityTypeManager()->getStorage('language_content_settings')->create([
+      'target_entity_type_id' => 'node',
+      'target_bundle' => 'page',
+      'language_alterable' => TRUE,
+    ])->save();
 
     // Make node body translatable.
     $field_storage = FieldStorageConfig::loadByName('node', 'body');
@@ -71,7 +71,7 @@ class NodeFieldMultilingualTest extends BrowserTestBase {
   /**
    * Tests whether field languages are correctly set through the node form.
    */
-  public function testMultilingualNodeForm() {
+  public function testMultilingualNodeForm(): void {
     // Create "Basic page" content.
     $langcode = language_get_default_langcode('node', 'page');
     $title_key = 'title[0][value]';
@@ -123,7 +123,7 @@ class NodeFieldMultilingualTest extends BrowserTestBase {
   /**
    * Tests multilingual field display settings.
    */
-  public function testMultilingualDisplaySettings() {
+  public function testMultilingualDisplaySettings(): void {
     // Create "Basic page" content.
     $title_key = 'title[0][value]';
     $title_value = $this->randomMachineName(8);

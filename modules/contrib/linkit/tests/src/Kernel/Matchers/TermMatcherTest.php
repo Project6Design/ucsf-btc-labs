@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\linkit\Kernel\Matchers;
 
 use Drupal\Core\Language\LanguageInterface;
@@ -9,7 +11,7 @@ use Drupal\Tests\linkit\Kernel\LinkitKernelTestBase;
 /**
  * Tests term matcher.
  *
- * @todo: Use TaxonomyTestTrait when the methods allow us to define own values.
+ * @todo Use TaxonomyTestTrait when the methods allow us to define own values.
  *
  * @group linkit
  */

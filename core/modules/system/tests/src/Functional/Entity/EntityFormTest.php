@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Entity;
 
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Entity\Entity\EntityFormMode;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\EntityTestHelper;
+use Drupal\entity_test\EntityTestTypesFilter;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 
@@ -16,9 +20,7 @@ use Drupal\Tests\BrowserTestBase;
 class EntityFormTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['entity_test', 'language'];
 
@@ -52,9 +54,9 @@ class EntityFormTest extends BrowserTestBase {
   /**
    * Tests basic form CRUD functionality.
    */
-  public function testFormCRUD() {
+  public function testFormCRUD(): void {
     // All entity variations have to have the same results.
-    foreach (entity_test_entity_types() as $entity_type) {
+    foreach (EntityTestHelper::getEntityTypes() as $entity_type) {
       $this->doTestFormCRUD($entity_type);
     }
   }
@@ -62,19 +64,20 @@ class EntityFormTest extends BrowserTestBase {
   /**
    * Tests basic multilingual form CRUD functionality.
    */
-  public function testMultilingualFormCRUD() {
+  public function testMultilingualFormCRUD(): void {
     // All entity variations have to have the same results.
-    foreach (entity_test_entity_types(ENTITY_TEST_TYPES_MULTILINGUAL) as $entity_type) {
+    foreach (EntityTestHelper::getEntityTypes(EntityTestTypesFilter::Multilingual) as $entity_type) {
       $this->doTestMultilingualFormCRUD($entity_type);
     }
   }
 
   /**
-   * Tests hook_entity_form_mode_alter().
+   * Tests hook_entity_form_mode_alter() and hook_ENTITY_TYPE_form_mode_alter().
    *
    * @see entity_test_entity_form_mode_alter()
+   * @see entity_test_entity_test_form_mode_alter()
    */
-  public function testEntityFormModeAlter() {
+  public function testEntityFormModeAlter(): void {
     // Create compact entity display.
     EntityFormMode::create([
       'id' => 'entity_test.compact',
@@ -104,6 +107,13 @@ class EntityFormTest extends BrowserTestBase {
     $entity2->save();
     $this->drupalGet($entity2->toUrl('edit-form'));
     $this->assertSession()->elementNotExists('css', 'input[name="field_test_text[0][value]"]');
+
+    $entity3 = EntityTest::create([
+      'name' => 'test_entity_type_form_mode_alter',
+    ]);
+    $entity3->save();
+    $this->drupalGet($entity3->toUrl('edit-form'));
+    $this->assertSession()->elementNotExists('css', 'input[name="field_test_text[0][value]"]');
   }
 
   /**
@@ -113,7 +123,7 @@ class EntityFormTest extends BrowserTestBase {
    *
    * @see entity_test_entity_form_display_alter()
    */
-  public function testEntityFormDisplayAlter() {
+  public function testEntityFormDisplayAlter(): void {
     $this->drupalGet('entity_test/add');
     $altered_field = $this->assertSession()->fieldExists('field_test_text[0][value]');
     $this->assertEquals(42, $altered_field->getAttribute('size'));
@@ -125,7 +135,7 @@ class EntityFormTest extends BrowserTestBase {
    * @param string $entity_type
    *   The entity type to run the tests with.
    */
-  protected function doTestFormCRUD($entity_type) {
+  protected function doTestFormCRUD($entity_type): void {
     $name1 = $this->randomMachineName(8);
     $name2 = $this->randomMachineName(10);
 
@@ -161,7 +171,7 @@ class EntityFormTest extends BrowserTestBase {
    * @param string $entity_type_id
    *   The ID of entity type to run the tests with.
    */
-  protected function doTestMultilingualFormCRUD($entity_type_id) {
+  protected function doTestMultilingualFormCRUD($entity_type_id): void {
     $name1 = $this->randomMachineName(8);
     $name1_ro = $this->randomMachineName(9);
     $name2_ro = $this->randomMachineName(11);
@@ -212,7 +222,7 @@ class EntityFormTest extends BrowserTestBase {
   /**
    * Checks that validation handlers works as expected.
    */
-  public function testValidationHandlers() {
+  public function testValidationHandlers(): void {
     /** @var \Drupal\Core\State\StateInterface $state */
     $state = $this->container->get('state');
 

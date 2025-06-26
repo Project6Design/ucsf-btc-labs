@@ -2,12 +2,14 @@
 
 namespace Drupal\social_media_links_field\Plugin\Field\FieldFormatter;
 
-use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\social_media_links\IconsetBase;
-use Drupal\Core\Template\Attribute;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\Template\Attribute;
+use Drupal\social_media_links\IconsetBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'social_media_links_field_default' formatter.
@@ -20,9 +22,33 @@ use Drupal\Core\StringTranslation\StringTranslationTrait;
  *   }
  * )
  */
-class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
+class SocialMediaLinksFieldDefaultFormatter extends FormatterBase implements ContainerFactoryPluginInterface {
 
   use StringTranslationTrait;
+
+  /**
+   * Social Media Links Platform Manager container.
+   *
+   * @var \Drupal\social_media_links\SocialMediaLinksPlatformManager
+   */
+  protected $socialMediaManager;
+
+  /**
+   * Iconset finder service.
+   *
+   * @var \Drupal\social_media_links\SocialMediaLinksIconsetManager
+   */
+  protected $iconsetFinder;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->socialMediaManager = $container->get('plugin.manager.social_media_links.platform');
+    $instance->iconsetFinder = $container->get('plugin.manager.social_media_links.iconset');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -49,8 +75,8 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
       $platforms[$platform_id]['attributes'] = new Attribute($link_attributes);
 
       if (!empty($platform['instance']->getDescription())) {
-        $platforms[$platform_id]['attributes']->setAttribute('aria-label', $this->t($platform['instance']->getDescription()));
-        $platforms[$platform_id]['attributes']->setAttribute('title', $this->t($platform['instance']->getDescription()));
+        $platforms[$platform_id]['attributes']->setAttribute('aria-label', $platform['instance']->getDescription());
+        $platforms[$platform_id]['attributes']->setAttribute('title', $platform['instance']->getDescription());
       }
     }
 
@@ -61,6 +87,9 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
       '#attached' => [
         'library' => ['social_media_links/social_media_links.theme'],
       ],
+      '#field_name' => $items->getName(),
+      '#entity_type' => $items->getParent()->getEntity()->getEntityTypeId(),
+      '#entity_bundle' => $items->getParent()->getEntity()->bundle(),
     ];
 
     if ($iconset['instance']->getPath() === 'library' && (array) $library = $iconset['instance']->getLibrary()) {
@@ -98,13 +127,13 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
         'v' => $this->t('vertical'),
         'h' => $this->t('horizontal'),
       ],
-      '#default_value' => isset($config['appearance']['orientation']) ? $config['appearance']['orientation'] : 'h',
+      '#default_value' => $config['appearance']['orientation'] ?? 'h',
     ];
     $element['appearance']['show_name'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show name'),
       '#description' => $this->t('Show the platform name next to the icon.'),
-      '#default_value' => isset($config['appearance']['show_name']) ? $config['appearance']['show_name'] : 0,
+      '#default_value' => $config['appearance']['show_name'] ?? 0,
     ];
 
     // Link Attributes.
@@ -116,7 +145,7 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
     $element['link_attributes']['target'] = [
       '#type' => 'select',
       '#title' => $this->t('Default target'),
-      '#default_value' => isset($config['link_attributes']['target']) ? $config['link_attributes']['target'] : '<none>',
+      '#default_value' => $config['link_attributes']['target'] ?? '<none>',
       '#options' => [
         '<none>' => $this->t('Remove target attribute'),
         '_blank' => $this->t('Open in a new browser window or tab (_blank)'),
@@ -128,7 +157,7 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
     $element['link_attributes']['rel'] = [
       '#type' => 'select',
       '#title' => $this->t('Default rel'),
-      '#default_value' => isset($config['link_attributes']['rel']) ? $config['link_attributes']['rel'] : '<none>',
+      '#default_value' => $config['link_attributes']['rel'] ?? '<none>',
       '#options' => [
         '<none>' => $this->t('Remove rel attribute'),
         'nofollow' => $this->t('Set nofollow'),
@@ -191,8 +220,8 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
         if ($all_platforms_available || isset($platform_settings[$item->platform]['enabled']) && $platform_settings[$item->platform]['enabled']) {
           $platforms[$item->platform] = [
             'value' => $item->value,
-            'weight' => $platform_settings[$item->platform]['weight'],
-            'description' => $platform_settings[$item->platform]['description'],
+            'weight' => $platform_settings[$item->platform]['weight'] ?? 0,
+            'description' => $platform_settings[$item->platform]['description'] ?? '',
           ];
         }
       }
@@ -204,15 +233,15 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
           if ($all_platforms_available || !empty($platform_value['value']) && isset($platform_settings[$platform_id]['enabled']) && $platform_settings[$platform_id]['enabled']) {
             $platforms[$platform_id] = [
               'value' => $platform_value['value'],
-              'weight' => $platform_settings[$platform_id]['weight'],
-              'description' => $platform_settings[$platform_id]['description'],
+              'weight' => $platform_settings[$platform_id]['weight'] ?? 0,
+              'description' => $platform_settings[$platform_id]['description'] ?? '',
             ];
           }
         }
       }
     }
 
-    return \Drupal::service('plugin.manager.social_media_links.platform')->getPlatformsWithValue($platforms);
+    return $this->socialMediaManager->getPlatformsWithValue($platforms);
   }
 
   /**
@@ -225,7 +254,7 @@ class SocialMediaLinksFieldDefaultFormatter extends FormatterBase {
    *   $iconsets
    */
   protected function getIconset($iconset) {
-    $iconsets = \Drupal::service('plugin.manager.social_media_links.iconset')->getIconsets();
+    $iconsets = $this->iconsetFinder->getIconsets();
     return $iconsets[$iconset];
   }
 

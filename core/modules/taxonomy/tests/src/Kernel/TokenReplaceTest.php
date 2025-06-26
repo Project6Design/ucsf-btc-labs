@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Kernel;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
@@ -76,7 +78,7 @@ class TokenReplaceTest extends KernelTestBase {
       ],
       'auto_create' => TRUE,
     ];
-    $this->createEntityReferenceField('node', 'article', $this->fieldName, NULL, 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
+    $this->createEntityReferenceField('node', 'article', $this->fieldName, '', 'taxonomy_term', 'default', $handler_settings, FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED);
 
     /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
     $display_repository = \Drupal::service('entity_display.repository');
@@ -95,7 +97,7 @@ class TokenReplaceTest extends KernelTestBase {
   /**
    * Creates some terms and a node, then tests the tokens generated from them.
    */
-  public function testTaxonomyTokenReplacement() {
+  public function testTaxonomyTokenReplacement(): void {
     $token_service = \Drupal::token();
     $language_interface = \Drupal::languageManager()->getCurrentLanguage();
 
@@ -107,7 +109,7 @@ class TokenReplaceTest extends KernelTestBase {
     ]);
 
     // Create node with term2.
-    $node = $this->createNode([
+    $this->createNode([
       'type' => 'article',
       $this->fieldName => $term2->id(),
     ]);
@@ -115,11 +117,15 @@ class TokenReplaceTest extends KernelTestBase {
     // Generate and test sanitized tokens for term1.
     $tests = [];
     $tests['[term:tid]'] = $term1->id();
+    $tests['[term:uuid]'] = $term1->uuid();
     $tests['[term:name]'] = $term1->getName();
     $tests['[term:description]'] = $term1->description->processed;
     $tests['[term:url]'] = $term1->toUrl('canonical', ['absolute' => TRUE])->toString();
     $tests['[term:node-count]'] = 0;
     $tests['[term:parent:name]'] = '[term:parent:name]';
+    /** @var \Drupal\Core\Datetime\DateFormatterInterface $date_formatter */
+    $date_formatter = $this->container->get('date.formatter');
+    $tests['[term:changed:since]'] = $date_formatter->formatTimeDiffSince($term1->getChangedTime(), ['langcode' => $language_interface->getId()]);
     $tests['[term:vocabulary:name]'] = $this->vocabulary->label();
     $tests['[term:vocabulary]'] = $this->vocabulary->label();
 
@@ -127,6 +133,7 @@ class TokenReplaceTest extends KernelTestBase {
 
     $metadata_tests = [];
     $metadata_tests['[term:tid]'] = $base_bubbleable_metadata;
+    $metadata_tests['[term:uuid]'] = $base_bubbleable_metadata;
     $metadata_tests['[term:name]'] = $base_bubbleable_metadata;
     $metadata_tests['[term:description]'] = $base_bubbleable_metadata;
     $metadata_tests['[term:url]'] = $base_bubbleable_metadata;
@@ -135,6 +142,8 @@ class TokenReplaceTest extends KernelTestBase {
     $bubbleable_metadata = clone $base_bubbleable_metadata;
     $metadata_tests['[term:vocabulary:name]'] = $bubbleable_metadata->addCacheTags($this->vocabulary->getCacheTags());
     $metadata_tests['[term:vocabulary]'] = $bubbleable_metadata->addCacheTags($this->vocabulary->getCacheTags());
+    $bubbleable_metadata = clone $base_bubbleable_metadata;
+    $metadata_tests['[term:changed:since]'] = $bubbleable_metadata->setCacheMaxAge(0);
 
     foreach ($tests as $input => $expected) {
       $bubbleable_metadata = new BubbleableMetadata();
@@ -146,6 +155,7 @@ class TokenReplaceTest extends KernelTestBase {
     // Generate and test sanitized tokens for term2.
     $tests = [];
     $tests['[term:tid]'] = $term2->id();
+    $tests['[term:uuid]'] = $term2->uuid();
     $tests['[term:name]'] = $term2->getName();
     $tests['[term:description]'] = $term2->description->processed;
     $tests['[term:url]'] = $term2->toUrl('canonical', ['absolute' => TRUE])->toString();
@@ -153,6 +163,7 @@ class TokenReplaceTest extends KernelTestBase {
     $tests['[term:parent:name]'] = $term1->getName();
     $tests['[term:parent:url]'] = $term1->toUrl('canonical', ['absolute' => TRUE])->toString();
     $tests['[term:parent:parent:name]'] = '[term:parent:parent:name]';
+    $tests['[term:changed:since]'] = $date_formatter->formatTimeDiffSince($term2->getChangedTime(), ['langcode' => $language_interface->getId()]);
     $tests['[term:vocabulary:name]'] = $this->vocabulary->label();
 
     // Test to make sure that we generated something for each token.

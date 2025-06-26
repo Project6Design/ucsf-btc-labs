@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Updater;
 
 use Drupal\Core\Updater\Updater;
@@ -13,6 +15,7 @@ use Drupal\KernelTests\KernelTestBase;
  * extensions.
  *
  * @group Extension
+ * @group legacy
  */
 class UpdaterTest extends KernelTestBase {
 
@@ -21,7 +24,7 @@ class UpdaterTest extends KernelTestBase {
    *
    * @see https://drupal.org/node/2409515
    */
-  public function testGetProjectTitleWithChild() {
+  public function testGetProjectTitleWithChild(): void {
     // Get the project title from its directory. If it can't find the title
     // it will choose the first project title in the directory.
     $directory = $this->root . '/core/modules/system/tests/modules/module_handler_test_multiple';

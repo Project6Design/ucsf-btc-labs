@@ -4,8 +4,11 @@ namespace Drupal\url_embed\Plugin\Filter;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\filter\Attribute\Filter;
 use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
+use Drupal\filter\Plugin\FilterInterface;
 
 /**
  * Provides a filter to display embedded entities based on data attributes.
@@ -20,6 +23,14 @@ use Drupal\filter\Plugin\FilterBase;
  *   },
  * )
  */
+#[Filter(
+  id: "url_embed_convert_links",
+  title: new TranslatableMarkup("Convert URLs to URL embeds"),
+  type: FilterInterface::TYPE_TRANSFORM_REVERSIBLE,
+  settings: [
+    "url_prefix" => "",
+  ],
+)]
 class ConvertUrlToEmbedFilter extends FilterBase {
 
   /**
@@ -30,11 +41,10 @@ class ConvertUrlToEmbedFilter extends FilterBase {
       '#type' => 'textfield',
       '#title' => $this->t('URL prefix'),
       '#default_value' => $this->settings['url_prefix'],
-      '#description' => $this->t('Optional prefix that will be used to indicate which URLs that apply. All URLs that are supported will be converted if empty. Example: EMBED-https://twitter.com/drupal/status/735873777683320832'),
+      '#description' => $this->t('Optional prefix that will be used to indicate which URLs that apply. All URLs that are supported will be converted if empty. Example: EMBED-https://www.youtube.com/watch?v=I95hSyocMlg'),
     ];
     return $form;
   }
-
 
   /**
    * {@inheritdoc}
@@ -71,11 +81,11 @@ class ConvertUrlToEmbedFilter extends FilterBase {
     $tasks = [];
 
     // Prepare protocols pattern for absolute URLs.
-    // \Drupal\Component\Utility\UrlHelper::stripDangerousProtocols() will replace
-    // any bad protocols with HTTP, so we need to support the identical list.
-    // While '//' is technically optional for MAILTO only, we cannot cleanly
-    // differ between protocols here without hard-coding MAILTO, so '//' is
-    // optional for all protocols.
+    // \Drupal\Component\Utility\UrlHelper::stripDangerousProtocols() will
+    // replace any bad protocols with HTTP, so we need to support the identical
+    // list. While '//' is technically optional for MAILTO only, we cannot
+    // cleanly differ between protocols here without hard-coding MAILTO, so '//'
+    // is optional for all protocols.
     // @see \Drupal\Component\Utility\UrlHelper::stripDangerousProtocols()
     $protocols = \Drupal::getContainer()->getParameter('filter_protocols');
     $protocols = implode(':(?://)?|', $protocols) . ':(?://)?';
@@ -84,19 +94,20 @@ class ConvertUrlToEmbedFilter extends FilterBase {
 
     // Allow URL paths to contain balanced parens
     // 1. Used in Wikipedia URLs like /Primer_(film)
-    // 2. Used in IIS sessions like /S(dfd346)/
-    $valid_url_balanced_parens = '\('. $valid_url_path_characters . '+\)';
+    // 2. Used in IIS sessions like /S(dfd346)/.
+    $valid_url_balanced_parens = '\(' . $valid_url_path_characters . '+\)';
 
     // Valid end-of-path characters (so /foo. does not gobble the period).
-    // 1. Allow =&# for empty URL parameters and other URL-join artifacts
+    // 1. Allow =&# for empty URL parameters and other URL-join artifacts.
     $valid_url_ending_characters = '[\p{L}\p{M}\p{N}:_+~#=/]|(?:' . $valid_url_balanced_parens . ')';
 
     $valid_url_query_chars = '[a-zA-Z0-9!?\*\'@\(\);:&=\+\$\/%#\[\]\-_\.,~|]';
     $valid_url_query_ending_chars = '[a-zA-Z0-9_&=#\/]';
 
-    //full path
-    //and allow @ in a url, but only in the middle. Catch things like http://example.com/@user/
-    $valid_url_path = '(?:(?:'.$valid_url_path_characters . '*(?:'.$valid_url_balanced_parens .$valid_url_path_characters . '*)*'. $valid_url_ending_characters . ')|(?:@' . $valid_url_path_characters . '+\/))';
+    // Full path
+    // and allow @ in a url, but only in the middle. Catch things like
+    // http://example.com/@user/
+    $valid_url_path = '(?:(?:' . $valid_url_path_characters . '*(?:' . $valid_url_balanced_parens . $valid_url_path_characters . '*)*' . $valid_url_ending_characters . ')|(?:@' . $valid_url_path_characters . '+\/))';
 
     // Prepare domain name pattern.
     // The ICANN seems to be on track towards accepting more diverse top level
@@ -105,7 +116,7 @@ class ConvertUrlToEmbedFilter extends FilterBase {
     $domain = '(?:[\p{L}\p{M}\p{N}._+-]+\.)?[\p{L}\p{M}]{2,64}\b';
     $ip = '(?:[0-9]{1,3}\.){3}[0-9]{1,3}';
     $auth = '[\p{L}\p{M}\p{N}:%_+*~#?&=.,/;-]+@';
-    $trail = '('.$valid_url_path.'*)?(\\?'.$valid_url_query_chars .'*'.$valid_url_query_ending_chars.')?';
+    $trail = '(' . $valid_url_path . '*)?(\\?' . $valid_url_query_chars . '*' . $valid_url_query_ending_chars . ')?';
 
     // Match absolute URLs.
     $url_pattern = "(?:$auth)?(?:$domain|$ip)/?(?:$trail)?";
@@ -138,9 +149,10 @@ class ConvertUrlToEmbedFilter extends FilterBase {
           $chunks[$i] = preg_replace_callback(
             $pattern,
             function ($match) {
-              if (\Drupal::service('url_embed')->getEmbed(Html::decodeEntities($match[1]))) {
-                return '<drupal-url data-embed-url="' . $match[1] . '"></drupal-url>';
-              }
+                $info = \Drupal::service('url_embed')->getEmbed(Html::decodeEntities($match[1]));
+                if ($info && !empty($info->code->html)) {
+                    return '<drupal-url data-embed-url="' . $match[1] . '"></drupal-url>';
+                }
               else {
                 return $match[1];
               }
@@ -171,7 +183,7 @@ class ConvertUrlToEmbedFilter extends FilterBase {
     }
 
     $text = implode($chunks);
-    // Revert to the original comment contents
+    // Revert to the original comment contents.
     _filter_url_escape_comments('', FALSE);
     return preg_replace_callback('`<!--(.*?)-->`', '_filter_url_escape_comments', $text);
   }

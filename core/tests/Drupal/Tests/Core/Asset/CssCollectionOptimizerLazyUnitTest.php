@@ -54,7 +54,7 @@ class CssCollectionOptimizerLazyUnitTest extends UnitTestCase {
     $mock_language = $this->createMock(LanguageManagerInterface::class);
     $optimizer = new CssCollectionOptimizerLazy($mock_grouper, $mock_optimizer, $mock_theme_manager, $mock_dependency_resolver, new RequestStack(), $mock_file_system, $mock_config_factory, $mock_file_url_generator, $mock_time, $mock_language);
     $gpl_license = [
-      'name' => 'GNU-GPL-2.0-or-later',
+      'name' => 'GPL-2.0-or-later',
       'url' => 'https://www.drupal.org/licensing/faq',
       'gpl-compatible' => TRUE,
     ];
@@ -113,7 +113,7 @@ class CssCollectionOptimizerLazyUnitTest extends UnitTestCase {
     $mock_language = $this->createMock(LanguageManagerInterface::class);
     $optimizer = new CssCollectionOptimizerLazy($mock_grouper, $mock_optimizer, $mock_theme_manager, $mock_dependency_resolver, new RequestStack(), $mock_file_system, $mock_config_factory, $mock_file_url_generator, $mock_time, $mock_language);
     $gpl_license = [
-      'name' => 'GNU-GPL-2.0-or-later',
+      'name' => 'GPL-2.0-or-later',
       'url' => 'https://www.drupal.org/licensing/faq',
       'gpl-compatible' => TRUE,
     ];
@@ -146,6 +146,42 @@ class CssCollectionOptimizerLazyUnitTest extends UnitTestCase {
       ],
     );
     self::assertStringEqualsFile(__DIR__ . '/css_test_files/css_license.css.optimized.aggregated.css', $aggregate);
+  }
+
+  /**
+   * Test that external minified CSS assets do not trigger optimization.
+   *
+   * This ensures that fully external asset groups do not result in a
+   * CssOptimizer exception and are safely ignored.
+   */
+  public function testExternalMinifiedCssAssetOptimizationIsSkipped(): void {
+    $mock_grouper = $this->createMock(AssetCollectionGrouperInterface::class);
+    $mock_optimizer = $this->createMock(AssetOptimizerInterface::class);
+    $mock_optimizer->expects($this->never())->method('optimize');
+
+    $optimizer = new CssCollectionOptimizerLazy(
+      $mock_grouper,
+      $mock_optimizer,
+      $this->createMock(ThemeManagerInterface::class),
+      $this->createMock(LibraryDependencyResolverInterface::class),
+      new RequestStack(),
+      $this->createMock(FileSystemInterface::class),
+      $this->createMock(ConfigFactoryInterface::class),
+      $this->createMock(FileUrlGeneratorInterface::class),
+      $this->createMock(TimeInterface::class),
+      $this->createMock(LanguageManagerInterface::class)
+    );
+    $optimizer->optimizeGroup([
+      'items' => [
+        [
+          'type' => 'external',
+          'data' => __DIR__ . '/css_test_files/css_external.optimized.aggregated.css',
+          'license' => FALSE,
+          'preprocess' => TRUE,
+          'minified' => TRUE,
+        ],
+      ],
+    ]);
   }
 
 }

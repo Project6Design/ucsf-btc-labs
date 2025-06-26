@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Functional\Views;
 
 use Drupal\Core\Render\RenderContext;
@@ -25,7 +27,10 @@ class HandlerFieldUserNameTest extends UserTestBase {
    */
   protected $defaultTheme = 'stark';
 
-  public function testUserName() {
+  /**
+   * Tests the rendering of the user name field in Views.
+   */
+  public function testUserName(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -67,7 +72,7 @@ class HandlerFieldUserNameTest extends UserTestBase {
   /**
    * Tests that the field handler works when no additional fields are added.
    */
-  public function testNoAdditionalFields() {
+  public function testNoAdditionalFields(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 

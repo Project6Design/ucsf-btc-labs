@@ -28,22 +28,41 @@ class UrlEncodeTest extends MigrateTestCase {
    * @return array
    *   An array of URLs to test.
    */
-  public function urlDataProvider() {
+  public static function urlDataProvider() {
     return [
-      'A URL with no characters requiring encoding' => ['http://example.com/normal_url.html', 'http://example.com/normal_url.html'],
-      'The definitive use case - encoding spaces in URLs' => ['http://example.com/url with spaces.html', 'http://example.com/url%20with%20spaces.html'],
-      'Definitive use case 2 - spaces in directories' => ['http://example.com/dir with spaces/foo.html', 'http://example.com/dir%20with%20spaces/foo.html'],
-      'Local file specs without spaces should not be transformed' => ['/tmp/normal.txt', '/tmp/normal.txt'],
-      'Local file specs with spaces should not be transformed' => ['/tmp/with spaces.txt', '/tmp/with spaces.txt'],
-      'Make sure URL characters (:, ?, &) are not encoded but others are.' => ['https://example.com/?a=b@c&d=e+f%', 'https://example.com/?a%3Db%40c&d%3De%2Bf%25'],
+      'A URL with no characters requiring encoding' => [
+        'http://example.com/normal_url.html',
+        'http://example.com/normal_url.html',
+      ],
+      'The definitive use case - encoding spaces in URLs' => [
+        'http://example.com/url with spaces.html',
+        'http://example.com/url%20with%20spaces.html',
+      ],
+      'Definitive use case 2 - spaces in directories' => [
+        'http://example.com/dir with spaces/foo.html',
+        'http://example.com/dir%20with%20spaces/foo.html',
+      ],
+      'Local file specs without spaces should not be transformed' => [
+        '/tmp/normal.txt',
+        '/tmp/normal.txt',
+      ],
+      'Local file specs with spaces should not be transformed' => [
+        '/tmp/with spaces.txt',
+        '/tmp/with spaces.txt',
+      ],
+      'Make sure URL characters (:, ?, &) are not encoded but others are.' => [
+        'https://example.com/?a=b@c&d=e+f%',
+        'https://example.com/?a%3Db%40c&d%3De%2Bf%25',
+      ],
     ];
   }
 
   /**
    * Cover various encoding scenarios.
+   *
    * @dataProvider urlDataProvider
    */
-  public function testUrls($input, $output) {
+  public function testUrls($input, $output): void {
     $this->assertEquals($output, $this->doTransform($input));
   }
 

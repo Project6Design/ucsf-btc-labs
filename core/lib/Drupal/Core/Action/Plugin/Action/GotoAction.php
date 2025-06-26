@@ -116,7 +116,7 @@ class GotoAction extends ConfigurableActionBase implements ContainerFactoryPlugi
     $form['url'] = [
       '#type' => 'textfield',
       '#title' => $this->t('URL'),
-      '#description' => $this->t('The URL to which the user should be redirected. This can be an internal URL like /node/1234 or an external URL like @url.', ['@url' => 'http://example.com']),
+      '#description' => $this->t('The URL to which the user should be redirected. This can be an internal URL like /node/1234 or an external URL like @url.', ['@url' => 'https://example.com']),
       '#default_value' => $this->configuration['url'],
       '#required' => TRUE,
     ];
@@ -133,7 +133,7 @@ class GotoAction extends ConfigurableActionBase implements ContainerFactoryPlugi
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     $access = AccessResult::allowed();
     return $return_as_object ? $access : $access->isAllowed();
   }

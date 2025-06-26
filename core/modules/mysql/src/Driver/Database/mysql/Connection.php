@@ -6,9 +6,7 @@ use Drupal\Core\Database\Connection as DatabaseConnection;
 use Drupal\Core\Database\Database;
 use Drupal\Core\Database\DatabaseAccessDeniedException;
 use Drupal\Core\Database\DatabaseConnectionRefusedException;
-use Drupal\Core\Database\DatabaseException;
 use Drupal\Core\Database\DatabaseNotFoundException;
-use Drupal\Core\Database\Query\Condition;
 use Drupal\Core\Database\StatementWrapperIterator;
 use Drupal\Core\Database\SupportsTemporaryTablesInterface;
 use Drupal\Core\Database\Transaction\TransactionManagerInterface;
@@ -39,36 +37,9 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
   const CONNECTION_REFUSED = 2002;
 
   /**
-   * Error code for "Can't initialize character set" error.
-   */
-  const UNSUPPORTED_CHARSET = 2019;
-
-  /**
-   * Driver-specific error code for "Unknown character set" error.
-   */
-  const UNKNOWN_CHARSET = 1115;
-
-  /**
-   * SQLSTATE error code for "Syntax error or access rule violation".
-   */
-  const SQLSTATE_SYNTAX_ERROR = 42000;
-
-  /**
    * {@inheritdoc}
    */
   protected $statementWrapperClass = StatementWrapperIterator::class;
-
-  /**
-   * Flag to indicate if the cleanup function in __destruct() should run.
-   *
-   * @var bool
-   *
-   * @deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. There's no
-   *    replacement.
-   *
-   * @see https://www.drupal.org/node/3349345
-   */
-  protected $needsCleanup = FALSE;
 
   /**
    * Stores the server version after it has been retrieved from the database.
@@ -83,7 +54,7 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
    * The minimal possible value for the max_allowed_packet setting of MySQL.
    *
    * @link https://mariadb.com/kb/en/mariadb/server-system-variables/#max_allowed_packet
-   * @link https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_max_allowed_packet
+   * @link https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_max_allowed_packet
    *
    * @var int
    */
@@ -102,11 +73,8 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
     // combination mode), then MySQL doesn't interpret a double quote as an
     // identifier quote, in which case use the non-ANSI-standard backtick.
     //
-    // Because we still support MySQL 5.7, check for the deprecated combination
-    // modes as well.
-    //
-    // @see https://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_ansi_quotes
-    $ansi_quotes_modes = ['ANSI_QUOTES', 'ANSI', 'DB2', 'MAXDB', 'MSSQL', 'ORACLE', 'POSTGRESQL'];
+    // @see https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html#sqlmode_ansi_quotes
+    $ansi_quotes_modes = ['ANSI_QUOTES', 'ANSI'];
     $is_ansi_quotes_mode = FALSE;
     if (isset($connection_options['init_commands']['sql_mode'])) {
       foreach ($ansi_quotes_modes as $mode) {
@@ -130,13 +98,6 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
    * {@inheritdoc}
    */
   public static function open(array &$connection_options = []) {
-    if (isset($connection_options['_dsn_utf8_fallback']) && $connection_options['_dsn_utf8_fallback'] === TRUE) {
-      // Only used during the installer version check, as a fallback from utf8mb4.
-      $charset = 'utf8';
-    }
-    else {
-      $charset = 'utf8mb4';
-    }
     // The DSN should use either a socket or a host/port.
     if (isset($connection_options['unix_socket'])) {
       $dsn = 'mysql:unix_socket=' . $connection_options['unix_socket'];
@@ -148,7 +109,7 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
     // Character set is added to dsn to ensure PDO uses the proper character
     // set when escaping. This has security implications. See
     // https://www.drupal.org/node/1201452 for further discussion.
-    $dsn .= ';charset=' . $charset;
+    $dsn .= ';charset=utf8mb4';
     if (!empty($connection_options['database'])) {
       $dsn .= ';dbname=' . $connection_options['database'];
     }
@@ -158,13 +119,15 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
     ];
     $connection_options['pdo'] += [
       \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-      // So we don't have to mess around with cursors and unbuffered queries by default.
+      // So we don't have to mess around with cursors and unbuffered queries by
+      // default.
       \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => TRUE,
       // Make sure MySQL returns all matched rows on update queries including
       // rows that actually didn't have to be updated because the values didn't
       // change. This matches common behavior among other database systems.
       \PDO::MYSQL_ATTR_FOUND_ROWS => TRUE,
-      // Because MySQL's prepared statements skip the query cache, because it's dumb.
+      // Because MySQL's prepared statements skip the query cache, because it's
+      // dumb.
       \PDO::ATTR_EMULATE_PREPARES => TRUE,
       // Limit SQL to a single statement like mysqli.
       \PDO::MYSQL_ATTR_MULTI_STATEMENTS => FALSE,
@@ -191,7 +154,7 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
             // Show message for socket connection via 'host' option.
             $message = 'Drupal was attempting to connect to the database server via a socket, but the socket file could not be found.';
             $message .= ' A Unix socket file is used if you do not specify a host name or if you specify the special host name localhost.';
-            $message .= ' To connect via TPC/IP use an IP address (127.0.0.1 for IPv4) instead of "localhost".';
+            $message .= ' To connect via TCP/IP use an IP address (127.0.0.1 for IPv4) instead of "localhost".';
             $message .= ' This message normally means that there is no MySQL server running on the system or that you are using an incorrect Unix socket file name when trying to connect to the server.';
             throw new DatabaseConnectionRefusedException($e->getMessage() . ' [Tip: ' . $message . '] ', $e->getCode(), $e);
           }
@@ -216,10 +179,10 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
     // 'utf8mb4_general_ci' (MySQL 5) or 'utf8mb4_0900_ai_ci' (MySQL 8) for
     // utf8mb4.
     if (!empty($connection_options['collation'])) {
-      $pdo->exec('SET NAMES ' . $charset . ' COLLATE ' . $connection_options['collation']);
+      $pdo->exec('SET NAMES utf8mb4 COLLATE ' . $connection_options['collation']);
     }
     else {
-      $pdo->exec('SET NAMES ' . $charset);
+      $pdo->exec('SET NAMES utf8mb4');
     }
 
     // Set MySQL init_commands if not already defined.  Default Drupal's MySQL
@@ -254,13 +217,6 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
   /**
    * {@inheritdoc}
    */
-  public function __destruct() {
-    if ($this->needsCleanup) {
-      $this->nextIdDelete();
-    }
-    parent::__destruct();
-  }
-
   public function queryRange($query, $from, $count, array $args = [], array $options = []) {
     return $this->query($query . ' LIMIT ' . (int) $from . ', ' . (int) $count, $args, $options);
   }
@@ -274,6 +230,9 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
     return $tablename;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function driver() {
     return 'mysql';
   }
@@ -328,6 +287,9 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
     return $this->serverVersion;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function databaseType() {
     return 'mysql';
   }
@@ -354,58 +316,12 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
     }
   }
 
-  public function mapConditionOperator($operator) {
-    // We don't want to override any of the defaults.
-    return NULL;
-  }
-
   /**
    * {@inheritdoc}
    */
-  public function nextId($existing_id = 0) {
-    @trigger_error('Drupal\Core\Database\Connection::nextId() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Modules should use instead the keyvalue storage for the last used id. See https://www.drupal.org/node/3349345', E_USER_DEPRECATED);
-    $this->query('INSERT INTO {sequences} () VALUES ()');
-    $new_id = $this->lastInsertId();
-    // This should only happen after an import or similar event.
-    if ($existing_id >= $new_id) {
-      // If we INSERT a value manually into the sequences table, on the next
-      // INSERT, MySQL will generate a larger value. However, there is no way
-      // of knowing whether this value already exists in the table. MySQL
-      // provides an INSERT IGNORE which would work, but that can mask problems
-      // other than duplicate keys. Instead, we use INSERT ... ON DUPLICATE KEY
-      // UPDATE in such a way that the UPDATE does not do anything. This way,
-      // duplicate keys do not generate errors but everything else does.
-      $this->query('INSERT INTO {sequences} (value) VALUES (:value) ON DUPLICATE KEY UPDATE value = value', [':value' => $existing_id]);
-      $this->query('INSERT INTO {sequences} () VALUES ()');
-      $new_id = $this->lastInsertId();
-    }
-    $this->needsCleanup = TRUE;
-    return $new_id;
-  }
-
-  public function nextIdDelete() {
-    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Modules should use instead the keyvalue storage for the last used id. See https://www.drupal.org/node/3349345', E_USER_DEPRECATED);
-    // While we want to clean up the table to keep it up from occupying too
-    // much storage and memory, we must keep the highest value in the table
-    // because InnoDB uses an in-memory auto-increment counter as long as the
-    // server runs. When the server is stopped and restarted, InnoDB
-    // re-initializes the counter for each table for the first INSERT to the
-    // table based solely on values from the table so deleting all values would
-    // be a problem in this case. Also, TRUNCATE resets the auto increment
-    // counter.
-    try {
-      $max_id = $this->query('SELECT MAX(value) FROM {sequences}')->fetchField();
-      // We know we are using MySQL here, no need for the slower ::delete().
-      $this->query('DELETE FROM {sequences} WHERE value < :value', [':value' => $max_id]);
-    }
-    // During testing, this function is called from shutdown with the
-    // simpletest prefix stored in $this->connection, and those tables are gone
-    // by the time shutdown is called so we need to ignore the database
-    // errors. There is no problem with completely ignoring errors here: if
-    // these queries fail, the sequence will work just fine, just use a bit
-    // more database storage and memory.
-    catch (DatabaseException $e) {
-    }
+  public function mapConditionOperator($operator) {
+    // We don't want to override any of the defaults.
+    return NULL;
   }
 
   /**
@@ -418,13 +334,6 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
   /**
    * {@inheritdoc}
    */
-  public function select($table, $alias = NULL, array $options = []) {
-    return new Select($this, $table, $alias, $options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function insert($table, array $options = []) {
     return new Insert($this, $table, $options);
   }
@@ -432,36 +341,8 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
   /**
    * {@inheritdoc}
    */
-  public function merge($table, array $options = []) {
-    return new Merge($this, $table, $options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function upsert($table, array $options = []) {
     return new Upsert($this, $table, $options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function update($table, array $options = []) {
-    return new Update($this, $table, $options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function delete($table, array $options = []) {
-    return new Delete($this, $table, $options);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function truncate($table, array $options = []) {
-    return new Truncate($this, $table, $options);
   }
 
   /**
@@ -477,22 +358,8 @@ class Connection extends DatabaseConnection implements SupportsTemporaryTablesIn
   /**
    * {@inheritdoc}
    */
-  public function condition($conjunction) {
-    return new Condition($conjunction);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   protected function driverTransactionManager(): TransactionManagerInterface {
     return new TransactionManager($this);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function startTransaction($name = '') {
-    return $this->transactionManager()->push($name);
   }
 
 }

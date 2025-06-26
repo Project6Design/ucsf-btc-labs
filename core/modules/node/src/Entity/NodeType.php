@@ -2,59 +2,66 @@
 
 namespace Drupal\node\Entity;
 
+use Drupal\Core\Config\Action\Attribute\ActionMethod;
 use Drupal\Core\Config\Entity\ConfigEntityBundleBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\node\Form\NodeTypeDeleteConfirm;
+use Drupal\node\NodeTypeAccessControlHandler;
+use Drupal\node\Form\NodeTypeForm;
 use Drupal\node\NodeTypeInterface;
+use Drupal\node\NodeTypeListBuilder;
+use Drupal\user\Entity\EntityPermissionsRouteProvider;
 
 /**
  * Defines the Node type configuration entity.
- *
- * @ConfigEntityType(
- *   id = "node_type",
- *   label = @Translation("Content type"),
- *   label_collection = @Translation("Content types"),
- *   label_singular = @Translation("content type"),
- *   label_plural = @Translation("content types"),
- *   label_count = @PluralTranslation(
- *     singular = "@count content type",
- *     plural = "@count content types",
- *   ),
- *   handlers = {
- *     "access" = "Drupal\node\NodeTypeAccessControlHandler",
- *     "form" = {
- *       "add" = "Drupal\node\NodeTypeForm",
- *       "edit" = "Drupal\node\NodeTypeForm",
- *       "delete" = "Drupal\node\Form\NodeTypeDeleteConfirm"
- *     },
- *     "route_provider" = {
- *       "permissions" = "Drupal\user\Entity\EntityPermissionsRouteProvider",
- *     },
- *     "list_builder" = "Drupal\node\NodeTypeListBuilder",
- *   },
- *   admin_permission = "administer content types",
- *   config_prefix = "type",
- *   bundle_of = "node",
- *   entity_keys = {
- *     "id" = "type",
- *     "label" = "name"
- *   },
- *   links = {
- *     "edit-form" = "/admin/structure/types/manage/{node_type}",
- *     "delete-form" = "/admin/structure/types/manage/{node_type}/delete",
- *     "entity-permissions-form" = "/admin/structure/types/manage/{node_type}/permissions",
- *     "collection" = "/admin/structure/types",
- *   },
- *   config_export = {
- *     "name",
- *     "type",
- *     "description",
- *     "help",
- *     "new_revision",
- *     "preview_mode",
- *     "display_submitted",
- *   }
- * )
  */
+#[ConfigEntityType(
+  id: 'node_type',
+  label: new TranslatableMarkup('Content type'),
+  label_collection: new TranslatableMarkup('Content types'),
+  label_singular: new TranslatableMarkup('content type'),
+  label_plural: new TranslatableMarkup('content types'),
+  config_prefix: 'type',
+  entity_keys: [
+    'id' => 'type',
+    'label' => 'name',
+  ],
+  handlers: [
+    'access' => NodeTypeAccessControlHandler::class,
+    'form' => [
+      'add' => NodeTypeForm::class,
+      'edit' => NodeTypeForm::class,
+      'delete' => NodeTypeDeleteConfirm::class,
+    ],
+    'route_provider' => [
+      'permissions' => EntityPermissionsRouteProvider::class,
+    ],
+    'list_builder' => NodeTypeListBuilder::class,
+  ],
+  links: [
+    'edit-form' => '/admin/structure/types/manage/{node_type}',
+    'delete-form' => '/admin/structure/types/manage/{node_type}/delete',
+    'entity-permissions-form' => '/admin/structure/types/manage/{node_type}/permissions',
+    'collection' => '/admin/structure/types',
+  ],
+  admin_permission: 'administer content types',
+  bundle_of: 'node',
+  label_count: [
+    'singular' => '@count content type',
+    'plural' => '@count content types',
+  ],
+  config_export: [
+    'name',
+    'type',
+    'description',
+    'help',
+    'new_revision',
+    'preview_mode',
+    'display_submitted',
+  ],
+)]
 class NodeType extends ConfigEntityBundleBase implements NodeTypeInterface {
 
   /**
@@ -78,16 +85,16 @@ class NodeType extends ConfigEntityBundleBase implements NodeTypeInterface {
   /**
    * A brief description of this node type.
    *
-   * @var string
+   * @var string|null
    */
-  protected $description;
+  protected $description = NULL;
 
   /**
    * Help information shown to the user when creating a Node of this type.
    *
-   * @var string
+   * @var string|null
    */
-  protected $help;
+  protected $help = NULL;
 
   /**
    * Default value of the 'Create new revision' checkbox of this node type.
@@ -122,12 +129,13 @@ class NodeType extends ConfigEntityBundleBase implements NodeTypeInterface {
    */
   public function isLocked() {
     $locked = \Drupal::state()->get('node.type.locked');
-    return isset($locked[$this->id()]) ? $locked[$this->id()] : FALSE;
+    return $locked[$this->id()] ?? FALSE;
   }
 
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Automatically create new revisions'), pluralize: FALSE)]
   public function setNewRevision($new_revision) {
     $this->new_revision = $new_revision;
   }
@@ -142,6 +150,7 @@ class NodeType extends ConfigEntityBundleBase implements NodeTypeInterface {
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Set whether to display submission information'), pluralize: FALSE)]
   public function setDisplaySubmitted($display_submitted) {
     $this->display_submitted = $display_submitted;
   }
@@ -156,6 +165,7 @@ class NodeType extends ConfigEntityBundleBase implements NodeTypeInterface {
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Set preview mode'), pluralize: FALSE)]
   public function setPreviewMode($preview_mode) {
     $this->preview_mode = $preview_mode;
   }
@@ -164,14 +174,14 @@ class NodeType extends ConfigEntityBundleBase implements NodeTypeInterface {
    * {@inheritdoc}
    */
   public function getHelp() {
-    return $this->help;
+    return $this->help ?? '';
   }
 
   /**
    * {@inheritdoc}
    */
   public function getDescription() {
-    return $this->description;
+    return $this->description ?? '';
   }
 
   /**
@@ -180,18 +190,6 @@ class NodeType extends ConfigEntityBundleBase implements NodeTypeInterface {
   public function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
 
-    if ($update && $this->getOriginalId() != $this->id()) {
-      $update_count = $storage->updateType($this->getOriginalId(), $this->id());
-      if ($update_count) {
-        \Drupal::messenger()->addStatus(\Drupal::translation()->formatPlural($update_count,
-          'Changed the content type of 1 post from %old-type to %type.',
-          'Changed the content type of @count posts from %old-type to %type.',
-          [
-            '%old-type' => $this->getOriginalId(),
-            '%type' => $this->id(),
-          ]));
-      }
-    }
     if ($update) {
       // Clear the cached field definitions as some settings affect the field
       // definitions.

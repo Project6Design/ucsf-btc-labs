@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block\Kernel\Migrate\d6;
 
 use Drupal\Tests\migrate_drupal\Kernel\d6\MigrateDrupal6TestBase;
+use Drupal\block\Hook\BlockHooks;
 
 /**
  * Tests migration of i18n block translations.
@@ -15,17 +18,14 @@ class MigrateBlockContentTranslationTest extends MigrateDrupal6TestBase {
    * {@inheritdoc}
    */
   protected static $modules = [
-    'book',
     'block',
     'comment',
-    'forum',
     'views',
     'block_content',
     'config_translation',
     'language',
     'locale',
     'path_alias',
-    'statistics',
     'taxonomy',
   ];
 
@@ -35,6 +35,7 @@ class MigrateBlockContentTranslationTest extends MigrateDrupal6TestBase {
   protected function setUp(): void {
     parent::setUp();
     $this->installEntitySchema('block_content');
+    $this->installEntitySchema('path_alias');
     $this->installConfig(['block']);
     $this->installConfig(['block_content']);
     $this->container->get('theme_installer')->install(['stark']);
@@ -44,18 +45,20 @@ class MigrateBlockContentTranslationTest extends MigrateDrupal6TestBase {
       'd6_filter_format',
       'block_content_type',
       'block_content_body_field',
+      'd6_menu',
       'd6_custom_block',
       'd6_user_role',
       'd6_block',
       'd6_block_translation',
     ]);
-    block_rebuild();
+    $blockRebuild = new BlockHooks();
+    $blockRebuild->rebuild();
   }
 
   /**
    * Tests the migration of block title translation.
    */
-  public function testBlockContentTranslation() {
+  public function testBlockContentTranslation(): void {
     /** @var \Drupal\language\ConfigurableLanguageManagerInterface $language_manager */
     $language_manager = $this->container->get('language_manager');
 

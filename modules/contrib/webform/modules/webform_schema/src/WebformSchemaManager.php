@@ -12,8 +12,8 @@ use Drupal\webform\Element\WebformHtmlEditor;
 use Drupal\webform\Plugin\WebformElement\BooleanBase;
 use Drupal\webform\Plugin\WebformElement\DateBase;
 use Drupal\webform\Plugin\WebformElement\NumericBase;
-use Drupal\webform\Plugin\WebformElement\Textarea;
 use Drupal\webform\Plugin\WebformElement\TextField;
+use Drupal\webform\Plugin\WebformElement\Textarea;
 use Drupal\webform\Plugin\WebformElement\WebformCompositeBase;
 use Drupal\webform\Plugin\WebformElement\WebformManagedFileBase;
 use Drupal\webform\Plugin\WebformElementEntityReferenceInterface;
@@ -21,7 +21,7 @@ use Drupal\webform\Plugin\WebformElementManagerInterface;
 use Drupal\webform\WebformInterface;
 
 /**
- * Provides a webform schema maaager.
+ * Provides a webform schema manager.
  */
 class WebformSchemaManager implements WebformSchemaManagerInterface {
 

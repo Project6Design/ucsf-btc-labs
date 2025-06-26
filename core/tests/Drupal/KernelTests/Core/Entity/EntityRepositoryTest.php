@@ -1,10 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
-use Drupal\Core\Language\LanguageInterface;
-use Drupal\Core\Plugin\Context\Context;
-use Drupal\Core\Plugin\Context\ContextDefinition;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -79,7 +78,7 @@ class EntityRepositoryTest extends KernelTestBase {
    * @covers ::getActive
    * @covers ::getActiveMultiple
    */
-  public function testGetActive() {
+  public function testGetActive(): void {
     $en_contexts = $this->getLanguageContexts('en');
 
     // Check that when the entity does not exist NULL is returned.
@@ -212,7 +211,7 @@ class EntityRepositoryTest extends KernelTestBase {
    * @covers ::getCanonical
    * @covers ::getCanonicalMultiple
    */
-  public function testGetCanonical() {
+  public function testGetCanonical(): void {
     // Check that when the entity does not exist NULL is returned.
     $entity_type_id = 'entity_test_mul';
     $canonical = $this->entityRepository->getActive($entity_type_id, -1);
@@ -256,7 +255,7 @@ class EntityRepositoryTest extends KernelTestBase {
    * @param string $method_name
    *   An entity repository method name.
    */
-  protected function doTestLanguageFallback($method_name) {
+  protected function doTestLanguageFallback($method_name): void {
     $entity_type_id = 'entity_test_mulrev';
     $en_contexts = $this->getLanguageContexts('en');
     $it_contexts = $this->getLanguageContexts('it');
@@ -317,12 +316,8 @@ class EntityRepositoryTest extends KernelTestBase {
    * @return \Drupal\Core\Plugin\Context\ContextInterface[]
    *   An array of contexts.
    */
-  protected function getLanguageContexts($langcode) {
-    $prefix = '@language.current_language_context:';
-    return [
-      $prefix . LanguageInterface::TYPE_INTERFACE => new Context(new ContextDefinition('language'), $langcode),
-      $prefix . LanguageInterface::TYPE_CONTENT => new Context(new ContextDefinition('language'), $langcode),
-    ];
+  protected function getLanguageContexts($langcode): array {
+    return ['langcode' => $langcode];
   }
 
 }

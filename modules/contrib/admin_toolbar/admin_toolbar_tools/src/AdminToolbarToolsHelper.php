@@ -70,8 +70,8 @@ class AdminToolbarToolsHelper {
   /**
    * Generate the toolbar tab and item for primary local tasks.
    *
-   * @return array
-   *   The toolbar render array.
+   * @return array<string, mixed>
+   *   The toolbar item render array.
    */
   public function buildLocalTasksToolbar() {
     $build = [];
@@ -97,7 +97,7 @@ class AdminToolbarToolsHelper {
         // Only show the accessible local tasks.
         foreach (Element::getVisibleChildren($local_tasks['tabs']) as $task) {
           $local_task_links['#links'][$task] = $local_tasks['tabs'][$task]['#link'];
-          if ($local_tasks['tabs'][$task]['#active']) {
+          if (isset($local_tasks['tabs'][$task]['#active']) && $local_tasks['tabs'][$task]['#active']) {
             $local_task_links['#links'][$task]['attributes']['class'][] = 'is-active';
           }
         }
@@ -141,7 +141,7 @@ class AdminToolbarToolsHelper {
   /**
    * Gets a list of content entities.
    *
-   * @return array
+   * @return array<string, mixed>
    *   An array of metadata about content entities.
    */
   public function getBundleableEntitiesList() {
@@ -161,7 +161,7 @@ class AdminToolbarToolsHelper {
   /**
    * Gets an array of entity types that should trigger a menu rebuild.
    *
-   * @return array
+   * @return array<int, mixed>
    *   An array of entity machine names.
    */
   public function getRebuildEntityTypes() {

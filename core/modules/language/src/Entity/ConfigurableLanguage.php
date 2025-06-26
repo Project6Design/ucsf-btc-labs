@@ -2,57 +2,63 @@
 
 namespace Drupal\language\Entity;
 
+use Drupal\Core\Config\Action\Attribute\ActionMethod;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Language\LanguageManager;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\language\ConfigurableLanguageManager;
 use Drupal\language\ConfigurableLanguageManagerInterface;
 use Drupal\language\Exception\DeleteDefaultLanguageException;
 use Drupal\language\ConfigurableLanguageInterface;
+use Drupal\language\Form\LanguageAddForm;
+use Drupal\language\Form\LanguageDeleteForm;
+use Drupal\language\Form\LanguageEditForm;
+use Drupal\language\LanguageAccessControlHandler;
+use Drupal\language\LanguageListBuilder;
 
 /**
  * Defines the ConfigurableLanguage entity.
- *
- * @ConfigEntityType(
- *   id = "configurable_language",
- *   label = @Translation("Language"),
- *   label_collection = @Translation("Languages"),
- *   label_singular = @Translation("language"),
- *   label_plural = @Translation("languages"),
- *   label_count = @PluralTranslation(
- *     singular = "@count language",
- *     plural = "@count languages",
- *   ),
- *   handlers = {
- *     "list_builder" = "Drupal\language\LanguageListBuilder",
- *     "access" = "Drupal\language\LanguageAccessControlHandler",
- *     "form" = {
- *       "add" = "Drupal\language\Form\LanguageAddForm",
- *       "edit" = "Drupal\language\Form\LanguageEditForm",
- *       "delete" = "Drupal\language\Form\LanguageDeleteForm"
- *     }
- *   },
- *   admin_permission = "administer languages",
- *   config_prefix = "entity",
- *   entity_keys = {
- *     "id" = "id",
- *     "label" = "label",
- *     "weight" = "weight"
- *   },
- *   config_export = {
- *     "id",
- *     "label",
- *     "direction",
- *     "weight",
- *     "locked"
- *   },
- *   links = {
- *     "delete-form" = "/admin/config/regional/language/delete/{configurable_language}",
- *     "edit-form" = "/admin/config/regional/language/edit/{configurable_language}",
- *     "collection" = "/admin/config/regional/language",
- *   }
- * )
  */
+#[ConfigEntityType(
+  id: 'configurable_language',
+  label: new TranslatableMarkup('Language'),
+  label_collection: new TranslatableMarkup('Languages'),
+  label_singular: new TranslatableMarkup('language'),
+  label_plural: new TranslatableMarkup('languages'),
+  config_prefix: 'entity',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+    'weight' => 'weight',
+  ], handlers: [
+    'list_builder' => LanguageListBuilder::class,
+    'access' => LanguageAccessControlHandler::class,
+    'form' => [
+      'add' => LanguageAddForm::class,
+      'edit' => LanguageEditForm::class,
+      'delete' => LanguageDeleteForm::class,
+    ],
+  ],
+  links: [
+    'delete-form' => '/admin/config/regional/language/delete/{configurable_language}',
+    'edit-form' => '/admin/config/regional/language/edit/{configurable_language}',
+    'collection' => '/admin/config/regional/language',
+  ],
+  admin_permission: 'administer languages',
+  label_count: [
+    'singular' => '@count language',
+    'plural' => '@count languages',
+  ],
+  config_export: [
+    'id',
+    'label',
+    'direction',
+    'weight',
+    'locked',
+  ],
+)]
 class ConfigurableLanguage extends ConfigEntityBase implements ConfigurableLanguageInterface {
 
   /**
@@ -96,10 +102,10 @@ class ConfigurableLanguage extends ConfigEntityBase implements ConfigurableLangu
    * This property is not saved to the language entity, but is needed for
    * detecting when to rebuild the services.
    *
+   * @var bool
+   *
    * @see \Drupal\language\Entity\ConfigurableLanguage::preSave()
    * @see \Drupal\language\Entity\ConfigurableLanguage::postSave()
-   *
-   * @var bool
    */
   protected $preSaveMultilingual;
 
@@ -150,7 +156,8 @@ class ConfigurableLanguage extends ConfigEntityBase implements ConfigurableLangu
       $language_manager::rebuildServices();
     }
     if (!$update) {
-      // Install any available language configuration overrides for the language.
+      // Install any available language configuration overrides for the
+      // language.
       \Drupal::service('language.config_factory_override')->installLanguageOverrides($this->id());
     }
 
@@ -224,6 +231,7 @@ class ConfigurableLanguage extends ConfigEntityBase implements ConfigurableLangu
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Set Language name'), pluralize: FALSE)]
   public function setName($name) {
     $this->label = $name;
 
@@ -254,6 +262,7 @@ class ConfigurableLanguage extends ConfigEntityBase implements ConfigurableLangu
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Set weight'), pluralize: FALSE)]
   public function setWeight($weight) {
     $this->weight = $weight;
     return $this;

@@ -1,0 +1,126 @@
+<?php
+
+/**
+ * @file
+ * Install, uninstall and update hooks for Photoswipe module.
+ */
+
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_install().
+ */
+function photoswipe_dynamic_caption_install() {
+  // Clear the discovery cache, so the captions appear:
+  \Drupal::cache('discovery')->invalidateAll();
+
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function photoswipe_dynamic_caption_requirements($phase) {
+  $requirements = [];
+  // If we are not in runtime phase, there is nothing to do. So bail out early.
+  if ($phase !== 'runtime') {
+    return [];
+  }
+
+  $library_file_finder = \Drupal::service('library.libraries_directory_file_finder');
+  $message = NULL;
+  $description = NULL;
+
+  $is_cdn_enabled = \Drupal::config('photoswipe.settings')->get('enable_cdn');
+  $is_locally_installed = $library_file_finder->find('photoswipe-dynamic-caption-plugin');
+
+  // We only care about major version.
+  $version_required = 1;
+
+  $library_req = REQUIREMENT_OK;
+  // @todo Currently, this plugin isn't on bower, nor has it a downloadable
+  // Github release, see
+  // https://github.com/dimsemenov/photoswipe-dynamic-caption-plugin/issues/21
+  $help_text = t('
+  <strong>Composer installation (recommended)</strong></br>
+  <ol>
+    <li>Enable usage of third-party libraries using composer, see @here for an explanation.</li>
+    <li>Require the photoswipe dynamic caption library using "composer require npm-asset/photoswipe-dynamic-caption-plugin:^1"</li>
+  </ol>
+  <strong>Manual installation</strong>
+  <ol>
+    <li>Clone the @githubLink</li>
+    <li>Place the cloned photoswipe caption directory in the "libraries" directory on your server.</li>
+  </ol>',
+  [
+    '@githubLink' => Link::fromTextAndUrl(t('Photoswipe dynamic caption plugin'), Url::fromUri('https://github.com/dimsemenov/photoswipe-dynamic-caption-plugin'))->toString(),
+    '@here' => Link::fromTextAndUrl(t('here'), Url::fromUri('https://www.drupal.org/docs/develop/using-composer/manage-dependencies#third-party-libraries'))->toString(),
+  ]);
+
+  if (!$is_cdn_enabled && !$is_locally_installed) {
+    $library_req = REQUIREMENT_ERROR;
+    $message = t('<strong>Photoswipe dynamic caption plugin library not found, CDN disabled</strong>');
+    $description = t('You can either enable requiring the library through CDN @here (not recommended) or install it locally, using the following instructions:<br>@help_text',
+      [
+        '@help_text' => $help_text,
+        '@here' => Link::createFromRoute(t('link'), 'photoswipe.settings')->toString(),
+      ]
+    );
+  }
+  elseif ($is_locally_installed && !$library_file_finder->find('photoswipe-dynamic-caption-plugin/package.json')) {
+    $library_req = REQUIREMENT_ERROR;
+    $message = t('<strong>Photoswipe dynamic caption library found, but missing photoswipe-dynamic-caption-plugin package.json detected!</strong>');
+    $description = t('Local library folder found, but library seems to be corrupted, please require the photoswipe dynamic caption library correctly:<br>@help_text', ['@help_text' => $help_text]);
+  }
+  else {
+    $photoswipe_json_content = file_get_contents($library_file_finder->find('photoswipe-dynamic-caption-plugin/package.json'));
+    $photoswipe_json = json_decode($photoswipe_json_content, TRUE);
+    $library_version = $photoswipe_json['version'];
+    // We only care about major version.
+    [$major] = explode('.', $library_version);
+    if ((int) $major !== $version_required) {
+      $library_req = REQUIREMENT_ERROR;
+      $message = t('Current version supports ^@version.x: Please install appropriate version', [
+        '@version' => $version_required,
+      ]);
+      $description = t('<strong>You need to install a compatible version!</strong><br><br>@help_text', ['@help_text' => $help_text]);
+    }
+  }
+
+  // Requirements.
+  $requirements['photoswipe_dynamic_caption'] = [
+    'title' => t('Photoswipe dynamic caption plugin'),
+    'severity' => $library_req,
+    'value' => $message ?? $version_required,
+    'description' => $description ?? '',
+  ];
+
+  return $requirements;
+}
+
+/**
+ * Sets the "photoswipe_dynamic_caption" default options.
+ *
+ * In some cases, these settings where NULL on sites migrating from photoswipe
+ * v4.
+ */
+function photoswipe_dynamic_caption_update_9001() {
+  $configFactory = Drupal::configFactory();
+  $config = $configFactory->getEditable('photoswipe_dynamic_caption.settings');
+  if (empty($config->get('options.type'))) {
+    $config->set('options.type', 'auto');
+  }
+  if (empty($config->get('options.mobileLayoutBreakpoint'))) {
+    $config->set('options.mobileLayoutBreakpoint', 600);
+  }
+  if (empty($config->get('options.horizontalEdgeThreshold'))) {
+    $config->set('options.horizontalEdgeThreshold', 20);
+  }
+  if (empty($config->get('options.mobileCaptionOverlapRatio'))) {
+    $config->set('options.mobileCaptionOverlapRatio', 0.3);
+  }
+  if (empty($config->get('options.verticallyCenterImage'))) {
+    $config->set('options.verticallyCenterImage', FALSE);
+  }
+  $config->save();
+}

@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Url;
 use Drupal\taxonomy\Entity\Vocabulary;
 
@@ -39,7 +41,7 @@ class VocabularyUiTest extends TaxonomyTestBase {
   /**
    * Create, edit and delete a vocabulary via the user interface.
    */
-  public function testVocabularyInterface() {
+  public function testVocabularyInterface(): void {
     // Visit the main taxonomy administration page.
     $this->drupalGet('admin/structure/taxonomy');
 
@@ -99,9 +101,10 @@ class VocabularyUiTest extends TaxonomyTestBase {
     $link->click();
 
     // Confirm deletion.
-    $this->assertSession()->responseContains(new FormattableMarkup('Are you sure you want to delete the vocabulary %name?', ['%name' => $edit['name']]));
+    $name = Html::escape($edit['name']);
+    $this->assertSession()->responseContains("Are you sure you want to delete the vocabulary <em class=\"placeholder\">$name</em>?");
     $this->submitForm([], 'Delete');
-    $this->assertSession()->responseContains(new FormattableMarkup('Deleted vocabulary %name.', ['%name' => $edit['name']]));
+    $this->assertSession()->responseContains("Deleted vocabulary <em class=\"placeholder\">$name</em>.");
     $this->container->get('entity_type.manager')->getStorage('taxonomy_vocabulary')->resetCache();
     $this->assertNull(Vocabulary::load($edit['vid']), 'Vocabulary not found.');
   }
@@ -109,7 +112,7 @@ class VocabularyUiTest extends TaxonomyTestBase {
   /**
    * Changing weights on the vocabulary overview with two or more vocabularies.
    */
-  public function testTaxonomyAdminChangingWeights() {
+  public function testTaxonomyAdminChangingWeights(): void {
     // Create some vocabularies.
     for ($i = 0; $i < 10; $i++) {
       $this->createVocabulary();
@@ -139,10 +142,10 @@ class VocabularyUiTest extends TaxonomyTestBase {
   /**
    * Tests the vocabulary overview with no vocabularies.
    */
-  public function testTaxonomyAdminNoVocabularies() {
+  public function testTaxonomyAdminNoVocabularies(): void {
     // Delete all vocabularies.
     $vocabularies = Vocabulary::loadMultiple();
-    foreach ($vocabularies as $key => $vocabulary) {
+    foreach ($vocabularies as $vocabulary) {
       $vocabulary->delete();
     }
     // Confirm that no vocabularies are found in the database.
@@ -155,7 +158,7 @@ class VocabularyUiTest extends TaxonomyTestBase {
   /**
    * Deleting a vocabulary.
    */
-  public function testTaxonomyAdminDeletingVocabulary() {
+  public function testTaxonomyAdminDeletingVocabulary(): void {
     // Create a vocabulary.
     $vid = $this->randomMachineName();
     $edit = [

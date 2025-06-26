@@ -2,6 +2,7 @@
 
 namespace Drupal\link\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Entity\Element\EntityAutocomplete;
@@ -14,15 +15,12 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 /**
  * Plugin implementation of the 'link' widget.
- *
- * @FieldWidget(
- *   id = "link_default",
- *   label = @Translation("Link"),
- *   field_types = {
- *     "link"
- *   }
- * )
  */
+#[FieldWidget(
+  id: 'link_default',
+  label: new TranslatableMarkup('Link'),
+  field_types: ['link'],
+)]
 class LinkWidget extends WidgetBase {
 
   /**
@@ -48,6 +46,7 @@ class LinkWidget extends WidgetBase {
    *   The URI to get the displayable string for.
    *
    * @return string
+   *   The displayable string for the URI.
    *
    * @see static::getUserEnteredStringAsUri()
    */
@@ -160,8 +159,8 @@ class LinkWidget extends WidgetBase {
    */
   public static function validateTitleElement(&$element, FormStateInterface $form_state, $form) {
     if ($element['uri']['#value'] !== '' && $element['title']['#value'] === '') {
-      // We expect the field name placeholder value to be wrapped in $this->t() here,
-      // so it won't be escaped again as it's already marked safe.
+      // We expect the field name placeholder value to be wrapped in $this->t()
+      // here, so it won't be escaped again as it's already marked safe.
       $form_state->setError($element['title'], new TranslatableMarkup('@title field is required if there is @uri input.', ['@title' => $element['title']['#title'], '@uri' => $element['uri']['#title']]));
     }
   }
@@ -194,7 +193,7 @@ class LinkWidget extends WidgetBase {
           $display_uri = static::getUriAsDisplayableString($item->uri);
         }
       }
-      catch (\InvalidArgumentException $e) {
+      catch (\InvalidArgumentException) {
         // If $item->uri is invalid, show value as is, so the user can see what
         // to edit.
         // @todo Add logging here in https://www.drupal.org/project/drupal/issues/3348020
@@ -220,7 +219,7 @@ class LinkWidget extends WidgetBase {
       //   in https://www.drupal.org/node/2423093.
       $element['uri']['#target_type'] = 'node';
       // Disable autocompletion when the first character is '/', '#' or '?'.
-      $element['uri']['#attributes']['data-autocomplete-first-character-blacklist'] = '/#?';
+      $element['uri']['#attributes']['data-autocomplete-first-character-denylist'] = '/#?';
 
       // The link widget is doing its own processing in
       // static::getUriAsDisplayableString().
@@ -236,12 +235,12 @@ class LinkWidget extends WidgetBase {
     // If the field is configured to allow both internal and external links,
     // show a useful description.
     elseif ($this->supportsExternalLinks() && $this->supportsInternalLinks()) {
-      $element['uri']['#description'] = $this->t('Start typing the title of a piece of content to select it. You can also enter an internal path such as %add-node or an external URL such as %url. Enter %front to link to the front page. Enter %nolink to display link text only. Enter %button to display keyboard-accessible link text only.', ['%front' => '<front>', '%add-node' => '/node/add', '%url' => 'http://example.com', '%nolink' => '<nolink>', '%button' => '<button>']);
+      $element['uri']['#description'] = $this->t('Start typing the title of a piece of content to select it. You can also enter an internal path such as %add-node or an external URL such as %url. Enter %front to link to the front page. Enter %nolink to display link text only. Enter %button to display keyboard-accessible link text only.', ['%front' => '<front>', '%add-node' => '/node/add', '%url' => 'https://example.com', '%nolink' => '<nolink>', '%button' => '<button>']);
     }
     // If the field is configured to allow only external links, show a useful
     // description.
     elseif ($this->supportsExternalLinks() && !$this->supportsInternalLinks()) {
-      $element['uri']['#description'] = $this->t('This must be an external URL such as %url.', ['%url' => 'http://example.com']);
+      $element['uri']['#description'] = $this->t('This must be an external URL such as %url.', ['%url' => 'https://example.com']);
     }
 
     // Make uri required on the front-end when title filled-in.
@@ -299,8 +298,8 @@ class LinkWidget extends WidgetBase {
       $element['#element_validate'][] = [static::class, 'validateTitleNoLink'];
     }
 
-    // Exposing the attributes array in the widget is left for alternate and more
-    // advanced field widgets.
+    // Exposing the attributes array in the widget is left for alternate and
+    // more advanced field widgets.
     $element['attributes'] = [
       '#type' => 'value',
       '#tree' => TRUE,
@@ -447,6 +446,7 @@ class LinkWidget extends WidgetBase {
       if (isset($parameters['@uri'])) {
         $parameters['@uri'] = static::getUriAsDisplayableString($parameters['@uri']);
         $violations->set($offset, new ConstraintViolation(
+          // phpcs:ignore Drupal.Semantics.FunctionT.NotLiteralString
           $this->t($violation->getMessageTemplate(), $parameters),
           $violation->getMessageTemplate(),
           $parameters,

@@ -71,13 +71,13 @@ class WebformTable extends WebformElementBase {
   /**
    * {@inheritdoc}
    */
-  public function prepare(array &$element, WebformSubmissionInterface $webform_submission = NULL) {
+  public function prepare(array &$element, ?WebformSubmissionInterface $webform_submission = NULL) {
     $this->prepareTableHeader($element);
     parent::prepare($element, $webform_submission);
   }
 
   /**
-   * Prepare webform talble header for rendering.
+   * Prepare webform table header for rendering.
    *
    * @param array &$element
    *   A webform table element.

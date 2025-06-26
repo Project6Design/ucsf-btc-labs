@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
@@ -25,9 +27,7 @@ class CacheWebTest extends ViewTestBase {
   public static $testViews = ['test_display'];
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['taxonomy'];
 
@@ -48,7 +48,7 @@ class CacheWebTest extends ViewTestBase {
   /**
    * Tests the output caching on an actual page.
    */
-  public function testCacheOutputOnPage() {
+  public function testCacheOutputOnPage(): void {
     $view = Views::getView('test_display');
     $view->storage->setStatus(TRUE);
     $view->setDisplay('page_1');
@@ -62,6 +62,10 @@ class CacheWebTest extends ViewTestBase {
     $view->save();
     $this->container->get('router.builder')->rebuildIfNeeded();
 
+    /** @var \Drupal\Core\Cache\VariationCacheFactoryInterface $vc_factory */
+    $variation_cache_factory = \Drupal::service('variation_cache_factory');
+    $variation_cache = $variation_cache_factory->get('render');
+
     /** @var \Drupal\Core\Render\RenderCacheInterface $render_cache */
     $render_cache = \Drupal::service('render_cache');
     $cache_element = DisplayPluginBase::buildBasicRenderable('test_display', 'page_1');
@@ -70,6 +74,11 @@ class CacheWebTest extends ViewTestBase {
 
     $this->drupalGet('test-display');
     $this->assertSession()->statusCodeEquals(200);
+
+    // Because we warm caches in different requests, we do not properly populate
+    // the internal properties of our variation cache. Reset it.
+    $variation_cache->reset();
+
     $this->assertNotEmpty($render_cache->get($cache_element));
     $cache_tags = [
       'config:user.role.anonymous',
@@ -88,7 +97,7 @@ class CacheWebTest extends ViewTestBase {
   /**
    * Tests that a display without caching still contains the cache metadata.
    */
-  public function testDisplayWithoutCacheStillBubblesMetadata() {
+  public function testDisplayWithoutCacheStillBubblesMetadata(): void {
     $view = Views::getView('test_display');
 
     $uncached_block = $view->buildRenderable('block_1', [], FALSE);

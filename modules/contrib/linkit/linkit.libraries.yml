@@ -1,11 +1,9 @@
 linkit.admin:
-  version: VERSION
   css:
     theme:
       css/linkit.admin.theme.css: {}
 
 linkit.base:
-  version: VERSION
   js:
     js/linkit.js: {}
   dependencies:
@@ -14,7 +12,6 @@ linkit.base:
     - core/drupalSettings
 
 linkit.autocomplete:
-  version: VERSION
   js:
     js/linkit.autocomplete.js: {}
   css:
@@ -26,17 +23,7 @@ linkit.autocomplete:
     - core/drupal.autocomplete
     - core/once
 
-linkit.filter_html.admin:
-  version: VERSION
-  js:
-    js/linkit.filter_html.admin.js: {}
-  dependencies:
-    - core/jquery
-    - core/drupal
-    - core/once
-
 ckeditor5:
-  version: VERSION
   js:
     js/build/linkit.js: { minified: true }
   css:

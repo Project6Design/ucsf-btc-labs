@@ -29,7 +29,7 @@ class ModulePermissionsLinkHelper {
   public function __construct(
     protected PermissionHandlerInterface $permissionHandler,
     protected AccessManagerInterface $accessManager,
-    protected ModuleExtensionList $moduleExtensionList
+    protected ModuleExtensionList $moduleExtensionList,
   ) {}
 
   /**
@@ -49,7 +49,7 @@ class ModulePermissionsLinkHelper {
       if ($this->accessManager->checkNamedRoute('user.admin_permissions.module', ['modules' => $module])) {
         $url = new Url('user.admin_permissions.module', ['modules' => $module]);
         return [
-          'title' => t('Configure @module permissions', ['@module' => $name]),
+          'title' => $this->t('Configure @module permissions', ['@module' => $name]),
           'description' => '',
           'url' => $url,
         ];

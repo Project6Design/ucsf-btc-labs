@@ -3,6 +3,7 @@
 namespace Drupal\social_media_links;
 
 use Drupal\Core\DrupalKernelInterface;
+use Drupal\Core\Extension\ExtensionPathResolver;
 
 /**
  * Service class to detect the files of the iconsets/ in various directories.
@@ -10,30 +11,46 @@ use Drupal\Core\DrupalKernelInterface;
 class IconsetFinderService {
 
   /**
-   * {@inheritdoc}
+   * Directories that iconsets are installed to.
+   *
+   * @var string
    */
   protected $installDirs = [];
 
   /**
-   * {@inheritdoc}
+   * Directories to search for Iconsets.
+   *
+   * @var string
    */
   protected $searchDirs = [];
 
   /**
-   * {@inheritdoc}
+   * List of Iconsets.
+   *
+   * @var string
    */
   protected $iconsets = [];
 
   /**
-   * {@inheritdoc}
+   * The Drupal Kernel.
+   *
+   * @var \Drupal\Core\DrupalKernelInterface
    */
   protected $kernel;
 
   /**
-   * Define inital state if the service class is constructed.
+   * The Path resolver for extensions (Themes, Profiles, Modules).
+   *
+   * @var \Drupal\Core\Extension\ExtensionPathResolver
    */
-  public function __construct(DrupalKernelInterface $kernel) {
+  protected $extensionPathResolver;
+
+  /**
+   * Constructor for the Iconset Finder Service.
+   */
+  public function __construct(DrupalKernelInterface $kernel, ExtensionPathResolver $extension_path_resolver) {
     $this->kernel = $kernel;
+    $this->extensionPathResolver = $extension_path_resolver;
 
     $this->setSearchDirs();
     $this->setIconsets();
@@ -49,7 +66,7 @@ class IconsetFinderService {
    *   The path to the iconset or NULL if the iconset is not installed.
    */
   public function getPath($id) {
-    return isset($this->iconsets[$id]) ? $this->iconsets[$id] : NULL;
+    return $this->iconsets[$id] ?? NULL;
   }
 
   /**
@@ -69,9 +86,9 @@ class IconsetFinderService {
     // Similar to 'modules' and 'themes' directories inside an installation
     // profile, installation profiles may want to place libraries into a
     // 'libraries' directory.
-    $profile = \Drupal::installProfile();
-    if ($profile && strpos($profile, "core") === FALSE) {
-      $profile_path = \Drupal::service('extension.list.profile')->getPath($profile);
+    $install_profile = $this->kernel->getContainer()->getParameter('install_profile');
+    if ($install_profile && strpos($install_profile, "core") === FALSE) {
+      $profile_path = $this->extensionPathResolver->getPath('profile', $install_profile);
       $searchdirs[] = "$profile_path/libraries";
     }
 
@@ -86,7 +103,7 @@ class IconsetFinderService {
     $searchdirs[] = "$site_path/libraries";
 
     // Add the social_media_links module directory.
-    $searchdirs[] = \Drupal::service('extension.list.module')->getPath('social_media_links') . '/libraries';
+    $searchdirs[] = $this->extensionPathResolver->getPath('module', 'social_media_links') . '/libraries';
 
     $this->searchDirs = $searchdirs;
   }

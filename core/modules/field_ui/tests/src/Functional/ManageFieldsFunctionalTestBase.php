@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field_ui\Functional;
 
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\node\Entity\NodeType;
+use Drupal\Tests\node\Traits\NodeAccessTrait;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
@@ -14,13 +17,12 @@ use Drupal\Tests\field_ui\Traits\FieldUiTestTrait;
  */
 class ManageFieldsFunctionalTestBase extends BrowserTestBase {
 
-  use FieldUiTestTrait;
   use EntityReferenceFieldCreationTrait;
+  use FieldUiTestTrait;
+  use NodeAccessTrait;
 
   /**
-   * Modules to install.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'node',
@@ -136,7 +138,7 @@ class ManageFieldsFunctionalTestBase extends BrowserTestBase {
 
     // Setup node access testing.
     node_access_rebuild();
-    node_access_test_add_field(NodeType::load('article'));
+    $this->addPrivateField(NodeType::load('article'));
     \Drupal::state()->set('node_access_test.private', TRUE);
 
   }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains Drupal\url_embed\UrlEmbedInterface.
- */
-
 namespace Drupal\url_embed;
 
 use Embed\Extractor;
@@ -16,8 +11,20 @@ use Embed\Extractor;
  */
 interface UrlEmbedInterface {
 
+  /**
+   * Return the object config.
+   *
+   * @return array
+   *   The static::$config property.
+   */
   public function getConfig();
 
+  /**
+   * Set the value of the object config.
+   *
+   * @param array $config
+   *   The value to set in the static::$config property.
+   */
   public function setConfig(array $config);
 
   /**
@@ -30,6 +37,7 @@ interface UrlEmbedInterface {
    *   options on the service will be used.
    *
    * @return \Embed\Extractor
+   *   The Embed Extractor for the given URL.
    *
    * @throws \InvalidArgumentException
    *   If the URL or config is not valid.

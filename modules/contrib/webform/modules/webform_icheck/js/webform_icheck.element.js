@@ -5,8 +5,6 @@
 
 (function ($, Drupal) {
 
-  'use strict';
-
   // @see http://icheck.fronteed.com/#options
   Drupal.webform = Drupal.webform || {};
   Drupal.webform.iCheck = Drupal.webform.iCheck || {};
@@ -57,7 +55,7 @@
   };
 
   /**
-   * Enhance table select checkall.
+   * Enhance table select check-all.
    *
    * ISSUE: Select all is not sync'd with checkboxes because iCheck overrides all existing event handlers.
    *

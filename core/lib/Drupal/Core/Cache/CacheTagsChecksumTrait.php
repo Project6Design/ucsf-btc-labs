@@ -33,6 +33,11 @@ trait CacheTagsChecksumTrait {
   protected $tagCache = [];
 
   /**
+   * Registered cache tags to preload.
+   */
+  protected array $preloadTags = [];
+
+  /**
    * Callback to be invoked just after a database transaction gets committed.
    *
    * Executes all delayed tag invalidations.
@@ -51,7 +56,6 @@ trait CacheTagsChecksumTrait {
    * Implements \Drupal\Core\Cache\CacheTagsInvalidatorInterface::invalidateTags()
    */
   public function invalidateTags(array $tags) {
-    // Only invalidate tags once per request unless they are written again.
     foreach ($tags as $key => $tag) {
       if (isset($this->invalidatedTags[$tag])) {
         unset($tags[$key]);
@@ -68,14 +72,9 @@ trait CacheTagsChecksumTrait {
     $in_transaction = $this->getDatabaseConnection()->inTransaction();
     if ($in_transaction) {
       if (empty($this->delayedTags)) {
-        // @todo in drupal:11.0.0, remove the conditional and only call the
-        //   TransactionManager().
-        if ($this->getDatabaseConnection()->transactionManager()) {
-          $this->getDatabaseConnection()->transactionManager()->addPostTransactionCallback([$this, 'rootTransactionEndCallback']);
-        }
-        else {
-          $this->getDatabaseConnection()->addRootTransactionEndCallback([$this, 'rootTransactionEndCallback']);
-        }
+        $this->getDatabaseConnection()
+          ->transactionManager()
+          ->addPostTransactionCallback([$this, 'rootTransactionEndCallback']);
       }
       $this->delayedTags = Cache::mergeTags($this->delayedTags, $tags);
     }
@@ -110,6 +109,11 @@ trait CacheTagsChecksumTrait {
    * Implements \Drupal\Core\Cache\CacheTagsChecksumInterface::isValid()
    */
   public function isValid($checksum, array $tags) {
+    // If there are no cache tags, then there is no cache tag to validate,
+    // hence it's always valid.
+    if (empty($tags)) {
+      return TRUE;
+    }
     // Any cache reads in this request involving cache tags whose invalidation
     // has been delayed due to an in-progress transaction are not allowed to use
     // data stored in cache; it must be assumed to be stale. This forces those
@@ -135,7 +139,23 @@ trait CacheTagsChecksumTrait {
   protected function calculateChecksum(array $tags) {
     $checksum = 0;
 
-    $query_tags = array_diff($tags, array_keys($this->tagCache));
+    // If there are no cache tags, then there is no cache tag to checksum,
+    // so return early.
+    if (empty($tags)) {
+      return $checksum;
+    }
+
+    // If there are registered preload tags, add them to the tags list then
+    // reset the list. This needs to make sure that it only returns the
+    // requested cache tags, so store the combination of requested and
+    // preload cache tags in a separate variable.
+    $tags_with_preload = $tags;
+    if ($this->preloadTags) {
+      $tags_with_preload = array_unique(array_merge($tags, $this->preloadTags));
+      $this->preloadTags = [];
+    }
+
+    $query_tags = array_diff($tags_with_preload, array_keys($this->tagCache));
     if ($query_tags) {
       $tag_invalidations = $this->getTagInvalidationCounts($query_tags);
       $this->tagCache += $tag_invalidations;
@@ -156,6 +176,20 @@ trait CacheTagsChecksumTrait {
   public function reset() {
     $this->tagCache = [];
     $this->invalidatedTags = [];
+  }
+
+  /**
+   * Implements \Drupal\Core\Cache\CacheTagsChecksumPreloadInterface::registerCacheTagsForPreload()
+   */
+  public function registerCacheTagsForPreload(array $cache_tags): void {
+    if (empty($cache_tags)) {
+      return;
+    }
+    // Don't preload delayed tags that are awaiting invalidation.
+    $preloadable_tags = array_diff($cache_tags, $this->delayedTags);
+    if ($preloadable_tags) {
+      $this->preloadTags = array_merge($this->preloadTags, $preloadable_tags);
+    }
   }
 
   /**

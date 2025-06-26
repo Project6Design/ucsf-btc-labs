@@ -8,3 +8,31 @@ url_embed.settings:
     facebook_app_secret:
       type: string
       label: 'Facebook App Secret'
+filter_settings.url_embed_convert_links:
+  type: filter
+  label: 'URL Prefix'
+  mapping:
+    url_prefix:
+      type: string
+      label: 'URL Prefix'
+filter_settings.url_embed:
+  type: filter
+  label: 'URL Embed settings'
+  mapping:
+    enable_responsive:
+      type: boolean
+      label: 'Enable responsive wrappers'
+    default_ratio:
+      type: string
+      label: 'A ratio that should be used if none provided'
+
+field.formatter.settings.url_embed:
+  type: mapping
+  label: 'URL Embed wrapped in a responsive wrapper'
+  mapping:
+    enable_responsive:
+      type: boolean
+      label: 'Enable responsive wrappers'
+    default_ratio:
+      type: string
+      label: 'A ratio that should be used if none provided'

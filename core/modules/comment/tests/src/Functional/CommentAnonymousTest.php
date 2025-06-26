@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Functional;
 
 use Drupal\comment\CommentInterface;
@@ -39,7 +41,7 @@ class CommentAnonymousTest extends CommentTestBase {
   /**
    * Tests anonymous comment functionality.
    */
-  public function testAnonymous() {
+  public function testAnonymous(): void {
     $this->setCommentAnonymous(CommentInterface::ANONYMOUS_MAYNOT_CONTACT);
 
     // Preview comments (with `skip comment approval` permission).
@@ -137,7 +139,8 @@ class CommentAnonymousTest extends CommentTestBase {
     $this->drupalLogin($this->adminUser);
     $this->drupalGet('comment/' . $anonymous_comment3->id() . '/edit');
     $this->assertSession()->responseContains($author_name);
-    // Check the author field is empty (i.e. anonymous) when editing the comment.
+    // Check the author field is empty (i.e. anonymous) when editing the
+    // comment.
     $this->assertSession()->fieldValueEquals('uid', '');
     $this->assertSession()->responseContains($author_mail);
 

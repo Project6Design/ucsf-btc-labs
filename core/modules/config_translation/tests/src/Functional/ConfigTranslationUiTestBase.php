@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config_translation\Functional;
 
 use Drupal\Core\Test\AssertMailTrait;
@@ -48,9 +50,7 @@ abstract class ConfigTranslationUiTestBase extends BrowserTestBase {
   protected $localeStorage;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'block',
@@ -123,11 +123,11 @@ abstract class ConfigTranslationUiTestBase extends BrowserTestBase {
   /**
    * Gets translation from locale storage.
    *
-   * @param $config_name
+   * @param string $config_name
    *   Configuration object.
-   * @param $key
+   * @param string $key
    *   Translation configuration field key.
-   * @param $langcode
+   * @param string $langcode
    *   String language code to load translation.
    *
    * @return bool|mixed
@@ -191,7 +191,7 @@ abstract class ConfigTranslationUiTestBase extends BrowserTestBase {
   }
 
   /**
-   * Helper function that returns a .po file with a given number of plural forms.
+   * Returns a .po file with a given number of plural forms.
    */
   public function getPoFile($plurals) {
     $po_file = [];

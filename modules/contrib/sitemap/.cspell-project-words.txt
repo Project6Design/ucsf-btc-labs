@@ -1,8 +1,16 @@
-# Function calls to fix after tests are running.
-buildlist
+# Maintainer names.
+Alexandrov
+Kalata
 
-# JS Strings to fix after tests are running.
-fitler
+# Other module names.
+taxonews
+Entityreference
 
-# Variable names to fix after tests are running.
-feedurl
+# Example words in tests.
+amet
+adipiscing
+~bizz
+pametis
+
+# Technical terms.
+mlid

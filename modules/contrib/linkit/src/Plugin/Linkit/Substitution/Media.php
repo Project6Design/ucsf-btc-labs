@@ -22,15 +22,19 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class Media extends PluginBase implements SubstitutionInterface, ContainerFactoryPluginInterface {
 
   /**
+   * The file URL generator.
+   *
+   * @var \Drupal\Core\File\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('entity_type.manager')
-    );
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->fileUrlGenerator = $container->get('file_url_generator');
+    return $instance;
   }
 
   /**
@@ -45,9 +49,7 @@ class Media extends PluginBase implements SubstitutionInterface, ContainerFactor
     if ($source_field && $entity->hasField($source_field->getName()) && $entity->get($source_field->getName())->entity instanceof FileInterface) {
       /** @var \Drupal\file\FileInterface $file */
       $file = $entity->get($source_field->getName())->entity;
-      /** @var \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator */
-      $file_url_generator = \Drupal::service('file_url_generator');
-      return $file_url_generator->generate($file->getFileUri());
+      return $this->fileUrlGenerator->generate($file->getFileUri());
     }
 
     // If available, fall back to the canonical URL if the bundle doesn't have

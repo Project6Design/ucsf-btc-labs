@@ -83,7 +83,7 @@ class WebformShareController extends ControllerBase {
       $build['#attached']['library'][] = "webform_share/libraries.$library.$version";
     }
     // Add setting notifying AjaxCommand that this page is shared via an
-    // embeddded iframe.
+    // embedded iframe.
     // @see Drupal.AjaxCommands.prototype.webformRefresh
     $build['#attached']['drupalSettings']['webform_share']['page'] = TRUE;
     return $build;
@@ -117,7 +117,7 @@ class WebformShareController extends ControllerBase {
       '#javascript' => TRUE,
       '#query' => $request->query->all(),
     ];
-    $iframe = $this->renderer->renderPlain($build);
+    $iframe = $this->renderer->renderInIsolation($build);
 
     $iframe_script = json_encode($iframe);
     $iframe_script = str_replace('src=\\"\/\/', 'src=\\"' . $request->getScheme() . ':\/\/', $iframe_script);

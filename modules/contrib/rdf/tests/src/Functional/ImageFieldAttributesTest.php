@@ -3,10 +3,11 @@
 namespace Drupal\Tests\rdf\Functional;
 
 use Drupal\Core\Url;
-use Drupal\image\Entity\ImageStyle;
-use Drupal\Tests\image\Functional\ImageFieldTestBase;
-use Drupal\node\Entity\Node;
 use Drupal\file\Entity\File;
+use Drupal\image\Entity\ImageStyle;
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+use Drupal\Tests\image\Functional\ImageFieldTestBase;
 use Drupal\Tests\rdf\Traits\RdfParsingTrait;
 use Drupal\Tests\TestFileCreationTrait;
 
@@ -61,15 +62,18 @@ class ImageFieldAttributesTest extends ImageFieldTestBase {
    *
    * @var \Drupal\node\NodeInterface
    */
-  protected $node;
+  protected NodeInterface $node;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
     $this->fieldName = 'field_image';
 
     // Create the image field.
-    $this->createImageField($this->fieldName, 'article');
+    $this->createImageField($this->fieldName, 'node', 'article');
 
     // Set the RDF mapping for the new field.
     rdf_get_mapping('node', 'article')
@@ -95,7 +99,7 @@ class ImageFieldAttributesTest extends ImageFieldTestBase {
   /**
    * Tests that image fields in teasers have correct resources.
    */
-  public function testNodeTeaser() {
+  public function testNodeTeaser(): void {
     // Set the display options for the teaser.
     $display_options = [
       'type' => 'image',

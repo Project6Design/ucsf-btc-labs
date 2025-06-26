@@ -18,7 +18,7 @@ class OptGroupTest extends UnitTestCase {
    *
    * @dataProvider providerTestFlattenOptions
    */
-  public function testFlattenOptions($options) {
+  public function testFlattenOptions($options): void {
     $this->assertSame(['foo' => 'foo'], OptGroup::flattenOptions($options));
   }
 
@@ -26,8 +26,9 @@ class OptGroupTest extends UnitTestCase {
    * Provides test data for the flattenOptions() method.
    *
    * @return array
+   *   An array of option structures to be flattened.
    */
-  public function providerTestFlattenOptions() {
+  public static function providerTestFlattenOptions() {
     $object1 = new \stdClass();
     $object1->option = ['foo' => 'foo'];
     $object2 = new \stdClass();

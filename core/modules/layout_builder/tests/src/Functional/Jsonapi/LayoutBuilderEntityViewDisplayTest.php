@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\layout_builder\Functional\Jsonapi;
 
 use Drupal\layout_builder\Plugin\SectionStorage\OverridesSectionStorage;
@@ -40,7 +42,7 @@ class LayoutBuilderEntityViewDisplayTest extends EntityViewDisplayTest {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedDocument() {
+  protected function getExpectedDocument(): array {
     $document = parent::getExpectedDocument();
     array_unshift($document['data']['attributes']['dependencies']['module'], 'layout_builder');
     $document['data']['attributes']['hidden'][OverridesSectionStorage::FIELD_NAME] = TRUE;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\UpdateSystem;
 
 use Drupal\Core\Database\Database;
@@ -7,6 +9,8 @@ use Drupal\Core\Url;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\UpdatePathTestTrait;
 use Drupal\user\Entity\User;
+
+// cspell:ignore postupdate
 
 /**
  * Tests hook_removed_post_updates().
@@ -71,7 +75,7 @@ class UpdateRemovedPostUpdateTest extends BrowserTestBase {
   /**
    * Tests hook_post_update_NAME().
    */
-  public function testRemovedPostUpdate() {
+  public function testRemovedPostUpdate(): void {
     // Mimic the behavior of ModuleInstaller::install().
     $key_value = \Drupal::service('keyvalue');
     $existing_updates = $key_value->get('post_update')->get('existing_updates', []);

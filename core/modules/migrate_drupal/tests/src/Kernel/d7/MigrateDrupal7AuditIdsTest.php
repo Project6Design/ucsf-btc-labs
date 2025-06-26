@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal\Kernel\d7;
 
 use Drupal\KernelTests\FileSystemModuleDiscoveryDataProviderTrait;
@@ -14,6 +16,7 @@ use Drupal\Tests\migrate_drupal\Traits\CreateTestContentEntitiesTrait;
  * Tests the migration auditor for ID conflicts.
  *
  * @group migrate_drupal
+ * @group #slow
  */
 class MigrateDrupal7AuditIdsTest extends MigrateDrupal7TestBase {
 
@@ -30,18 +33,19 @@ class MigrateDrupal7AuditIdsTest extends MigrateDrupal7TestBase {
     parent::setUp();
 
     // Install required entity schemas.
-    $this->installEntitySchemas();
+    $this->installEntitySchema('block_content');
+    $this->installEntitySchema('comment');
+    $this->installEntitySchema('file');
+    $this->installEntitySchema('menu_link_content');
+    $this->installEntitySchema('node');
+    $this->installEntitySchema('path_alias');
+    $this->installEntitySchema('taxonomy_term');
+    $this->installEntitySchema('user');
 
     // Install required schemas.
-    // @todo Remove book in https://www.drupal.org/project/drupal/issues/3376101
-    $this->installSchema('book', ['book']);
     $this->installSchema('dblog', ['watchdog']);
-    // @todo Remove forum in https://www.drupal.org/project/drupal/issues/3261653
-    $this->installSchema('forum', ['forum_index']);
     $this->installSchema('node', ['node_access']);
     $this->installSchema('search', ['search_dataset']);
-    // @todo Remove tracker in https://www.drupal.org/project/drupal/issues/3261452
-    $this->installSchema('tracker', ['tracker_node', 'tracker_user']);
 
     // Enable content moderation for nodes of type page.
     $this->installEntitySchema('content_moderation_state');
@@ -58,7 +62,7 @@ class MigrateDrupal7AuditIdsTest extends MigrateDrupal7TestBase {
   /**
    * Tests multiple migrations to the same destination with no ID conflicts.
    */
-  public function testMultipleMigrationWithoutIdConflicts() {
+  public function testMultipleMigrationWithoutIdConflicts(): void {
     // Create a node of type page.
     $node = Node::create(['type' => 'page', 'title' => 'foo']);
     $node->moderation_state->value = 'published';
@@ -96,7 +100,7 @@ class MigrateDrupal7AuditIdsTest extends MigrateDrupal7TestBase {
   /**
    * Tests all migrations with no ID conflicts.
    */
-  public function testAllMigrationsWithNoIdConflicts() {
+  public function testAllMigrationsWithNoIdConflicts(): void {
     $migrations = $this->container
       ->get('plugin.manager.migration')
       ->createInstancesByTag('Drupal 7');
@@ -114,7 +118,7 @@ class MigrateDrupal7AuditIdsTest extends MigrateDrupal7TestBase {
   /**
    * Tests all migrations with ID conflicts.
    */
-  public function testAllMigrationsWithIdConflicts() {
+  public function testAllMigrationsWithIdConflicts(): void {
     $migrations = $this->container
       ->get('plugin.manager.migration')
       ->createInstancesByTag('Drupal 7');
@@ -150,7 +154,7 @@ class MigrateDrupal7AuditIdsTest extends MigrateDrupal7TestBase {
   /**
    * Tests draft revisions ID conflicts.
    */
-  public function testDraftRevisionIdConflicts() {
+  public function testDraftRevisionIdConflicts(): void {
     // Create a published node of type page.
     $node = Node::create(['type' => 'page', 'title' => 'foo']);
     $node->moderation_state->value = 'published';
@@ -184,7 +188,7 @@ class MigrateDrupal7AuditIdsTest extends MigrateDrupal7TestBase {
   /**
    * Tests ID conflicts for inaccessible nodes.
    */
-  public function testNodeGrantsIdConflicts() {
+  public function testNodeGrantsIdConflicts(): void {
     // Enable the node_test module to restrict access to page nodes.
     $this->enableModules(['node_test']);
 

@@ -2,9 +2,11 @@
 
 namespace Drupal\sitemap\Plugin\Sitemap;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\sitemap\SitemapBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a link to the front page for the sitemap.
@@ -21,6 +23,22 @@ use Drupal\sitemap\SitemapBase;
  * )
  */
 class Frontpage extends SitemapBase {
+
+  /**
+   * A configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected ConfigFactoryInterface $configFactory;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->configFactory = $container->get('config.factory');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -48,7 +66,9 @@ class Frontpage extends SitemapBase {
 
     $content[] = [
       '#theme' => 'sitemap_frontpage_item',
-      '#text' => $this->t('Front page of %sn', ['%sn' => \Drupal::config('system.site')->get('name')]),
+      '#text' => $this->t('Front page of %sn', [
+        '%sn' => $this->configFactory->get('system.site')->get('name'),
+      ]),
       '#url' => Url::fromRoute('<front>', [], ['html' => TRUE])->toString(),
       '#feed' => $this->settings['rss'],
     ];

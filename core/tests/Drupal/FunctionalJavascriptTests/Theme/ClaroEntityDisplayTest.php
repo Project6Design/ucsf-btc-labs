@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\FunctionalJavascriptTests\Theme;
 
+use Drupal\entity_test\EntityTestHelper;
 use Drupal\Tests\field_ui\FunctionalJavascript\EntityDisplayTest;
 
 /**
@@ -16,7 +17,7 @@ use Drupal\Tests\field_ui\FunctionalJavascript\EntityDisplayTest;
 class ClaroEntityDisplayTest extends EntityDisplayTest {
 
   /**
-   * Modules to enable.
+   * Modules to install.
    *
    * Install the shortcut module so that claro.settings has its schema checked.
    * There's currently no way for Claro to provide a default and have valid
@@ -42,7 +43,7 @@ class ClaroEntityDisplayTest extends EntityDisplayTest {
    * with a line changed to reflect row weight toggle being a link instead
    * of a button.
    */
-  public function testEntityForm() {
+  public function testEntityForm(): void {
     $this->drupalGet('entity_test/manage/1/edit');
     $this->assertSession()->fieldExists('field_test_text[0][value]');
 
@@ -68,7 +69,7 @@ class ClaroEntityDisplayTest extends EntityDisplayTest {
    * with a line changed to reflect row weight toggle being a link instead
    * of a button.
    */
-  public function testEntityView() {
+  public function testEntityView(): void {
     $this->drupalGet('entity_test/1');
     $this->assertSession()->elementNotExists('css', '.field--name-field-test-text');
 
@@ -95,8 +96,8 @@ class ClaroEntityDisplayTest extends EntityDisplayTest {
    * This is Drupal\Tests\field_ui\FunctionalJavascript\EntityDisplayTest::testExtraFields()
    * with a line changed to reflect Claro's tabledrag selector.
    */
-  public function testExtraFields() {
-    entity_test_create_bundle('bundle_with_extra_fields');
+  public function testExtraFields(): void {
+    EntityTestHelper::createBundle('bundle_with_extra_fields');
     $this->drupalGet('entity_test/structure/bundle_with_extra_fields/display');
     $this->assertSession()->waitForElement('css', '.tabledrag-handle');
     $id = $this->getSession()->getPage()->find('css', '[name="form_build_id"]')->getValue();

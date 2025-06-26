@@ -78,11 +78,11 @@ class WorkflowTransitionDeleteForm extends ConfirmFormBase {
    * @return array
    *   The form structure.
    */
-  public function buildForm(array $form, FormStateInterface $form_state, WorkflowInterface $workflow = NULL, $workflow_transition = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?WorkflowInterface $workflow = NULL, $workflow_transition = NULL) {
     try {
       $this->transition = $workflow->getTypePlugin()->getTransition($workflow_transition);
     }
-    catch (\InvalidArgumentException $e) {
+    catch (\InvalidArgumentException) {
       throw new NotFoundHttpException();
     }
     $this->workflow = $workflow;

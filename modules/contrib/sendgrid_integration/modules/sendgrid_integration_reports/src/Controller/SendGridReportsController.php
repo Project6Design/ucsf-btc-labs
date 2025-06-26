@@ -114,23 +114,23 @@ class SendGridReportsController extends ControllerBase {
         ],
       ],
       'message' => [
-        '#markup' => t('The following reports are the from the Global Statistics provided by SendGrid. For more comprehensive data, please visit your @dashboard. @cache to ensure the data is current. @settings to alter the time frame of this data.',
+        '#markup' => $this->t('The following reports are the from the Global Statistics provided by SendGrid. For more comprehensive data, please visit your @dashboard. @cache to ensure the data is current. @settings to alter the time frame of this data.',
           [
-            '@dashboard' => Link::fromTextAndUrl(t('SendGrid Dashboard'), Url::fromUri('//app.sendgrid.com/'))
+            '@dashboard' => Link::fromTextAndUrl($this->t('SendGrid Dashboard'), Url::fromUri('//app.sendgrid.com/'))
               ->toString(),
-            '@cache' => Link::createFromRoute(t('Clear your cache'), 'system.performance_settings')
+            '@cache' => Link::createFromRoute($this->t('Clear your cache'), 'system.performance_settings')
               ->toString(),
-            '@settings' => Link::createFromRoute(t('Change your settings'), 'sendgrid_integration_reports.settings_form')
+            '@settings' => Link::createFromRoute($this->t('Change your settings'), 'sendgrid_integration_reports.settings_form')
               ->toString(),
           ]
         ),
       ],
       'volume' => [
-        '#prefix' => '<h2>' . t('Sending Volume') . '</h2>',
+        '#prefix' => '<h2>' . $this->t('Sending Volume') . '</h2>',
         '#markup' => '<div id="sendgrid-global-volume-chart"></div>',
       ],
       'spam' => [
-        '#prefix' => '<h2>' . t('Spam Reports') . '</h2>',
+        '#prefix' => '<h2>' . $this->t('Spam Reports') . '</h2>',
         '#markup' => '<div id="sendgrid-global-spam-chart"></div>',
       ],
     ];
@@ -141,11 +141,11 @@ class SendGridReportsController extends ControllerBase {
       $rows[] = [$key, $value];
     }
     $headerbrowser = [
-      t('Browser'),
-      t('Click Count'),
+      $this->t('Browser'),
+      $this->t('Click Count'),
     ];
     $render['browsers'] = [
-      '#prefix' => '<h2>' . t('Browser Statistics') . '</h2>',
+      '#prefix' => '<h2>' . $this->t('Browser Statistics') . '</h2>',
       '#theme' => 'table',
       '#header' => $headerbrowser,
       '#rows' => $rows,
@@ -161,11 +161,11 @@ class SendGridReportsController extends ControllerBase {
       ];
     }
     $headerdevices = [
-      t('Device'),
-      t('Open Count'),
+      $this->t('Device'),
+      $this->t('Open Count'),
     ];
     $render['devices'] = [
-      '#prefix' => '<h2>' . t('Device Statistics') . '</h2>',
+      '#prefix' => '<h2>' . $this->t('Device Statistics') . '</h2>',
       '#theme' => 'table',
       '#header' => $headerdevices,
       '#rows' => $rowsdevices,

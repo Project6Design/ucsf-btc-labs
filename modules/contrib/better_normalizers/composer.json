@@ -4,8 +4,8 @@
   "type": "drupal-module",
   "license": "GPL-2.0-or-later",
   "require": {
-    "drupal/core": "^9 || ^10",
-    "drupal/hal": "^1.0 || ^2.0"
+    "drupal/hal": "^1.0 || ^2.0",
+    "drupal/core": "^9 || ^10 || ^11"
   },
   "homepage": "https://www.drupal.org/project/better_normalizers",
   "support": {

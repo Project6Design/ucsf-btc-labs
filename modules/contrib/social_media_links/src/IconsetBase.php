@@ -2,8 +2,8 @@
 
 namespace Drupal\social_media_links;
 
-use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Plugin\PluginBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -106,7 +106,7 @@ abstract class IconsetBase extends PluginBase implements IconsetInterface, Conta
   /**
    * Get the iconset element.
    *
-   * @param string $platform
+   * @param \Drupal\social_media_links\PlatformInterface $platform
    *   The platform id.
    * @param string $style
    *   The style.
@@ -145,8 +145,8 @@ abstract class IconsetBase extends PluginBase implements IconsetInterface, Conta
     }
 
     return [
-      'iconset' => isset($exploded[0]) ? $exploded[0] : '',
-      'style' => isset($exploded[1]) ? $exploded[1] : '',
+      'iconset' => $exploded[0] ?? '',
+      'style' => $exploded[1] ?? '',
     ];
   }
 

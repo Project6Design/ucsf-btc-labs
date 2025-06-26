@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Component\Serialization\Yaml;
@@ -29,7 +31,7 @@ class DistributionProfileExistingSettingsTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function prepareEnvironment() {
+  protected function prepareEnvironment(): void {
     parent::prepareEnvironment();
     $this->info = [
       'type' => 'profile',
@@ -78,7 +80,7 @@ class DistributionProfileExistingSettingsTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpLanguage() {
+  protected function setUpLanguage(): void {
     // Make settings file not writable.
     $filename = $this->siteDirectory . '/settings.php';
     // Make the settings file read-only.
@@ -98,14 +100,14 @@ class DistributionProfileExistingSettingsTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpProfile() {
+  protected function setUpProfile(): void {
     // This step is skipped, because there is a distribution profile.
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function setUpSettings() {
+  protected function setUpSettings(): void {
     // This step should not appear, since settings.php is fully configured
     // already.
   }
@@ -113,7 +115,7 @@ class DistributionProfileExistingSettingsTest extends InstallerTestBase {
   /**
    * Confirms that the installation succeeded.
    */
-  public function testInstalled() {
+  public function testInstalled(): void {
     $this->assertSession()->addressEquals('user/1');
     $this->assertSession()->statusCodeEquals(200);
     // Confirm that we are logged-in after installation.

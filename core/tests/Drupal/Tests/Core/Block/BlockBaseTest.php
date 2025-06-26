@@ -18,16 +18,16 @@ class BlockBaseTest extends UnitTestCase {
   /**
    * Tests the machine name suggestion.
    *
-   * @see \Drupal\Core\Block\BlockBase::getMachineNameSuggestion()
-   *
    * @param string $label
    *   The block label.
    * @param string $expected
    *   The expected machine name.
    *
    * @dataProvider providerTestGetMachineNameSuggestion
+   *
+   * @see \Drupal\Core\Block\BlockBase::getMachineNameSuggestion()
    */
-  public function testGetMachineNameSuggestion($label, $expected) {
+  public function testGetMachineNameSuggestion($label, $expected): void {
     $module_handler = $this->createMock('Drupal\Core\Extension\ModuleHandlerInterface');
     $transliteration = $this->getMockBuilder('Drupal\Core\Transliteration\PhpTransliteration')
       ->setConstructorArgs([NULL, $module_handler])
@@ -47,7 +47,7 @@ class BlockBaseTest extends UnitTestCase {
   /**
    * Provides data for testGetMachineNameSuggestion().
    */
-  public function providerTestGetMachineNameSuggestion() {
+  public static function providerTestGetMachineNameSuggestion() {
     return [
       ['Admin label', 'adminlabel'],
       // cspell:disable-next-line

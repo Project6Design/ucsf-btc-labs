@@ -27,11 +27,10 @@ class FileWidgetAjaxController {
       'percentage' => -1,
     ];
 
-    $implementation = file_progress_implementation();
-    if ($implementation == 'uploadprogress') {
+    if (extension_loaded('uploadprogress')) {
       $status = uploadprogress_get_info($key);
       if (isset($status['bytes_uploaded']) && !empty($status['bytes_total'])) {
-        $progress['message'] = t('Uploading... (@current of @total)', [
+        $progress['message'] = $this->t('Uploading... (@current of @total)', [
           '@current' => ByteSizeMarkup::create($status['bytes_uploaded']),
           '@total' => ByteSizeMarkup::create($status['bytes_total']),
         ]);

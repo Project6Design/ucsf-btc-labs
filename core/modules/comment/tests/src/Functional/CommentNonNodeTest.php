@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Functional;
 
 use Drupal\comment\CommentInterface;
@@ -8,6 +10,7 @@ use Drupal\comment\Entity\CommentType;
 use Drupal\comment\Plugin\Field\FieldType\CommentItemInterface;
 use Drupal\comment\Tests\CommentTestTrait;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\EntityTestHelper;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\Tests\BrowserTestBase;
@@ -25,6 +28,9 @@ class CommentNonNodeTest extends BrowserTestBase {
   use FieldUiTestTrait;
   use CommentTestTrait;
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'comment',
     'user',
@@ -61,7 +67,7 @@ class CommentNonNodeTest extends BrowserTestBase {
     $this->drupalPlaceBlock('page_title_block');
 
     // Create a bundle for entity_test.
-    entity_test_create_bundle('entity_test', 'Entity Test', 'entity_test');
+    EntityTestHelper::createBundle('entity_test', 'Entity Test', 'entity_test');
     CommentType::create([
       'id' => 'comment',
       'label' => 'Comment settings',
@@ -193,7 +199,7 @@ class CommentNonNodeTest extends BrowserTestBase {
    * @return bool
    *   Boolean indicating whether the comment was found.
    */
-  public function commentExists(CommentInterface $comment = NULL, $reply = FALSE) {
+  public function commentExists(?CommentInterface $comment = NULL, $reply = FALSE) {
     if ($comment) {
       $regex = '/' . ($reply ? '<div class="indented">(.*?)' : '');
       $regex .= '<article(.*?)id="comment-' . $comment->id() . '"(.*?)';
@@ -228,7 +234,7 @@ class CommentNonNodeTest extends BrowserTestBase {
    * @param bool $approval
    *   Operation is found on approval page.
    */
-  public function performCommentOperation($comment, $operation, $approval = FALSE) {
+  public function performCommentOperation($comment, $operation, $approval = FALSE): void {
     $edit = [];
     $edit['operation'] = $operation;
     $edit['comments[' . $comment->id() . ']'] = TRUE;
@@ -263,7 +269,7 @@ class CommentNonNodeTest extends BrowserTestBase {
   /**
    * Tests anonymous comment functionality.
    */
-  public function testCommentFunctionality() {
+  public function testCommentFunctionality(): void {
     $limited_user = $this->drupalCreateUser([
       'administer entity_test fields',
     ]);
@@ -488,9 +494,9 @@ class CommentNonNodeTest extends BrowserTestBase {
   /**
    * Tests comment fields cannot be added to entity types without integer IDs.
    */
-  public function testsNonIntegerIdEntities() {
+  public function testsNonIntegerIdEntities(): void {
     // Create a bundle for entity_test_string_id.
-    entity_test_create_bundle('entity_test', 'Entity Test', 'entity_test_string_id');
+    EntityTestHelper::createBundle('entity_test', 'Entity Test', 'entity_test_string_id');
     $limited_user = $this->drupalCreateUser([
       'administer entity_test_string_id fields',
       'administer comment types',
@@ -499,9 +505,9 @@ class CommentNonNodeTest extends BrowserTestBase {
     // Visit the Field UI field add page.
     $this->drupalGet('entity_test_string_id/structure/entity_test/fields/add-field');
     // Ensure field isn't shown for string IDs.
-    $this->assertSession()->elementNotExists('css', "[name='new_storage_type'][value='comment']");
+    $this->assertSession()->elementNotExists('xpath', "//a//span[text()='Comments']");
     // Ensure a core field type shown.
-    $this->assertSession()->elementExists('css', "[name='new_storage_type'][value='boolean']");
+    $this->assertSession()->elementExists('xpath', "//a//span[text()='Boolean']");
 
     // Attempt to add a comment-type referencing this entity-type.
     $this->drupalGet('admin/structure/comment/types/add');
@@ -509,22 +515,22 @@ class CommentNonNodeTest extends BrowserTestBase {
     $this->assertSession()->responseNotContains('Test entity with string_id');
 
     // Create a bundle for entity_test_no_id.
-    entity_test_create_bundle('entity_test', 'Entity Test', 'entity_test_no_id');
+    EntityTestHelper::createBundle('entity_test', 'Entity Test', 'entity_test_no_id');
     $this->drupalLogin($this->drupalCreateUser([
       'administer entity_test_no_id fields',
     ]));
     // Visit the Field UI field add page.
     $this->drupalGet('entity_test_no_id/structure/entity_test/fields/add-field');
     // Ensure field isn't shown for empty IDs.
-    $this->assertSession()->elementNotExists('css', "[name='new_storage_type'][value='comment']");
+    $this->assertSession()->elementNotExists('xpath', "//a//span[text()='Comments']");
     // Ensure a core field type shown.
-    $this->assertSession()->elementExists('css', "[name='new_storage_type'][value='boolean']");
+    $this->assertSession()->elementExists('xpath', "//a//span[text()='Boolean']");
   }
 
   /**
    * Ensures that comment settings are not required.
    */
-  public function testCommentSettingsNotRequired() {
+  public function testCommentSettingsNotRequired(): void {
     $limited_user = $this->drupalCreateUser([
       'administer entity_test fields',
     ]);

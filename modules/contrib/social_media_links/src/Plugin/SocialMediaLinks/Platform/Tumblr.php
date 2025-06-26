@@ -3,8 +3,8 @@
 namespace Drupal\social_media_links\Plugin\SocialMediaLinks\Platform;
 
 use Drupal\Component\Utility\UrlHelper;
-use Drupal\social_media_links\PlatformBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\social_media_links\PlatformBase;
 
 /**
  * Provides 'tumblr' platform.

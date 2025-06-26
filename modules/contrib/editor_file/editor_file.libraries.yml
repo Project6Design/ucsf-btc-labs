@@ -7,3 +7,17 @@ drupal.ckeditor.drupalfile.admin:
     - core/drupal
     - core/drupal.vertical-tabs
     - core/drupalSettings
+
+drupal.ckeditor5.drupalfile:
+  js:
+    js/build/drupalFile.js: { minified: true }
+  dependencies:
+    - core/drupal
+    - ckeditor5/ckeditor5
+
+# Loaded in the text format configuration form to provide styling for the icon
+# used in toolbar config.
+drupal.ckeditor5.drupalfile.admin:
+  css:
+    theme:
+      css/editor_file.admin.css: { }

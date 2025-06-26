@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Config;
 
 use Drupal\Core\Config\Entity\ConfigEntityDependency;
@@ -58,7 +60,7 @@ class DefaultConfigTest extends KernelTestBase {
    *
    * @dataProvider themeListDataProvider
    */
-  public function testThemeConfig($theme) {
+  public function testThemeConfig($theme): void {
     $this->assertExtensionConfig($theme, 'theme');
   }
 
@@ -84,7 +86,7 @@ class DefaultConfigTest extends KernelTestBase {
         $file_name = DRUPAL_ROOT . '/core/modules/system/tests/modules/' . $name . '/' . $name . '.info.yml';
         break;
 
-      default;
+      default:
         $file_name = DRUPAL_ROOT . '/core/' . $type . 's/' . $name . '/' . $name . '.info.yml';
     }
 
@@ -143,7 +145,7 @@ class DefaultConfigTest extends KernelTestBase {
    *   An array of theme names to test, with both key and value being the name
    *   of the theme.
    */
-  public function themeListDataProvider() {
+  public static function themeListDataProvider() {
     $prefix = dirname(__DIR__, 4) . DIRECTORY_SEPARATOR . 'themes';
     $theme_dirs = array_keys(iterator_to_array(new \FilesystemIterator($prefix)));
     $theme_names = array_map(function ($path) use ($prefix) {
@@ -190,7 +192,7 @@ class DefaultConfigTest extends KernelTestBase {
    * @param string $type
    *   The extension type to test.
    */
-  protected function doTestsOnConfigStorage(StorageInterface $default_config_storage, $extension, string $type = 'module') {
+  protected function doTestsOnConfigStorage(StorageInterface $default_config_storage, $extension, string $type = 'module'): void {
     /** @var \Drupal\Core\Config\ConfigManagerInterface $config_manager */
     $config_manager = $this->container->get('config.manager');
 

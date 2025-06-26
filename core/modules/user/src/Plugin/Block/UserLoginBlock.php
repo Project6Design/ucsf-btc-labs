@@ -13,6 +13,8 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Form\FormBuilderInterface;
+use Drupal\user\Form\UserLoginForm;
 use Drupal\user\UserInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -44,13 +46,21 @@ class UserLoginBlock extends BlockBase implements ContainerFactoryPluginInterfac
    *   initialize the defined contexts by setting it to an array of context
    *   values keyed by context names.
    * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
+   *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    *   The route match.
+   * @param \Drupal\Core\Form\FormBuilderInterface $formBuilder
+   *   The form builder.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    RouteMatchInterface $route_match,
+    protected FormBuilderInterface $formBuilder,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->routeMatch = $route_match;
@@ -64,7 +74,8 @@ class UserLoginBlock extends BlockBase implements ContainerFactoryPluginInterfac
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('current_route_match')
+      $container->get('current_route_match'),
+      $container->get('form_builder')
     );
   }
 
@@ -84,7 +95,7 @@ class UserLoginBlock extends BlockBase implements ContainerFactoryPluginInterfac
    * {@inheritdoc}
    */
   public function build() {
-    $form = \Drupal::formBuilder()->getForm('Drupal\user\Form\UserLoginForm');
+    $form = $this->formBuilder->getForm(UserLoginForm::class);
     unset($form['name']['#attributes']['autofocus']);
     $form['name']['#size'] = 15;
     $form['pass']['#size'] = 15;
@@ -141,7 +152,9 @@ class UserLoginBlock extends BlockBase implements ContainerFactoryPluginInterfac
   }
 
   /**
-   * #lazy_builder callback; renders a form action URL including destination.
+   * Render API callback: Renders a form action URL including destination.
+   *
+   * This function is assigned as a #lazy_builder callback.
    *
    * @return array
    *   A renderable array representing the form action.

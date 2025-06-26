@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\Core\Render;
 
+use Drupal\Core\Render\RenderContext;
 use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Access\AccessResultInterface;
@@ -13,6 +14,8 @@ use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Template\Attribute;
+use Drupal\Core\Theme\ThemeManagerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
 // cspell:ignore fooalert
 
@@ -22,6 +25,11 @@ use Drupal\Core\Template\Attribute;
  */
 class RendererTest extends RendererTestBase {
 
+  /**
+   * The expected theme variables.
+   *
+   * @var array
+   */
   protected $defaultThemeVars = [
     '#cache' => [
       'contexts' => [
@@ -41,10 +49,10 @@ class RendererTest extends RendererTestBase {
    *
    * @dataProvider providerTestRenderBasic
    */
-  public function testRenderBasic($build, $expected, callable $setup_code = NULL) {
+  public function testRenderBasic($build, $expected, ?callable $setup_code = NULL): void {
     if (isset($setup_code)) {
       $setup_code = $setup_code->bindTo($this);
-      $setup_code();
+      $setup_code($this->themeManager, $this);
     }
 
     if (isset($build['#markup'])) {
@@ -62,8 +70,9 @@ class RendererTest extends RendererTestBase {
    * Provides a list of render arrays to test basic rendering.
    *
    * @return array
+   *   An array of render arrays and their expected output.
    */
-  public function providerTestRenderBasic() {
+  public static function providerTestRenderBasic(): array {
     $data = [];
 
     // Part 1: the most simplistic render arrays possible, none using #theme.
@@ -266,10 +275,10 @@ class RendererTest extends RendererTestBase {
       '#theme_wrappers' => ['container'],
       '#attributes' => ['class' => ['baz']],
     ];
-    $setup_code_type_link = function () {
-      $this->themeManager->expects($this->exactly(2))
+    $setup_code_type_link = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase): void {
+      $themeManager->expects($testCase->exactly(2))
         ->method('render')
-        ->with($this->logicalOr('common_test_foo', 'container'))
+        ->with(static::logicalOr('common_test_foo', 'container'))
         ->willReturnCallback(function ($theme, $vars) {
           if ($theme == 'container') {
             return '<div' . (string) (new Attribute($vars['#attributes'])) . '>' . $vars['#children'] . "</div>\n";
@@ -293,10 +302,10 @@ class RendererTest extends RendererTestBase {
       '#url' => 'https://www.drupal.org',
       '#title' => 'bar',
     ];
-    $setup_code_type_link = function () {
-      $this->themeManager->expects($this->exactly(2))
+    $setup_code_type_link = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase): void {
+      $themeManager->expects($testCase->exactly(2))
         ->method('render')
-        ->with($this->logicalOr('link', 'container'))
+        ->with(static::logicalOr('link', 'container'))
         ->willReturnCallback(function ($theme, $vars) {
           if ($theme == 'container') {
             return '<div' . (string) (new Attribute($vars['#attributes'])) . '>' . $vars['#children'] . "</div>\n";
@@ -332,8 +341,8 @@ class RendererTest extends RendererTestBase {
         'container',
       ],
     ];
-    $setup_code = function () {
-      $this->themeManager->expects($this->exactly(2))
+    $setup_code = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase): void {
+      $themeManager->expects($testCase->exactly(2))
         ->method('render')
         ->with('container')
         ->willReturnCallback(function ($theme, $vars) {
@@ -347,8 +356,8 @@ class RendererTest extends RendererTestBase {
       '#theme_wrappers' => [['container']],
       '#attributes' => ['class' => ['foo']],
     ];
-    $setup_code = function () {
-      $this->themeManager->expects($this->once())
+    $setup_code = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase): void {
+      $themeManager->expects($testCase->once())
         ->method('render')
         ->with(['container'])
         ->willReturnCallback(function ($theme, $vars) {
@@ -364,10 +373,10 @@ class RendererTest extends RendererTestBase {
       '#theme' => ['suggestion_not_implemented'],
       '#markup' => 'foo',
     ];
-    $setup_code = function () {
-      $this->themeManager->expects($this->once())
+    $setup_code = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase): void {
+      $themeManager->expects($testCase->once())
         ->method('render')
-        ->with(['suggestion_not_implemented'], $this->anything())
+        ->with(['suggestion_not_implemented'], $testCase->anything())
         ->willReturn(FALSE);
     };
     $data[] = [$build, 'foo', $setup_code];
@@ -379,10 +388,10 @@ class RendererTest extends RendererTestBase {
         '#markup' => 'foo',
       ],
     ];
-    $setup_code = function () {
-      $this->themeManager->expects($this->once())
+    $setup_code = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase): void {
+      $themeManager->expects($testCase->once())
         ->method('render')
-        ->with(['suggestion_not_implemented'], $this->anything())
+        ->with(['suggestion_not_implemented'], $testCase->anything())
         ->willReturn(FALSE);
     };
     $data[] = [$build, 'foo', $setup_code];
@@ -392,11 +401,11 @@ class RendererTest extends RendererTestBase {
       '#theme' => ['common_test_empty'],
       '#markup' => 'foo',
     ];
-    $theme_function_output = $this->randomContextValue();
-    $setup_code = function () use ($theme_function_output) {
-      $this->themeManager->expects($this->once())
+    $theme_function_output = static::randomContextValue();
+    $setup_code = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase) use ($theme_function_output): void {
+      $themeManager->expects($testCase->once())
         ->method('render')
-        ->with(['common_test_empty'], $this->anything())
+        ->with(['common_test_empty'], $testCase->anything())
         ->willReturn($theme_function_output);
     };
     $data[] = [$build, $theme_function_output, $setup_code];
@@ -420,10 +429,10 @@ class RendererTest extends RendererTestBase {
       '#children' => 'baz',
       'child' => ['#markup' => 'boo'],
     ];
-    $setup_code = function () {
-      $this->themeManager->expects($this->once())
+    $setup_code = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase): void {
+      $themeManager->expects($testCase->once())
         ->method('render')
-        ->with('common_test_foo', $this->anything())
+        ->with('common_test_foo', $testCase->anything())
         ->willReturn('foobar');
     };
     $data[] = [$build, 'foobar', $setup_code];
@@ -439,8 +448,8 @@ class RendererTest extends RendererTestBase {
         '#markup' => 'boo',
       ],
     ];
-    $setup_code = function () {
-      $this->themeManager->expects($this->never())
+    $setup_code = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase): void {
+      $themeManager->expects($testCase->never())
         ->method('render');
     };
     $data[] = [$build, 'boo', $setup_code];
@@ -455,8 +464,8 @@ class RendererTest extends RendererTestBase {
         '#markup' => 'boo',
       ],
     ];
-    $setup_code = function () {
-      $this->themeManager->expects($this->never())
+    $setup_code = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase): void {
+      $themeManager->expects($testCase->never())
         ->method('render');
     };
     $data[] = [$build, 'baz', $setup_code];
@@ -474,8 +483,8 @@ class RendererTest extends RendererTestBase {
         '#markup' => 'kitten',
       ],
     ];
-    $setup_code = function () {
-      $this->themeManager->expects($this->never())
+    $setup_code = function (ThemeManagerInterface&MockObject $themeManager, RendererTestBase $testCase): void {
+      $themeManager->expects($testCase->never())
         ->method('render');
     };
     $data[] = [$build, 'kitten', $setup_code];
@@ -487,7 +496,7 @@ class RendererTest extends RendererTestBase {
    * @covers ::render
    * @covers ::doRender
    */
-  public function testRenderSorting() {
+  public function testRenderSorting(): void {
     $first = $this->randomMachineName();
     $second = $this->randomMachineName();
     // Build an array with '#weight' set for each element.
@@ -522,7 +531,7 @@ class RendererTest extends RendererTestBase {
    * @covers ::render
    * @covers ::doRender
    */
-  public function testRenderSortingWithSetHashSorted() {
+  public function testRenderSortingWithSetHashSorted(): void {
     $first = $this->randomMachineName();
     $second = $this->randomMachineName();
     // The same array structure again, but with #sorted set to TRUE.
@@ -544,12 +553,46 @@ class RendererTest extends RendererTestBase {
   }
 
   /**
+   * Tests that element defaults are added.
+   *
+   * @covers ::render
+   * @covers ::doRender
+   */
+  public function testElementDefaultsAdded(): void {
+    $build = ['#type' => 'details'];
+    $this->renderer->renderInIsolation($build);
+    $this->assertTrue($build['#defaults_loaded'], "An element with a type had said type's defaults loaded.");
+
+    $build = [
+      '#lazy_builder' => [
+        'Drupal\Tests\Core\Render\TestCallables::lazyBuilder',
+        [FALSE],
+      ],
+      '#create_placeholder' => FALSE,
+    ];
+
+    $this->renderer->renderInIsolation($build);
+    $this->assertArrayNotHasKey('#defaults_loaded', $build, "A lazy builder that did not set a type had no type defaults loaded.");
+
+    $build = [
+      '#lazy_builder' => [
+        'Drupal\Tests\Core\Render\TestCallables::lazyBuilder',
+        [TRUE],
+      ],
+      '#create_placeholder' => FALSE,
+    ];
+
+    $this->renderer->renderInIsolation($build);
+    $this->assertTrue($build['#defaults_loaded'], "A lazy builder that set a type had said type's defaults loaded.");
+  }
+
+  /**
    * @covers ::render
    * @covers ::doRender
    *
    * @dataProvider providerAccessValues
    */
-  public function testRenderWithPresetAccess($access) {
+  public function testRenderWithPresetAccess($access): void {
     $build = [
       '#access' => $access,
     ];
@@ -563,7 +606,7 @@ class RendererTest extends RendererTestBase {
    *
    * @dataProvider providerAccessValues
    */
-  public function testRenderWithAccessCallbackCallable($access) {
+  public function testRenderWithAccessCallbackCallable($access): void {
     $build = [
       '#access_callback' => function () use ($access) {
         return $access;
@@ -581,7 +624,7 @@ class RendererTest extends RendererTestBase {
    *
    * @dataProvider providerAccessValues
    */
-  public function testRenderWithAccessPropertyAndCallback($access) {
+  public function testRenderWithAccessPropertyAndCallback($access): void {
     $build = [
       '#access' => $access,
       '#access_callback' => function () {
@@ -598,7 +641,7 @@ class RendererTest extends RendererTestBase {
    *
    * @dataProvider providerAccessValues
    */
-  public function testRenderWithAccessControllerResolved($access) {
+  public function testRenderWithAccessControllerResolved($access): void {
 
     switch ($access) {
       case AccessResult::allowed():
@@ -629,12 +672,12 @@ class RendererTest extends RendererTestBase {
    * @covers ::render
    * @covers ::doRender
    */
-  public function testRenderAccessCacheabilityDependencyInheritance() {
+  public function testRenderAccessCacheabilityDependencyInheritance(): void {
     $build = [
       '#access' => AccessResult::allowed()->addCacheContexts(['user']),
     ];
 
-    $this->renderer->renderPlain($build);
+    $this->renderer->renderInIsolation($build);
 
     $this->assertEqualsCanonicalizing(['languages:language_interface', 'theme', 'user'], $build['#cache']['contexts']);
   }
@@ -651,7 +694,7 @@ class RendererTest extends RendererTestBase {
    *
    * @dataProvider providerRenderTwice
    */
-  public function testRenderTwice($build) {
+  public function testRenderTwice($build): void {
     $this->assertEquals('kittens', $this->renderer->renderRoot($build));
     $this->assertEquals('kittens', $build['#markup']);
     $this->assertEquals(['kittens-147'], $build['#cache']['tags']);
@@ -665,8 +708,9 @@ class RendererTest extends RendererTestBase {
    * Provides a list of render array iterations.
    *
    * @return array
+   *   An array of render arrays.
    */
-  public function providerRenderTwice() {
+  public static function providerRenderTwice() {
     return [
       [
         [
@@ -703,7 +747,7 @@ class RendererTest extends RendererTestBase {
   /**
    * Ensures that #access is taken in account when rendering #render_children.
    */
-  public function testRenderChildrenAccess() {
+  public function testRenderChildrenAccess(): void {
     $build = [
       '#access' => FALSE,
       '#render_children' => TRUE,
@@ -719,8 +763,9 @@ class RendererTest extends RendererTestBase {
    * Provides a list of both booleans.
    *
    * @return array
+   *   A list of boolean values and AccessResult objects.
    */
-  public function providerAccessValues() {
+  public static function providerAccessValues() {
     return [
       [FALSE],
       [TRUE],
@@ -754,7 +799,7 @@ class RendererTest extends RendererTestBase {
    * @covers ::render
    * @covers ::doRender
    */
-  public function testRenderWithoutThemeArguments() {
+  public function testRenderWithoutThemeArguments(): void {
     $element = [
       '#theme' => 'common_test_foo',
     ];
@@ -772,7 +817,7 @@ class RendererTest extends RendererTestBase {
    * @covers ::render
    * @covers ::doRender
    */
-  public function testRenderWithThemeArguments() {
+  public function testRenderWithThemeArguments(): void {
     $element = [
       '#theme' => 'common_test_foo',
       '#foo' => $this->randomMachineName(),
@@ -794,8 +839,9 @@ class RendererTest extends RendererTestBase {
    * Provides a list of access conditions and expected cache metadata.
    *
    * @return array
+   *   An array of access conditions and expected cache metadata.
    */
-  public function providerRenderCache() {
+  public static function providerRenderCache() {
     return [
       'full access' => [
         NULL,
@@ -830,9 +876,9 @@ class RendererTest extends RendererTestBase {
    *
    * @dataProvider providerRenderCache
    */
-  public function testRenderCache($child_access, $expected_tags) {
+  public function testRenderCache($child_access, $expected_tags): void {
     $this->setUpRequest();
-    $this->setupMemoryCache();
+    $this->setUpMemoryCache();
 
     // Create an empty element.
     $test_element = [
@@ -880,9 +926,9 @@ class RendererTest extends RendererTestBase {
    *
    * @dataProvider providerTestRenderCacheMaxAge
    */
-  public function testRenderCacheMaxAge($max_age, $is_render_cached, $render_cache_item_expire) {
+  public function testRenderCacheMaxAge($max_age, $is_render_cached, $render_cache_item_expire): void {
     $this->setUpRequest();
-    $this->setupMemoryCache();
+    $this->setUpMemoryCache();
 
     $element = [
       '#cache' => [
@@ -903,7 +949,7 @@ class RendererTest extends RendererTestBase {
     }
   }
 
-  public function providerTestRenderCacheMaxAge() {
+  public static function providerTestRenderCacheMaxAge() {
     return [
       [0, FALSE, NULL],
       [60, TRUE, (int) $_SERVER['REQUEST_TIME'] + 60],
@@ -925,9 +971,9 @@ class RendererTest extends RendererTestBase {
    *
    * @dataProvider providerTestRenderCacheProperties
    */
-  public function testRenderCacheProperties(array $expected_results) {
+  public function testRenderCacheProperties(array $expected_results): void {
     $this->setUpRequest();
-    $this->setupMemoryCache();
+    $this->setUpMemoryCache();
 
     $element = $original = [
       '#cache' => [
@@ -973,7 +1019,7 @@ class RendererTest extends RendererTestBase {
    *   An array of associative arrays of expected results keyed by property
    *   name.
    */
-  public function providerTestRenderCacheProperties() {
+  public static function providerTestRenderCacheProperties() {
     return [
       [[]],
       [['child1' => 0, 'child2' => 0, '#custom_property' => 0, '#custom_property_array' => 0]],
@@ -993,12 +1039,12 @@ class RendererTest extends RendererTestBase {
    *
    * @dataProvider providerTestAddCacheableDependency
    */
-  public function testAddCacheableDependency(array $build, $object, array $expected) {
+  public function testAddCacheableDependency(array $build, $object, array $expected): void {
     $this->renderer->addCacheableDependency($build, $object);
     $this->assertEquals($build, $expected);
   }
 
-  public function providerTestAddCacheableDependency() {
+  public static function providerTestAddCacheableDependency() {
     return [
       // Empty render array, typical default cacheability.
       [
@@ -1063,8 +1109,28 @@ class RendererTest extends RendererTestBase {
     ];
   }
 
+  /**
+   * @covers ::hasRenderContext
+   */
+  public function testHasRenderContext(): void {
+    // Tests with no render context.
+    $this->assertFalse($this->renderer->hasRenderContext());
+
+    // Tests in a render context.
+    $this->renderer->executeInRenderContext(new RenderContext(), function () {
+      $this->assertTrue($this->renderer->hasRenderContext());
+    });
+
+    // Test that the method works with no current request.
+    $this->requestStack->pop();
+    $this->assertFalse($this->renderer->hasRenderContext());
+  }
+
 }
 
+/**
+ * Test class for mocking the access callback.
+ */
 class TestAccessClass implements TrustedCallbackInterface {
 
   public static function accessTrue() {
@@ -1092,6 +1158,9 @@ class TestAccessClass implements TrustedCallbackInterface {
 
 }
 
+/**
+ * Mock callable for testing the pre_render callback.
+ */
 class TestCallables implements TrustedCallbackInterface {
 
   public function preRenderPrinted($elements) {
@@ -1099,11 +1168,19 @@ class TestCallables implements TrustedCallbackInterface {
     return $elements;
   }
 
+  public static function lazyBuilder(bool $set_type): array {
+    $build['content'] = ['#markup' => 'Content'];
+    if ($set_type) {
+      $build['#type'] = 'details';
+    }
+    return $build;
+  }
+
   /**
    * {@inheritdoc}
    */
   public static function trustedCallbacks() {
-    return ['preRenderPrinted'];
+    return ['preRenderPrinted', 'lazyBuilder'];
   }
 
 }

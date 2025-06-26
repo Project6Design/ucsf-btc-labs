@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Datetime;
 
 use Drupal\Component\Utility\Variable;
@@ -19,18 +21,9 @@ use Drupal\KernelTests\KernelTestBase;
 class DatetimeElementFormTest extends KernelTestBase implements FormInterface, TrustedCallbackInterface {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['datetime', 'system'];
-
-  /**
-   * Sets up the test.
-   */
-  protected function setUp(): void {
-    parent::setUp();
-  }
 
   /**
    * {@inheritdoc}
@@ -42,7 +35,7 @@ class DatetimeElementFormTest extends KernelTestBase implements FormInterface, T
   /**
    * {@inheritdoc}
    */
-  public function datetimeDateCallbackTrusted(array &$element, FormStateInterface $form_state, DrupalDateTime $date = NULL) {
+  public function datetimeDateCallbackTrusted(array &$element, FormStateInterface $form_state, ?DrupalDateTime $date = NULL): void {
     $element['datetimeDateCallbackExecuted'] = [
       '#value' => TRUE,
     ];
@@ -52,7 +45,7 @@ class DatetimeElementFormTest extends KernelTestBase implements FormInterface, T
   /**
    * {@inheritdoc}
    */
-  public static function datetimeDateCallback(array &$element, FormStateInterface $form_state, DrupalDateTime $date = NULL) {
+  public static function datetimeDateCallback(array &$element, FormStateInterface $form_state, ?DrupalDateTime $date = NULL): void {
     $element['datetimeDateCallbackExecuted'] = [
       '#value' => TRUE,
     ];
@@ -62,7 +55,7 @@ class DatetimeElementFormTest extends KernelTestBase implements FormInterface, T
   /**
    * {@inheritdoc}
    */
-  public function datetimeTimeCallbackTrusted(array &$element, FormStateInterface $form_state, DrupalDateTime $date = NULL) {
+  public function datetimeTimeCallbackTrusted(array &$element, FormStateInterface $form_state, ?DrupalDateTime $date = NULL): void {
     $element['timeCallbackExecuted'] = [
       '#value' => TRUE,
     ];
@@ -72,7 +65,7 @@ class DatetimeElementFormTest extends KernelTestBase implements FormInterface, T
   /**
    * {@inheritdoc}
    */
-  public static function datetimeTimeCallback(array &$element, FormStateInterface $form_state, DrupalDateTime $date = NULL) {
+  public static function datetimeTimeCallback(array &$element, FormStateInterface $form_state, ?DrupalDateTime $date = NULL): void {
     $element['timeCallbackExecuted'] = [
       '#value' => TRUE,
     ];
@@ -106,9 +99,32 @@ class DatetimeElementFormTest extends KernelTestBase implements FormInterface, T
       '#date_time_element' => 'HTML Time',
     ];
 
+    // Element with #required_error.
+    $form['datetime_required_error'] = [
+      '#type' => 'datetime',
+      '#title' => 'Datetime with required error',
+      '#date_date_format' => 'Y-m-d',
+      '#date_time_format' => 'H:i:s',
+      '#date_date_element' => 'HTML Date',
+      '#date_time_element' => 'HTML Time',
+      '#required' => TRUE,
+      '#required_error' => 'Custom required error message.',
+    ];
+
+    // Element without #required_error.
+    $form['datetime_no_required_error'] = [
+      '#type' => 'datetime',
+      '#title' => 'Datetime without required error',
+      '#date_date_format' => 'Y-m-d',
+      '#date_time_format' => 'H:i:s',
+      '#date_date_element' => 'HTML Date',
+      '#date_time_element' => 'HTML Time',
+      '#required' => TRUE,
+    ];
+
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => t('Submit'),
+      '#value' => 'Submit',
     ];
 
     return $form;
@@ -132,7 +148,7 @@ class DatetimeElementFormTest extends KernelTestBase implements FormInterface, T
   /**
    * Tests that default handlers are added even if custom are specified.
    */
-  public function testDatetimeElement() {
+  public function testDatetimeElement(): void {
     $form_state = new FormState();
     $form = \Drupal::formBuilder()->buildForm($this, $form_state);
     $this->render($form);
@@ -157,7 +173,7 @@ class DatetimeElementFormTest extends KernelTestBase implements FormInterface, T
    * @dataProvider providerUntrusted
    * @group legacy
    */
-  public function testDatetimeElementUntrustedCallbacks(string $date_callback = 'datetimeDateCallbackTrusted', string $time_callback = 'datetimeTimeCallbackTrusted', string $expected_exception = NULL) : void {
+  public function testDatetimeElementUntrustedCallbacks(string $date_callback = 'datetimeDateCallbackTrusted', string $time_callback = 'datetimeTimeCallbackTrusted', ?string $expected_exception = NULL) : void {
     if ($expected_exception) {
       $this->expectException(UntrustedCallbackException::class);
       $this->expectExceptionMessage($expected_exception);
@@ -175,7 +191,7 @@ class DatetimeElementFormTest extends KernelTestBase implements FormInterface, T
    * @return string[][]
    *   Test cases.
    */
-  public function providerUntrusted() : array {
+  public static function providerUntrusted() : array {
     return [
       'untrusted date' => [
         'datetimeDateCallback',
@@ -193,7 +209,7 @@ class DatetimeElementFormTest extends KernelTestBase implements FormInterface, T
   /**
    * Tests proper timezone handling of the Datetime element.
    */
-  public function testTimezoneHandling() {
+  public function testTimezoneHandling(): void {
     // Render the form once with the site's timezone.
     $form = \Drupal::formBuilder()->getForm($this);
     $this->render($form);
@@ -215,6 +231,31 @@ class DatetimeElementFormTest extends KernelTestBase implements FormInterface, T
       'datetimeDateCallbackTrusted',
       'datetimeTimeCallbackTrusted',
     ];
+  }
+
+  /**
+   * Tests the custom required error message for datetime elements.
+   */
+  public function testDatetimeElementRequiredError(): void {
+    $form_builder = $this->container->get('form_builder');
+
+    // Test datetime element with #required_error.
+    $form_state = (new FormState())
+      ->setValues([
+        'datetime_required_error' => '',
+      ]);
+    $form_builder->submitForm($this, $form_state);
+    // Check that the custom required error message is set correctly.
+    $this->assertEquals('Custom required error message.', $form_state->getErrors()['datetime_required_error']);
+
+    // Test datetime element without #required_error.
+    $form_state = (new FormState())
+      ->setValues([
+        'datetime_no_required_error' => '',
+      ]);
+    $form_builder->submitForm($this, $form_state);
+    // Check that the default required error message is set correctly.
+    $this->assertEquals('The Datetime without required error date is required.', $form_state->getErrors()['datetime_no_required_error']);
   }
 
 }

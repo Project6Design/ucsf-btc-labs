@@ -17,13 +17,13 @@ class AccessRouteAlterSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[RoutingEvents::ALTER][] = 'accessAdminMenuBlockPage';
     return $events;
   }
 
   /**
-   * Adds _access_admin_menu_block_page requirement to routes pointing to SystemController::systemAdminMenuBlockPage.
+   * Adds requirements to some System Controller routes.
    *
    * @param \Drupal\Core\Routing\RouteBuildEvent $event
    *   The event to process.
@@ -33,8 +33,16 @@ class AccessRouteAlterSubscriber implements EventSubscriberInterface {
     foreach ($routes as $route) {
       // Do not use a leading slash when comparing to the _controller string
       // because the leading slash in a fully-qualified method name is optional.
-      if ($route->hasDefault('_controller') && ltrim($route->getDefault('_controller'), '\\') === 'Drupal\system\Controller\SystemController::systemAdminMenuBlockPage') {
-        $route->setRequirement('_access_admin_menu_block_page', 'TRUE');
+      if ($route->hasDefault('_controller')) {
+        switch (ltrim($route->getDefault('_controller'), '\\')) {
+          case 'Drupal\system\Controller\SystemController::systemAdminMenuBlockPage':
+            $route->setRequirement('_access_admin_menu_block_page', 'TRUE');
+            break;
+
+          case 'Drupal\system\Controller\SystemController::overview':
+            $route->setRequirement('_access_admin_overview_page', 'TRUE');
+            break;
+        }
       }
     }
   }

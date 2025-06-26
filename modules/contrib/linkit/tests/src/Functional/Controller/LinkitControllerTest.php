@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\linkit\Functional\Controller;
 
 use Drupal\linkit\Tests\ProfileCreationTrait;

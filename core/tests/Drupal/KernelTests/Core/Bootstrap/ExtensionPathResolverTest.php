@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Bootstrap;
 
 use Drupal\Core\Extension\Exception\UnknownExtensionException;
@@ -39,7 +41,7 @@ class ExtensionPathResolverTest extends KernelTestBase {
 
     // Retrieving the location of a profile. Profiles are a special case with
     // a fixed location and naming.
-    $this->assertSame('core/profiles/testing/testing.info.yml', \Drupal::service('extension.list.profile')
+    $this->assertSame('core/profiles/tests/testing/testing.info.yml', \Drupal::service('extension.list.profile')
       ->getPathname('testing'));
   }
 
@@ -94,7 +96,7 @@ class ExtensionPathResolverTest extends KernelTestBase {
   /**
    * Tests the getPath() method with an unknown extension.
    */
-  public function testUnknownExtension() {
+  public function testUnknownExtension(): void {
     $module_extension_list = $this->prophesize(ModuleExtensionList::class);
     $profile_extension_list = $this->prophesize(ProfileExtensionList::class);
     $theme_extension_list = $this->prophesize(ThemeExtensionList::class);

@@ -16,5 +16,8 @@
   "support": {
     "issues": "http://drupal.org/project/issues/fakeobjects",
     "source": "http://cgit.drupalcode.org/fakeobjects"
+  },
+  "require": {
+    "drupal-ckeditor-libraries-group/fakeobjects": "^4.5.11"
   }
 }

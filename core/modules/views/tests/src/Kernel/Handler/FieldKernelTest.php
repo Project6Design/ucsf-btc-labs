@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Handler;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Plugin\views\field\FieldPluginBase;
@@ -12,11 +13,13 @@ use Drupal\views\Views;
  * Tests the generic field handler.
  *
  * @group views
- * @group #slow
  * @see \Drupal\views\Plugin\views\field\FieldPluginBase
  */
 class FieldKernelTest extends ViewsKernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = ['user'];
 
   /**
@@ -49,7 +52,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests that the render function is called.
    */
-  public function testRender() {
+  public function testRender(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -67,7 +70,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests all things related to the query.
    */
-  public function testQuery() {
+  public function testQuery(): void {
     // Tests adding additional fields to the query.
     $view = Views::getView('test_view');
     $view->initHandlers();
@@ -102,9 +105,8 @@ class FieldKernelTest extends ViewsKernelTestBase {
    *   The value to search for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
-   *   variables in the message text, not t(). If left blank, a default message
-   *   will be displayed.
+   *   messages: use string interpolation to embed variables in the message
+   *   text, not t(). If left blank, a default message will be displayed.
    *
    * @internal
    */
@@ -121,9 +123,8 @@ class FieldKernelTest extends ViewsKernelTestBase {
    *   The value to search for.
    * @param string $message
    *   (optional) A message to display with the assertion. Do not translate
-   *   messages: use \Drupal\Component\Render\FormattableMarkup to embed
-   *   variables in the message text, not t(). If left blank, a default message
-   *   will be displayed.
+   *   messages: use string interpolation to embed variables in the message
+   *   text, not t(). If left blank, a default message will be displayed.
    *
    * @internal
    */
@@ -134,7 +135,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests general rewriting of the output.
    */
-  public function testRewrite() {
+  public function testRewrite(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -161,7 +162,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests rewriting of the output with HTML.
    */
-  public function testRewriteHtmlWithTokens() {
+  public function testRewriteHtmlWithTokens(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -190,7 +191,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests rewriting of the output with HTML and aggregation.
    */
-  public function testRewriteHtmlWithTokensAndAggregation() {
+  public function testRewriteHtmlWithTokensAndAggregation(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -222,7 +223,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests the arguments tokens on field level.
    */
-  public function testArgumentTokens() {
+  public function testArgumentTokens(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -260,7 +261,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests the field tokens, row level and field level.
    */
-  public function testFieldTokens() {
+  public function testFieldTokens(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -288,17 +289,17 @@ class FieldKernelTest extends ViewsKernelTestBase {
       $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field_0, $row) {
         return $name_field_0->advancedRender($row);
       });
-      $this->assertEquals($expected_output_0, $output, new FormattableMarkup('Test token replacement: "@token" gave "@output"', ['@token' => $name_field_0->options['alter']['text'], '@output' => $output]));
+      $this->assertEquals($expected_output_0, $output, sprintf('Test token replacement: "%s" gave "%s"', $name_field_0->options['alter']['text'], $output));
 
       $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field_1, $row) {
         return $name_field_1->advancedRender($row);
       });
-      $this->assertEquals($expected_output_1, $output, new FormattableMarkup('Test token replacement: "@token" gave "@output"', ['@token' => $name_field_1->options['alter']['text'], '@output' => $output]));
+      $this->assertEquals($expected_output_1, $output, sprintf('Test token replacement: "%s" gave "%s"', $name_field_1->options['alter']['text'], $output));
 
       $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($name_field_2, $row) {
         return $name_field_2->advancedRender($row);
       });
-      $this->assertEquals($expected_output_2, $output, new FormattableMarkup('Test token replacement: "@token" gave "@output"', ['@token' => $name_field_2->options['alter']['text'], '@output' => $output]));
+      $this->assertEquals($expected_output_2, $output, sprintf('Test token replacement: "%s" gave %s"', $name_field_2->options['alter']['text'], $output));
     }
 
     $job_field = $view->field['job'];
@@ -310,11 +311,11 @@ class FieldKernelTest extends ViewsKernelTestBase {
     $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($job_field, $row) {
       return $job_field->advancedRender($row);
     });
-    $this->assertSubString($output, $random_text, new FormattableMarkup('Make sure the self token (@token => @value) appears in the output (@output)', [
-      '@value' => $random_text,
-      '@output' => $output,
-      '@token' => $job_field->options['alter']['text'],
-    ]));
+    $this->assertSubString($output, $random_text, sprintf('Make sure the self token (%s => %s) appears in the output (%s)',
+      $job_field->options['alter']['text'],
+      $random_text,
+      $output,
+    ));
 
     // Verify the token format used in D7 and earlier does not get substituted.
     $old_token = '[job]';
@@ -324,7 +325,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
     $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($job_field, $row) {
       return $job_field->advancedRender($row);
     });
-    $this->assertEquals($old_token, $output, new FormattableMarkup('Make sure the old token style (@token => @value) is not changed in the output (@output)', ['@value' => $random_text, '@output' => $output, '@token' => $job_field->options['alter']['text']]));
+    $this->assertEquals($old_token, $output, sprintf('Make sure the old token style (%s => %s) is not changed in the output (%s)', $job_field->options['alter']['text'], $random_text, $output));
 
     // Verify HTML tags are allowed in rewrite templates while token
     // replacements are escaped.
@@ -353,13 +354,13 @@ class FieldKernelTest extends ViewsKernelTestBase {
     $output = (string) $renderer->executeInRenderContext(new RenderContext(), function () use ($job_field, $row) {
       return $job_field->advancedRender($row);
     });
-    $this->assertEquals($random_text, $output, new FormattableMarkup('Make sure a script tag in the template (@template) is removed, leaving only the replaced token in the output (@output)', ['@output' => $output, '@template' => $rewrite_template]));
+    $this->assertEquals($random_text, $output, "Make sure a script tag in the template ($rewrite_template) is removed, leaving only the replaced token in the output ($output)");
   }
 
   /**
    * Tests the exclude setting.
    */
-  public function testExclude() {
+  public function testExclude(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = $this->container->get('renderer');
     $view = Views::getView('test_field_output');
@@ -386,7 +387,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests everything related to empty output of a field.
    */
-  public function testEmpty() {
+  public function testEmpty(): void {
     $this->_testHideIfEmpty();
     $this->_testEmptyText();
   }
@@ -397,7 +398,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
    * This tests alters the result to get easier and less coupled results. It is
    * important that assertSame() is used in this test since in PHP 0 == ''.
    */
-  public function _testHideIfEmpty() {
+  public function _testHideIfEmpty(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -531,7 +532,8 @@ class FieldKernelTest extends ViewsKernelTestBase {
     });
     $this->assertSame($random_name, (string) $render, 'If the rewritten string is not empty, "0" should not be treated as empty.');
 
-    // Test when results are rewritten to an empty string and non-zero empty results are hidden.
+    // Test when results are rewritten to an empty string and non-zero empty
+    // results are hidden.
     $view->field['name']->options['hide_alter_empty'] = TRUE;
     $view->field['name']->options['hide_empty'] = TRUE;
     $view->field['name']->options['empty_zero'] = FALSE;
@@ -678,7 +680,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests the usage of the empty text.
    */
-  public function _testEmptyText() {
+  public function _testEmptyText(): void {
     /** @var \Drupal\Core\Render\RendererInterface $renderer */
     $renderer = \Drupal::service('renderer');
 
@@ -728,7 +730,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests views_handler_field::isValueEmpty().
    */
-  public function testIsValueEmpty() {
+  public function testIsValueEmpty(): void {
     $view = Views::getView('test_view');
     $view->initHandlers();
     $field = $view->field['name'];
@@ -750,7 +752,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests whether the filters are click sortable as expected.
    */
-  public function testClickSortable() {
+  public function testClickSortable(): void {
     // Test that clickSortable is TRUE by default.
     $item = [
       'table' => 'views_test_data',
@@ -773,7 +775,7 @@ class FieldKernelTest extends ViewsKernelTestBase {
   /**
    * Tests the trimText method.
    */
-  public function testTrimText() {
+  public function testTrimText(): void {
     // Test unicode. See https://www.drupal.org/node/513396#comment-2839416.
     // cSpell:disable
     $text = [

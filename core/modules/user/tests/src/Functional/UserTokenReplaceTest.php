@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Functional;
 
 use Drupal\Core\Url;
@@ -16,9 +18,7 @@ use Drupal\user\Entity\User;
 class UserTokenReplaceTest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['language', 'user_hooks_test'];
 
@@ -26,6 +26,11 @@ class UserTokenReplaceTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected bool $useOneTimeLoginLinks = FALSE;
 
   /**
    * {@inheritdoc}
@@ -38,7 +43,7 @@ class UserTokenReplaceTest extends BrowserTestBase {
   /**
    * Creates a user, then tests the tokens generated from it.
    */
-  public function testUserTokenReplacement() {
+  public function testUserTokenReplacement(): void {
     $token_service = \Drupal::token();
     $language_interface = \Drupal::languageManager()->getCurrentLanguage();
     $url_options = [
@@ -46,8 +51,8 @@ class UserTokenReplaceTest extends BrowserTestBase {
       'language' => $language_interface,
     ];
 
-    \Drupal::state()->set('user_hooks_test_user_format_name_alter', TRUE);
-    \Drupal::state()->set('user_hooks_test_user_format_name_alter_safe', TRUE);
+    \Drupal::keyValue('user_hooks_test')->set('user_format_name_alter', TRUE);
+    \Drupal::keyValue('user_hooks_test')->set('user_format_name_alter_safe', TRUE);
 
     // Create two users and log them in one after another.
     $user1 = $this->drupalCreateUser([]);
@@ -65,6 +70,7 @@ class UserTokenReplaceTest extends BrowserTestBase {
     // Generate and test tokens.
     $tests = [];
     $tests['[user:uid]'] = $account->id();
+    $tests['[user:uuid]'] = $account->uuid();
     $tests['[user:name]'] = $account->getAccountName();
     $tests['[user:account-name]'] = $account->getAccountName();
     $tests['[user:display-name]'] = $account->getDisplayName();
@@ -82,6 +88,7 @@ class UserTokenReplaceTest extends BrowserTestBase {
     $base_bubbleable_metadata = BubbleableMetadata::createFromObject($account);
     $metadata_tests = [];
     $metadata_tests['[user:uid]'] = $base_bubbleable_metadata;
+    $metadata_tests['[user:uuid]'] = $base_bubbleable_metadata;
     $metadata_tests['[user:name]'] = $base_bubbleable_metadata;
     $metadata_tests['[user:account-name]'] = $base_bubbleable_metadata;
     $metadata_tests['[user:display-name]'] = $base_bubbleable_metadata;
@@ -117,11 +124,13 @@ class UserTokenReplaceTest extends BrowserTestBase {
     $anonymous_user = User::load(0);
     $tests = [];
     $tests['[user:uid]'] = 'not yet assigned';
+    $tests['[user:uuid]'] = $anonymous_user->uuid();
     $tests['[user:display-name]'] = $anonymous_user->getDisplayName();
 
     $base_bubbleable_metadata = BubbleableMetadata::createFromObject($anonymous_user);
     $metadata_tests = [];
     $metadata_tests['[user:uid]'] = $base_bubbleable_metadata;
+    $metadata_tests['[user:uuid]'] = $base_bubbleable_metadata;
     $bubbleable_metadata = clone $base_bubbleable_metadata;
     $bubbleable_metadata->addCacheableDependency(\Drupal::config('user.settings'));
     $metadata_tests['[user:display-name]'] = $bubbleable_metadata;
@@ -164,8 +173,7 @@ class UserTokenReplaceTest extends BrowserTestBase {
     }
 
     // Generate user display name tokens when safe markup is returned.
-    // @see user_hooks_test_user_format_name_alter()
-    \Drupal::state()->set('user_hooks_test_user_format_name_alter_safe', TRUE);
+    \Drupal::keyValue('user_hooks_test')->set('user_format_name_alter_safe', TRUE);
     $input = '[user:display-name] [current-user:display-name]';
     $expected = "<em>{$user1->id()}</em> <em>{$user2->id()}</em>";
     $output = $token_service->replace($input, ['user' => $user1]);

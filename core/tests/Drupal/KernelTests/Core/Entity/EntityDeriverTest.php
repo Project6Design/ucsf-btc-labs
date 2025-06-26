@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\comment\Entity\CommentType;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\entity_test\EntityTestHelper;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\node\Entity\NodeType;
 
@@ -48,8 +51,8 @@ class EntityDeriverTest extends KernelTestBase {
       'label' => 'Default comment',
       'target_entity_type_id' => 'node',
     ])->save();
-    entity_test_create_bundle('foo', NULL, 'entity_test_no_bundle');
-    entity_test_create_bundle('entity_test_no_bundle', NULL, 'entity_test_no_bundle');
+    EntityTestHelper::createBundle('foo', NULL, 'entity_test_no_bundle');
+    EntityTestHelper::createBundle('entity_test_no_bundle', NULL, 'entity_test_no_bundle');
     $this->typedDataManager = $this->container->get('typed_data_manager');
   }
 
@@ -58,7 +61,7 @@ class EntityDeriverTest extends KernelTestBase {
    *
    * @dataProvider derivativesProvider
    */
-  public function testDerivatives($data_type, $expect_exception) {
+  public function testDerivatives($data_type, $expect_exception): void {
     if ($expect_exception) {
       $this->expectException(PluginNotFoundException::class);
     }
@@ -68,7 +71,7 @@ class EntityDeriverTest extends KernelTestBase {
   /**
    * Provides test data for ::testDerivatives().
    */
-  public function derivativesProvider() {
+  public static function derivativesProvider() {
     return [
       'un-bundleable entity type with no bundle type' => ['entity:user', FALSE],
       'un-bundleable entity type with bundle type' => ['entity:user:user', TRUE],

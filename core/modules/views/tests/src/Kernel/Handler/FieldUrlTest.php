@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Handler;
 
 use Drupal\Core\Link;
@@ -14,6 +16,9 @@ use Drupal\views\Views;
  */
 class FieldUrlTest extends ViewsKernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = ['system'];
 
   /**
@@ -23,13 +28,19 @@ class FieldUrlTest extends ViewsKernelTestBase {
    */
   public static $testViews = ['test_view'];
 
+  /**
+   * Defines the Views data for the test entity.
+   */
   public function viewsData() {
     $data = parent::viewsData();
     $data['views_test_data']['name']['field']['id'] = 'url';
     return $data;
   }
 
-  public function testFieldUrl() {
+  /**
+   * Tests the rendering of a field as a plain text value and as a link.
+   */
+  public function testFieldUrl(): void {
     $view = Views::getView('test_view');
     $view->setDisplay();
 

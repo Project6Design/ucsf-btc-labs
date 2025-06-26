@@ -6,7 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
     'CURLStringFile' => $vendorDir . '/symfony/polyfill-php81/Resources/stubs/CURLStringFile.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'DateError' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateError.php',
@@ -18,8 +17,9 @@ return array(
     'DateMalformedStringException' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateMalformedStringException.php',
     'DateObjectError' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateObjectError.php',
     'DateRangeError' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/DateRangeError.php',
+    'Deprecated' => $vendorDir . '/symfony/polyfill-php84/Resources/stubs/Deprecated.php',
     'Drupal' => $baseDir . '/core/lib/Drupal.php',
-    'DrupalFinder\\DrupalFinder' => $vendorDir . '/webflo/drupal-finder/src/DrupalFinder.php',
+    'Drupal\\Component\\Datetime\\Time' => $baseDir . '/core/lib/Drupal/Component/Datetime/Time.php',
     'Drupal\\Component\\DependencyInjection\\Container' => $baseDir . '/core/lib/Drupal/Component/DependencyInjection/Container.php',
     'Drupal\\Component\\DependencyInjection\\PhpArrayContainer' => $baseDir . '/core/lib/Drupal/Component/DependencyInjection/PhpArrayContainer.php',
     'Drupal\\Component\\FileCache\\FileCacheFactory' => $baseDir . '/core/lib/Drupal/Component/FileCache/FileCacheFactory.php',
@@ -47,8 +47,8 @@ return array(
     'PEAR_Error' => $vendorDir . '/pear/pear-core-minimal/src/PEAR.php',
     'PEAR_ErrorStack' => $vendorDir . '/pear/pear-core-minimal/src/PEAR/ErrorStack.php',
     'PEAR_Exception' => $vendorDir . '/pear/pear_exception/PEAR/Exception.php',
-    'PhpToken' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
     'ReturnTypeWillChange' => $vendorDir . '/symfony/polyfill-php81/Resources/stubs/ReturnTypeWillChange.php',
+    'SQLite3Exception' => $vendorDir . '/symfony/polyfill-php83/Resources/stubs/SQLite3Exception.php',
     'SebastianBergmann\\Diff\\Chunk' => $vendorDir . '/sebastian/diff/src/Chunk.php',
     'SebastianBergmann\\Diff\\ConfigurationException' => $vendorDir . '/sebastian/diff/src/Exception/ConfigurationException.php',
     'SebastianBergmann\\Diff\\Diff' => $vendorDir . '/sebastian/diff/src/Diff.php',
@@ -65,8 +65,5 @@ return array(
     'SebastianBergmann\\Diff\\Output\\UnifiedDiffOutputBuilder' => $vendorDir . '/sebastian/diff/src/Output/UnifiedDiffOutputBuilder.php',
     'SebastianBergmann\\Diff\\Parser' => $vendorDir . '/sebastian/diff/src/Parser.php',
     'SebastianBergmann\\Diff\\TimeEfficientLongestCommonSubsequenceCalculator' => $vendorDir . '/sebastian/diff/src/TimeEfficientLongestCommonSubsequenceCalculator.php',
-    'Stringable' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
     'System' => $vendorDir . '/pear/pear-core-minimal/src/System.php',
-    'UnhandledMatchError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
-    'ValueError' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
 );

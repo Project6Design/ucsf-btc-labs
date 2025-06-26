@@ -1,0 +1,23 @@
+{
+  "repositories": {
+    "fitvids": {
+      "type": "package",
+      "package": {
+        "name": "jquery/fitvids",
+        "version": "1.2.0",
+        "type": "drupal-library",
+        "extra": {
+          "installer-name": "fitvids"
+        },
+        "dist": {
+          "url": "https://github.com/davatron5000/FitVids.js/archive/refs/tags/v1.2.0.tar.gz",
+          "type": "tar"
+        },
+        "license": "MIT"
+      }
+    }
+  },
+  "require": {
+    "jquery/fitvids": "*"
+  }
+}

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests;
 
-use Drupal\Component\Utility\Random;
+use Drupal\TestTools\Extension\Dump\DebugDump;
 
 /**
  * Tests for the UnitTestCase class.
@@ -16,22 +16,19 @@ class UnitTestCaseTest extends UnitTestCase {
   /**
    * Tests the dump() function in a test run in the same process.
    */
-  public function testVarDumpSameProcess() {
-    // Append the stream capturer to the STDOUT stream, so that we can test the
-    // dump() output and also prevent it from actually outputting in this
-    // particular test.
-    stream_filter_register("capture", StreamCapturer::class);
-    stream_filter_append(STDOUT, "capture");
-
+  public function testVarDumpSameProcess(): void {
     // Dump some variables.
     $object = (object) [
-      'foo' => 'bar',
+      'Aldebaran' => 'Betelgeuse',
     ];
     dump($object);
-    dump('banana');
+    dump('Alpheratz');
 
-    $this->assertStringContainsString('bar', StreamCapturer::$cache);
-    $this->assertStringContainsString('banana', StreamCapturer::$cache);
+    $dumpString = json_encode(DebugDump::getDumps());
+
+    $this->assertStringContainsString('Aldebaran', $dumpString);
+    $this->assertStringContainsString('Betelgeuse', $dumpString);
+    $this->assertStringContainsString('Alpheratz', $dumpString);
   }
 
   /**
@@ -39,35 +36,24 @@ class UnitTestCaseTest extends UnitTestCase {
    *
    * @runInSeparateProcess
    */
-  public function testVarDumpSeparateProcess() {
-    // Append the stream capturer to the STDOUT stream, so that we can test the
-    // dump() output and also prevent it from actually outputting in this
-    // particular test.
-    stream_filter_register("capture", StreamCapturer::class);
-    stream_filter_append(STDOUT, "capture");
-
+  public function testVarDumpSeparateProcess(): void {
     // Dump some variables.
     $object = (object) [
-      'foo' => 'bar',
+      'Denebola' => 'Aspidiske',
     ];
     dump($object);
-    dump('banana');
+    dump('Schedar');
 
-    $this->assertStringContainsString('bar', StreamCapturer::$cache);
-    $this->assertStringContainsString('banana', StreamCapturer::$cache);
-  }
+    $dumpString = json_encode(DebugDump::getDumps());
 
-  /**
-   * Tests the deprecation of accessing the randomGenerator property directly.
-   *
-   * @group legacy
-   */
-  public function testGetRandomGeneratorPropertyDeprecation() {
-    $this->expectDeprecation('Accessing the randomGenerator property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use getRandomGenerator() instead. See https://www.drupal.org/node/3358445');
-    // We purposely test accessing an undefined property here. We need to tell
-    // PHPStan to ignore that.
-    // @phpstan-ignore-next-line
-    $this->assertInstanceOf(Random::class, $this->randomGenerator);
+    $this->assertStringContainsString('Denebola', $dumpString);
+    $this->assertStringContainsString('Aspidiske', $dumpString);
+    $this->assertStringContainsString('Schedar', $dumpString);
+
+    // We should also find the dump of the previous test.
+    $this->assertStringContainsString('Aldebaran', $dumpString);
+    $this->assertStringContainsString('Betelgeuse', $dumpString);
+    $this->assertStringContainsString('Alpheratz', $dumpString);
   }
 
 }

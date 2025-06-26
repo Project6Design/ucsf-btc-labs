@@ -5,6 +5,8 @@ namespace Drupal\Tests\rdf\Functional\Rest;
 use Drupal\Tests\rest\Functional\CookieResourceTestTrait;
 
 /**
+ * Tests JSON Cookie for RDF mappings.
+ *
  * @group rest
  */
 class RdfMappingJsonCookieTest extends RdfMappingResourceTestBase {

@@ -2,7 +2,7 @@
 
 namespace Drupal\Tests\twig_tweak\Kernel;
 
-use Drupal\Core\Cache\Cache;
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\user\Traits\UserCreationTrait;
@@ -45,8 +45,13 @@ final class EntityFormViewBuilderTest extends AbstractTestCase {
 
   /**
    * Test callback.
+   *
+   * @see \twig_tweak_test_node_access()
    */
   public function testEntityFormViewBuilder(): void {
+    if (version_compare(\Drupal::VERSION, '11.1.dev', '<')) {
+      $this->markTestSkipped();
+    }
 
     $view_builder = $this->container->get('twig_tweak.entity_form_view_builder');
 
@@ -75,11 +80,12 @@ final class EntityFormViewBuilderTest extends AbstractTestCase {
         'user.roles:authenticated',
       ],
       'tags' => [
+        'CACHE_MISS_IF_UNCACHEABLE_HTTP_METHOD:form',
         'config:core.entity_form_display.node.article.default',
         'node:1',
         'tag_from_twig_tweak_test_node_access',
       ],
-      'max-age' => 50,
+      'max-age' => 0,
     ];
     self::assertCache($expected_cache, $build['#cache']);
     self::assertStringContainsString('<form class="node-article-form node-form" ', $this->renderPlain($build));
@@ -111,10 +117,11 @@ final class EntityFormViewBuilderTest extends AbstractTestCase {
         'user.roles:authenticated',
       ],
       'tags' => [
+        'CACHE_MISS_IF_UNCACHEABLE_HTTP_METHOD:form',
         'config:core.entity_form_display.node.article.default',
         'node:2',
       ],
-      'max-age' => Cache::PERMANENT,
+      'max-age' => 0,
     ];
     self::assertCache($expected_cache, $build['#cache']);
     self::assertStringContainsString('<form class="node-article-form node-form" ', $this->renderPlain($build));
@@ -124,7 +131,13 @@ final class EntityFormViewBuilderTest extends AbstractTestCase {
    * Renders a render array.
    */
   private function renderPlain(array $build): string {
-    return $this->container->get('renderer')->renderPlain($build);
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = $this->container->get('renderer');
+    return DeprecationHelper::backwardsCompatibleCall(
+      \Drupal::VERSION, '10.3.0',
+      fn () => $renderer->renderInIsolation($build),
+      fn () => $renderer->renderPlain($build),
+    );
   }
 
 }

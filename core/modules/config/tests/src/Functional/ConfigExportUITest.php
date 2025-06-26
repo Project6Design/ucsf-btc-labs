@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config\Functional;
 
 use Drupal\Core\Archiver\Tar;
@@ -15,9 +17,7 @@ use Drupal\Tests\BrowserTestBase;
 class ConfigExportUITest extends BrowserTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['config', 'config_test'];
 
@@ -45,7 +45,7 @@ class ConfigExportUITest extends BrowserTestBase {
   /**
    * Tests export of configuration.
    */
-  public function testExport() {
+  public function testExport(): void {
     // Verify the export page with export submit button is available.
     $this->drupalGet('admin/config/development/configuration/full/export');
     $this->assertSession()->buttonExists('Export');
@@ -84,7 +84,7 @@ class ConfigExportUITest extends BrowserTestBase {
     // Ensure the test configuration override is in effect but was not exported.
     $this->assertSame('Foo', \Drupal::config('system.maintenance')->get('message'));
     $archiver->extract($temp_directory, ['system.maintenance.yml']);
-    $file_contents = file_get_contents($temp_directory . '/' . 'system.maintenance.yml');
+    $file_contents = file_get_contents($temp_directory . '/system.maintenance.yml');
     $exported = Yaml::decode($file_contents);
     $this->assertNotSame('Foo', $exported['message']);
 

@@ -52,7 +52,7 @@ class JsCollectionOptimizerLazy implements AssetCollectionGroupOptimizerInterfac
     protected readonly ConfigFactoryInterface $configFactory,
     protected readonly FileUrlGeneratorInterface $fileUrlGenerator,
     protected readonly TimeInterface $time,
-    protected readonly LanguageManagerInterface $languageManager
+    protected readonly LanguageManagerInterface $languageManager,
   ) {}
 
   /**
@@ -140,14 +140,6 @@ class JsCollectionOptimizerLazy implements AssetCollectionGroupOptimizerInterfac
     }
 
     return $js_assets;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getAll() {
-    @trigger_error(__METHOD__ . ' is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. There is no replacement. See https://www.drupal.org/node/3301744', E_USER_DEPRECATED);
-    return [];
   }
 
   /**

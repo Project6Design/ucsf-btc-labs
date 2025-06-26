@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Handler;
 
 use Drupal\Core\Url;
@@ -22,9 +24,7 @@ class FieldEntityOperationsTest extends ViewTestBase {
   public static $testViews = ['test_entity_operations'];
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['node', 'language', 'views_ui'];
 
@@ -46,7 +46,7 @@ class FieldEntityOperationsTest extends ViewTestBase {
   /**
    * Tests entity operations field.
    */
-  public function testEntityOperations() {
+  public function testEntityOperations(): void {
     // Add languages and refresh the container so the entity type manager will
     // have fresh data.
     ConfigurableLanguage::createFromLangcode('hu')->save();
@@ -90,8 +90,9 @@ class FieldEntityOperationsTest extends ViewTestBase {
           // test would by default point to the frontpage.
           $operation['url']->setOption('query', ['destination' => $expected_destination]);
           $this->assertSession()->elementsCount('xpath', "//ul[contains(@class, dropbutton)]/li/a[@href='{$operation['url']->toString()}' and text()='{$operation['title']}']", 1);
-          // Entities which were created in Hungarian should link to the Hungarian
-          // edit form, others to the English one (which has no path prefix here).
+          // Entities which were created in Hungarian should link to the
+          // Hungarian edit form, others to the English one (which has no path
+          // prefix here).
           $base_path = \Drupal::request()->getBasePath();
           $parts = explode('/', str_replace($base_path, '', $operation['url']->toString()));
           $expected_prefix = ($language->getId() != 'en' ? $language->getId() : 'node');

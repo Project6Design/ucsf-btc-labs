@@ -34,6 +34,9 @@ class NodeAttributesTest extends NodeTestBase {
    */
   protected $baseUri;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 

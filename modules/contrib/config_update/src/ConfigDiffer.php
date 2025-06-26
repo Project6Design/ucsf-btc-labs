@@ -3,9 +3,9 @@
 namespace Drupal\config_update;
 
 use Drupal\Component\Diff\Diff;
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslationInterface;
-use Drupal\Core\Serialization\Yaml;
 
 /**
  * Provides methods related to config differences.
@@ -130,7 +130,7 @@ class ConfigDiffer implements ConfigDiffInterface {
    * Formats config for showing differences.
    *
    * To compute differences, we need to separate the config into lines and use
-   * line-by-line differencer. The obvious way to split into lines is:
+   * line-by-line differentiator. The obvious way to split into lines is:
    * @code
    * explode("\n", Yaml::encode($config))
    * @endcode

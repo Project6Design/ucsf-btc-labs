@@ -68,7 +68,10 @@ abstract class FormBase extends EntityForm {
     switch ($status) {
       case SAVED_NEW:
         $this->messenger()->addMessage($this->t('Created new profile %label.', ['%label' => $linkit_profile->label()]));
-        $this->logger('linkit')->notice('Created new profile %label.', ['%label' => $linkit_profile->label(), 'link' => $edit_link]);
+        $this->logger('linkit')->notice('Created new profile %label.', [
+          '%label' => $linkit_profile->label(),
+          'link' => $edit_link,
+        ]);
         $form_state->setRedirect('linkit.matchers', [
           'linkit_profile' => $linkit_profile->id(),
         ]);
@@ -76,10 +79,15 @@ abstract class FormBase extends EntityForm {
 
       case SAVED_UPDATED:
         $this->messenger()->addMessage($this->t('Updated profile %label.', ['%label' => $linkit_profile->label()]));
-        $this->logger('linkit')->notice('Updated profile %label.', ['%label' => $linkit_profile->label(), 'link' => $edit_link]);
+        $this->logger('linkit')->notice('Updated profile %label.', [
+          '%label' => $linkit_profile->label(),
+          'link' => $edit_link,
+        ]);
         $form_state->setRedirectUrl($linkit_profile->toUrl('edit-form'));
         break;
     }
+
+    return $status;
   }
 
 }

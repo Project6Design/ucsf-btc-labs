@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Functional;
 
 use Drupal\Core\Entity\EntityInterface;
@@ -51,7 +53,7 @@ class MediaRevisionTest extends MediaFunctionalTestBase {
   /**
    * Checks media revision operations.
    */
-  public function testRevisions() {
+  public function testRevisions(): void {
     $assert = $this->assertSession();
 
     $media = $this->createMedia('Sample media');
@@ -102,7 +104,7 @@ class MediaRevisionTest extends MediaFunctionalTestBase {
   /**
    * Tests creating revisions of a File media item.
    */
-  public function testFileMediaRevision() {
+  public function testFileMediaRevision(): void {
     $assert = $this->assertSession();
 
     $uri = 'temporary://foo.txt';
@@ -144,7 +146,7 @@ class MediaRevisionTest extends MediaFunctionalTestBase {
   /**
    * Tests creating revisions of an Image media item.
    */
-  public function testImageMediaRevision() {
+  public function testImageMediaRevision(): void {
     $assert = $this->assertSession();
 
     $this->createMediaType('image', ['id' => 'image', 'new_revision' => TRUE]);
@@ -283,13 +285,13 @@ class MediaRevisionTest extends MediaFunctionalTestBase {
     $revision = \Drupal::entityTypeManager()->getStorage('media')
       ->loadRevision($originalRevisionId);
     $this->drupalGet($revision->toUrl('revision-delete-form'));
-    $this->assertSession()->pageTextContains('Are you sure you want to delete the revision from Sun, 01/11/2009 - 16:00?');
+    $this->assertSession()->pageTextContains('Are you sure you want to delete the revision from Sun, 11 Jan 2009 - 16:00?');
     $this->submitForm([], 'Delete');
     $this->assertSession()->pageTextNotContains("First revision");
     $this->assertSession()->pageTextContains("Second revision");
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->addressEquals(sprintf('media/%s/revisions', $media->id()));
-    $this->assertSession()->pageTextContains('Revision from Sun, 01/11/2009 - 16:00 of test 1st changed title has been deleted.');
+    $this->assertSession()->pageTextContains('Revision from Sun, 11 Jan 2009 - 16:00 of test 1st changed title has been deleted.');
     // Check that only two revisions exists, i.e. the original and the latest
     // revision.
     $this->assertSession()->elementsCount('css', 'table tbody tr', 2);
@@ -332,13 +334,13 @@ class MediaRevisionTest extends MediaFunctionalTestBase {
     $revision = \Drupal::entityTypeManager()->getStorage('media')
       ->loadRevision($originalRevisionId);
     $this->drupalGet($revision->toUrl('revision-revert-form'));
-    $this->assertSession()->pageTextContains('Are you sure you want to revert to the revision from Sun, 01/11/2009 - 16:00?');
+    $this->assertSession()->pageTextContains('Are you sure you want to revert to the revision from Sun, 11 Jan 2009 - 16:00?');
 
     $this->submitForm([], 'Revert');
     $this->assertSession()->statusCodeEquals(200);
-    $this->assertSession()->pageTextContains('Copy of the revision from Sun, 01/11/2009 - 16:00');
+    $this->assertSession()->pageTextContains('Copy of the revision from Sun, 11 Jan 2009 - 16:00');
     $this->assertSession()->addressEquals(sprintf('media/%s/revisions', $media->id()));
-    $this->assertSession()->pageTextContains(sprintf('test %s has been reverted to the revision from Sun, 01/11/2009 - 16:00.', $originalRevisionLabel));
+    $this->assertSession()->pageTextContains(sprintf('test %s has been reverted to the revision from Sun, 11 Jan 2009 - 16:00.', $originalRevisionLabel));
     $this->assertSession()->elementsCount('css', 'table tbody tr', 4);
     $this->drupalGet($media->toUrl('edit-form'));
     // Check if the title is changed to the reverted revision.

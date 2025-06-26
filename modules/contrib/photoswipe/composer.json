@@ -17,7 +17,8 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "repositories": [{
+    "repositories": [
+        {
             "type": "composer",
             "url": "https://asset-packagist.org"
         },
@@ -25,17 +26,30 @@
             "type": "package",
             "package": {
                 "name": "npm-asset/photoswipe",
-                "version": "4.1.3",
+                "version": "5.4.4",
                 "type": "drupal-library",
                 "dist": {
-                    "url": "https://github.com/dimsemenov/PhotoSwipe/archive/v4.1.3.zip",
+                    "url": "https://github.com/dimsemenov/PhotoSwipe/archive/v5.4.4.zip",
                     "type": "zip"
                 }
             }
-        }
+        },
+        {
+          "type": "package",
+          "package": {
+              "name": "npm-asset/photoswipe-dynamic-caption-plugin",
+              "version": "1.2.7",
+              "type": "drupal-library",
+              "dist": {
+                "url": "https://registry.npmjs.org/photoswipe-dynamic-caption-plugin/-/photoswipe-dynamic-caption-plugin-1.2.7.tgz",
+                "type": "tar"
+            }
+          }
+      }
     ],
     "require": {},
     "suggest": {
-        "npm-asset/photoswipe": "Required to use drupal/photoswipe. Expected version: ^4"
+        "npm-asset/photoswipe": "Required to make the 'photoswipe' module functional. Expected version: ^5",
+        "npm-asset/photoswipe-dynamic-caption-plugin": "Required to make the 'photoswipe_dynamic_caption' submodule functional. Expected version: ^1.2"
     }
 }

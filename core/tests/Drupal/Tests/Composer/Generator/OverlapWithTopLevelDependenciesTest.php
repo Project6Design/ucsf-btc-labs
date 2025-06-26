@@ -16,7 +16,7 @@ class OverlapWithTopLevelDependenciesTest extends TestCase {
   /**
    * Provides data for testOverlapWithTemplateProject().
    */
-  public function templateProjectPathProvider() {
+  public static function templateProjectPathProvider() {
     return [
       [
         'composer/Template/RecommendedProject',
@@ -30,12 +30,12 @@ class OverlapWithTopLevelDependenciesTest extends TestCase {
   /**
    * Tests top level and core-recommended dependencies do not overlap.
    *
-   * @dataProvider templateProjectPathProvider
-   *
    * @param string $template_project_path
    *   The path of the project template to test.
+   *
+   * @dataProvider templateProjectPathProvider
    */
-  public function testOverlapWithTemplateProject($template_project_path) {
+  public function testOverlapWithTemplateProject($template_project_path): void {
     $root = dirname(__DIR__, 6);
     // Read template project composer.json.
     $top_level_composer_json = json_decode(file_get_contents("$root/$template_project_path/composer.json"), TRUE);

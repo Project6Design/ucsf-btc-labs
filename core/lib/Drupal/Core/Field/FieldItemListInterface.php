@@ -84,13 +84,13 @@ interface FieldItemListInterface extends ListInterface, AccessibleInterface {
   /**
    * Contains the default access logic of this field.
    *
-   * See \Drupal\Core\Entity\EntityAccessControlHandlerInterface::fieldAccess() for
-   * the parameter documentation.
+   * See \Drupal\Core\Entity\EntityAccessControlHandlerInterface::fieldAccess()
+   * for the parameter documentation.
    *
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function defaultAccess($operation = 'view', AccountInterface $account = NULL);
+  public function defaultAccess($operation = 'view', ?AccountInterface $account = NULL);
 
   /**
    * Filters out empty field items and re-numbers the item deltas.

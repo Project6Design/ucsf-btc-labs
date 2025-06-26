@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\file_module_test\Form;
 
 use Drupal\Core\Form\FormBase;
@@ -41,6 +43,7 @@ class FileModuleTestForm extends FormBase {
     $form['nested']['file'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('Managed <em>@type</em>', ['@type' => 'file & butter']),
+      '#description' => $this->t('Upload a <em>@type</em> file', ['@type' => 'file & butter']),
       '#upload_location' => 'public://test',
       '#progress_message' => $this->t('Processing...'),
       '#extended' => (bool) $extended,

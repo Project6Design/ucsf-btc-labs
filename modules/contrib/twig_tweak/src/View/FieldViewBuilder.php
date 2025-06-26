@@ -49,8 +49,8 @@ class FieldViewBuilder {
     EntityInterface $entity,
     string $field_name,
     $view_mode = 'full',
-    string $langcode = NULL,
-    bool $check_access = TRUE
+    ?string $langcode = NULL,
+    bool $check_access = TRUE,
   ): array {
 
     $build = [];

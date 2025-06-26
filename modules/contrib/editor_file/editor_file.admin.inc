@@ -3,10 +3,16 @@
 /**
  * @file
  * Administration functions for editor_file.module.
+ *
+ * @deprecated in editor_file:2.0.0 and is removed from editor_file:2.1.0. This
+ *  code is only used for the now unsupported CKEditor4 plugin.
+ * @see https://www.drupal.org/project/editor_file/issues/3415204
  */
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Utility\Environment;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\editor\Entity\Editor;
 
 /**
@@ -91,7 +97,7 @@ function editor_file_upload_settings_form(Editor $editor) {
     '#states' => $show_if_file_uploads_enabled,
   ];
 
-  $default_max_size = format_size(Environment::getUploadMaxSize());
+  $default_max_size = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => ByteSizeMarkup::create(Environment::getUploadMaxSize()), fn() => format_size(Environment::getUploadMaxSize()));
   $form['max_size'] = [
     '#type' => 'textfield',
     '#default_value' => $file_upload['max_size'],

@@ -130,7 +130,7 @@ class OverviewTerms extends FormBase {
    * @return array
    *   The form structure.
    */
-  public function buildForm(array $form, FormStateInterface $form_state, VocabularyInterface $taxonomy_vocabulary = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?VocabularyInterface $taxonomy_vocabulary = NULL) {
     $form_state->set(['taxonomy', 'vocabulary'], $taxonomy_vocabulary);
     $vocabulary_hierarchy = $this->storageController->getVocabularyHierarchyType($taxonomy_vocabulary->id());
     $parent_fields = FALSE;
@@ -264,34 +264,18 @@ class OverviewTerms extends FormBase {
       '%name' => $taxonomy_vocabulary->label(),
     ];
     if ($this->currentUser()->hasPermission('administer taxonomy') || $this->currentUser()->hasPermission('edit terms in ' . $taxonomy_vocabulary->id())) {
-      switch ($vocabulary_hierarchy) {
-        case VocabularyInterface::HIERARCHY_DISABLED:
-          $help_message = $this->t('You can reorganize the terms in %capital_name using their drag-and-drop handles, and group terms under a parent term by sliding them under and to the right of the parent.', $args);
-          break;
-
-        case VocabularyInterface::HIERARCHY_SINGLE:
-          $help_message = $this->t('%capital_name contains terms grouped under parent terms. You can reorganize the terms in %capital_name using their drag-and-drop handles.', $args);
-          break;
-
-        case VocabularyInterface::HIERARCHY_MULTIPLE:
-          $help_message = $this->t('%capital_name contains terms with multiple parents. Drag and drop of terms with multiple parents is not supported, but you can re-enable drag-and-drop support by editing each term to include only a single parent.', $args);
-          break;
-      }
+      $help_message = match ($vocabulary_hierarchy) {
+        VocabularyInterface::HIERARCHY_DISABLED => $this->t('You can reorganize the terms in %capital_name using their drag-and-drop handles, and group terms under a parent term by sliding them under and to the right of the parent.', $args),
+        VocabularyInterface::HIERARCHY_SINGLE => $this->t('%capital_name contains terms grouped under parent terms. You can reorganize the terms in %capital_name using their drag-and-drop handles.', $args),
+        VocabularyInterface::HIERARCHY_MULTIPLE => $this->t('%capital_name contains terms with multiple parents. Drag and drop of terms with multiple parents is not supported, but you can re-enable drag-and-drop support by editing each term to include only a single parent.', $args),
+      };
     }
     else {
-      switch ($vocabulary_hierarchy) {
-        case VocabularyInterface::HIERARCHY_DISABLED:
-          $help_message = $this->t('%capital_name contains the following terms.', $args);
-          break;
-
-        case VocabularyInterface::HIERARCHY_SINGLE:
-          $help_message = $this->t('%capital_name contains terms grouped under parent terms', $args);
-          break;
-
-        case VocabularyInterface::HIERARCHY_MULTIPLE:
-          $help_message = $this->t('%capital_name contains terms with multiple parents.', $args);
-          break;
-      }
+      $help_message = match ($vocabulary_hierarchy) {
+        VocabularyInterface::HIERARCHY_DISABLED =>  $this->t('%capital_name contains the following terms.', $args),
+        VocabularyInterface::HIERARCHY_SINGLE => $this->t('%capital_name contains terms grouped under parent terms', $args),
+        VocabularyInterface::HIERARCHY_MULTIPLE => $this->t('%capital_name contains terms with multiple parents.', $args),
+      };
     }
 
     // Get the IDs of the terms edited on the current page which have pending
@@ -373,7 +357,7 @@ class OverviewTerms extends FormBase {
       ];
       $form['terms'][$key]['status'] = [
         '#type' => 'item',
-        '#markup' => ($term->isPublished()) ? t('Published') : t('Unpublished'),
+        '#markup' => ($term->isPublished()) ? $this->t('Published') : $this->t('Unpublished'),
       ];
 
       // Add a special class for terms with pending revision so we can highlight
@@ -555,12 +539,14 @@ class OverviewTerms extends FormBase {
     foreach ($form_state->getValue('terms') as $tid => $values) {
       if (isset($form['terms'][$tid]['#term'])) {
         $term = $form['terms'][$tid]['#term'];
-        // Give terms at the root level a weight in sequence with terms on previous pages.
+        // Give terms at the root level a weight in sequence with terms on
+        // previous pages.
         if ($values['term']['parent'] == 0 && $term->getWeight() != $weight) {
           $term->setWeight($weight);
           $changed_terms[$term->id()] = $term;
         }
-        // Terms not at the root level can safely start from 0 because they're all on this page.
+        // Terms not at the root level can safely start from 0 because they're
+        // all on this page.
         elseif ($values['term']['parent'] > 0) {
           $level_weights[$values['term']['parent']] = isset($level_weights[$values['term']['parent']]) ? $level_weights[$values['term']['parent']] + 1 : 0;
           if ($level_weights[$values['term']['parent']] != $term->getWeight()) {

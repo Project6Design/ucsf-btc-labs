@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\error_test\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
@@ -56,12 +58,12 @@ class ErrorTestController extends ControllerBase {
   }
 
   /**
-   * Generate fatals to test the error handler.
+   * Generate fatal errors to test the error handler.
    */
-  public function generateFatals() {
+  public function generateFatalErrors() {
     $function = function (array $test) {
     };
-
+    // Use an incorrect parameter type, string, for testing a fatal error.
     $function("test-string");
     return [];
   }

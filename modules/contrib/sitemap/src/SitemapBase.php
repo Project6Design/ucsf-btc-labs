@@ -68,7 +68,6 @@ abstract class SitemapBase extends PluginBase implements SitemapInterface, Conta
     $this->setConfiguration($configuration);
     $this->settings = $this->configuration['settings'];
     $this->provider = $this->configuration['provider'];
-    $this->sitemapConfig = \Drupal::config('sitemap.settings');
   }
 
   /**
@@ -77,6 +76,7 @@ abstract class SitemapBase extends PluginBase implements SitemapInterface, Conta
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $plugin = new static($configuration, $plugin_id, $plugin_definition);
     $plugin->currentUser = $container->get('current_user');
+    $plugin->sitemapConfig = $container->get('config.factory')->get('sitemap.settings');
     return $plugin;
   }
 
@@ -151,6 +151,7 @@ abstract class SitemapBase extends PluginBase implements SitemapInterface, Conta
    */
   protected function baseConfigurationDefaults() {
     return [
+      'base_plugin' => $this->getBaseId(),
       'id' => $this->getPluginId(),
       'provider' => $this->pluginDefinition['provider'],
       'enabled' => $this->pluginDefinition['enabled'] ?? FALSE,

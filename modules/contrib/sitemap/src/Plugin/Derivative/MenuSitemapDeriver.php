@@ -19,25 +19,15 @@ class MenuSitemapDeriver extends DeriverBase implements ContainerDeriverInterfac
    *
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
-  protected $menuStorage;
-
-  /**
-   * Constructs new SitemapMenus sitemap_map.
-   *
-   * @param \Drupal\Core\Entity\EntityStorageInterface $menu_storage
-   *   The menu storage.
-   */
-  public function __construct(EntityStorageInterface $menu_storage) {
-    $this->menuStorage = $menu_storage;
-  }
+  protected EntityStorageInterface $menuStorage;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
-    return new static(
-      $container->get('entity_type.manager')->getStorage('menu')
-    );
+    $instance = new static();
+    $instance->menuStorage = $container->get('entity_type.manager')->getStorage('menu');
+    return $instance;
   }
 
   /**

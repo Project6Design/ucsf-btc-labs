@@ -7,7 +7,7 @@ namespace Drupal\Tests\Composer\Plugin\Scaffold\Functional;
 use Composer\Util\Filesystem;
 use Drupal\Tests\Composer\Plugin\Scaffold\Fixtures;
 use Drupal\Tests\Composer\Plugin\Scaffold\AssertUtilsTrait;
-use Drupal\Tests\Composer\Plugin\Scaffold\ExecTrait;
+use Drupal\Tests\Composer\Plugin\ExecTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -82,8 +82,8 @@ class ManageGitIgnoreTest extends TestCase {
    * @return string
    *   The path to the fixture directory.
    */
-  protected function createSutWithGit($fixture_name) {
-    $this->fixturesDir = $this->fixtures->tmpDir($this->getName());
+  protected function createSutWithGit($fixture_name): string {
+    $this->fixturesDir = $this->fixtures->tmpDir($this->name());
     $sut = $this->fixturesDir . '/' . $fixture_name;
     $replacements = ['SYMLINK' => 'false', 'PROJECT_ROOT' => $this->projectRoot];
     $this->fixtures->cloneFixtureProjects($this->fixturesDir, $replacements);
@@ -102,7 +102,7 @@ class ManageGitIgnoreTest extends TestCase {
   /**
    * Tests scaffold command correctly manages the .gitignore file.
    */
-  public function testManageGitIgnore() {
+  public function testManageGitIgnore(): void {
     // Note that the drupal-composer-drupal-project fixture does not
     // have any configuration settings related to .gitignore management.
     $sut = $this->createSutWithGit('drupal-composer-drupal-project');
@@ -125,7 +125,6 @@ class ManageGitIgnoreTest extends TestCase {
 /index.php
 /robots.txt
 /update.php
-/web.config
 EOT;
     // At this point we should have a .gitignore file, because although we did
     // not explicitly ask for .gitignore tracking, the vendor directory is not
@@ -147,7 +146,7 @@ EOT;
   /**
    * Tests scaffold command does not manage the .gitignore file when disabled.
    */
-  public function testUnmanagedGitIgnoreWhenDisabled() {
+  public function testUnmanagedGitIgnoreWhenDisabled(): void {
     // Note that the drupal-drupal fixture has a configuration setting
     // `"gitignore": false,` which disables .gitignore file handling.
     $sut = $this->createSutWithGit('drupal-drupal');
@@ -168,7 +167,7 @@ EOT;
    * .gitignore files, then we expect that the unmanaged file should not be
    * added to the .gitignore file, because unmanaged files should be committed.
    */
-  public function testAppendToEmptySettingsIsUnmanaged() {
+  public function testAppendToEmptySettingsIsUnmanaged(): void {
     $sut = $this->createSutWithGit('drupal-drupal-append-settings');
     $this->assertFileDoesNotExist($sut . '/autoload.php');
     $this->assertFileDoesNotExist($sut . '/index.php');
@@ -188,7 +187,7 @@ EOT;
    * The scaffold operation should still succeed if there is no 'git'
    * executable.
    */
-  public function testUnmanagedGitIgnoreWhenGitNotAvailable() {
+  public function testUnmanagedGitIgnoreWhenGitNotAvailable(): void {
     // Note that the drupal-composer-drupal-project fixture does not have any
     // configuration settings related to .gitignore management.
     $sut = $this->createSutWithGit('drupal-composer-drupal-project');
@@ -240,7 +239,6 @@ Scaffolding files for fixtures/drupal-assets-fixture:
   - Copy [web-root]/index.php from assets/index.php
   - Skip [web-root]/robots.txt: overridden in fixtures/drupal-composer-drupal-project
   - Copy [web-root]/update.php from assets/update.php
-  - Copy [web-root]/web.config from assets/web.config
 Scaffolding files for fixtures/scaffold-override-fixture:
   - Copy [web-root]/sites/default/default.settings.php from assets/override-settings.php
 Scaffolding files for fixtures/drupal-composer-drupal-project:
@@ -248,7 +246,7 @@ Scaffolding files for fixtures/drupal-composer-drupal-project:
   - Copy [web-root]/robots.txt from assets/robots-default.txt
 
 EOT;
-    $this->assertEquals($expected, $output);
+    $this->assertStringContainsString($expected, $output);
     $this->assertFileExists($sut . '/docroot/index.php');
     $this->assertFileDoesNotExist($sut . '/docroot/sites/default/.gitignore');
   }

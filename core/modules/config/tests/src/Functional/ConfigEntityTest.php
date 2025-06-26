@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Uuid\Uuid;
 use Drupal\Core\Entity\EntityMalformedException;
 use Drupal\Core\Entity\EntityStorageException;
@@ -24,9 +25,7 @@ class ConfigEntityTest extends BrowserTestBase {
   const MAX_ID_LENGTH = ConfigEntityStorage::MAX_ID_LENGTH;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['config_test'];
 
@@ -38,7 +37,7 @@ class ConfigEntityTest extends BrowserTestBase {
   /**
    * Tests CRUD operations.
    */
-  public function testCRUD() {
+  public function testCRUD(): void {
     $default_langcode = \Drupal::languageManager()->getDefaultLanguage()->getId();
     // Verify default properties on a newly created empty entity.
     $storage = \Drupal::entityTypeManager()->getStorage('config_test');
@@ -172,12 +171,11 @@ class ConfigEntityTest extends BrowserTestBase {
     ]);
     try {
       $status = $id_length_config_test->save();
-      $this->fail(new FormattableMarkup("config_test entity with ID length @length exceeding the maximum allowed length of @max saved successfully", [
-        '@length' => strlen($id_length_config_test->id()),
-        '@max' => static::MAX_ID_LENGTH,
-      ]));
+      $length = strlen($id_length_config_test->id());
+      $max = static::MAX_ID_LENGTH;
+      $this->fail("config_test entity with ID length $length exceeding the maximum allowed length of $max saved successfully");
     }
-    catch (ConfigEntityIdLengthException $e) {
+    catch (ConfigEntityIdLengthException) {
       // Expected exception; just continue testing.
     }
 
@@ -191,7 +189,7 @@ class ConfigEntityTest extends BrowserTestBase {
       $same_id->save();
       $this->fail('Not possible to overwrite an entity.');
     }
-    catch (EntityStorageException $e) {
+    catch (EntityStorageException) {
       // Expected exception; just continue testing.
     }
 
@@ -225,7 +223,7 @@ class ConfigEntityTest extends BrowserTestBase {
   /**
    * Tests CRUD operations through the UI.
    */
-  public function testCrudUi() {
+  public function testCrudUi(): void {
     $this->drupalLogin($this->drupalCreateUser([
       'administer site configuration',
     ]));

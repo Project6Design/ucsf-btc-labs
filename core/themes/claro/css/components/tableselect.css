@@ -131,8 +131,6 @@ tr.selected td {
   }
 }
 
-.position-sticky thead {
-  position: sticky;
-  z-index: 500;
-  top: var(--drupal-displace-offset-top);
+.ui-autocomplete {
+  z-index: 501;
 }

@@ -18,7 +18,7 @@ class PhotoswipeResponsivePreprocessProcessor extends PhotoswipePreprocessProces
     $settings = $this->imageDTO->getSettings();
     $image_style_store = $this->entityTypeManager->getStorage('image_style');
     $resp_image_store = $this->entityTypeManager->getStorage('responsive_image_style');
-    $responsive_image_style = $resp_image_store->load($settings['photoswipe_node_style']);
+    $responsive_image_style = $resp_image_store->load($settings['photoswipe_thumbnail_style']);
 
     $cache_tags = [];
     $image_styles_to_load = [];
@@ -32,23 +32,32 @@ class PhotoswipeResponsivePreprocessProcessor extends PhotoswipePreprocessProces
       $cache_tags = Cache::mergeTags($cache_tags, $image_style->getCacheTags());
     }
 
+    // We need to merge the item attributes here, instead of doing it in
+    // "preprocess", as responsive images use the "responsive_image" key instead
+    // of "image":
+    $itemAttributes = $variables['item_attributes'];
+    // Check if this is not NULL, just in case, before merging:
+    if ($item->_attributes) {
+      $itemAttributes = array_merge($item->_attributes, $variables['item_attributes']);
+    }
+
     $image = [
       '#theme' => 'responsive_image_formatter',
       '#item' => $item,
-      '#item_attributes' => $item->_attributes,
+      '#item_attributes' => $itemAttributes,
       '#responsive_image_style_id' => $responsive_image_style ? $responsive_image_style->id() : '',
       '#cache' => [
         'tags' => $cache_tags,
       ],
-      '#style_name' => $settings['photoswipe_node_style'],
+      '#style_name' => $settings['photoswipe_thumbnail_style'],
     ];
 
     $meta_a = CacheableMetadata::createFromRenderArray($image);
     $meta_b = CacheableMetadata::createFromObject($item->getEntity());
     $meta_a->merge($meta_b)->applyTo($image);
 
-    if (isset($variables['delta']) && $variables['delta'] === 0 && !empty($settings['photoswipe_node_style_first'])) {
-      $image['#style_name'] = $settings['photoswipe_node_style_first'];
+    if (isset($variables['delta']) && $variables['delta'] === 0 && !empty($settings['photoswipe_thumbnail_style_first'])) {
+      $image['#style_name'] = $settings['photoswipe_thumbnail_style_first'];
     }
 
     // Render as a standard image if an image style is not given or "hide".

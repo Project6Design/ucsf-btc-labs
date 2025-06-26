@@ -33,3 +33,9 @@ sendgrid_integration.settings:
         reply_to:
           type: string
           label: 'The reply to address for the test mail.'
+    trackopens:
+      type: integer
+      label: 'Track opens'
+    trackclicks:
+      type: integer
+      label: 'Track clicks'

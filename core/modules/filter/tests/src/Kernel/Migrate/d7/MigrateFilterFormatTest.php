@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\filter\Kernel\Migrate\d7;
 
 use Drupal\Core\Database\Database;
@@ -33,7 +35,7 @@ class MigrateFilterFormatTest extends MigrateDrupal7TestBase implements MigrateD
   /**
    * {@inheritdoc}
    */
-  public static function migrateDumpAlter(KernelTestBase $test) {
+  public static function migrateDumpAlter(KernelTestBase $test): void {
     $db = Database::getConnection('default', 'migrate');
     $fields = [
       'format' => 'image_resize_filter',
@@ -87,9 +89,19 @@ class MigrateFilterFormatTest extends MigrateDrupal7TestBase implements MigrateD
   /**
    * Tests the Drupal 7 filter format to Drupal 8 migration.
    */
-  public function testFilterFormat() {
+  public function testFilterFormat(): void {
     $this->assertEntity('custom_text_format', 'Custom Text format', ['filter_autop' => 0, 'filter_html' => -10], 0, TRUE);
-    $this->assertEntity('filtered_html', 'Filtered HTML', ['filter_autop' => 2, 'filter_html' => 1, 'filter_htmlcorrector' => 10, 'filter_url' => 0], 0, TRUE);
+    $this->assertEntity(
+      'filtered_html',
+      'Filtered HTML',
+      [
+        'filter_autop' => 2,
+        'filter_html' => 1,
+        'filter_htmlcorrector' => 10,
+        'filter_url' => 0,
+      ],
+      0,
+      TRUE);
     $this->assertEntity('full_html', 'Full HTML', ['filter_autop' => 1, 'filter_htmlcorrector' => 10, 'filter_url' => 0], 1, TRUE);
     $this->assertEntity('plain_text', 'Plain text', ['filter_autop' => 2, 'filter_html_escape' => 0, 'filter_url' => 1], 10, TRUE);
     // This assertion covers issue #2555089. Drupal 7 formats are identified

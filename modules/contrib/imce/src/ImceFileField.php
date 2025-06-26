@@ -2,8 +2,8 @@
 
 namespace Drupal\imce;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Field\WidgetInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Url;
 
@@ -47,7 +47,10 @@ class ImceFileField implements TrustedCallbackInterface {
     if (static::isWidgetSupported($widget)) {
       $form['enabled'] = [
         '#type' => 'checkbox',
-        '#title' => t('Allow users to select files from <a href=":url">Imce File Manager</a> for this field.', [':url' => Url::fromRoute('imce.admin')->toString()]),
+        '#title' => t(
+          'Allow users to select files from <a href=":url">Imce File Manager</a> for this field.',
+          [':url' => Url::fromRoute('imce.admin')->toString()]
+        ),
         '#default_value' => $widget->getThirdPartySetting('imce', 'enabled'),
       ];
     }
@@ -114,16 +117,18 @@ class ImceFileField implements TrustedCallbackInterface {
       $paths = array_slice($paths, 0, $element['#cardinality']);
     }
     // Check if paths are accessible by the current user with Imce.
-    if (!$paths = Imce::accessFilePaths($paths, \Drupal::currentUser(), $element['#scheme'])) {
+    $paths = Imce::accessFilePaths($paths, Imce::currentUser(), $element['#scheme']);
+    if (!$paths) {
       return;
     }
     // Validate paths as file entities.
-    $file_usage = \Drupal::service('file.usage');
+    $file_usage = Imce::service('file.usage');
     $errors = [];
     foreach ($paths as $path) {
       // Get entity by uri.
       $file = Imce::getFileEntity($element['#scheme'] . '://' . $path, TRUE);
-      if ($new_errors = file_validate($file, $element['#upload_validators'])) {
+      $new_errors = Imce::runValidators($file, $element['#upload_validators']);
+      if ($new_errors) {
         $errors = array_merge($errors, $new_errors);
       }
       else {
@@ -131,7 +136,8 @@ class ImceFileField implements TrustedCallbackInterface {
         if ($file->isNew()) {
           $file->save();
         }
-        if ($fid = $file->id()) {
+        $fid = $file->id();
+        if ($fid) {
           // Make sure the file has usage otherwise it will be denied.
           if (!$file_usage->listUsage($file)) {
             $file_usage->add($file, 'imce', 'file', $fid);
@@ -145,14 +151,13 @@ class ImceFileField implements TrustedCallbackInterface {
       $errors = array_unique($errors);
       if (count($errors) > 1) {
         $errors = ['#theme' => 'item_list', '#items' => $errors];
-        $message = \Drupal::service('renderer')->render($errors);
+        $message = Imce::service('renderer')->render($errors);
       }
       else {
         $message = array_pop($errors);
       }
       // May break the widget flow if set as a form error.
-      \Drupal::messenger()
-        ->addMessage($message, 'error');
+      Imce::messenger()->addMessage($message, 'error');
     }
   }
 

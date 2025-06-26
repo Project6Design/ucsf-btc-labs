@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\action_test\Plugin\Action;
 
 use Drupal\Core\Action\ActionBase;
@@ -27,7 +29,7 @@ class SaveEntity extends ActionBase {
   /**
    * {@inheritdoc}
    */
-  public function access($object, AccountInterface $account = NULL, $return_as_object = FALSE) {
+  public function access($object, ?AccountInterface $account = NULL, $return_as_object = FALSE) {
     /** @var \Drupal\Core\Entity\EntityInterface $object */
     return $object->access('update', $account, $return_as_object);
   }

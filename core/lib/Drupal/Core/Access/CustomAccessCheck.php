@@ -2,11 +2,11 @@
 
 namespace Drupal\Core\Access;
 
-use Drupal\Core\Controller\ControllerResolverInterface;
 use Drupal\Core\Routing\Access\AccessInterface as RoutingAccessInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Utility\CallableResolver;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Route;
 
 /**
@@ -22,30 +22,17 @@ use Symfony\Component\Routing\Route;
 class CustomAccessCheck implements RoutingAccessInterface {
 
   /**
-   * The controller resolver.
-   *
-   * @var \Drupal\Core\Controller\ControllerResolverInterface
-   */
-  protected $controllerResolver;
-
-  /**
-   * The arguments resolver.
-   *
-   * @var \Drupal\Core\Access\AccessArgumentsResolverFactoryInterface
-   */
-  protected $argumentsResolverFactory;
-
-  /**
    * Constructs a CustomAccessCheck instance.
    *
-   * @param \Drupal\Core\Controller\ControllerResolverInterface $controller_resolver
-   *   The controller resolver.
-   * @param \Drupal\Core\Access\AccessArgumentsResolverFactoryInterface $arguments_resolver_factory
+   * @param \Drupal\Core\Utility\CallableResolver $callableResolver
+   *   The callable resolver.
+   * @param \Drupal\Core\Access\AccessArgumentsResolverFactoryInterface $argumentsResolverFactory
    *   The arguments resolver factory.
    */
-  public function __construct(ControllerResolverInterface $controller_resolver, AccessArgumentsResolverFactoryInterface $arguments_resolver_factory) {
-    $this->controllerResolver = $controller_resolver;
-    $this->argumentsResolverFactory = $arguments_resolver_factory;
+  public function __construct(
+    protected CallableResolver $callableResolver,
+    protected AccessArgumentsResolverFactoryInterface $argumentsResolverFactory,
+  ) {
   }
 
   /**
@@ -64,11 +51,11 @@ class CustomAccessCheck implements RoutingAccessInterface {
    * @return \Drupal\Core\Access\AccessResultInterface
    *   The access result.
    */
-  public function access(Route $route, RouteMatchInterface $route_match, AccountInterface $account, Request $request = NULL) {
+  public function access(Route $route, RouteMatchInterface $route_match, AccountInterface $account, ?Request $request = NULL) {
     try {
-      $callable = $this->controllerResolver->getControllerFromDefinition($route->getRequirement('_custom_access'));
+      $callable = $this->callableResolver->getCallableFromDefinition($route->getRequirement('_custom_access'));
     }
-    catch (\InvalidArgumentException $e) {
+    catch (\InvalidArgumentException) {
       // The custom access controller method was not found.
       throw new \BadMethodCallException(sprintf('The "%s" method is not callable as a _custom_access callback in route "%s"', $route->getRequirement('_custom_access'), $route->getPath()));
     }

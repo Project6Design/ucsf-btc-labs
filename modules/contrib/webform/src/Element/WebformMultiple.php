@@ -5,7 +5,7 @@ namespace Drupal\webform\Element;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Render\Element\FormElement;
+use Drupal\Core\Render\Element\FormElementBase;
 use Drupal\Core\Template\Attribute;
 use Drupal\webform\Utility\WebformAccessibilityHelper;
 use Drupal\webform\Utility\WebformElementHelper;
@@ -15,7 +15,7 @@ use Drupal\webform\Utility\WebformElementHelper;
  *
  * @FormElement("webform_multiple")
  */
-class WebformMultiple extends FormElement {
+class WebformMultiple extends FormElementBase {
 
   /**
    * Value indicating a element accepts an unlimited number of values.
@@ -145,7 +145,7 @@ class WebformMultiple extends FormElement {
       $number_of_empty_items = (int) $element['#empty_items'];
       $number_of_items = $number_of_default_values + $number_of_empty_items;
 
-      // Make sure number of items is greated than min items.
+      // Make sure number of items is greater than min items.
       $min_items = (int) $element['#min_items'];
       $number_of_items = ($number_of_items < $min_items) ? $min_items : $number_of_items;
 

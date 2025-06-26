@@ -1,4 +1,3 @@
-# CKEditor 5
 plugin:
   js:
     js/ckeditor5_plugins/urlembed/build/urlembed.js: { preprocess: false, minified: true }
@@ -10,3 +9,7 @@ admin:
   css:
     theme:
       css/ckeditor5.css: { }
+responsive_styles:
+  css:
+    component:
+      css/url_embed.responsive.css: { }

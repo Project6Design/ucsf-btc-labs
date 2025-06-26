@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional;
 
 use Drupal\node\Entity\NodeType;
+use Drupal\Tests\node\Traits\NodeAccessTrait;
 
 /**
  * Tests node access rebuild functions with multiple node access modules.
@@ -10,6 +13,8 @@ use Drupal\node\Entity\NodeType;
  * @group node
  */
 class NodeAccessRebuildNodeGrantsTest extends NodeTestBase {
+
+  use NodeAccessTrait;
 
   /**
    * {@inheritdoc}
@@ -50,10 +55,10 @@ class NodeAccessRebuildNodeGrantsTest extends NodeTestBase {
   /**
    * Tests rebuilding the node access permissions table with content.
    */
-  public function testNodeAccessRebuildNodeGrants() {
+  public function testNodeAccessRebuildNodeGrants(): void {
     \Drupal::service('module_installer')->install(['node_access_test']);
     \Drupal::state()->set('node_access_test.private', TRUE);
-    node_access_test_add_field(NodeType::load('page'));
+    $this->addPrivateField(NodeType::load('page'));
     $this->resetAll();
 
     // Create 30 nodes so that _node_access_rebuild_batch_operation() has to run
@@ -106,7 +111,7 @@ class NodeAccessRebuildNodeGrantsTest extends NodeTestBase {
   /**
    * Tests rebuilding the node access permissions table with no content.
    */
-  public function testNodeAccessRebuildNoAccessModules() {
+  public function testNodeAccessRebuildNoAccessModules(): void {
     // Default realm access is present.
     $this->assertEquals(1, \Drupal::service('node.grant_storage')->count(), 'There is an all realm access record');
 

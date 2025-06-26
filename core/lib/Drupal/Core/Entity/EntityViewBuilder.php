@@ -173,10 +173,12 @@ class EntityViewBuilder extends EntityHandlerBase implements EntityHandlerInterf
    *   The view mode that should be used.
    *
    * @return array
+   *   A build array with entity specific defaults added.
    */
   protected function getBuildDefaults(EntityInterface $entity, $view_mode) {
     // Allow modules to change the view mode.
-    $this->moduleHandler()->alter('entity_view_mode', $view_mode, $entity);
+    $entityType = $this->entityTypeId;
+    $this->moduleHandler()->alter([$entityType . '_view_mode', 'entity_view_mode'], $view_mode, $entity);
 
     $build = [
       "#{$this->entityTypeId}" => $entity,
@@ -398,7 +400,7 @@ class EntityViewBuilder extends EntityHandlerBase implements EntityHandlerInterf
   /**
    * {@inheritdoc}
    */
-  public function resetCache(array $entities = NULL) {
+  public function resetCache(?array $entities = NULL) {
     // If no set of specific entities is provided, invalidate the entity view
     // builder's cache tag. This will invalidate all entities rendered by this
     // view builder.
@@ -492,7 +494,7 @@ class EntityViewBuilder extends EntityHandlerBase implements EntityHandlerInterf
   /**
    * Gets an EntityViewDisplay for rendering an individual field.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
    * @param string $field_name
    *   The field name.
@@ -500,6 +502,7 @@ class EntityViewBuilder extends EntityHandlerBase implements EntityHandlerInterf
    *   The display options passed to the viewField() method.
    *
    * @return \Drupal\Core\Entity\Display\EntityViewDisplayInterface
+   *   The EntityViewDisplay objects created for individual field rendering.
    */
   protected function getSingleFieldDisplay($entity, $field_name, $display_options) {
     if (is_string($display_options)) {

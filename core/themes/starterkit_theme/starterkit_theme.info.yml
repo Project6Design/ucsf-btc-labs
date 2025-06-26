@@ -1,8 +1,7 @@
-name: starterkit_theme
+name: Starterkit theme
 type: theme
 'base theme': stable9
 hidden: true
-starterkit: true
 version: VERSION
 libraries:
   - starterkit_theme/base
@@ -19,3 +18,5 @@ libraries-extend:
     - starterkit_theme/file
   core/drupal.progress:
     - starterkit_theme/progress
+  core/drupal.tablesort:
+    - starterkit_theme/drupal.tablesort

@@ -2,18 +2,18 @@
 
 namespace Drupal\photoswipe\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Template\Attribute;
 use Drupal\photoswipe\PhotoswipeAssetsManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'photoswipe_field_formatter' formatter.
@@ -28,13 +28,6 @@ use Drupal\photoswipe\PhotoswipeAssetsManagerInterface;
  * )
  */
 class PhotoswipeFieldFormatter extends FormatterBase {
-
-  /**
-   * The module handler.
-   *
-   * @var \Drupal\Core\Extension\ModuleHandlerInterface
-   */
-  protected $moduleHandler;
 
   /**
    * The entity field manager.
@@ -76,13 +69,14 @@ class PhotoswipeFieldFormatter extends FormatterBase {
    */
   public static function defaultSettings() {
     return [
-      'photoswipe_node_style_first' => '',
-      'photoswipe_node_style' => '',
+      'photoswipe_thumbnail_style_first' => '',
+      'photoswipe_thumbnail_style' => '',
       'photoswipe_image_style' => '',
       'photoswipe_reference_image_field' => '',
-      'photoswipe_caption' => 'alt',
-      'photoswipe_caption_custom' => '',
       'photoswipe_view_mode' => '',
+      'image_loading' => [
+        'attribute' => 'lazy',
+      ],
     ] + parent::defaultSettings();
   }
 
@@ -103,8 +97,6 @@ class PhotoswipeFieldFormatter extends FormatterBase {
    *   The view mode.
    * @param array $third_party_settings
    *   Any third party settings.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The module handler.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    *   The entity field manager.
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
@@ -112,7 +104,7 @@ class PhotoswipeFieldFormatter extends FormatterBase {
    * @param \Drupal\photoswipe\PhotoswipeAssetsManagerInterface $assets_manager
    *   The assets manager.
    * @param \Drupal\Core\Entity\EntityStorageInterface $image_style_storage
-   *   The image style storage.
+   *   The module handler.
    */
   public function __construct(
     $plugin_id,
@@ -122,11 +114,10 @@ class PhotoswipeFieldFormatter extends FormatterBase {
     $label,
     $view_mode,
     array $third_party_settings,
-    ModuleHandlerInterface $module_handler,
     EntityFieldManagerInterface $entity_field_manager,
     EntityRepositoryInterface $entity_repository,
     PhotoswipeAssetsManagerInterface $assets_manager,
-    EntityStorageInterface $image_style_storage
+    EntityStorageInterface $image_style_storage,
   ) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
     $this->fieldDefinition = $field_definition;
@@ -134,7 +125,6 @@ class PhotoswipeFieldFormatter extends FormatterBase {
     $this->label = $label;
     $this->viewMode = $view_mode;
     $this->thirdPartySettings = $third_party_settings;
-    $this->moduleHandler = $module_handler;
     $this->entityFieldManager = $entity_field_manager;
     $this->entityRepository = $entity_repository;
     $this->photoswipeAssetManager = $assets_manager;
@@ -153,7 +143,6 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       $configuration['label'],
       $configuration['view_mode'],
       $configuration['third_party_settings'],
-      $container->get('module_handler'),
       $container->get('entity_field.manager'),
       $container->get('entity.repository'),
       $container->get('photoswipe.assets_manager'),
@@ -168,18 +157,18 @@ class PhotoswipeFieldFormatter extends FormatterBase {
     $image_styles_hide = $this->includeHidden
       ? $this->getImageStyles() + ['hide' => $this->t('Hide (do not display image)')]
       : $this->getImageStyles();
-    $element['photoswipe_node_style'] = [
+    $element['photoswipe_thumbnail_style'] = [
       '#title' => $this->t('Thumbnail image style'),
       '#type' => 'select',
-      '#default_value' => $this->getSetting('photoswipe_node_style'),
+      '#default_value' => $this->getSetting('photoswipe_thumbnail_style'),
       '#empty_option' => $this->t('None (Original image)'),
       '#options' => $image_styles_hide,
       '#description' => $this->t('Select the image style for the thumbnail display. Clicking a thumbnail will open the Photoswipe layer.'),
     ];
-    $element['photoswipe_node_style_first'] = [
+    $element['photoswipe_thumbnail_style_first'] = [
       '#title' => $this->t('Override first image thumbnail style'),
       '#type' => 'select',
-      '#default_value' => $this->getSetting('photoswipe_node_style_first'),
+      '#default_value' => $this->getSetting('photoswipe_thumbnail_style_first'),
       '#empty_option' => $this->t('No override (use default thumbnail image style)'),
       '#options' => $image_styles_hide,
       '#description' => $this->t('Sometimes the first image should be displayed differently, e.g. larger than other images. This option overrides the first image style.'),
@@ -193,18 +182,31 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       '#description' => $this->t('Select the image style to display the image in the Photoswipe modal.'),
     ];
 
-    // Set our caption options.
-    $caption_options = [
-      'title' => $this->t('Image title tag'),
-      'alt' => $this->t('Image alt tag'),
-      'entity_label' => $this->t('Entity label'),
-      'custom' => $this->t('Custom (with tokens)'),
+    // This class originally never extended the ImgaeFormatter class, as we
+    // don't want to extend it now, simply copy the "image_loading" code from
+    // there:
+    $image_loading = $this->getSetting('image_loading');
+    $element['image_loading'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Image loading'),
+      '#weight' => 10,
+      '#description' => $this->t('Lazy render images with native image loading attribute (<em>loading="lazy"</em>). This improves performance by allowing browsers to lazily load images.'),
     ];
-    // Add media entity name if the target is a media entity:
-    $field_settings = $this->getFieldSettings();
-    if (isset($field_settings['target_type']) && $field_settings['target_type'] === 'media') {
-      $caption_options['media_name'] = $this->t('Media entity name');
-    }
+    $loading_attribute_options = [
+      'lazy' => $this->t('Lazy (<em>loading="lazy"</em>)'),
+      'eager' => $this->t('Eager (<em>loading="eager"</em>)'),
+    ];
+    $element['image_loading']['attribute'] = [
+      '#title' => $this->t('Image loading attribute'),
+      '#type' => 'radios',
+      '#default_value' => $image_loading['attribute'],
+      '#options' => $loading_attribute_options,
+      '#description' => $this->t('Select the loading attribute for images. <a href=":link">Learn more about the loading attribute for images.</a>', [
+        ':link' => 'https://html.spec.whatwg.org/multipage/urls-and-fetching.html#lazy-loading-attributes',
+      ]),
+    ];
+    $element['image_loading']['attribute']['lazy']['#description'] = $this->t('Delays loading the image until that section of the page is visible in the browser. When in doubt, lazy loading is recommended.');
+    $element['image_loading']['attribute']['eager']['#description'] = $this->t('Force browsers to download an image as soon as possible. This is the browser default for legacy reasons. Only use this option when the image is always expected to render.');
 
     $element = $this->addEntityReferenceSettings($element);
 
@@ -217,62 +219,7 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       }
     }
 
-    $element['photoswipe_caption'] = [
-      '#title' => $this->t('Photoswipe image caption'),
-      '#type' => 'select',
-      '#default_value' => $this->getSetting('photoswipe_caption'),
-      '#options' => $caption_options,
-      '#description' => $this->t('Field that should be used for the caption displayed in the Photoswipe modal.'),
-    ];
-
-    $element['photoswipe_caption_custom'] = [
-      '#title' => $this->t('Custom caption'),
-      '#type' => 'textarea',
-      '#default_value' => $this->getSetting('photoswipe_caption_custom'),
-      '#states' => [
-        'visible' => [
-          ':input[name$="[settings][photoswipe_caption]"]' => ['value' => 'custom'],
-        ],
-      ],
-    ];
-    if ($this->moduleHandler->moduleExists('token')) {
-      // Get the field target type, e.g. 'file':
-      $target_type = $this->fieldDefinition->getSetting('target_type');
-      // Get the field parent entity type, e.g. 'node':
-      $entity_type = $this->fieldDefinition->getTargetEntityTypeId();
-      $element['photoswipe_token_caption'] = [
-        '#type' => 'fieldset',
-        '#title' => $this->t('Replacement patterns'),
-        '#theme' => 'token_tree_link',
-        '#token_types' => [
-          // Default it will work for file type.
-          'file',
-          // The "entity_type" key is set in \Drupal\Core\Field\FieldConfigBase.
-          $entity_type ?: 'node',
-          // For prevent duplicate file type.
-          ($target_type !== 'file' ? $target_type : 'media'),
-        ],
-        '#states' => [
-          'visible' => [
-            ':input[name$="[settings][photoswipe_caption]"]' => ['value' => 'custom'],
-          ],
-        ],
-      ];
-    }
-    else {
-      $element['photoswipe_token_caption'] = [
-        '#type' => 'fieldset',
-        '#title' => $this->t('Replacement patterns'),
-        '#description' => '<strong class="error">' . $this->t('For token support the <a href="@token_url">token module</a> must be installed.', ['@token_url' => 'http://drupal.org/project/token']) . '</strong>',
-        '#states' => [
-          'visible' => [
-            ':input[name$="[settings][photoswipe_caption]"]' => ['value' => 'custom'],
-          ],
-        ],
-      ];
-    }
-
-    // Add the current view mode so we can control view mode for node fields.
+    // Add the current view mode so we can control view mode for entity fields.
     $element['photoswipe_view_mode'] = [
       '#type' => 'hidden',
       '#value' => $this->viewMode,
@@ -355,20 +302,20 @@ class PhotoswipeFieldFormatter extends FormatterBase {
     unset($image_styles['']);
     // Styles could be lost because of enabled/disabled modules that defines
     // their styles in code.
-    if (isset($image_styles[$this->getSetting('photoswipe_node_style')])) {
-      $summary[] = $this->t('Thumbnail image style: @style', ['@style' => $image_styles[$this->getSetting('photoswipe_node_style')]]);
+    if (isset($image_styles[$this->getSetting('photoswipe_thumbnail_style')])) {
+      $summary[] = $this->t('Thumbnail image style: @style', ['@style' => $image_styles[$this->getSetting('photoswipe_thumbnail_style')]]);
     }
-    elseif ($this->getSetting('photoswipe_node_style') == 'hide') {
+    elseif ($this->getSetting('photoswipe_thumbnail_style') == 'hide') {
       $summary[] = $this->t('Thumbnail image style: Hidden');
     }
     else {
       $summary[] = $this->t('Thumbnail image style: Original image');
     }
 
-    if (isset($image_styles[$this->getSetting('photoswipe_node_style_first')])) {
-      $summary[] = $this->t('First image thumbnail style override: @style', ['@style' => $image_styles[$this->getSetting('photoswipe_node_style_first')]]);
+    if (isset($image_styles[$this->getSetting('photoswipe_thumbnail_style_first')])) {
+      $summary[] = $this->t('First image thumbnail style override: @style', ['@style' => $image_styles[$this->getSetting('photoswipe_thumbnail_style_first')]]);
     }
-    elseif ($this->getSetting('photoswipe_node_style_first') == 'hide') {
+    elseif ($this->getSetting('photoswipe_thumbnail_style_first') == 'hide') {
       $summary[] = $this->t('First image thumbnail style override: Hidden');
     }
     else {
@@ -386,22 +333,10 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       $summary[] = $this->t('Referenced entity image field: @field', ['@field' => $this->getSetting('photoswipe_reference_image_field')]);
     }
 
-    if ($this->getSetting('photoswipe_caption')) {
-      $caption_options = [
-        'alt' => $this->t('Image alt tag'),
-        'title' => $this->t('Image title tag'),
-        'entity_label' => $this->t('Entity label'),
-        'media_name' => $this->t('Media entity name'),
-        'custom' => $this->t('Custom (with tokens)'),
-      ];
-      if (array_key_exists($this->getSetting('photoswipe_caption'), $caption_options)) {
-        $caption_setting = $caption_options[$this->getSetting('photoswipe_caption')];
-      }
-      else {
-        $caption_setting = $this->getSetting('photoswipe_caption');
-      }
-      $summary[] = $this->t('Photoswipe Caption: @field', ['@field' => $caption_setting]);
-    }
+    $image_loading = $this->getSetting('image_loading');
+    $summary[] = $this->t('Image loading: @attribute', [
+      '@attribute' => $image_loading['attribute'],
+    ]);
 
     return $summary;
   }
@@ -409,9 +344,22 @@ class PhotoswipeFieldFormatter extends FormatterBase {
   /**
    * {@inheritdoc}
    */
+  public function view(FieldItemListInterface $items, $langcode = NULL) {
+    $elements = parent::view($items, $langcode);
+    // Ensure #attributes exists:
+    if (empty($elements['#attributes'])) {
+      $elements['#attributes'] = new Attribute();
+    }
+    // Add the gallery wrapper class to the field:
+    $elements['#attributes']->addClass('photoswipe-gallery');
+    return $elements;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
-    $settings = $this->getSettings();
 
     if ($items->isEmpty()) {
       $default_image = $this->getFieldSetting('default_image');
@@ -439,25 +387,33 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       }
     }
 
-    $this->photoswipeAssetManager->attach($elements);
-    if (!empty($items) && count($items) > 1) {
-      // If there are more than 1 elements, add the gallery wrapper.
-      // Otherwise this is done in javascript for more flexibility.
-      $elements['#prefix'] = '<div class="photoswipe-gallery">';
-      $elements['#suffix'] = '</div>';
-    }
+    // @todo We should pass the formatter specific settings here in the future
+    // or move the attach into the photoswipe_image_formatter and use the
+    // settings from there.
+    $overriddenOptions = [];
 
     foreach ($items as $delta => $item) {
       // Check if the entity is an Entity (e.g. wasn't deleted) and the entity
       // is accessible:
       if ($item->entity instanceof EntityInterface && $item->entity->access('view')) {
+        // Get the item attributes and add the loading attribute:
+        $item_attributes = $item->_attributes;
+        $image_loading_settings = $this->getSetting('image_loading');
+        $item_attributes['loading'] = $image_loading_settings['attribute'];
+
         $elements[$delta] = [
           '#theme' => 'photoswipe_image_formatter',
           '#item' => $item,
+          '#item_attributes' => $item_attributes,
           '#entity' => $items->getEntity(),
-          '#display_settings' => $settings,
+          '#display_settings' => $this->getSettings(),
+          '#third_party_settings' => $this->getThirdPartySettings(),
           '#delta' => $delta,
         ];
+        // We need to attach on each element, so that PS still works
+        // when using only field values.
+        // @see https://www.drupal.org/project/photoswipe/issues/3392968
+        $this->photoswipeAssetManager->attach($elements[$delta], $overriddenOptions);
       }
     }
     return $elements;
@@ -469,9 +425,9 @@ class PhotoswipeFieldFormatter extends FormatterBase {
   public function calculateDependencies() {
     $dependencies = parent::calculateDependencies();
     $style_ids = [];
-    $style_ids[] = $this->getSetting('photoswipe_node_style');
-    if (!empty($this->getSetting('photoswipe_node_style_first'))) {
-      $style_ids[] = $this->getSetting('photoswipe_node_style_first');
+    $style_ids[] = $this->getSetting('photoswipe_thumbnail_style');
+    if (!empty($this->getSetting('photoswipe_thumbnail_style_first'))) {
+      $style_ids[] = $this->getSetting('photoswipe_thumbnail_style_first');
     }
     $style_ids[] = $this->getSetting('photoswipe_image_style');
     foreach ($style_ids as $style_id) {
@@ -491,9 +447,9 @@ class PhotoswipeFieldFormatter extends FormatterBase {
   public function onDependencyRemoval(array $dependencies) {
     $changed = parent::onDependencyRemoval($dependencies);
     $style_ids = [];
-    $style_ids['photoswipe_node_style'] = $this->getSetting('photoswipe_node_style');
-    if (!empty($this->getSetting('photoswipe_node_style_first'))) {
-      $style_ids['photoswipe_node_style_first'] = $this->getSetting('photoswipe_node_style_first');
+    $style_ids['photoswipe_thumbnail_style'] = $this->getSetting('photoswipe_thumbnail_style');
+    if (!empty($this->getSetting('photoswipe_thumbnail_style_first'))) {
+      $style_ids['photoswipe_thumbnail_style_first'] = $this->getSetting('photoswipe_thumbnail_style_first');
     }
     $style_ids['photoswipe_image_style'] = $this->getSetting('photoswipe_image_style');
     foreach ($style_ids as $name => $style_id) {

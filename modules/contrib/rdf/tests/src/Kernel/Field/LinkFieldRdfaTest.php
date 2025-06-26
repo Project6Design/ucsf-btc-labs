@@ -14,7 +14,7 @@ class LinkFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $fieldType = 'link';
+  protected string $fieldType = 'link';
 
   /**
    * {@inheritdoc}

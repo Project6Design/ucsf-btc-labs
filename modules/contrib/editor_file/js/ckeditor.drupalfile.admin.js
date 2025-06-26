@@ -1,6 +1,10 @@
 /**
  * @file
  * CKEditor 'drupalfile' plugin admin behavior.
+ *
+ * @deprecated in editor_file:2.0.0 and is removed from editor_file:2.1.0. This
+ *  code is only used for the now unsupported CKEditor4 plugin.
+ * @see https://www.drupal.org/project/editor_file/issues/3415204
  */
 
 (function ($, Drupal, drupalSettings) {

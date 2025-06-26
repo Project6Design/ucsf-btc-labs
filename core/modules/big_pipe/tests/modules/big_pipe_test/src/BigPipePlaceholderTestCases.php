@@ -1,11 +1,8 @@
 <?php
 
-/**
- * @file
- */
+declare(strict_types=1);
 
-// cSpell:ignore Vxezb
-// cSpell:ignore divpiggydiv
+// cspell:ignore divpiggydiv timecurrent timetime
 
 namespace Drupal\big_pipe_test;
 
@@ -35,8 +32,9 @@ class BigPipePlaceholderTestCases {
    *   Optional. Necessary to get the embedded AJAX/HTML responses.
    *
    * @return \Drupal\big_pipe_test\BigPipePlaceholderTestCase[]
+   *   An array of placeholder test cases.
    */
-  public static function cases(ContainerInterface $container = NULL, AccountInterface $user = NULL) {
+  public static function cases(?ContainerInterface $container = NULL, ?AccountInterface $user = NULL) {
     // Define the two types of cacheability that we expect to see. These will be
     // used in the expectations.
     $cacheability_depends_on_session_only = [
@@ -172,7 +170,7 @@ class BigPipePlaceholderTestCases {
         '#markup' => BigPipeMarkup::create('<hello'),
         '#attached' => [
           'placeholders' => [
-            '<hello' => ['#lazy_builder' => ['\Drupal\big_pipe_test\BigPipeTestController::helloOrYarhar', []]],
+            '<hello' => ['#lazy_builder' => ['\Drupal\big_pipe_test\BigPipeTestController::helloOrHi', []]],
           ],
         ],
       ],
@@ -182,7 +180,7 @@ class BigPipePlaceholderTestCases {
           // We specifically test an invalid callback here. We need to let
           // PHPStan ignore it.
           // @phpstan-ignore-next-line
-          'hello_or_yarhar',
+          'hello_or_hi',
           [],
         ],
       ]
@@ -197,7 +195,7 @@ class BigPipePlaceholderTestCases {
         ],
       ],
     ];
-    $hello->embeddedHtmlResponse = '<marquee>Yarhar llamas forever!</marquee>';
+    $hello->embeddedHtmlResponse = '<marquee>Llamas forever!</marquee>';
 
     // 5. Edge case: non-#lazy_builder placeholder that calls Fiber::suspend().
     $piggy = new BigPipePlaceholderTestCase(
@@ -331,6 +329,7 @@ class BigPipePlaceholderTestCases {
     // cspell:disable-next-line
     $exception->bigPipePlaceholderId = 'callback=%5CDrupal%5Cbig_pipe_test%5CBigPipeTestController%3A%3Aexception&amp;args%5B0%5D=llamas&amp;args%5B1%5D=suck&amp;token=uhKFNfT4eF449_W-kDQX8E5z4yHyt0-nSHUlwaGAQeU';
     $exception->bigPipePlaceholderRenderArray = [
+      // cspell:disable-next-line
       '#prefix' => '<span data-big-pipe-placeholder-id="callback=%5CDrupal%5Cbig_pipe_test%5CBigPipeTestController%3A%3Aexception&amp;args%5B0%5D=llamas&amp;args%5B1%5D=suck&amp;token=uhKFNfT4eF449_W-kDQX8E5z4yHyt0-nSHUlwaGAQeU">',
       'interface_preview' => [
         '#theme' => 'big_pipe_interface_preview',
@@ -430,6 +429,9 @@ class BigPipePlaceholderTestCases {
 
 }
 
+/**
+ * Provides a placeholder for the BigPipe placeholder test cases.
+ */
 class BigPipePlaceholderTestCase {
 
   /**

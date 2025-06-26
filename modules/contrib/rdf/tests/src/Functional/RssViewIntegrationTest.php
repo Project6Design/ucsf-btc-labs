@@ -5,6 +5,8 @@ namespace Drupal\Tests\rdf\Functional;
 use Drupal\Tests\BrowserTestBase;
 
 /**
+ * Test RSS View integration.
+ *
  * @group rdf
  */
 class RssViewIntegrationTest extends BrowserTestBase {
@@ -39,7 +41,7 @@ class RssViewIntegrationTest extends BrowserTestBase {
       ],
       'users as fields' => [
         'rdf-rss-test-user-fields',
-      ]
+      ],
     ];
   }
 

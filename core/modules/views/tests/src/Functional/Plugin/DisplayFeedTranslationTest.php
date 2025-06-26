@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\node\Entity\Node;
@@ -30,9 +32,7 @@ class DisplayFeedTranslationTest extends ViewTestBase {
   public static $testViews = ['test_display_feed'];
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'node',
@@ -85,8 +85,8 @@ class DisplayFeedTranslationTest extends ViewTestBase {
     // that hold a list of languages.
     $this->rebuildContainer();
 
-    // The \Drupal\path_alias\AliasWhitelist service performs cache clears after
-    // Drupal has flushed the response to the client. We use
+    // The \Drupal\path_alias\AliasPrefixList service performs cache clears
+    // after Drupal has flushed the response to the client. We use
     // WaitTerminateTestTrait to wait for Drupal to do this before continuing.
     $this->setWaitForTerminate();
   }
@@ -94,7 +94,7 @@ class DisplayFeedTranslationTest extends ViewTestBase {
   /**
    * Tests the rendered output for fields display with multiple translations.
    */
-  public function testFeedFieldOutput() {
+  public function testFeedFieldOutput(): void {
     $node = $this->drupalCreateNode([
       'type' => 'page',
       'title' => 'en',
@@ -140,7 +140,7 @@ class DisplayFeedTranslationTest extends ViewTestBase {
    * @param \Drupal\node\Entity\Node $node
    *   The node entity that's been created.
    */
-  protected function checkFeedResults($link_style, Node $node) {
+  protected function checkFeedResults($link_style, Node $node): void {
     /** @var \Drupal\Core\Language\LanguageManagerInterface $languageManager */
     $language_manager = \Drupal::languageManager()->reset();
 

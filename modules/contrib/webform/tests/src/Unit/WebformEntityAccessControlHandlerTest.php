@@ -222,7 +222,7 @@ class WebformEntityAccessControlHandlerTest extends UnitTestCase {
    *
    * @see testCheckAccess()
    */
-  public function providerCheckAccess() {
+  public static function providerCheckAccess() {
     $tests = [];
 
     /* ********************************************************************** */
@@ -587,7 +587,7 @@ class WebformEntityAccessControlHandlerTest extends UnitTestCase {
 
     $tests[] = [
       'duplicate', [
-        'permisssions' => ['create webform', 'edit own webform'],
+        'permissions' => ['create webform', 'edit own webform'],
         'account_is_webform_owner' => FALSE,
       ],
       [

@@ -116,7 +116,7 @@
     if (Folder) {
       Folder.open();
     }
-    // Triger postinit
+    // Trigger postinit
     imce.trigger('postinit');
   };
 
@@ -783,14 +783,41 @@
    * Checks if all the selected items are images.
    */
   imce.validateImageTypes = function (items) {
-    var Item = imce.getFirstItem(items, 'width', false);
-    if (Item) {
-      imce.setMessage(Drupal.t('%name is not an image.', {'%name': Item.name}));
-      return false;
+    // Require width when lazy dimensions is not enabled.
+    // Otherwise require an image extension.
+    const lazy = imce.getConf('lazy_dimensions', false);
+    for (const Item of items) {
+      if ((!lazy && !Item.width) || !Item.hasImageExtension()) {
+        imce.setMessage(
+          Drupal.t('%name is not a supported image type.', {
+            '%name': Item.name,
+          }),
+        );
+        return false;
+      }
     }
     return true;
   };
 
+  /**
+   * Checks if a file name has image extension.
+   *
+   * @param {string} name
+   *  File name.
+   *
+   * @return {boolean}
+   *  Boolean.
+   */
+  imce.hasImageExtension = function (name) {
+    let re = imce.imageExtensionsRE;
+    if (!re) {
+      let exts = imce.getConf('image_extensions', 'jpg jpeg png gif webp');
+      exts = exts.trim().replace(/ +/g, '|');
+      re = new RegExp(`\\.(${exts})$`, 'i');
+      imce.imageExtensionsRE = re;
+    }
+    return re.test(`${name}`);
+  };
 
   /**
    * Keydown event for the file manager.

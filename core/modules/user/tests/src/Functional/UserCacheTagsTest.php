@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Functional;
 
 use Drupal\Tests\system\Functional\Entity\EntityWithUriCacheTagsTestBase;
@@ -54,7 +56,7 @@ class UserCacheTagsTest extends EntityWithUriCacheTagsTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getAdditionalCacheTagsForEntityListing() {
+  protected function getAdditionalCacheTagsForEntityListing(): array {
     return ['user:0', 'user:1'];
   }
 

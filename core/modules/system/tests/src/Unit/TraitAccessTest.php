@@ -18,9 +18,11 @@ class TraitAccessTest extends UnitTestCase {
   use TestTrait;
 
   /**
+   * Tests \Drupal\Tests\system\Traits\TestTrait::getStuff().
+   *
    * @coversNothing
    */
-  public function testSimpleStuff() {
+  public function testSimpleStuff(): void {
     $stuff = $this->getStuff();
     $this->assertSame($stuff, 'stuff', "Same old stuff");
   }

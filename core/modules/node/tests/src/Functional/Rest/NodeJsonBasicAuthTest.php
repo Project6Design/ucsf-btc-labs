@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional\Rest;
 
 use Drupal\Tests\rest\Functional\BasicAuthResourceTestTrait;
@@ -39,7 +41,7 @@ class NodeJsonBasicAuthTest extends NodeResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpAuthorization($method) {
+  protected function setUpAuthorization($method): void {
     parent::setUpAuthorization($method);
     $this->grantPermissionsToTestedRole(['view camelids revisions']);
   }

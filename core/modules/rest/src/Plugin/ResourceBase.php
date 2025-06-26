@@ -46,7 +46,7 @@ abstract class ResourceBase extends PluginBase implements ContainerFactoryPlugin
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
+   *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param array $serializer_formats
@@ -184,7 +184,7 @@ abstract class ResourceBase extends PluginBase implements ContainerFactoryPlugin
   /**
    * Gets the base route requirements for a particular method.
    *
-   * @param $method
+   * @param string $method
    *   The HTTP method to be used for the route.
    *
    * @return array

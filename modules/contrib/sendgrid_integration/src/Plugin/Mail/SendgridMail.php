@@ -28,6 +28,7 @@ use SendGrid\Mail\SpamCheck;
 use SendGrid\Mail\To;
 use SendGrid\Mail\TrackingSettings;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * @file
@@ -40,6 +41,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}
@@ -234,7 +237,7 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
     if (isset($message['headers']['From'])) {
       $fromaddrarray = $this->parseAddress($message['headers']['From']);
       $data['from'] = $fromaddrarray[0];
-      $data['fromname'] = strval($fromaddrarray[1]);
+      $data['fromname'] = isset($fromaddrarray[1]) ? strval($fromaddrarray[1]) : strval($sitename);
       unset($fromaddrarray);
     }
     else {
@@ -269,7 +272,7 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
     }
 
     $sendgrid_message->addCategories($categories);
-    $personalization0->setSubject($message['subject']);
+    $personalization0->setSubject((string) $message['subject']);
     $from = new From($data['from'], $data['fromname']);
     unset($data);
     # Set the from address and add a name if it exists.
@@ -432,7 +435,7 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
             default:
               // Everything else is unknown so we log and send the message as text.
               \Drupal::messenger()
-                ->addError(t('The %header of your message is not supported by SendGrid and will be sent as text/plain instead.', ['%header' => "Content-Type: $value"]));
+                ->addError($this->t('The %header of your message is not supported by SendGrid and will be sent as text/plain instead.', ['%header' => "Content-Type: $value"]));
               $this->logger->error("The Content-Type: $value of your message is not supported by PHPMailer and will be sent as text/plain instead.");
               // Force the email to be text.
               $sendgrid_message->addContent('text/plain', MailFormatHelper::wrapMail(MailFormatHelper::htmlToText($message['body'])));
@@ -517,9 +520,9 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
     if (isset($message['params']['attachments']) && !empty($message['params']['attachments'])) {
       foreach ($message['params']['attachments'] as $attachment) {
         $attach = new Attachment();
-        if (isset($attachment['uri'])) {
+        if (isset($attachment['filepath'])) {
           $attachment_path = \Drupal::service('file_system')
-            ->realpath($attachment['uri']);
+            ->realpath($attachment['filepath']);
           if (is_file($attachment_path)) {
             try {
               $struct = $this->getAttachmentStruct($attachment_path);
@@ -601,7 +604,7 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
 
     // Lets try and send the message and catch the error.
     try {
-      $response = $client->send($sendgrid_message);
+      $response = $client->send($sendgrid_params['message']);
     }
     catch (SendgridException $e) {
       $this->logger->error('Sending emails to Sendgrid service failed with error code ' . Xss::filter($e->getCode()));
@@ -826,6 +829,7 @@ class SendGridMail implements MailInterface, ContainerFactoryPluginInterface {
       'text/',
       'application/pdf',
       'application/x-zip',
+      'application/xml',
     ];
     // Allow modules to alter the valid types array.
     \Drupal::moduleHandler()

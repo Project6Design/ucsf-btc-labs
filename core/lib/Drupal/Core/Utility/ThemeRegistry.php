@@ -31,6 +31,8 @@ class ThemeRegistry extends CacheCollector implements DestructableInterface {
 
   /**
    * The complete theme registry array.
+   *
+   * @var array
    */
   protected $completeRegistry;
 
@@ -55,7 +57,7 @@ class ThemeRegistry extends CacheCollector implements DestructableInterface {
     $this->tags = $tags;
     $this->persistable = $modules_loaded && \Drupal::hasRequest() && \Drupal::request()->isMethod('GET');
 
-    // @todo: Implement lazy-loading.
+    // @todo Implement lazy-loading.
     $this->cacheLoaded = TRUE;
 
     if ($this->persistable && $cached = $this->cache->get($this->cid)) {
@@ -137,7 +139,7 @@ class ThemeRegistry extends CacheCollector implements DestructableInterface {
     if (!$this->persistable) {
       return;
     }
-    // @todo: Is the custom implementation necessary?
+    // @todo Is the custom implementation necessary?
     $data = [];
     foreach ($this->keysToPersist as $offset => $persist) {
       if ($persist) {
@@ -164,6 +166,18 @@ class ThemeRegistry extends CacheCollector implements DestructableInterface {
         $this->lock->release($lock_name);
       }
     }
+  }
+
+  /**
+   * Gets preprocess invoke map.
+   *
+   * @return array
+   *   An array of preprocess invokes for preprocess functions in modules.
+   *
+   * @internal
+   */
+  public function getPreprocessInvokes() {
+    return $this->get('preprocess invokes');
   }
 
 }

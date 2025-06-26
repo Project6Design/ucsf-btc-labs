@@ -429,8 +429,19 @@
       prvEl.appendChild(el);
       prvEl.className += ' image';
       el.firstChild.onclick = imce.ePrvImgClick;
+      el.firstChild.onload = (e) => Item.prvImgLoad(e);
     }
     return prvEl;
+  };
+
+  /**
+   * Load event for the preview image.
+   */
+  Item.prvImgLoad = function (e) {
+    if (!this.width) {
+      const { width, height } = e.target;
+      this.extend({ width, height });
+    }
   };
 
   /**
@@ -483,10 +494,16 @@
   /**
    * Check if the item can be used as an image source.
    */
-  Item.isImageSource = function() {
-    return this.width || this.ext && this.ext.toLowerCase() === 'svg';
+  Item.isImageSource = function () {
+    return false;
   };
 
+  /**
+   * Check if the item name has image extension.
+   */
+  Item.hasImageExtension = function () {
+    return false;
+  };
 
   /**
    * Mousedown event for items.

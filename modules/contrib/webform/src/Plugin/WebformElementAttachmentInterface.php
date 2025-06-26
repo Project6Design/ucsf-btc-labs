@@ -55,7 +55,7 @@ interface WebformElementAttachmentInterface {
   /**
    * Determine if the element type has export attachments.
    *
-   * @return boolearn
+   * @return bool
    *   TRUE if the element type has export attachments.
    */
   public function hasExportAttachments();
@@ -64,7 +64,7 @@ interface WebformElementAttachmentInterface {
    * Get attachment export batch limit.
    *
    * @return int|null
-   *   Batch limit or NULL if the batch limit should not be overidden.
+   *   Batch limit or NULL if the batch limit should not be overridden.
    */
   public function getExportAttachmentsBatchLimit();
 

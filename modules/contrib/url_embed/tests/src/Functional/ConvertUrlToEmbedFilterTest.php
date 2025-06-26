@@ -2,9 +2,8 @@
 
 namespace Drupal\Tests\url_embed\Functional;
 
-use Drupal\editor\Entity\Editor;
-use Drupal\filter\Entity\FilterFormat;
 use Drupal\Tests\BrowserTestBase;
+use Drupal\filter\Entity\FilterFormat;
 
 /**
  * Tests the url_embed_convert_links filter.
@@ -14,11 +13,18 @@ use Drupal\Tests\BrowserTestBase;
 class ConvertUrlToEmbedFilterTest extends BrowserTestBase {
 
   /**
+   * The test user.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $webUser;
+
+  /**
    * Modules to enable.
    *
    * @var array
    */
-  protected static $modules = ['url_embed', 'node', 'ckeditor'];
+  protected static $modules = ['url_embed', 'node'];
 
   /**
    * {@inheritdoc}
@@ -46,23 +52,6 @@ class ConvertUrlToEmbedFilterTest extends BrowserTestBase {
     ]);
     $format->save();
 
-    $editor_group = [
-      'name' => 'URL Embed',
-      'items' => [
-        'url',
-      ],
-    ];
-    $editor = Editor::create([
-      'format' => 'custom_format',
-      'editor' => 'ckeditor',
-      'settings' => [
-        'toolbar' => [
-          'rows' => [[$editor_group]],
-        ],
-      ],
-    ]);
-    $editor->save();
-
     // Create a user with required permissions.
     $this->webUser = $this->drupalCreateUser([
       'access content',
@@ -79,14 +68,14 @@ class ConvertUrlToEmbedFilterTest extends BrowserTestBase {
    * are passed. Also tests situations when embed fails.
    */
   public function testFilter() {
-    $content = 'before https://twitter.com/drupal/status/735873777683320832 after';
+    $content = 'before https://www.youtube.com/watch?v=I95hSyocMlg after';
     $settings = [];
     $settings['type'] = 'page';
-    $settings['title'] = 'Test convert url to embed with sample Twitter url';
+    $settings['title'] = 'Test convert url to embed with sample YouTube url';
     $settings['body'] = [['value' => $content, 'format' => 'custom_format']];
     $node = $this->drupalCreateNode($settings);
     $this->drupalGet('node/' . $node->id());
-    $this->assertSession()->responseContains('<drupal-url data-embed-url="https://twitter.com/drupal/status/735873777683320832"></drupal-url>');
+    $this->assertSession()->responseContains('<drupal-url data-embed-url="https://www.youtube.com/watch?v=I95hSyocMlg"></drupal-url>');
     $this->assertSession()->pageTextNotContains(strip_tags($content));
 
     $content = 'before /not-valid/url after';
@@ -105,35 +94,35 @@ class ConvertUrlToEmbedFilterTest extends BrowserTestBase {
     $format->setFilterConfig('url_embed_convert_links', $configuration);
     $format->save();
 
-    $content = 'before https://twitter.com/drupal/status/735873777683320832 after';
+    $content = 'before https://www.youtube.com/watch?v=I95hSyocMlg after';
     $settings = [];
     $settings['type'] = 'page';
-    $settings['title'] = 'Test convert url to embed with sample Twitter url and no prefix';
+    $settings['title'] = 'Test convert url to embed with sample YouTube url and no prefix';
     $settings['body'] = [['value' => $content, 'format' => 'custom_format']];
     $node = $this->drupalCreateNode($settings);
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->responseContains(strip_tags($content));
-    $this->assertSession()->responseNotContains('<drupal-url data-embed-url="https://twitter.com/drupal/status/735873777683320832"></drupal-url>');
+    $this->assertSession()->responseNotContains('<drupal-url data-embed-url="https://www.youtube.com/watch?v=I95hSyocMlg"></drupal-url>');
 
-    $content = 'before EMBED https://twitter.com/drupal/status/735873777683320832 after';
+    $content = 'before EMBED https://www.youtube.com/watch?v=I95hSyocMlg after';
     $settings = [];
     $settings['type'] = 'page';
-    $settings['title'] = 'Test convert url to embed with sample Twitter url with the prefix';
+    $settings['title'] = 'Test convert url to embed with sample YouTube url with the prefix';
     $settings['body'] = [['value' => $content, 'format' => 'custom_format']];
     $node = $this->drupalCreateNode($settings);
     $this->drupalGet('node/' . $node->id());
-    $this->assertSession()->responseContains('<drupal-url data-embed-url="https://twitter.com/drupal/status/735873777683320832"></drupal-url>');
+    $this->assertSession()->responseContains('<drupal-url data-embed-url="https://www.youtube.com/watch?v=I95hSyocMlg"></drupal-url>');
     $this->assertSession()->pageTextNotContains(strip_tags($content));
 
-    $content = 'before Embed https://twitter.com/drupal/status/735873777683320832 after';
+    $content = 'before Embed https://www.youtube.com/watch?v=I95hSyocMlg after';
     $settings = [];
     $settings['type'] = 'page';
-    $settings['title'] = 'Test convert url to embed with sample Twitter url with wrong prefix';
+    $settings['title'] = 'Test convert url to embed with sample YouTube url with wrong prefix';
     $settings['body'] = [['value' => $content, 'format' => 'custom_format']];
     $node = $this->drupalCreateNode($settings);
     $this->drupalGet('node/' . $node->id());
     $this->assertSession()->responseContains(strip_tags($content));
-    $this->assertSession()->responseNotContains('<drupal-url data-embed-url="https://twitter.com/drupal/status/735873777683320832"></drupal-url>');
+    $this->assertSession()->responseNotContains('<drupal-url data-embed-url="https://www.youtube.com/watch?v=I95hSyocMlg"></drupal-url>');
   }
 
 }

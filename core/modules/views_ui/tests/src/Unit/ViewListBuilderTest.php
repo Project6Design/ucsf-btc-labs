@@ -27,7 +27,7 @@ class ViewListBuilderTest extends UnitTestCase {
    * @see \Drupal\views_ui\ViewListBuilder::getDisplaysList()
    * @covers ::buildRow
    */
-  public function testBuildRowEntityList() {
+  public function testBuildRowEntityList(): void {
     $storage = $this->getMockBuilder('Drupal\Core\Config\Entity\ConfigEntityStorage')
       ->disableOriginalConstructor()
       ->getMock();
@@ -84,7 +84,15 @@ class ViewListBuilderTest extends UnitTestCase {
     $parent_form_selector = $this->createMock(MenuParentFormSelector::class);
     $page_display = $this->getMockBuilder('Drupal\views\Plugin\views\display\Page')
       ->onlyMethods(['initDisplay', 'getPath'])
-      ->setConstructorArgs([[], 'default', $display_manager->getDefinition('page'), $route_provider, $state, $menu_storage, $parent_form_selector])
+      ->setConstructorArgs([
+        [],
+        'default',
+        $display_manager->getDefinition('page'),
+        $route_provider,
+        $state,
+        $menu_storage,
+        $parent_form_selector,
+      ])
       ->getMock();
     $page_display->expects($this->any())
       ->method('getPath')
@@ -143,7 +151,7 @@ class ViewListBuilderTest extends UnitTestCase {
       ->disableOriginalConstructor()
       ->getMock();
     $route_provider = $this->createMock('Drupal\Core\Routing\RouteProviderInterface');
-    $executable_factory = new ViewExecutableFactory($user, $request_stack, $views_data, $route_provider);
+    $executable_factory = new ViewExecutableFactory($user, $request_stack, $views_data, $route_provider, $display_manager);
     $entity_type_manager = $this->prophesize(EntityTypeManagerInterface::class);
     $container->set('views.executable', $executable_factory);
     $container->set('plugin.manager.views.display', $display_manager);
@@ -189,8 +197,14 @@ class ViewListBuilderTest extends UnitTestCase {
 
 }
 
+/**
+ * Stub class for testing ViewListBuilder methods.
+ */
 class TestViewListBuilder extends ViewListBuilder {
 
+  /**
+   * {@inheritdoc}
+   */
   public function buildOperations(EntityInterface $entity) {
     return [];
   }

@@ -1,0 +1,17 @@
+{
+  "plugins": [
+    {
+      "name": "Anchor",
+      "className": "Anchor",
+      "description": "Adds text to the editor.",
+      "path": "src/anchor.js",
+      "uiComponents": [
+        {
+          "name": "anchor",
+          "type": "Button",
+          "iconPath": "theme/icons/anchor.svg"
+        }
+      ]
+    }
+  ]
+}

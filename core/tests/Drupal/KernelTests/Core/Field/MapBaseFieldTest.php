@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Field;
 
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -43,9 +45,9 @@ class MapBaseFieldTest extends EntityKernelTestBase {
   /**
    * Tests uninstalling map item base field.
    */
-  public function testUninstallMapItemBaseField() {
+  public function testUninstallMapItemBaseField(): void {
     $definitions['data_map'] = BaseFieldDefinition::create('map')
-      ->setLabel(t('Data'))
+      ->setLabel('Data')
       ->setRequired(TRUE);
 
     $this->state->set('entity_test_update.additional_base_field_definitions', $definitions);

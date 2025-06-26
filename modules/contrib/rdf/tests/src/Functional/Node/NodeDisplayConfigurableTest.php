@@ -50,7 +50,7 @@ class NodeDisplayConfigurableTest extends NodeTestBase {
    * @param string $theme
    *   The name of the theme being tested.
    * @param string $metadata_region
-   *   The region of the node html content where meta data is expected.
+   *   The region of the node html content where metadata is expected.
    * @param bool $field_classes
    *   If TRUE, check for field--name-XXX classes.
    *
@@ -134,11 +134,17 @@ class NodeDisplayConfigurableTest extends NodeTestBase {
     else {
       // When field classes aren't available, use HTML elements for testing.
       $formatted_time = \Drupal::service('date.formatter')->format($node->getCreatedTime());
-      if ($is_inline) {
-        $created_selector = sprintf('//article//%s//%s[text()="%s"]', $metadata_region, $html_element, $formatted_time);
+      $drupal_version = preg_replace("/(-dev|-alpha*|-beta*|-rc*)/", "", \Drupal::VERSION);
+      if (version_compare($drupal_version, "10.3", ">=")) {
+        $created_selector = sprintf('//article//time[text()="%s"]', $formatted_time);
       }
       else {
-        $created_selector = sprintf('//article//%s[text()="%s"]', $html_element, $formatted_time);
+        if ($is_inline) {
+          $created_selector = sprintf('//article//%s//%s[text()="%s"]', $metadata_region, $html_element, $formatted_time);
+        }
+        else {
+          $created_selector = sprintf('//article//%s[text()="%s"]', $html_element, $formatted_time);
+        }
       }
       $assert->elementExists('xpath', $created_selector);
     }
@@ -163,8 +169,9 @@ class NodeDisplayConfigurableTest extends NodeTestBase {
    * Data provider for ::testDisplayConfigurable().
    *
    * @return array
+   *   Theme info for testing.
    */
-  public function provideThemes() {
+  public function provideThemes(): array {
     return [
       ['claro', 'footer', TRUE],
       // @todo Add coverage for olivero after fixing

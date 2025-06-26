@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
 use Drupal\Core\Plugin\Context\ContextDefinitionInterface;
@@ -17,9 +19,7 @@ class ContextualFiltersBlockContextTest extends ViewTestBase {
   use AssertPageCacheContextsAndTagsTrait;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'block',
@@ -85,7 +85,7 @@ class ContextualFiltersBlockContextTest extends ViewTestBase {
   /**
    * Tests exposed context.
    */
-  public function testBlockContext() {
+  public function testBlockContext(): void {
     $this->drupalLogin($this->drupalCreateUser([
       'administer views',
       'administer blocks',
@@ -122,7 +122,7 @@ class ContextualFiltersBlockContextTest extends ViewTestBase {
       'provider' => 'views',
       'label_display' => 'visible',
       'views_label' => '',
-      'items_per_page' => 'none',
+      'items_per_page' => NULL,
       'context_mapping' => ['nid' => '@node.node_route_context:node'],
     ];
     $this->assertEquals($expected_settings, $block->getPlugin()->getConfiguration(), 'Block settings are correct.');

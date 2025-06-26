@@ -41,13 +41,17 @@ class SearchPluginCollectionTest extends UnitTestCase {
     parent::setUp();
 
     $this->pluginManager = $this->createMock('Drupal\Component\Plugin\PluginManagerInterface');
-    $this->searchPluginCollection = new SearchPluginCollection($this->pluginManager, 'banana', ['id' => 'banana', 'color' => 'yellow'], 'fruit_stand');
+    $this->searchPluginCollection = new SearchPluginCollection(
+      $this->pluginManager,
+      'banana',
+      ['id' => 'banana', 'color' => 'yellow'],
+      'fruit_stand');
   }
 
   /**
    * Tests the get() method.
    */
-  public function testGet() {
+  public function testGet(): void {
     $plugin = $this->createMock('Drupal\search\Plugin\SearchInterface');
     $this->pluginManager->expects($this->once())
       ->method('createInstance')
@@ -58,7 +62,7 @@ class SearchPluginCollectionTest extends UnitTestCase {
   /**
    * Tests the get() method with a configurable plugin.
    */
-  public function testGetWithConfigurablePlugin() {
+  public function testGetWithConfigurablePlugin(): void {
     $plugin = $this->createMock('Drupal\search\Plugin\ConfigurableSearchPluginInterface');
     $plugin->expects($this->once())
       ->method('setSearchPageId')

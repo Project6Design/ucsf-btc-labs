@@ -16,9 +16,7 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 class BooleanFormatterSettingsTest extends WebDriverTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['field', 'field_ui', 'text', 'node', 'user'];
 
@@ -89,7 +87,7 @@ class BooleanFormatterSettingsTest extends WebDriverTestBase {
   /**
    * Tests the formatter settings page for the Boolean formatter.
    */
-  public function testBooleanFormatterSettings() {
+  public function testBooleanFormatterSettings(): void {
     // List the options we expect to see on the settings form. Omit the one
     // with the Unicode check/x characters, which does not appear to work
     // well in BrowserTestBase.
@@ -119,6 +117,7 @@ class BooleanFormatterSettingsTest extends WebDriverTestBase {
         'settings[off_label]' => $values[1],
       ], 'Save settings');
 
+      $assert_session->waitForText('Saved ' . $this->fieldName . ' configuration.');
       // Open the Manage Display page and trigger the field settings form.
       $this->drupalGet('admin/structure/types/manage/' . $this->bundle . '/display');
       $this->getSession()->getPage()->pressButton($this->fieldName . '_settings_edit');

@@ -2,7 +2,7 @@ name: Word Count & Character Count
 type: module
 description: "Adds the ability to count words and/or characters to CKEditor."
 package: CKEditor
-core_version_requirement: ^8 || ^9 || ^10
+core_version_requirement: ^8 || ^9 || ^10 || ^11
 
 dependencies:
   - drupal:ckeditor

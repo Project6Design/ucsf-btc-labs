@@ -2,9 +2,12 @@
 
 namespace Drupal\history\Plugin\views\filter;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Cache\UncacheableDependencyTrait;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\views\Attribute\ViewsFilter;
 use Drupal\views\Plugin\views\filter\FilterPluginBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Filter for new content.
@@ -13,9 +16,8 @@ use Drupal\views\Plugin\views\filter\FilterPluginBase;
  * table is history.
  *
  * @ingroup views_filter_handlers
- *
- * @ViewsFilter("history_user_timestamp")
  */
+#[ViewsFilter("history_user_timestamp")]
 class HistoryUserTimestamp extends FilterPluginBase {
 
   use UncacheableDependencyTrait;
@@ -23,7 +25,36 @@ class HistoryUserTimestamp extends FilterPluginBase {
   /**
    * {@inheritdoc}
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   public $no_operator = TRUE;
+
+  /**
+   * Constructs a HistoryUserTimestamp object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin ID for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Component\Datetime\TimeInterface $time
+   *   The time service.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, protected TimeInterface $time) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('datetime.time'),
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -81,7 +112,7 @@ class HistoryUserTimestamp extends FilterPluginBase {
 
     // Hey, Drupal kills old history, so nodes that haven't been updated
     // since HISTORY_READ_LIMIT are outta here!
-    $limit = REQUEST_TIME - HISTORY_READ_LIMIT;
+    $limit = $this->time->getRequestTime() - HISTORY_READ_LIMIT;
 
     $this->ensureMyTable();
     $field = "$this->tableAlias.$this->realField";

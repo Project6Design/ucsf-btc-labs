@@ -28,6 +28,22 @@ class ConstantContactMultiBlock extends BlockBase implements ContainerFactoryPlu
   protected $formBuilder;
 
   /**
+   * Drupal\ik_constant_contact\Service\ConstantContact.
+   *
+   * @var \Drupal\ik_constant_contact\Service\ConstantContact
+   *   Constant contact service.
+   */
+  protected $constantContact;
+
+
+  /**
+   * Drupal\Core\Config\ConfigFactoryInterface
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $config;
+
+  /**
    * {@inheritdoc}
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, FormBuilderInterface $form_builder, ConstantContact $constant_contact, ConfigFactoryInterface $config) {

@@ -52,15 +52,26 @@ class PermissionAccessCheckTest extends UnitTestCase {
    * Provides data for the testAccess method.
    *
    * @return array
+   *   An array of test data.
    */
-  public function providerTestAccess() {
+  public static function providerTestAccess() {
     return [
       [[], FALSE],
       [['_permission' => 'allowed'], TRUE, ['user.permissions']],
-      [['_permission' => 'denied'], FALSE, ['user.permissions'], "The 'denied' permission is required."],
+      [
+        ['_permission' => 'denied'],
+        FALSE,
+        ['user.permissions'],
+        "The 'denied' permission is required.",
+      ],
       [['_permission' => 'allowed+denied'], TRUE, ['user.permissions']],
       [['_permission' => 'allowed+denied+other'], TRUE, ['user.permissions']],
-      [['_permission' => 'allowed,denied'], FALSE, ['user.permissions'], "The following permissions are required: 'allowed' AND 'denied'."],
+      [
+        ['_permission' => 'allowed,denied'],
+        FALSE,
+        ['user.permissions'],
+        "The following permissions are required: 'allowed' AND 'denied'.",
+      ],
     ];
   }
 
@@ -70,7 +81,7 @@ class PermissionAccessCheckTest extends UnitTestCase {
    * @dataProvider providerTestAccess
    * @covers ::access
    */
-  public function testAccess($requirements, $access, array $contexts = [], $message = '') {
+  public function testAccess($requirements, $access, array $contexts = [], $message = ''): void {
     $access_result = AccessResult::allowedIf($access)->addCacheContexts($contexts);
     if (!empty($message)) {
       $access_result->setReason($message);

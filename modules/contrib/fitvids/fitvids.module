@@ -59,18 +59,16 @@ function fitvids_page_attachments(array &$page) {
   // Get video containers
   $selectors_for_js = implode(',', explode(PHP_EOL, $selectors));
   
+  $custom_vendors_for_js = [];
+  $custom_vendors_for_js[] = 'iframe[src^="https://youtu.be"]';
   // Get custom vendor iframes
   if (strlen(trim($custom_vendors))) {
-    $custom_vendors_for_js = explode(PHP_EOL, $custom_vendors);
-    foreach ($custom_vendors_for_js as $key => $value) {
-      $custom_vendors_for_js[$key] = 'iframe[src^="' . trim($value) . '"]';
+    foreach (explode(PHP_EOL, $custom_vendors) as $value) {
+      $custom_vendors_for_js[] = 'iframe[src^="' . trim($value) . '"]';
     }
     $custom_vendors_for_js = implode(',', $custom_vendors_for_js);
   }
-  else {
-    $custom_vendors_for_js = '';
-  }
-  
+
   // Get ignored containers
   $ignore_selectors_for_js = implode(',', explode(PHP_EOL, $ignore_selectors));
   

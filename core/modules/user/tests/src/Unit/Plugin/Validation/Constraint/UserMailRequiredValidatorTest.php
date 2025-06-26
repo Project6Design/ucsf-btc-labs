@@ -58,7 +58,7 @@ class UserMailRequiredValidatorTest extends UnitTestCase {
    *
    * @dataProvider providerTestValidate
    */
-  public function testValidate($items, $expected_violation, $is_admin = FALSE) {
+  public function testValidate($items, $expected_violation, $is_admin = FALSE): void {
     $constraint = new UserMailRequired();
 
     // If a violation is expected, then the context's addViolation method will
@@ -148,7 +148,11 @@ class UserMailRequiredValidatorTest extends UnitTestCase {
     $account->getFieldDefinition("mail")->willReturn($field_definition->reveal())->shouldBeCalledTimes(1);
     $items->getEntity()->willReturn($account->reveal())->shouldBeCalledTimes(1);
     $items->isEmpty()->willReturn(TRUE);
-    $cases['Existing users without an email should be ignored if the current user is an administrator.'] = [$items->reveal(), FALSE, TRUE];
+    $cases['Existing users without an email should be ignored if the current user is an administrator.'] = [
+      $items->reveal(),
+      FALSE,
+      TRUE,
+    ];
 
     return $cases;
   }

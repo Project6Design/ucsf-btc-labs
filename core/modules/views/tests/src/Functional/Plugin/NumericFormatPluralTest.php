@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Functional\Plugin;
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Component\Gettext\PoHeader;
 use Drupal\Component\Gettext\PoItem;
 use Drupal\file\Entity\File;
@@ -15,9 +18,7 @@ use Drupal\Tests\views\Functional\ViewTestBase;
 class NumericFormatPluralTest extends ViewTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['views_ui', 'file', 'language', 'locale'];
 
@@ -49,7 +50,7 @@ class NumericFormatPluralTest extends ViewTestBase {
   /**
    * Tests plural formatting setting on a numeric views handler.
    */
-  public function testNumericFormatPlural() {
+  public function testNumericFormatPlural(): void {
     // Create a file.
     $file = $this->createFile();
 
@@ -151,7 +152,7 @@ class NumericFormatPluralTest extends ViewTestBase {
    * @return \Drupal\Core\Entity\EntityInterface
    *   A file entity.
    */
-  protected function createFile() {
+  protected function createFile(): EntityInterface {
     // Create a new file entity.
     $file = File::create([
       'uid' => 1,

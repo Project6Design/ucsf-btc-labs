@@ -2,8 +2,12 @@
 
 /**
  * @file
- * Install, uninstall and update hooks for Photswipe module.
+ * Install, uninstall and update hooks for Photoswipe module.
  */
+
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 
 /**
  * Implements hook_requirements().
@@ -22,58 +26,65 @@ function photoswipe_requirements($phase) {
   /** @var \Drupal\photoswipe\PhotoswipeAssetsManager $assets_manager */
   $assets_manager = \Drupal::service('photoswipe.assets_manager');
 
+  $is_locally_installed = $library_file_finder->find('photoswipe');
+  $is_cdn_enabled = \Drupal::config('photoswipe.settings')->get('enable_cdn');
+
   // Init.
-  $library_definition = $library_discovery->getLibraryByName('photoswipe', 'photoswipe');
+  $library_definition = $library_discovery->getLibraryByName('photoswipe', 'photoswipe.cdn');
   $min_req_version = $assets_manager->photoswipeMinPluginVersion;
-  $max_req_version = $assets_manager->photoswipeMaxPluginVersion;
   $library_req = REQUIREMENT_OK;
   $library_version = '';
   $message = '';
   $description = '';
-  $help_text = t('Download the <a href="@url">Photoswipe plugin</a>, extract the archive and place the
-  photoswipe directory in the "libraries" directory on your server. <b>Keep photoswipe.json
-  file inside directory</b> to be able to check version of the library using Drupal tools.', [
-    '@url' => $library_definition['remote'],
-  ]);
-
-  // Library from CDN. Show a warning.
-  if (!$library_file_finder->find('photoswipe')) {
-    $library_version = $library_definition['version'];
-    $library_req = REQUIREMENT_WARNING;
-    $message = t('Missing local library. CDN version: @version', ['@version' => $library_version]);
-    $description = t('Library not found in the "libraries" directory.
-    You are using the library from the fallback CDN defined in libraries.yml,
-    but local libraries are preferred over CDN. @helptext', ['@helptext' => $help_text]);
-  }
-  elseif (!file_exists($library_file_finder->find('photoswipe/photoswipe.json'))) {
+  $help_text = t('
+  <strong>Composer installation (recommended)</strong></br>
+  <ol>
+    <li>Enable usage of third-party libraries using composer, see @here for an explanation.</li>
+    <li>Require the photoswipe library using "composer require bower-asset/photoswipe:^5"</li>
+  </ol>
+  <strong>Manual installation</strong>
+  <ol>
+    <li>Download the @pluginDownloadLink</li>
+    <li>Extract the archive and place the photoswipe directory in the "libraries" directory on your server. <b>Keep the photoswipe.json file inside directory</b> to be able to check the version of the library using Drupal tools.</li>
+  </ol>',
+    [
+      '@pluginDownloadLink' => Link::fromTextAndUrl(t('Photoswipe plugin'), Url::fromUri($library_definition['remote']))->toString(),
+      '@here' => Link::fromTextAndUrl(t('here'), Url::fromUri('https://www.drupal.org/docs/develop/using-composer/manage-dependencies#third-party-libraries'))->toString(),
+    ]);
+  if (!$is_cdn_enabled && !$is_locally_installed) {
     $library_req = REQUIREMENT_ERROR;
-    $message = t('<strong>Photoswipe library found, but missing photoswipe.json detected!</strong>');
-    $description = t('Local library folder found, but library seems to be corrupted, please require the photoswipe library correctly!<br><br>@helptext', ['@helptext' => $help_text]);
+    $message = t('<strong>Photoswipe library not found, CDN disabled</strong>');
+    $description = t('You can either enable requiring the library through CDN @here (not recommended) or install it locally, using the following instructions:<br>@help_text',
+      [
+        '@help_text' => $help_text,
+        '@here' => Link::createFromRoute(t('here'), 'photoswipe.settings')->toString(),
+      ]
+    );
   }
-  // Library detected and local. Check version requirements.
-  else {
-    // We get the json content as an array here:
-    $photoswipe_json_content = file_get_contents(DRUPAL_ROOT . '/libraries/photoswipe/photoswipe.json');
-    $photoswipe_json = json_decode($photoswipe_json_content, TRUE);
-    // If the photswipe.json is not empty get version and check if the
-    // installed version does not match version min requirements:
-    if (!empty($photoswipe_json)) {
-      $library_version = $photoswipe_json['version'];
-      if (version_compare($library_version, $min_req_version, '<') || version_compare($library_version, $max_req_version, '>')) {
-        $library_req = REQUIREMENT_ERROR;
-        $message = t('Current version supports ^4.x: At least @min and at most @max', [
-          '@min' => $min_req_version,
-          '@max' => $max_req_version,
-        ]);
-        $description = t('<strong>You need to install a compatible version!</strong><br><br>@helptext', ['@helptext' => $help_text]);
-      }
+  elseif ($is_locally_installed && !file_exists($library_file_finder->find('photoswipe/package.json'))) {
+    $library_req = REQUIREMENT_ERROR;
+    $message = t('<strong>Photoswipe library found, but missing package.json detected!</strong>');
+    $description = t('Local library folder found, but library seems to be corrupted, please require the photoswipe library correctly!<br><br>@help_text', ['@help_text' => $help_text]);
+    if (file_exists($library_file_finder->find('photoswipe/photoswipe.json'))) {
+      $message = t('<strong>Photoswipe library found, but incorrect json file detected!</strong>');
+      $description = t('Local library folder found, but the library uses the old "photoswipe.json". You are probably using an old Photoswipe <5 library.<br><br>@help_text', ['@help_text' => $help_text]);
     }
-    // If the photoswipe.json is empty we use cdn instead and show a warning:
-    else {
-      $library_req = REQUIREMENT_WARNING;
-      $message = t('<strong>Photoswipe library found, but empty photoswipe.json detected!</strong>');
-      $description = t('You are using the library from the fallback CDN defined
-      in libraries.yml, but local libraries are preferred over CDN. @helptext', ['@helptext' => $help_text]);
+  }
+  elseif ($is_locally_installed) {
+    // We get the json content as an array here:
+    $package_json_content = file_get_contents(DRUPAL_ROOT . '/libraries/photoswipe/package.json');
+    $package_json = json_decode($package_json_content, TRUE);
+    // If the package.json is not empty get version and check if the
+    // installed version does not match version min requirements:
+    if (!empty($package_json)) {
+      $library_version = $package_json['version'];
+      if (version_compare($library_version, $min_req_version, '<')) {
+        $library_req = REQUIREMENT_ERROR;
+        $message = t('Photoswipe v5 currently only supports photoswipe library version minimum: @min', [
+          '@min' => $min_req_version,
+        ]);
+        $description = t('<strong>You need to install a compatible version!</strong><br><br>@help_text', ['@help_text' => $help_text]);
+      }
     }
   }
 
@@ -101,14 +112,353 @@ function photoswipe_update_8313() {
 }
 
 /**
- * Remove unwanted config value from settings form: actions, form_build_id,
- * form_token, form_id.
+ * Remove unwanted config value from settings form.
+ *
+ * Removed configs are: actions, form_build_id, form_token, form_id.
  */
 function photoswipe_update_8314() {
   \Drupal::configFactory()->getEditable('photoswipe.settings')
-      ->clear('actions')
-      ->clear('form_build_id')
-      ->clear('form_token')
-      ->clear('form_id')
-      ->save();
+    ->clear('actions')
+    ->clear('form_build_id')
+    ->clear('form_token')
+    ->clear('form_id')
+    ->save();
+}
+
+/**
+ * Upgrade to Photoswipe 5.
+ *
+ * Removes obsolete configuration options, and enables the new caption
+ * submodule, where the image caption logic now resides in.
+ *
+ * Manual intervention needed:
+ *
+ * If you previously had photoswipe installed locally, please update
+ * your photoswipe version to >= 5.2.1 (for further installation instructions,
+ * please visit the status report after upgrade).
+ *
+ * If you previously fetched the photoswipe library via cdn, please visit
+ * "/admin/config/media/photoswipe", where you need to enable
+ * "Load PhotoSwipe library from CDN" manually.
+ */
+function photoswipe_update_9003() {
+  $configFactory = Drupal::configFactory();
+  $config = $configFactory->getEditable('photoswipe.settings');
+
+  $config
+    ->set('enable_cdn', FALSE)
+    ->clear('showHideOpacity')
+    ->clear('closeOnScroll')
+    ->clear('mouseUsed')
+    ->clear('history')
+    ->clear('focus')
+    ->set('maxZoomLevel', $config->get('maxSpreadZoom'))
+    ->clear('maxSpreadZoom')
+    ->save(TRUE);
+
+  // Install the "photoswipe_caption" submodule, as this functionality
+  // previously resided in the main module:
+  \Drupal::service('module_installer')->install(['photoswipe_dynamic_caption']);
+
+  // Change the formatter caption options to submodule third party settings:
+  // Loop through all entity view displays:
+  if ($view_displays = \Drupal::entityTypeManager()->getStorage('entity_view_display')->loadMultiple(NULL)) {
+    foreach ($view_displays as $view_display) {
+      $components = $view_display->getComponents();
+      foreach ($components as $componentName => $component) {
+        if (!isset($component['type']) || !in_array($component['type'], [
+          'photoswipe_field_formatter',
+          'photoswipe_responsive_field_formatter',
+        ])) {
+          // None of our formatters are used, skip this component:
+          continue;
+        }
+        // Get the "old" photoswipe caption values:
+        $photoswipeCaptionValue = $component['settings']['photoswipe_caption'];
+        $photoswipeCaptionCustomValue = $component['settings']['photoswipe_caption_custom'];
+        // Put the "old" photoswipe caption values in the new third party
+        // setting section:
+        $component['third_party_settings']['photoswipe_dynamic_caption']['photoswipe_caption'] = $photoswipeCaptionValue;
+        $component['third_party_settings']['photoswipe_dynamic_caption']['photoswipe_caption_custom'] = $photoswipeCaptionCustomValue;
+        // Get the old "photoswipe thumbnail style" values:
+        $thumbnailStyle = $component['settings']['photoswipe_node_style'];
+        $thumbnailStyleFirst = $component['settings']['photoswipe_node_style_first'];
+        // Put the old values into renamed settings:
+        $component['settings']['photoswipe_thumbnail_style'] = $thumbnailStyle;
+        $component['settings']['photoswipe_thumbnail_style_first'] = $thumbnailStyleFirst;
+        // Save changes:
+        $view_display->setComponent($componentName, $component)->save();
+      }
+    }
+  }
+
+  $formatterConfigs = [
+    $configFactory->getEditable('field.formatter.settings.photoswipe_field_formatter'),
+    $configFactory->getEditable('field.formatter.settings.photoswipe_responsive_field_formatter'),
+  ];
+
+  foreach ($formatterConfigs as $formatterConfig) {
+    $formatterConfig
+      ->clear('photoswipe_caption')
+      ->clear('photoswipe_caption_custom')
+      ->clear('photoswipe_node_style')
+      ->clear('photoswipe_node_style_first')
+      ->save(TRUE);
+  }
+
+  // Run "drush cr" programmatically:
+  drupal_flush_all_caches();
+  \Drupal::service('kernel')->rebuildContainer();
+  // Load the module data which has been removed when the container was
+  // rebuilt.
+  $module_handler = \Drupal::moduleHandler();
+  $module_handler->loadAll();
+  $module_handler->invokeAll('rebuild');
+
+  \Drupal::logger('photoswipe')->warning(
+    'Upgrade to Photoswipe 5.<br> Removes obsolete configuration options, and
+    enables the new caption submodule, where the image caption logic now resides
+    in.<br><br><strong>Manual intervention needed!</strong><br><br>If you
+    previously had photoswipe installed locally, please update your photoswipe
+    version to >= 5.2.1 (for further installation instructions, please visit the
+    status report after upgrade).<br><br>If you previously fetched the
+    photoswipe library via cdn, please visit "/admin/config/media/photoswipe",
+    where you need to enable "Load PhotoSwipe library from CDN" manually.'
+  );
+}
+
+/**
+ * Add new photoswipe setting additions.
+ */
+function photoswipe_update_9004() {
+  \Drupal::configFactory()->getEditable('photoswipe.settings')
+    ->set('options.zoomAnimationDuration', 333)
+    ->set('options.maxWidthToAnimate', 4000)
+    ->set('options.easing', 'cubic-bezier(.4,0,.22,1)')
+    ->set('options.clickToCloseNonZoomable', TRUE)
+    ->set('options.returnFocus', TRUE)
+    ->set('options.imageClickAction', 'zoom-or-close')
+    ->set('options.tapAction', 'toggle-controls')
+    ->set('options.doubleTapAction', 'zoom')
+    ->set('options.bgClickAction', 'close')
+    ->set('options.indexIndicatorSep', ' / ')
+    ->set('options.preloaderDelay', 2000)
+    // Clear deprecated 'modal' option:
+    ->clear('options.modal')
+    // Redefine old errorMsg:
+    ->set('options.errorMsg', 'The image could not be loaded.')
+    ->save();
+}
+
+/**
+ * Maps new photoswipe 5 formatter settings on entities using layout builder.
+ */
+function photoswipe_update_9005() {
+  if (!\Drupal::moduleHandler()->moduleExists('layout_builder')) {
+    return;
+  }
+
+  $dynamicCaptionInstalled = \Drupal::moduleHandler()->moduleExists('photoswipe_dynamic_caption');
+
+  if ($view_displays = \Drupal::entityTypeManager()->getStorage('entity_view_display')->loadMultiple(NULL)) {
+    foreach ($view_displays as $view_display) {
+      $changed = FALSE;
+      if ($view_display instanceof LayoutBuilderEntityViewDisplay) {
+        /* /Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay $view_display */
+        $sections = $view_display->getSections();
+        foreach ($sections as &$section) {
+          $components = $section->getComponents();
+          foreach ($components as &$component) {
+            $component_array = $component->toArray();
+            if (isset($component_array['configuration']['formatter']['type'])) {
+              $formatter = &$component_array['configuration']['formatter'];
+              if (
+                $formatter['type'] === 'photoswipe_field_formatter' ||
+                $formatter['type'] === 'photoswipe_responsive_field_formatter'
+              ) {
+                if ($dynamicCaptionInstalled) {
+                  // Get the "old" photoswipe caption values:
+                  $photoswipeCaptionValue = $formatter['settings']['photoswipe_caption'] ?? '';
+                  $photoswipeCaptionCustomValue = $formatter['settings']['photoswipe_caption_custom'] ?? '';
+                  // Put the "old" photoswipe caption values in the new third
+                  // party setting section:
+                  if (empty($formatter['third_party_settings']['photoswipe_dynamic_caption']['photoswipe_caption'])) {
+                    // Only if the new value isn't yet present:
+                    $formatter['third_party_settings']['photoswipe_dynamic_caption']['photoswipe_caption'] = $photoswipeCaptionValue;
+                  }
+                  if (empty($formatter['third_party_settings']['photoswipe_dynamic_caption']['photoswipe_caption_custom'])) {
+                    // Only if the new value isn't yet present:
+                    $formatter['third_party_settings']['photoswipe_dynamic_caption']['photoswipe_caption_custom'] = $photoswipeCaptionCustomValue;
+                  }
+                }
+                // Get the old "photoswipe thumbnail style" values:
+                $thumbnailStyle = $formatter['settings']['photoswipe_node_style'] ?? '';
+                $thumbnailStyleFirst = $formatter['settings']['photoswipe_node_style_first'] ?? '';
+                // Put the old values into renamed settings:
+                if (empty($formatter['settings']['photoswipe_thumbnail_style'])) {
+                  // Only if the new value isn't yet present:
+                  $formatter['settings']['photoswipe_thumbnail_style'] = $thumbnailStyle;
+                }
+                if (empty($formatter['settings']['photoswipe_thumbnail_style_first'])) {
+                  // Only if the new value isn't yet present:
+                  $formatter['settings']['photoswipe_thumbnail_style_first'] = $thumbnailStyleFirst;
+                }
+                // Unset legacy settings:
+                unset($formatter['settings']['photoswipe_caption']);
+                unset($formatter['settings']['photoswipe_caption_custom']);
+                unset($formatter['settings']['photoswipe_node_style']);
+                unset($formatter['settings']['photoswipe_node_style_first']);
+
+                $component->setConfiguration($component_array['configuration']);
+                $changed = TRUE;
+              }
+            }
+          }
+        }
+        if ($changed) {
+          $view_display->save();
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Set any empty mandatory settings.
+ */
+function photoswipe_update_9006() {
+  // We need to check every mandatory setting, which wasn't mandatory before,
+  // whether it is empty or not:
+  $configFactory = Drupal::configFactory();
+  $config = $configFactory->getEditable('photoswipe.settings');
+  $modified = FALSE;
+  if (empty($config->get('options.showAnimationDuration'))) {
+    $config->set('options.showAnimationDuration', 333);
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.hideAnimationDuration'))) {
+    $config->set('options.hideAnimationDuration', 333);
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.zoomAnimationDuration'))) {
+    $config->set('options.zoomAnimationDuration', 333);
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.maxWidthToAnimate'))) {
+    $config->set('options.maxWidthToAnimate', 4000);
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.easing'))) {
+    $config->set('options.easing', 'cubic-bezier(.4,0,.22,1)');
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.imageClickAction'))) {
+    $config->set('options.imageClickAction', 'zoom-or-close');
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.tapAction'))) {
+    $config->set('options.tapAction', 'toggle-controls');
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.doubleTapAction'))) {
+    $config->set('options.doubleTapAction', 'zoom');
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.bgClickAction'))) {
+    $config->set('options.bgClickAction', 'close');
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.indexIndicatorSep'))) {
+    $config->set('options.indexIndicatorSep', ' / ');
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.preloaderDelay'))) {
+    $config->set('options.preloaderDelay', 2000);
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.errorMsg'))) {
+    $config->set('options.errorMsg', 'The image could not be loaded.');
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.bgOpacity'))) {
+    $config->set('options.bgOpacity', 0.8);
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.spacing'))) {
+    $config->set('options.spacing', 0.1);
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.maxZoomLevel'))) {
+    $config->set('options.maxZoomLevel', 4);
+    $modified = TRUE;
+  }
+  if (empty($config->get('options.preload')[0]) || empty($config->get('options.preload')[1])) {
+    $config->set('options.preload', [1, 2]);
+    $modified = TRUE;
+  }
+  if ($modified === TRUE) {
+    $config->save();
+  }
+}
+
+/**
+ * Add new photoswipe setting additions.
+ *
+ * If you previously had photoswipe installed locally, please update your
+ * photoswipe version to >= 5.4.2 (for further installation instructions, please
+ * visit the status report after upgrade).
+ */
+function photoswipe_update_9007() {
+  \Drupal::configFactory()->getEditable('photoswipe.settings')
+    ->set('options.wheelToZoom', FALSE)
+    ->set('options.trapFocus', TRUE)
+    ->set('options.initialZoomLevel', 'fit')
+    ->set('options.secondaryZoomLevel', 2.5)
+    ->save();
+  \Drupal::logger('photoswipe')->warning(
+    'Adds newly introduced settings for the Photoswipe module.<br><br>If you
+      previously had photoswipe installed locally, please update your photoswipe
+      version to >= 5.4.2 (for further installation instructions, please visit the
+      status report after upgrade).'
+  );
+}
+
+/**
+ * Add new photoswipe tooltip settings.
+ */
+function photoswipe_update_9008() {
+  \Drupal::configFactory()->getEditable('photoswipe.settings')
+    ->set('options.closeTitle', 'Close')
+    ->set('options.zoomTitle', 'Zoom')
+    ->set('options.arrowPrevTitle', 'Previous')
+    ->set('options.arrowNextTitle', 'Next')
+    ->save();
+}
+
+/**
+ * Fix initialZoomLevel regression (#3414849). Set default to "fit".
+ */
+function photoswipe_update_9009() {
+  \Drupal::configFactory()->getEditable('photoswipe.settings')
+    ->set('options.initialZoomLevel', 'fit')
+    ->save();
+  return 'Set initialZoomLevel to "fit" like before the regression.';
+}
+
+/**
+ * Dropped support for photoswipe < 5.4.2.
+ *
+ * If you previously had photoswipe installed manually or via composer, please
+ * update your photoswipe version to >= 5.4.2 (5.4.4 is recommended).
+ */
+function photoswipe_update_9010() {
+}
+
+/**
+ * Add new photoswipe animation type setting.
+ */
+function photoswipe_update_9011() {
+  \Drupal::configFactory()->getEditable('photoswipe.settings')
+    ->set('options.showHideAnimationType', 'zoom')
+    ->save();
 }

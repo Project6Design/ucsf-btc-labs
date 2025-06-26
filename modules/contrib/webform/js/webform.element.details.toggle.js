@@ -5,8 +5,6 @@
 
 (function ($, Drupal, once) {
 
-  'use strict';
-
   Drupal.webform = Drupal.webform || {};
   Drupal.webform.detailsToggle = Drupal.webform.detailsToggle || {};
   Drupal.webform.detailsToggle.options = Drupal.webform.detailsToggle.options || {};
@@ -44,13 +42,16 @@
           .on('click', function (e) {
             // Get details that are not vertical tabs pane.
             var $details = $form.find('details:not(.vertical-tabs__pane)');
+            var $summary = $details.find('summary');
             var open;
             if (Drupal.webform.detailsToggle.isFormDetailsOpen($form)) {
               $details.removeAttr('open');
+              $summary.attr('aria-expanded', 'false');
               open = 0;
             }
             else {
               $details.attr('open', 'open');
+              $summary.attr('aria-expanded', 'true');
               open = 1;
             }
             Drupal.webform.detailsToggle.setDetailsToggleLabel($form);

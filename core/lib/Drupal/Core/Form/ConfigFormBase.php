@@ -2,11 +2,14 @@
 
 namespace Drupal\Core\Form;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Config\Config;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Render\Element;
-use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Component\Render\MarkupInterface;
+use Drupal\Core\Render\Markup;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -35,19 +38,14 @@ abstract class ConfigFormBase extends FormBase {
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
-   * @param \Drupal\Core\Config\TypedConfigManagerInterface|null $typedConfigManager
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typedConfigManager
    *   The typed config manager.
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
-    protected $typedConfigManager = NULL,
+    protected TypedConfigManagerInterface $typedConfigManager,
   ) {
     $this->setConfigFactory($config_factory);
-
-    if (!$typedConfigManager instanceof TypedConfigManagerInterface) {
-      $type = get_debug_type($typedConfigManager);
-      @trigger_error("Passing $type to the \$typedConfigManager parameter of ConfigFormBase::__construct() is deprecated in drupal:10.2.0 and must be an instance of \Drupal\Core\Config\TypedConfigManagerInterface in drupal:11.0.0. See https://www.drupal.org/node/3404140", E_USER_DEPRECATED);
-    }
   }
 
   /**
@@ -91,7 +89,7 @@ abstract class ConfigFormBase extends FormBase {
     // property.
     $form['#process'][] = '::loadDefaultValuesFromConfig';
     $form['#after_build'][] = '::storeConfigKeyToFormElementMap';
-
+    $form['#after_build'][] = '::checkConfigOverrides';
     return $form;
   }
 
@@ -122,7 +120,9 @@ abstract class ConfigFormBase extends FormBase {
   }
 
   /**
-   * #after_build callback which stores a map of element names to config keys.
+   * Render API callback: Stores a map of element names to config keys.
+   *
+   * This function is assigned as a #after_build callback.
    *
    * This will store an array in the form state whose keys are strings in the
    * form of `CONFIG_NAME:PROPERTY_PATH`, and whose values are instances of
@@ -279,9 +279,10 @@ abstract class ConfigFormBase extends FormBase {
    * @param \Symfony\Component\Validator\ConstraintViolationListInterface $violations
    *   The list of constraint violations that apply to this form element.
    *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup
+   * @return \Drupal\Component\Render\MarkupInterface|\Stringable
+   *   The rendered HTML.
    */
-  protected function formatMultipleViolationsMessage(string $form_element_name, array $violations): TranslatableMarkup {
+  protected function formatMultipleViolationsMessage(string $form_element_name, array $violations): MarkupInterface|\Stringable {
     $transformed_message_parts = [];
     foreach ($violations as $index => $violation) {
       // Note that `@validation_error_message` (should) already contain a
@@ -294,7 +295,9 @@ abstract class ConfigFormBase extends FormBase {
         '@validation_error_message' => $violation->getMessage(),
       ]);
     }
-    return $this->t(implode("\n", $transformed_message_parts));
+    // We use \Drupal\Core\Render\Markup::create() here as it is safe,
+    // rather than use t() because all input has been escaped by t().
+    return Markup::create(implode("\n", $transformed_message_parts));
   }
 
   /**
@@ -336,6 +339,60 @@ abstract class ConfigFormBase extends FormBase {
       $value = $form_state->getValue($target->elementParents);
       $target->setValue($config, $value, $form_state);
     }
+  }
+
+  /**
+   * Form #after_build callback: Adds message if overrides exist.
+   */
+  public function checkConfigOverrides(array $form, FormStateInterface $form_state): array {
+    // Determine which of those editable config keys have overrides.
+    $override_links = [];
+    $map = $form_state->get(static::CONFIG_KEY_TO_FORM_ELEMENT_MAP) ?? [];
+    foreach ($map as $config_name => $config_keys) {
+      $stored_config = $this->configFactory->get($config_name);
+      if (!$stored_config->hasOverrides()) {
+        // The config has no overrides at all. Can be skipped.
+        continue;
+      }
+
+      foreach ($config_keys as $key => $array_parents) {
+        if ($stored_config->hasOverrides($key)) {
+          $element = NestedArray::getValue($form, $array_parents);
+          $override_links[] = [
+            'attributes' => ['title' => $this->t("'@title' form element", ['@title' => $element['#title']])],
+            'url' => Url::fromUri("internal:#{$element['#id']}"),
+            'title' => $element['#title'],
+          ];
+        }
+      }
+    }
+
+    if (!empty($override_links)) {
+      $override_output = [
+        '#theme' => 'links__config_overrides',
+        '#heading' => [
+          'text' => $this->t('These values are overridden. Changes on this form will be saved, but overrides will take precedence. See <a href="https://www.drupal.org/docs/drupal-apis/configuration-api/configuration-override-system">configuration overrides documentation</a> for more information.'),
+          'level' => 'div',
+        ],
+        '#links' => $override_links,
+      ];
+      $form['config_override_status_messages'] = [
+        'message' => [
+          '#theme' => 'status_messages',
+          '#message_list' => ['status' => [$override_output]],
+          '#status_headings' => [
+            'status' => $this->t('Status message'),
+          ],
+        ],
+        // Ensure that the status message is at the top of the form.
+        '#weight' => array_reduce(
+          Element::children($form),
+          fn (int $carry, string $key) => min(($form[$key]['#weight'] ?? 0), $carry),
+          0
+        ) - 1,
+      ];
+    }
+    return $form;
   }
 
 }

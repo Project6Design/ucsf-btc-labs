@@ -4,16 +4,22 @@ namespace Drupal\linkit\Element;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
-use Drupal\Core\Render\Element\FormElement;
+use Drupal\Core\Render\Element\FormElementBase;
 use Drupal\Core\Render\Element\Textfield;
 use Drupal\Core\Url;
+
+// Workaround to support both Drupal 10.1 and Drupal 11.0.
+// @todo Remove once we depend on Drupal 10.2.
+if (!class_exists(FormElementBase::class)) {
+  class_alias('\Drupal\Core\Render\Element\FormElement', FormElementBase::class);
+}
 
 /**
  * Provides a form element for linkit.
  *
  * @FormElement("linkit")
  */
-class Linkit extends FormElement {
+class Linkit extends FormElementBase {
 
   /**
    * {@inheritdoc}

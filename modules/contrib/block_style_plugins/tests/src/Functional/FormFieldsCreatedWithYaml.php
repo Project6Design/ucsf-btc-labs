@@ -17,6 +17,11 @@ class FormFieldsCreatedWithYamlTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = ['block_style_plugins', 'block_style_plugins_test'];
 
   /**

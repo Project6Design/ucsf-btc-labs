@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Asset;
 
 use Drupal\Tests\BrowserTestBase;
@@ -18,6 +20,8 @@ class UnversionedAssetTest extends BrowserTestBase {
 
   /**
    * The file assets path settings value.
+   *
+   * @var string
    */
   protected $fileAssetsPath;
 

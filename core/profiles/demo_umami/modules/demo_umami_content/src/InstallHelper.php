@@ -7,9 +7,12 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\File\Exception\FileException;
+use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\State\StateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+
+// cSpell:ignore María García Gregorio Sánchez
 
 /**
  * Defines a helper class for importing default content.
@@ -91,6 +94,7 @@ class InstallHelper implements ContainerInjectionInterface {
   /**
    * The module's path.
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidVariableName.LowerCamelName, Drupal.Commenting.VariableComment.Missing
   protected string $module_path;
 
   /**
@@ -137,7 +141,7 @@ class InstallHelper implements ContainerInjectionInterface {
    */
   public function importContent() {
     $this->getModulePath()
-      ->importEditors()
+      ->importUsers()
       ->importContentFromFile('taxonomy_term', 'tags')
       ->importContentFromFile('taxonomy_term', 'recipe_category')
       ->importContentFromFile('media', 'image')
@@ -180,17 +184,17 @@ class InstallHelper implements ContainerInjectionInterface {
     foreach ($translated_languages as $language) {
       if (file_exists($default_content_path . "$language/$filename") &&
       ($handle = fopen($default_content_path . "$language/$filename", 'r')) !== FALSE) {
-        $header = fgetcsv($handle);
+        $header = fgetcsv($handle, escape: '');
         $line_counter = 0;
-        while (($content = fgetcsv($handle)) !== FALSE) {
+        while (($content = fgetcsv($handle, escape: '')) !== FALSE) {
           $keyed_content[$language][$line_counter] = array_combine($header, $content);
           $line_counter++;
         }
         fclose($handle);
       }
       else {
-        // Language directory exists, but the file in this language was not found,
-        // remove that language from list of languages to be translated.
+        // Language directory exists, but the file in this language was not
+        // found, remove that language from list of languages to be translated.
         $key = array_search($language, $translated_languages);
         unset($translated_languages[$key]);
       }
@@ -231,7 +235,7 @@ class InstallHelper implements ContainerInjectionInterface {
   }
 
   /**
-   * Retrieves the Media Image ID of a media image saved during the import process.
+   * Retrieves th ID of a media image saved during the import process.
    *
    * @param int $media_image_csv_id
    *   The media image's ID from the CSV file.
@@ -297,25 +301,42 @@ class InstallHelper implements ContainerInjectionInterface {
   }
 
   /**
-   * Imports editors.
+   * Imports users.
    *
-   * Other users are created as their content is imported. However, editors
-   * don't have their own content so are created here instead.
+   * Users are created as their content is imported. However, some users might
+   * have non-default values (as preferred language), or editors don't have
+   * their own content so are created here instead.
    *
    * @return $this
    */
-  protected function importEditors() {
+  protected function importUsers() {
     $user_storage = $this->entityTypeManager->getStorage('user');
-    $editors = [
-      'Margaret Hopper',
-      'Grace Hamilton',
+    $users = [
+      'Gregorio Sánchez' => [
+        'preferred_language' => 'es',
+        'roles' => ['author'],
+      ],
+      'Margaret Hopper' => [
+        'preferred_language' => 'en',
+        'roles' => ['editor'],
+      ],
+      'Grace Hamilton' => [
+        'preferred_language' => 'en',
+        'roles' => ['editor'],
+      ],
+      'María García' => [
+        'preferred_language' => 'es',
+        'roles' => ['editor'],
+      ],
     ];
-    foreach ($editors as $name) {
+    foreach ($users as $name => $user_data) {
       $user = $user_storage->create([
         'name' => $name,
         'status' => 1,
-        'roles' => ['editor'],
-        'mail' => mb_strtolower(str_replace(' ', '.', $name)) . '@example.com',
+        'roles' => $user_data['roles'],
+        'preferred_langcode' => $user_data['preferred_language'],
+        'preferred_admin_langcode' => $user_data['preferred_language'],
+        'mail' => \Drupal::transliteration()->transliterate(mb_strtolower(str_replace(' ', '.', $name))) . '@example.com',
       ]);
       $user->enforceIsNew();
       $user->save();
@@ -397,9 +418,9 @@ class InstallHelper implements ContainerInjectionInterface {
       'langcode' => 'en',
     ];
     // Fields mapping starts.
-    // Set body field.
-    if (!empty($data['body'])) {
-      $values['body'] = [['value' => $data['body'], 'format' => 'basic_html']];
+    // Set field_body field.
+    if (!empty($data['field_body'])) {
+      $values['field_body'] = [['value' => $data['field_body'], 'format' => 'basic_html']];
     }
     // Set node alias if exists.
     if (!empty($data['slug'])) {
@@ -529,12 +550,12 @@ class InstallHelper implements ContainerInjectionInterface {
       'langcode' => 'en',
     ];
     // Fields mapping starts.
-    // Set body field.
-    if (!empty($data['body'])) {
-      $body_path = $this->module_path . '/default_content/languages/' . $langcode . '/article_body/' . $data['body'];
+    // Set field_body field.
+    if (!empty($data['field_body'])) {
+      $body_path = $this->module_path . '/default_content/languages/' . $langcode . '/article_body/' . $data['field_body'];
       $body = file_get_contents($body_path);
       if ($body !== FALSE) {
-        $values['body'] = [['value' => $body, 'format' => 'basic_html']];
+        $values['field_body'] = [['value' => $body, 'format' => 'basic_html']];
       }
     }
 
@@ -722,7 +743,7 @@ class InstallHelper implements ContainerInjectionInterface {
    * Imports content.
    *
    * @param string $entity_type
-   *   Entity type to be imported
+   *   Entity type to be imported.
    * @param string $bundle_machine_name
    *   Bundle machine name to be imported.
    *
@@ -844,9 +865,9 @@ class InstallHelper implements ContainerInjectionInterface {
   protected function createFileEntity($path) {
     $filename = basename($path);
     try {
-      $uri = $this->fileSystem->copy($path, 'public://' . $filename, FileSystemInterface::EXISTS_REPLACE);
+      $uri = $this->fileSystem->copy($path, 'public://' . $filename, FileExists::Replace);
     }
-    catch (FileException $e) {
+    catch (FileException) {
       $uri = FALSE;
     }
     $file = $this->entityTypeManager->getStorage('file')->create([

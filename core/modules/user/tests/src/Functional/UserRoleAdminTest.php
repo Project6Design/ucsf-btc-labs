@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Functional;
 
 use Drupal\Tests\BrowserTestBase;
@@ -21,9 +23,7 @@ class UserRoleAdminTest extends BrowserTestBase {
   protected $adminUser;
 
   /**
-   * Modules to enable.
-   *
-   * @var string[]
+   * {@inheritdoc}
    */
   protected static $modules = ['block'];
 
@@ -47,7 +47,7 @@ class UserRoleAdminTest extends BrowserTestBase {
   /**
    * Tests adding, renaming and deleting roles.
    */
-  public function testRoleAdministration() {
+  public function testRoleAdministration(): void {
     $this->drupalLogin($this->adminUser);
     $default_langcode = \Drupal::languageManager()->getDefaultLanguage()->getId();
     // Test presence of tab.
@@ -85,7 +85,6 @@ class UserRoleAdminTest extends BrowserTestBase {
     $this->drupalGet("admin/people/roles/manage/{$role->id()}");
     $this->submitForm($edit, 'Save');
     $this->assertSession()->pageTextContains("Role {$role_name} has been updated.");
-    \Drupal::entityTypeManager()->getStorage('user_role')->resetCache([$role->id()]);
     $new_role = Role::load($role->id());
     $this->assertEquals($role_name, $new_role->label(), 'The role name has been successfully changed.');
 
@@ -95,7 +94,6 @@ class UserRoleAdminTest extends BrowserTestBase {
     $this->submitForm([], 'Delete');
     $this->assertSession()->pageTextContains("Role {$role_name} has been deleted.");
     $this->assertSession()->linkByHrefNotExists("admin/people/roles/manage/{$role->id()}", 'Role edit link removed.');
-    \Drupal::entityTypeManager()->getStorage('user_role')->resetCache([$role->id()]);
     $this->assertNull(Role::load($role->id()), 'A deleted role can no longer be loaded.');
 
     // Make sure that the system-defined roles can be edited via the user
@@ -111,7 +109,7 @@ class UserRoleAdminTest extends BrowserTestBase {
   /**
    * Tests user role weight change operation and ordering.
    */
-  public function testRoleWeightOrdering() {
+  public function testRoleWeightOrdering(): void {
     $this->drupalLogin($this->adminUser);
     $roles = Role::loadMultiple();
     $weight = count($roles);

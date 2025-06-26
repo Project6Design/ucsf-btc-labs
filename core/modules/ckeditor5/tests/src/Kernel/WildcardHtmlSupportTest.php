@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\ckeditor5\Kernel;
 
 use Drupal\ckeditor5\Plugin\Editor\CKEditor5;
 use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\KernelTests\KernelTestBase;
-use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
  * @covers \Drupal\ckeditor5\Plugin\CKEditor5PluginManager::getCKEditor5PluginConfig
@@ -82,7 +84,7 @@ class WildcardHtmlSupportTest extends KernelTestBase {
     $editor = Editor::create($editor_config);
     $editor->save();
     $this->assertSame([], array_map(
-      function (ConstraintViolation $v) {
+      function (ConstraintViolationInterface $v) {
         return (string) $v->getMessage();
       },
       iterator_to_array(CKEditor5::validatePair(
@@ -99,7 +101,10 @@ class WildcardHtmlSupportTest extends KernelTestBase {
     $this->assertEquals($expected_ghs_configuration, $ghs_configuration);
   }
 
-  public function providerGhsConfiguration(): array {
+  /**
+   * Provides test cases for CKEditor 5 General HTML Support (GHS) configuration.
+   */
+  public static function providerGhsConfiguration(): array {
     return [
       'empty source editing' => [
         '<p> <br>',

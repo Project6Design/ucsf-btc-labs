@@ -1,0 +1,15 @@
+editor_file_file:
+  ckeditor5:
+    plugins:
+      - drupalFile.DrupalFile
+      - drupalFile.DrupalInsertFile
+  drupal:
+    label: File
+    class: \Drupal\editor_file\Plugin\CKEditor5Plugin\File
+    library: editor_file/drupal.ckeditor5.drupalfile
+    admin_library: editor_file/drupal.ckeditor5.drupalfile.admin
+    elements:
+      - <a href data-entity-uuid data-entity-type>
+    toolbar_items:
+      drupalInsertFile:
+        label: File

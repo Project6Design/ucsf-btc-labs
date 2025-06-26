@@ -5,8 +5,6 @@
 
 (function ($, Drupal, once) {
 
-  'use strict';
-
   /**
    * Track file uploads and display confirm dialog when an file upload is in progress.
    *
@@ -50,7 +48,7 @@
           // with file upload.
           if ($form.data('webform-auto-file-uploads') > 0 &&
             (isFormActions || (isMultipleUpload && !isManagedUploadButton)) &&
-            blockSubmit($form)) {
+            Drupal.webformManagedFileBlockSubmit($form)) {
             this.ajaxing = false;
             return false;
           }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate\Kernel\process;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -22,6 +24,7 @@ class HandleMultiplesTest extends KernelTestBase {
    * Provides the test migration definition.
    *
    * @return array
+   *   The test migration definition.
    */
   public function getDefinition() {
     return [
@@ -108,14 +111,14 @@ class HandleMultiplesTest extends KernelTestBase {
   /**
    * Tests process pipelines with scalar and multiple values handling.
    *
-   * @dataProvider scalarAndMultipleValuesProviderSource
-   *
    * @param array $source_data
    *   The source data.
    * @param array $expected_data
    *   The expected results.
+   *
+   * @dataProvider scalarAndMultipleValuesProviderSource
    */
-  public function testScalarAndMultipleValues(array $source_data, array $expected_data) {
+  public function testScalarAndMultipleValues(array $source_data, array $expected_data): void {
     $definition = $this->getDefinition();
     $definition['source']['data_rows'] = [$source_data];
 
@@ -135,8 +138,9 @@ class HandleMultiplesTest extends KernelTestBase {
    * Provides the source data with scalar and multiple values.
    *
    * @return array
+   *   An array of test cases.
    */
-  public function scalarAndMultipleValuesProviderSource() {
+  public static function scalarAndMultipleValuesProviderSource() {
     return [
       [
         'source_data' => [

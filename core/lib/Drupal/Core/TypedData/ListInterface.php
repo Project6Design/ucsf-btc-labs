@@ -11,7 +11,7 @@ namespace Drupal\Core\TypedData;
  * When implementing this interface which extends Traversable, make sure to list
  * IteratorAggregate or Iterator before this interface in the implements clause.
  *
- * @see \Drupal\Core\TypedData\ListDefinitionInterface
+ * @see \Drupal\Core\TypedData\ListDataDefinitionInterface
  *
  * @ingroup typed_data
  */
@@ -90,6 +90,14 @@ interface ListInterface extends TraversableTypedDataInterface, \ArrayAccess, \Co
    *   If the complex data structure is unset and no item can be created.
    */
   public function first();
+
+  /**
+   * Returns the last item in this list.
+   *
+   * @return \Drupal\Core\TypedData\TypedDataInterface|null
+   *   The last item in this list, or NULL if there are no items.
+   */
+  public function last(): ?TypedDataInterface;
 
   /**
    * Appends a new item to the list.

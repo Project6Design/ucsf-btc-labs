@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel;
 
 /**
@@ -45,7 +47,7 @@ class FieldValidationTest extends FieldKernelTestBase {
   /**
    * Tests that the number of values is validated against the field cardinality.
    */
-  public function testCardinalityConstraint() {
+  public function testCardinalityConstraint(): void {
     $cardinality = $this->fieldTestData->field_storage->getCardinality();
     $entity = $this->entity;
 
@@ -65,7 +67,7 @@ class FieldValidationTest extends FieldKernelTestBase {
   /**
    * Tests that constraints defined by the field type are validated.
    */
-  public function testFieldConstraints() {
+  public function testFieldConstraints(): void {
     $cardinality = $this->fieldTestData->field_storage->getCardinality();
     $entity = $this->entity;
 
@@ -81,7 +83,7 @@ class FieldValidationTest extends FieldKernelTestBase {
       }
       else {
         $value = -1;
-        $expected_violations[$delta . '.value'][] = t('%name does not accept the value -1.', ['%name' => $this->fieldTestData->field->getLabel()]);
+        $expected_violations[$delta . '.value'][] = $this->fieldTestData->field->getLabel() . ' does not accept the value -1.';
       }
       $entity->{$this->fieldTestData->field_name}[] = $value;
     }

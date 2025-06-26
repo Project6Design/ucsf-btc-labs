@@ -14,13 +14,16 @@ class EmailFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $fieldType = 'email';
+  protected string $fieldType = 'email';
 
   /**
    * {@inheritdoc}
    */
   protected static $modules = ['text'];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -41,7 +44,7 @@ class EmailFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests all email formatters.
    */
-  public function testAllFormatters() {
+  public function testAllFormatters(): void {
     // Test the plain formatter.
     $this->assertFormatterRdfa(['type' => 'string'], 'http://schema.org/email', ['value' => $this->testValue]);
     // Test the mailto formatter.

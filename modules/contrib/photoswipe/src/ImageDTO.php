@@ -16,11 +16,18 @@ class ImageDTO {
   const WIDTH = 'width';
 
   /**
-   * Preprocesed image settings.
+   * Preprocessed image settings.
    *
    * @var array
    */
   protected $settings;
+
+  /**
+   * Preprocessed third party image settings.
+   *
+   * @var array
+   */
+  protected $thirdPartySettings;
 
   /**
    * Item.
@@ -39,7 +46,7 @@ class ImageDTO {
   /**
    * Image url.
    *
-   * @var string|null
+   * @var null|string
    */
   protected $uri;
 
@@ -96,8 +103,10 @@ class ImageDTO {
    */
   public function __construct(array $variables) {
     $this->settings = $variables['display_settings'];
+    $this->thirdPartySettings = $variables['third_party_settings'];
 
-    $this->entity = $variables['entity'];
+    // Retrieve the entity with the current translation context:
+    $this->entity = isset($variables['entity']) ? \Drupal::service('entity.repository')->getTranslationFromContext($variables['entity']) : NULL;
     $this->item = $variables['item'];
 
     // If item is instance of Media.
@@ -109,7 +118,7 @@ class ImageDTO {
       $this->item = $media->get($photoswipe_reference_image_field);
     }
 
-    $this->uri = $this->item->entity->getFileUri();
+    $this->uri = $this->item->entity ? $this->item->entity->getFileUri() : NULL;
     $this->alt = $this->item->alt ?: NULL;
     $this->title = $this->item->title ?: NULL;
     $this->setDimensions([
@@ -139,6 +148,13 @@ class ImageDTO {
    */
   public function getSettings() {
     return $this->settings;
+  }
+
+  /**
+   * Get item third party image settings.
+   */
+  public function getThirdPartySettings(): array {
+    return $this->thirdPartySettings;
   }
 
   /**
@@ -182,16 +198,6 @@ class ImageDTO {
   }
 
   /**
-   * Get Caption.
-   *
-   * @return string|null
-   *   Image caption.
-   */
-  public function getCaption() {
-    return $this->caption;
-  }
-
-  /**
    * Get image title.
    *
    * @return string|null
@@ -215,7 +221,7 @@ class ImageDTO {
    * Image dimensions.
    *
    * @param array $dimensions
-   *   Dimentions.
+   *   Dimensions.
    */
   public function setDimensions(array $dimensions) {
     $this->dimensions = $dimensions;

@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\datetime\Functional;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Datetime\Entity\DateFormat;
 use Drupal\datetime\Plugin\Field\FieldType\DateTimeItemInterface;
@@ -34,14 +35,14 @@ class DateTimeFieldTest extends DateTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getTestFieldType() {
+  protected function getTestFieldType(): string {
     return 'datetime';
   }
 
   /**
    * Tests date field functionality.
    */
-  public function testDateField() {
+  public function testDateField(): void {
     $field_name = $this->fieldStorage->getName();
 
     $display_repository = \Drupal::service('entity_display.repository');
@@ -167,12 +168,12 @@ class DateTimeFieldTest extends DateTestBase {
       $output = $this->renderTestEntity($id);
       $this->assertStringContainsString($expected, $output, "Formatted date field using daterange_custom format displayed as $expected in $timezone.");
 
-      // Verify that the 'datetime_time_ago' formatter works for intervals in the
-      // past.  First update the test entity so that the date difference always
-      // has the same interval.  Since the database always stores UTC, and the
-      // interval will use this, force the test date to use UTC and not the local
-      // or user timezone.
-      $timestamp = REQUEST_TIME - 87654321;
+      // Verify that the 'datetime_time_ago' formatter works for intervals in
+      // the past.  First update the test entity so that the date difference
+      // always has the same interval.  Since the database always stores UTC,
+      // and the interval will use this, force the test date to use UTC and not
+      // the local or user timezone.
+      $timestamp = \Drupal::time()->getRequestTime() - 87654321;
       $entity = EntityTest::load($id);
       $field_name = $this->fieldStorage->getName();
       $date = DrupalDateTime::createFromTimestamp($timestamp, 'UTC');
@@ -188,18 +189,22 @@ class DateTimeFieldTest extends DateTestBase {
       $display_repository->getViewDisplay($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'full')
         ->setComponent($field_name, $this->displayOptions)
         ->save();
-      $expected = new FormattableMarkup($this->displayOptions['settings']['past_format'], [
-        '@interval' => $this->dateFormatter->formatTimeDiffSince($timestamp, ['granularity' => $this->displayOptions['settings']['granularity']]),
-      ]);
+      $expected = str_replace(
+        '@interval',
+        $this->dateFormatter->formatTimeDiffSince(
+          $timestamp,
+          ['granularity' => $this->displayOptions['settings']['granularity']]),
+        $this->displayOptions['settings']['past_format']
+      );
       $output = $this->renderTestEntity($id);
-      $this->assertStringContainsString((string) $expected, $output, "Formatted date field using datetime_time_ago format displayed as $expected in $timezone.");
+      $this->assertStringContainsString($expected, $output, "Formatted date field using datetime_time_ago format displayed as $expected in $timezone.");
 
-      // Verify that the 'datetime_time_ago' formatter works for intervals in the
-      // future.  First update the test entity so that the date difference always
-      // has the same interval.  Since the database always stores UTC, and the
-      // interval will use this, force the test date to use UTC and not the local
-      // or user timezone.
-      $timestamp = REQUEST_TIME + 87654321;
+      // Verify that the 'datetime_time_ago' formatter works for intervals in
+      // the future.  First update the test entity so that the date difference
+      // always has the same interval.  Since the database always stores UTC,
+      // and the interval will use this, force the test date to use UTC and not
+      // the local or user timezone.
+      $timestamp = \Drupal::time()->getRequestTime() + 87654321;
       $entity = EntityTest::load($id);
       $field_name = $this->fieldStorage->getName();
       $date = DrupalDateTime::createFromTimestamp($timestamp, 'UTC');
@@ -209,18 +214,22 @@ class DateTimeFieldTest extends DateTestBase {
       $display_repository->getViewDisplay($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'full')
         ->setComponent($field_name, $this->displayOptions)
         ->save();
-      $expected = new FormattableMarkup($this->displayOptions['settings']['future_format'], [
-        '@interval' => $this->dateFormatter->formatTimeDiffUntil($timestamp, ['granularity' => $this->displayOptions['settings']['granularity']]),
-      ]);
+      $expected = str_replace(
+        '@interval',
+        $this->dateFormatter->formatTimeDiffUntil(
+          $timestamp,
+          ['granularity' => $this->displayOptions['settings']['granularity']]),
+        $this->displayOptions['settings']['future_format']
+      );
       $output = $this->renderTestEntity($id);
-      $this->assertStringContainsString((string) $expected, $output, "Formatted date field using datetime_time_ago format displayed as $expected in $timezone.");
+      $this->assertStringContainsString($expected, $output, "Formatted date field using datetime_time_ago format displayed as $expected in $timezone.");
     }
   }
 
   /**
    * Tests date and time field.
    */
-  public function testDatetimeField() {
+  public function testDatetimeField(): void {
     $field_name = $this->fieldStorage->getName();
     $field_label = $this->field->label();
     // Change the field to a datetime field.
@@ -323,7 +332,7 @@ class DateTimeFieldTest extends DateTestBase {
     // has the same interval.  Since the database always stores UTC, and the
     // interval will use this, force the test date to use UTC and not the local
     // or user timezone.
-    $timestamp = REQUEST_TIME - 87654321;
+    $timestamp = \Drupal::time()->getRequestTime() - 87654321;
     $entity = EntityTest::load($id);
     $field_name = $this->fieldStorage->getName();
     $date = DrupalDateTime::createFromTimestamp($timestamp, 'UTC');
@@ -339,18 +348,22 @@ class DateTimeFieldTest extends DateTestBase {
     $display_repository->getViewDisplay($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'full')
       ->setComponent($field_name, $this->displayOptions)
       ->save();
-    $expected = new FormattableMarkup($this->displayOptions['settings']['past_format'], [
-      '@interval' => $this->dateFormatter->formatTimeDiffSince($timestamp, ['granularity' => $this->displayOptions['settings']['granularity']]),
-    ]);
+    $expected = str_replace(
+      '@interval',
+      $this->dateFormatter->formatTimeDiffSince(
+        $timestamp,
+        ['granularity' => $this->displayOptions['settings']['granularity']]),
+      $this->displayOptions['settings']['past_format']
+    );
     $output = $this->renderTestEntity($id);
-    $this->assertStringContainsString((string) $expected, $output, "Formatted date field using datetime_time_ago format displayed as $expected.");
+    $this->assertStringContainsString($expected, $output, "Formatted date field using datetime_time_ago format displayed as $expected.");
 
     // Verify that the 'datetime_time_ago' formatter works for intervals in the
     // future.  First update the test entity so that the date difference always
     // has the same interval.  Since the database always stores UTC, and the
     // interval will use this, force the test date to use UTC and not the local
     // or user timezone.
-    $timestamp = REQUEST_TIME + 87654321;
+    $timestamp = \Drupal::time()->getRequestTime() + 87654321;
     $entity = EntityTest::load($id);
     $field_name = $this->fieldStorage->getName();
     $date = DrupalDateTime::createFromTimestamp($timestamp, 'UTC');
@@ -361,11 +374,15 @@ class DateTimeFieldTest extends DateTestBase {
       ->getViewDisplay($this->field->getTargetEntityTypeId(), $this->field->getTargetBundle(), 'full')
       ->setComponent($field_name, $this->displayOptions)
       ->save();
-    $expected = new FormattableMarkup($this->displayOptions['settings']['future_format'], [
-      '@interval' => $this->dateFormatter->formatTimeDiffUntil($timestamp, ['granularity' => $this->displayOptions['settings']['granularity']]),
-    ]);
+    $expected = str_replace(
+      '@interval',
+      $this->dateFormatter->formatTimeDiffUntil(
+        $timestamp,
+        ['granularity' => $this->displayOptions['settings']['granularity']]),
+      $this->displayOptions['settings']['future_format']
+    );
     $output = $this->renderTestEntity($id);
-    $this->assertStringContainsString((string) $expected, $output, "Formatted date field using datetime_time_ago format displayed as $expected.");
+    $this->assertStringContainsString($expected, $output, "Formatted date field using datetime_time_ago format displayed as $expected.");
 
     // Test the required field validation error message.
     $entity = EntityTest::create(['name' => 'test datetime required message']);
@@ -373,15 +390,15 @@ class DateTimeFieldTest extends DateTestBase {
     $form_state = new FormState();
     \Drupal::formBuilder()->submitForm($form, $form_state);
     $errors = $form_state->getErrors();
-    $expected_error_message = new FormattableMarkup('The %field date is required.', ['%field' => $field_label]);
+    $expected_error_message = "The <em class=\"placeholder\">$field_label</em> date is required.";
     $actual_error_message = $errors["{$field_name}][0][value"]->__toString();
-    $this->assertEquals($expected_error_message->__toString(), $actual_error_message);
+    $this->assertEquals($expected_error_message, $actual_error_message);
   }
 
   /**
    * Tests Date List Widget functionality.
    */
-  public function testDatelistWidget() {
+  public function testDatelistWidget(): void {
     $field_name = $this->fieldStorage->getName();
     $field_label = $this->field->label();
 
@@ -413,7 +430,8 @@ class DateTimeFieldTest extends DateTestBase {
     $this->assertSession()->elementNotExists('xpath', "//*[@id=\"edit-$field_name-0-value-hour\"]");
     $this->assertSession()->elementNotExists('xpath', "//*[@id=\"edit-$field_name-0-value-minute\"]");
 
-    // Go to the form display page to assert that increment option does not appear on Date Only
+    // Go to the form display page to assert that increment option does not
+    // appear on Date Only.
     $fieldEditUrl = 'entity_test/structure/entity_test/form-display';
     $this->drupalGet($fieldEditUrl);
 
@@ -439,7 +457,8 @@ class DateTimeFieldTest extends DateTestBase {
       ->save();
     \Drupal::service('entity_field.manager')->clearCachedFieldDefinitions();
 
-    // Go to the form display page to assert that increment option does appear on Date Time
+    // Go to the form display page to assert that increment option does appear
+    // on Date Time.
     $fieldEditUrl = 'entity_test/structure/entity_test/form-display';
     $this->drupalGet($fieldEditUrl);
 
@@ -660,7 +679,7 @@ class DateTimeFieldTest extends DateTestBase {
   /**
    * Tests default value functionality.
    */
-  public function testDefaultValue() {
+  public function testDefaultValue(): void {
     // Create a test content type.
     $this->drupalCreateContentType(['type' => 'date_content']);
 
@@ -786,7 +805,7 @@ class DateTimeFieldTest extends DateTestBase {
   /**
    * Tests that invalid values are caught and marked as invalid.
    */
-  public function testInvalidField() {
+  public function testInvalidField(): void {
     // Change the field to a datetime field.
     $this->fieldStorage->setSetting('datetime_type', 'datetime');
     $this->fieldStorage->save();
@@ -877,7 +896,7 @@ class DateTimeFieldTest extends DateTestBase {
   /**
    * Tests that 'Date' field storage setting form is disabled if field has data.
    */
-  public function testDateStorageSettings() {
+  public function testDateStorageSettings(): void {
     // Create a test content type.
     $this->drupalCreateContentType(['type' => 'date_content']);
 

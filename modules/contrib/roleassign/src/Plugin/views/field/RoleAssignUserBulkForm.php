@@ -16,7 +16,7 @@ class RoleAssignUserBulkForm extends UserBulkForm {
   /**
    * {@inheritdoc}
    */
-  public function init(ViewExecutable $view, DisplayPluginBase $display, array &$options = NULL) {
+  public function init(ViewExecutable $view, DisplayPluginBase $display, ?array &$options = NULL) {
     parent::init($view, $display, $options);
 
     if (_roleassign_restrict_access()) {
@@ -34,7 +34,7 @@ class RoleAssignUserBulkForm extends UserBulkForm {
         if (in_array($action->get('plugin'), $denied_actions)) {
           $config = $action->get('configuration');
 
-          if (!in_array($config['rid'], $assignable_roles)) {
+          if (!isset($assignable_roles[$config['rid']])) {
             unset($this->actions[$action_key]);
           }
         }

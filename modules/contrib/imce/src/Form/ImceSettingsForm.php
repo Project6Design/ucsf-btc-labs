@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StreamWrapper\StreamWrapperInterface;
 use Drupal\Core\Url;
 use Drupal\imce\ImceSettersTrait;
+use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -35,7 +36,7 @@ class ImceSettingsForm extends ConfigFormBase {
   /**
    * Provides a StreamWrapper manager.
    *
-   * @var Drupal\Core\StreamWrapper\StreamWrapperManagerInterface
+   * @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface
    */
   protected $streamWrapperManager;
 
@@ -43,9 +44,7 @@ class ImceSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    /**
-     * @var \Drupal\imce\Form\ImceSettingsForm
-     */
+    /** @var \Drupal\imce\Form\ImceSettingsForm $instance */
     $instance = parent::create($container);
     $instance->setConfigSystemFile($container->get('config.factory')->get('system.file'));
     $instance->setEntityTypeManager($container->get('entity_type.manager'));
@@ -89,7 +88,9 @@ class ImceSettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Use admin theme for IMCE paths'),
       '#default_value' => $config->get('admin_theme'),
-      '#description' => $this->t('If you have user interface issues with the active theme you may consider switching to admin theme.'),
+      '#description' => $this->t(
+        'If you have user interface issues with the active theme you may consider switching to admin theme.'
+      ),
     ];
     $form['#attached']['library'][] = 'imce/drupal.imce.admin';
     return parent::buildForm($form, $form_state);
@@ -107,7 +108,8 @@ class ImceSettingsForm extends ConfigFormBase {
     $roles_profiles = $form_state->getValue('roles_profiles');
     // Filter empty values.
     foreach ($roles_profiles as $rid => &$profiles) {
-      if (!$profiles = array_filter($profiles)) {
+      $profiles = array_filter($profiles);
+      if (!$profiles) {
         unset($roles_profiles[$rid]);
       }
     }
@@ -115,8 +117,9 @@ class ImceSettingsForm extends ConfigFormBase {
     $config->save();
     // Warn about anonymous access.
     if (!empty($roles_profiles[RoleInterface::ANONYMOUS_ID])) {
-      $this->messenger()
-        ->addMessage($this->t('You have enabled anonymous access to the file manager. Please make sure this is not a misconfiguration.'), 'warning');
+      $this->messenger()->addMessage($this->t(
+        'You have enabled anonymous access to the file manager. Please make sure this is not a misconfiguration.'
+      ), 'warning');
     }
     parent::submitForm($form, $form_state);
   }
@@ -142,16 +145,19 @@ class ImceSettingsForm extends ConfigFormBase {
    * @return array
    *   Array of headers items.
    */
-  public function buildHeaderProfilesTable() : array {
-    $wrappers = $this->streamWrapperManager->getNames(StreamWrapperInterface::WRITE_VISIBLE);
+  public function buildHeaderProfilesTable(array $wrappers = NULL): array {
+    $wrappers = $wrappers ?? $this->streamWrapperManager->getNames(StreamWrapperInterface::WRITE_VISIBLE);
     $imce_url = Url::fromRoute('imce.page')->toString();
-    $rp_table['#header'] = [$this->t('Role')];
+    $rp_table = ['#header' => [$this->t('Role')]];
     $default = $this->configSystemFile->get('default_scheme');
+    $suffixes = [$default => ' (' . $this->t('Default') . ')'];
     foreach ($wrappers as $scheme => $name) {
-      $url = $scheme === $default ? $imce_url : $imce_url . '/' . $scheme;
-      $rp_table['#header'][]['data'] = ['#markup' => '<a href="' . $url . '">' . Html::escape($name) . '</a>'];
+      $url = $scheme === $default ? $imce_url : "$imce_url/$scheme";
+      $name = Html::escape($name);
+      $suffix = $suffixes[$scheme] ?? '';
+      $html = '<a href="' . $url . '">' . $name . '</a>' . $suffix;
+      $rp_table['#header'][] = ['data' => ['#markup' => $html]];
     }
-
     return $rp_table;
   }
 
@@ -169,11 +175,10 @@ class ImceSettingsForm extends ConfigFormBase {
         $rp_table[$rid][$scheme] = [
           '#type' => 'select',
           '#options' => $this->getProfileOptions(),
-          '#default_value' => isset($roles_profiles[$rid][$scheme]) ? $roles_profiles[$rid][$scheme] : '',
+          '#default_value' => $roles_profiles[$rid][$scheme] ?? '',
         ];
       }
     }
-
     return $rp_table;
   }
 
@@ -183,25 +188,20 @@ class ImceSettingsForm extends ConfigFormBase {
   public function buildRolesProfilesTable(array $roles_profiles) {
     $rp_table = ['#type' => 'table'];
 
-    $roles = user_roles();
+    $roles = Role::loadMultiple();
     $wrappers = $this->streamWrapperManager->getNames(StreamWrapperInterface::WRITE_VISIBLE);
-
-    $imce_url = Url::fromRoute('imce.page')->toString();
 
     $rp_table += $this->buildHeaderProfilesTable($wrappers);
     $rp_table += $this->buildRowsProfilesTables($roles, $roles_profiles, $wrappers);
 
     // Add description.
     $rp_table['#prefix'] = '<h3>' . $this->t('Role-profile assignments') . '</h3>';
-    $desc = $this->t('Assign configuration profiles to user roles for available file systems. Users with multiple roles get the bottom most profile.');
-    $desc .= ' ' . $this->t(
-      'The default file system %name is accessible at :url path.',
-      [
-        '%name' => $wrappers[$this->configSystemFile->get('default_scheme')],
-        ':url' => $imce_url,
-      ]
+    $desc = $this->t('Assign configuration profiles to user roles for available file systems.') . '<br>';
+    $desc .= $this->t(
+      '<strong>A user with multiple roles gets the last profile assigned</strong>. You may want to <a href=":url">re-order your roles</a> for the correct assignment.',
+      [':url' => Url::fromRoute('entity.user_role.collection')->toString()]
     );
-    $rp_table['#suffix'] = '<div class="description">' . $desc . '</div>';
+    $rp_table['#prefix'] .= '<div class="description">' . $desc . '</div>';
     return $rp_table;
   }
 

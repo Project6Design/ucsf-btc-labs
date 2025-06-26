@@ -2,6 +2,7 @@
 
 namespace Drupal\image\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\Attribute\FieldWidget;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Image\ImageFactory;
@@ -11,18 +12,16 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\file\Entity\File;
 use Drupal\file\Plugin\Field\FieldWidget\FileWidget;
 use Drupal\image\Entity\ImageStyle;
+use Symfony\Component\Validator\ConstraintViolationInterface;
 
 /**
  * Plugin implementation of the 'image_image' widget.
- *
- * @FieldWidget(
- *   id = "image_image",
- *   label = @Translation("Image"),
- *   field_types = {
- *     "image"
- *   }
- * )
  */
+#[FieldWidget(
+  id: 'image_image',
+  label: new TranslatableMarkup('Image'),
+  field_types: ['image'],
+)]
 class ImageWidget extends FileWidget {
 
   /**
@@ -36,7 +35,7 @@ class ImageWidget extends FileWidget {
    * Constructs an ImageWidget object.
    *
    * @param string $plugin_id
-   *   The plugin_id for the widget.
+   *   The plugin ID for the widget.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
@@ -50,7 +49,7 @@ class ImageWidget extends FileWidget {
    * @param \Drupal\Core\Image\ImageFactory $image_factory
    *   The image factory service.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ElementInfoManagerInterface $element_info, ImageFactory $image_factory = NULL) {
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, ElementInfoManagerInterface $element_info, ?ImageFactory $image_factory = NULL) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings, $element_info);
     $this->imageFactory = $image_factory ?: \Drupal::service('image.factory');
   }
@@ -109,9 +108,7 @@ class ImageWidget extends FileWidget {
   }
 
   /**
-   * Overrides \Drupal\file\Plugin\Field\FieldWidget\FileWidget::formMultipleElements().
-   *
-   * Special handling for draggable multiple widgets and 'add more' button.
+   * {@inheritdoc}
    */
   protected function formMultipleElements(FieldItemListInterface $items, array &$form, FormStateInterface $form_state) {
     $elements = parent::formMultipleElements($items, $form, $form_state);
@@ -127,7 +124,7 @@ class ImageWidget extends FileWidget {
       // If there's only one field, return it as delta 0.
       if (empty($elements[0]['#default_value']['fids'])) {
         $file_upload_help['#description'] = $this->getFilteredDescription();
-        $elements[0]['#description'] = \Drupal::service('renderer')->renderPlain($file_upload_help);
+        $elements[0]['#description'] = \Drupal::service('renderer')->renderInIsolation($file_upload_help);
       }
     }
     else {
@@ -344,6 +341,16 @@ class ImageWidget extends FileWidget {
       }
     }
     return $changed;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function errorElement(array $element, ConstraintViolationInterface $error, array $form, FormStateInterface $form_state) {
+    $element = parent::errorElement($element, $error, $form, $form_state);
+
+    $property_path_array = explode('.', $error->getPropertyPath());
+    return ($element === FALSE) ? FALSE : $element[$property_path_array[1]];
   }
 
 }

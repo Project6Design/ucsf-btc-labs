@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Plugin;
 
 use Drupal\Component\Serialization\Json;
@@ -22,9 +24,7 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
   use UserCreationTrait;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['user', 'node'];
 
@@ -59,7 +59,7 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpFixtures() {
+  protected function setUpFixtures(): void {
     parent::setUpFixtures();
 
     $this->installEntitySchema('user');
@@ -72,7 +72,12 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
     ])->save();
 
     $this->editorUser = $this->createUser(['bypass node access']);
-    $this->powerUser = $this->createUser(['access content', 'create test content', 'edit own test content', 'delete own test content']);
+    $this->powerUser = $this->createUser([
+      'access content',
+      'create test content',
+      'edit own test content',
+      'delete own test content',
+    ]);
     $this->regularUser = $this->createUser(['access content']);
 
     // Create some test entities.
@@ -87,7 +92,7 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
   /**
    * Tests complex field rewriting and uncacheable field handlers.
    */
-  public function testAdvancedCaching() {
+  public function testAdvancedCaching(): void {
     // Test that row field output is actually cached and with the proper cache
     // contexts.
     $this->doTestRenderedOutput($this->editorUser);
@@ -110,7 +115,7 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
   /**
    * Tests that rows are not cached when the none cache plugin is used.
    */
-  public function testNoCaching() {
+  public function testNoCaching(): void {
     $this->setCurrentUser($this->regularUser);
     $view = Views::getView('test_row_render_cache_none');
     $view->setDisplay();
@@ -143,7 +148,7 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
    * @param bool $check_cache
    *   (optional) Whether explicitly test render cache entries.
    */
-  protected function doTestRenderedOutput(AccountInterface $account, $check_cache = FALSE) {
+  protected function doTestRenderedOutput(AccountInterface $account, $check_cache = FALSE): void {
     $this->setCurrentUser($account);
     $view = Views::getView('test_row_render_cache');
     $view->setDisplay();
@@ -183,10 +188,10 @@ class RowRenderCacheTest extends ViewsKernelTestBase {
       $expected = $access ? "<a href=\"$node_url/delete?destination=/\" hreflang=\"en\">delete</a>" : "";
       $output = $view->style_plugin->getField($index, 'delete_node');
       $this->assertSame($expected, (string) $output);
-      $expected = $access ? '  <div class="dropbutton-wrapper" data-drupal-ajax-container><div class="dropbutton-widget"><ul class="dropbutton">' .
-        '<li><a href="' . $node_url . '/edit?destination=/" hreflang="en">Edit</a></li>' .
-        '<li><a href="' . $node_url . '/delete?destination=/" class="use-ajax" data-dialog-type="modal" data-dialog-options="' . Html::escape(Json::encode(['width' => 880])) . '" hreflang="en">Delete</a></li>' .
-        '</ul></div></div>' : '';
+      $expected = $access ? '  <div class="dropbutton-wrapper" data-drupal-ajax-container>' . PHP_EOL . '    <div class="dropbutton-widget"><ul class="dropbutton">' .
+        '<li><a href="' . $node_url . '/edit?destination=/" aria-label="Edit ' . $node->label() . '" hreflang="en">Edit</a></li>' .
+        '<li><a href="' . $node_url . '/delete?destination=/" aria-label="Delete ' . $node->label() . '" class="use-ajax" data-dialog-type="modal" data-dialog-options="' . Html::escape(Json::encode(['width' => 880])) . '" hreflang="en">Delete</a></li>' .
+        '</ul></div>' . PHP_EOL . '  </div>' : '';
       $output = $view->style_plugin->getField($index, 'operations');
       $this->assertSame($expected, (string) $output);
 

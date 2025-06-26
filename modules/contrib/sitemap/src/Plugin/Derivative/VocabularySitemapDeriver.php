@@ -3,9 +3,10 @@
 namespace Drupal\sitemap\Plugin\Derivative;
 
 use Drupal\Component\Plugin\Derivative\DeriverBase;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
-use Drupal\taxonomy\Entity\Vocabulary;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -15,18 +16,35 @@ class VocabularySitemapDeriver extends DeriverBase implements ContainerDeriverIn
   use StringTranslationTrait;
 
   /**
+   * An entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * A module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected ModuleHandlerInterface $moduleHandler;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
-    return new static();
+    $instance = new static();
+    $instance->entityTypeManager = $container->get('entity_type.manager');
+    $instance->moduleHandler = $container->get('module_handler');
+    return $instance;
   }
 
   /**
    * {@inheritdoc}
    */
   public function getDerivativeDefinitions($base_plugin_definition) {
-    if (\Drupal::moduleHandler()->moduleExists('taxonomy')) {
-      foreach (Vocabulary::loadMultiple() as $id => $vocabulary) {
+    if ($this->moduleHandler->moduleExists('taxonomy')) {
+      foreach ($this->entityTypeManager->getStorage('taxonomy_vocabulary')->loadMultiple() as $id => $vocabulary) {
         /** @var \Drupal\taxonomy\VocabularyInterface $vocabulary */
         $this->derivatives[$id] = $base_plugin_definition;
         $this->derivatives[$id]['title'] = $this->t('Vocabulary: @vocabulary', ['@vocabulary' => $vocabulary->label()]);

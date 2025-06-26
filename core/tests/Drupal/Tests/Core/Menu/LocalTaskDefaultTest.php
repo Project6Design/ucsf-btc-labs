@@ -74,7 +74,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
   /**
    * Setups the local task default.
    */
-  protected function setupLocalTaskDefault() {
+  protected function setupLocalTaskDefault(): void {
     $this->localTaskBase = new TestLocalTaskDefault($this->config, $this->pluginId, $this->pluginDefinition);
     $this->localTaskBase
       ->setRouteProvider($this->routeProvider);
@@ -83,7 +83,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
   /**
    * @covers ::getRouteParameters
    */
-  public function testGetRouteParametersForStaticRoute() {
+  public function testGetRouteParametersForStaticRoute(): void {
     $this->pluginDefinition = [
       'route_name' => 'test_route',
     ];
@@ -102,7 +102,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
   /**
    * @covers ::getRouteParameters
    */
-  public function testGetRouteParametersInPluginDefinitions() {
+  public function testGetRouteParametersInPluginDefinitions(): void {
     $this->pluginDefinition = [
       'route_name' => 'test_route',
       'route_parameters' => ['parameter' => 'example'],
@@ -122,7 +122,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
   /**
    * @covers ::getRouteParameters
    */
-  public function testGetRouteParametersForDynamicRouteWithNonUpcastedParameters() {
+  public function testGetRouteParametersForDynamicRouteWithNonUpcastedParameters(): void {
     $this->pluginDefinition = [
       'route_name' => 'test_route',
     ];
@@ -145,7 +145,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
    *
    * @covers ::getRouteParameters
    */
-  public function testGetRouteParametersForDynamicRouteWithUpcastedParameters() {
+  public function testGetRouteParametersForDynamicRouteWithUpcastedParameters(): void {
     $this->pluginDefinition = [
       'route_name' => 'test_route',
     ];
@@ -167,7 +167,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
    *
    * @covers ::getRouteParameters
    */
-  public function testGetRouteParametersForDynamicRouteWithUpcastedParametersEmptyRawParameters() {
+  public function testGetRouteParametersForDynamicRouteWithUpcastedParametersEmptyRawParameters(): void {
     $this->pluginDefinition = [
       'route_name' => 'test_route',
     ];
@@ -190,7 +190,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
    * @return array
    *   A list or test plugin definition and expected weight.
    */
-  public function providerTestGetWeight() {
+  public static function providerTestGetWeight() {
     return [
       // Manually specify a weight, so this is used.
       [['weight' => 314], 'test_id', 314],
@@ -231,7 +231,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
    * @dataProvider providerTestGetWeight
    * @covers ::getWeight
    */
-  public function testGetWeight($plugin_definition, $plugin_id, $expected_weight) {
+  public function testGetWeight($plugin_definition, $plugin_id, $expected_weight): void {
     $this->pluginDefinition = $plugin_definition;
     $this->pluginId = $plugin_id;
     $this->setupLocalTaskDefault();
@@ -243,7 +243,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
    * @covers ::getActive
    * @covers ::setActive
    */
-  public function testActive() {
+  public function testActive(): void {
     $this->setupLocalTaskDefault();
 
     $this->assertFalse($this->localTaskBase->getActive());
@@ -254,7 +254,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
   /**
    * @covers ::getTitle
    */
-  public function testGetTitle() {
+  public function testGetTitle(): void {
     $this->pluginDefinition['title'] = (new TranslatableMarkup('Example', [], [], $this->stringTranslation));
     $this->stringTranslation->expects($this->once())
       ->method('translateString')
@@ -268,8 +268,9 @@ class LocalTaskDefaultTest extends UnitTestCase {
   /**
    * @covers ::getTitle
    */
-  public function testGetTitleWithContext() {
+  public function testGetTitleWithContext(): void {
     $title = 'Example';
+    // phpcs:ignore Drupal.Semantics.FunctionT.NotLiteralString
     $this->pluginDefinition['title'] = (new TranslatableMarkup($title, [], ['context' => 'context'], $this->stringTranslation));
     $this->stringTranslation->expects($this->once())
       ->method('translateString')
@@ -283,7 +284,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
   /**
    * @covers ::getTitle
    */
-  public function testGetTitleWithTitleArguments() {
+  public function testGetTitleWithTitleArguments(): void {
     $this->pluginDefinition['title'] = (new TranslatableMarkup('Example @test', ['@test' => 'value'], [], $this->stringTranslation));
     $this->stringTranslation->expects($this->once())
       ->method('translateString')
@@ -297,7 +298,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
   /**
    * @covers ::getOptions
    */
-  public function testGetOptions() {
+  public function testGetOptions(): void {
     $this->pluginDefinition['options'] = [
       'attributes' => ['class' => ['example']],
     ];
@@ -324,7 +325,7 @@ class LocalTaskDefaultTest extends UnitTestCase {
    * @covers ::getCacheTags
    * @covers ::getCacheMaxAge
    */
-  public function testCacheabilityMetadata() {
+  public function testCacheabilityMetadata(): void {
     $this->pluginDefinition['cache_contexts'] = ['route'];
     $this->pluginDefinition['cache_tags'] = ['kitten'];
     $this->pluginDefinition['cache_max_age'] = 3600;
@@ -338,6 +339,9 @@ class LocalTaskDefaultTest extends UnitTestCase {
 
 }
 
+/**
+ * Stub class for testing LocalTaskDefault.
+ */
 class TestLocalTaskDefault extends LocalTaskDefault {
 
   public function setRouteProvider(RouteProviderInterface $route_provider) {

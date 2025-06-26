@@ -39,14 +39,20 @@ class UrlEmbedAdminSettingsForm extends ConfigFormBase {
       ]),
     ];
 
-    // If we have Facebook credentials in the config, check that it is a valid app and show a message to the user.
-    if (!empty($config->get('facebook_app_id')) && !empty($config->get('facebook_app_id'))) {
+    // Check Facebook credentials and show appropriate messages.
+    if (!empty($config->get('facebook_app_id')) || !empty($config->get('facebook_app_secret'))) {
       $debug = url_embed_debug_facebook_access_token($config->get('facebook_app_id') . '|' . $config->get('facebook_app_secret'));
       if (!empty($debug['is_valid'])) {
-        $form['facebook_app']['facebook_app_status']['#markup'] = '<div class="messages messages--status">' . $this->t('The Facebook app is active.') . '</div>';
+        $form['facebook_app']['status'] = [
+          '#markup' => '<div class="messages messages--status">' . $this->t('The Facebook app is active.') . '</div>',
+          '#weight' => -10,
+        ];
       }
       else {
-        $form['facebook_app']['facebook_app_status']['#markup'] = '<div class="messages messages--warning">' . $this->t('The App ID and App Secret combination is invalid. Make sure you entered your app credentials correctly.') . '</div>';
+        $form['facebook_app']['error'] = [
+          '#markup' => '<div class="messages messages--error">' . $this->t('The App ID and App Secret combination is invalid. Make sure you entered your app credentials correctly and that it is live.') . '</div>',
+          '#weight' => -10,
+        ];
       }
     }
 
@@ -63,13 +69,6 @@ class UrlEmbedAdminSettingsForm extends ConfigFormBase {
     ];
 
     return parent::buildForm($form, $form_state);
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
   }
 
   /**

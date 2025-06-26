@@ -18,13 +18,13 @@ class Plugin extends AttributeBase {
    * Constructs a plugin attribute object.
    *
    * @param string $id
-   *   The attribute class ID.
+   *   The plugin ID.
    * @param class-string|null $deriver
    *   (optional) The deriver class.
    */
   public function __construct(
     public readonly string $id,
-    public readonly ?string $deriver = NULL
+    public readonly ?string $deriver = NULL,
   ) {}
 
 }

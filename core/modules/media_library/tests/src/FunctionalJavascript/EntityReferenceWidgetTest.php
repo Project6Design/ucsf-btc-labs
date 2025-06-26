@@ -74,7 +74,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   /**
    * Tests that disabled media items don't capture focus on page load.
    */
-  public function testFocusNotAppliedWithoutSelectionChange() {
+  public function testFocusNotAppliedWithoutSelectionChange(): void {
     // Create a node with the maximum number of values for the field_twin_media
     // field.
     $node = $this->drupalCreateNode([
@@ -99,7 +99,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   /**
    * Tests that the Media library's widget works as expected.
    */
-  public function testWidget() {
+  public function testWidget(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -181,7 +181,12 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
     foreach ($links as $link) {
       $link_titles[] = $link->getText();
     }
-    $expected_link_titles = ['Show Type Three media (selected)', 'Show Type One media', 'Show Type Two media', 'Show Type Four media'];
+    $expected_link_titles = [
+      'Show Type Three media (selected)',
+      'Show Type One media',
+      'Show Type Two media',
+      'Show Type Four media',
+    ];
     $this->assertSame($link_titles, $expected_link_titles);
     $this->drupalGet('admin/structure/types/manage/basic_page/form-display');
 
@@ -192,10 +197,10 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
 
     $assert_session->buttonExists('field_twin_media_settings_edit')->press();
     $this->assertElementExistsAfterWait('css', '#field-twin-media .tabledrag-toggle-weight')->press();
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_one][weight]')->selectOption(0);
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_three][weight]')->selectOption(1);
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_four][weight]')->selectOption(2);
-    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_two][weight]')->selectOption(3);
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_one][weight]')->selectOption('0');
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_three][weight]')->selectOption('1');
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_four][weight]')->selectOption('2');
+    $assert_session->fieldExists('fields[field_twin_media][settings_edit_form][settings][media_types][type_two][weight]')->selectOption('3');
     $assert_session->buttonExists('Save')->press();
 
     $this->drupalGet('node/add/basic_page');
@@ -203,7 +208,9 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
     $link_titles = array_map(function ($link) {
       return $link->getText();
     }, $links);
-    $this->assertSame($link_titles, ['Show Type One media (selected)', 'Show Type Three media', 'Show Type Four media', 'Show Type Two media']);
+    $this->assertSame(
+      $link_titles,
+      ['Show Type One media (selected)', 'Show Type Three media', 'Show Type Four media', 'Show Type Two media']);
     $assert_session->elementExists('css', '.ui-dialog-titlebar-close')->click();
 
     // Assert the announcements for media type navigation in the media library.
@@ -212,7 +219,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
     $this->assertAnnounceContains('Showing Type Three media.');
     $this->switchToMediaType('One');
     $this->assertAnnounceContains('Showing Type One media.');
-    // Assert the links can be triggered by via the spacebar.
+    // Assert the links can be triggered by via the space bar.
     $assert_session->elementExists('named', ['link', 'Type Three'])->keyPress(32);
     $this->assertAnnounceContains('Showing Type Three media.');
     $assert_session->elementExists('css', '.ui-dialog-titlebar-close')->click();
@@ -236,7 +243,6 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
     $session->getPage()->fillField('Name', 'Dog');
     $session->getPage()->pressButton('Apply filters');
     $this->waitForText('Dog');
-    $this->markTestSkipped("Skipped temporarily for random fails.");
     $this->waitForNoText('Bear');
     $session->getPage()->fillField('Name', '');
     $session->getPage()->pressButton('Apply filters');
@@ -283,8 +289,8 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
 
     // Assert the same has been added twice and remove the items again.
     $this->waitForElementsCount('css', '.field--name-field-twin-media [data-media-library-item-delta]', 2);
-    $assert_session->hiddenFieldValueEquals('field_twin_media[selection][0][target_id]', 4);
-    $assert_session->hiddenFieldValueEquals('field_twin_media[selection][1][target_id]', 4);
+    $assert_session->hiddenFieldValueEquals('field_twin_media[selection][0][target_id]', '4');
+    $assert_session->hiddenFieldValueEquals('field_twin_media[selection][1][target_id]', '4');
     $wrapper->pressButton('Remove');
     $this->waitForText('Dog has been removed.');
     $wrapper->pressButton('Remove');
@@ -474,7 +480,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   /**
    * Tests saving a required media library field.
    */
-  public function testRequiredMediaField() {
+  public function testRequiredMediaField(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 
@@ -567,7 +573,8 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
    * Checks for inclusion of text in #drupal-live-announce.
    *
    * @param string $expected_message
-   *   The text that is expected to be present in the #drupal-live-announce element.
+   *   The text that is expected to be present in the #drupal-live-announce
+   *   element.
    *
    * @internal
    */
@@ -579,7 +586,7 @@ class EntityReferenceWidgetTest extends MediaLibraryTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function sortableUpdate($item, $from, $to = NULL) {
+  protected function sortableUpdate($item, $from, $to = NULL): void {
     // See core/modules/media_library/js/media_library.widget.js.
     $script = <<<JS
 (function ($) {
@@ -599,7 +606,7 @@ JS;
   /**
    * Tests the preview displayed by the field widget.
    */
-  public function testWidgetPreview() {
+  public function testWidgetPreview(): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
 

@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Entity;
 
 use Drupal\Core\Database\Database;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\entity_test_revlog\Entity\EntityTestMulWithRevisionLog;
 use Drupal\user\Entity\User;
@@ -36,7 +39,7 @@ class RevisionableContentEntityBaseTest extends EntityKernelTestBase {
   /**
    * Tests the correct functionality CRUD operations of entity revisions.
    */
-  public function testRevisionableContentEntity() {
+  public function testRevisionableContentEntity(): void {
     $entity_type = 'entity_test_mul_revlog';
     $definition = \Drupal::entityTypeManager()->getDefinition($entity_type);
     $user = User::create(['name' => 'test name']);
@@ -97,7 +100,7 @@ class RevisionableContentEntityBaseTest extends EntityKernelTestBase {
    *
    * @covers \Drupal\Core\Entity\ContentEntityBase::wasDefaultRevision
    */
-  public function testWasDefaultRevision() {
+  public function testWasDefaultRevision(): void {
     $entity_type_id = 'entity_test_mul_revlog';
     $entity = EntityTestMulWithRevisionLog::create([
       'type' => $entity_type_id,
@@ -150,6 +153,8 @@ class RevisionableContentEntityBaseTest extends EntityKernelTestBase {
     $this->assertTrue($entity->wasDefaultRevision());
 
     // Check that the "revision_default" flag cannot be changed once set.
+    $this->expectException(EntityStorageException::class);
+    $this->expectExceptionMessage("An existing default revision of the 'entity_test_mul_revlog' entity type can not be changed to a non-default revision.");
     /** @var \Drupal\entity_test_revlog\Entity\EntityTestMulWithRevisionLog $entity2 */
     $entity2 = EntityTestMulWithRevisionLog::create([
       'type' => $entity_type_id,
@@ -192,7 +197,7 @@ class RevisionableContentEntityBaseTest extends EntityKernelTestBase {
    * @param string $log_message
    *   The log message of the new revision.
    */
-  protected function createRevision(EntityInterface $entity, UserInterface $user, $timestamp, $log_message) {
+  protected function createRevision(EntityInterface $entity, UserInterface $user, $timestamp, $log_message): void {
     $entity->setNewRevision(TRUE);
     $entity->setRevisionCreationTime($timestamp);
     $entity->setRevisionUserId($user->id());

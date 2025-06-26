@@ -61,7 +61,7 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Setup access plugin manager and config factory in the Drupal class.
    */
-  public function setupContainer() {
+  public function setupContainer(): void {
     $this->accessPluginManager = $this->getMockBuilder('\Drupal\views\Plugin\ViewsPluginManager')
       ->disableOriginalConstructor()
       ->getMock();
@@ -105,7 +105,7 @@ class PathPluginBaseTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\display\PathPluginBase::collectRoutes()
    */
-  public function testCollectRoutes() {
+  public function testCollectRoutes(): void {
     [$view] = $this->setupViewExecutableAccessPlugin();
 
     $display = [];
@@ -133,7 +133,7 @@ class PathPluginBaseTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\display\PathPluginBase::collectRoutes()
    */
-  public function testCollectRoutesWithDisplayReturnResponse() {
+  public function testCollectRoutesWithDisplayReturnResponse(): void {
     [$view] = $this->setupViewExecutableAccessPlugin();
 
     $display = [];
@@ -160,7 +160,7 @@ class PathPluginBaseTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\display\PathPluginBase::collectRoutes()
    */
-  public function testCollectRoutesWithArguments() {
+  public function testCollectRoutesWithArguments(): void {
     [$view] = $this->setupViewExecutableAccessPlugin();
 
     $display = [];
@@ -188,7 +188,7 @@ class PathPluginBaseTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\display\PathPluginBase::collectRoutes()
    */
-  public function testCollectRoutesWithArgumentsNotSpecifiedInPath() {
+  public function testCollectRoutesWithArgumentsNotSpecifiedInPath(): void {
     [$view] = $this->setupViewExecutableAccessPlugin();
 
     $display = [];
@@ -217,7 +217,7 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Tests the collect routes method with an alternative route name in the UI.
    */
-  public function testCollectRoutesWithSpecialRouteName() {
+  public function testCollectRoutesWithSpecialRouteName(): void {
     [$view] = $this->setupViewExecutableAccessPlugin();
 
     $display = [];
@@ -243,7 +243,7 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Tests the alter route method.
    */
-  public function testAlterRoute() {
+  public function testAlterRoute(): void {
     $collection = new RouteCollection();
     $collection->add('test_route', new Route('test_route', ['_controller' => 'Drupal\Tests\Core\Controller\TestController::content']));
     $route_2 = new Route('test_route/example', ['_controller' => 'Drupal\Tests\Core\Controller\TestController::content']);
@@ -280,7 +280,7 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Tests the altering of a REST route.
    */
-  public function testAlterPostRestRoute() {
+  public function testAlterPostRestRoute(): void {
     $collection = new RouteCollection();
     $route = new Route('test_route', ['_controller' => 'Drupal\Tests\Core\Controller\TestController::content']);
     $route->setMethods(['POST']);
@@ -318,7 +318,7 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Tests the altering of a REST route.
    */
-  public function testGetRestRoute() {
+  public function testGetRestRoute(): void {
     $collection = new RouteCollection();
     $route = new Route('test_route', ['_controller' => 'Drupal\Tests\Core\Controller\TestController::content']);
     $route->setMethods(['GET']);
@@ -357,9 +357,14 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Tests the alter route method with preexisting title callback.
    */
-  public function testAlterRouteWithAlterCallback() {
+  public function testAlterRouteWithAlterCallback(): void {
     $collection = new RouteCollection();
-    $collection->add('test_route', new Route('test_route', ['_controller' => 'Drupal\Tests\Core\Controller\TestController::content', '_title_callback' => '\Drupal\Tests\views\Unit\Plugin\display\TestController::testTitle']));
+    $collection->add('test_route', new Route(
+      'test_route',
+      [
+        '_controller' => 'Drupal\Tests\Core\Controller\TestController::content',
+        '_title_callback' => '\Drupal\Tests\views\Unit\Plugin\display\TestController::testTitle',
+      ]));
     $route_2 = new Route('test_route/example', ['_controller' => 'Drupal\Tests\Core\Controller\TestController::content']);
     $collection->add('test_route_2', $route_2);
 
@@ -396,7 +401,7 @@ class PathPluginBaseTest extends UnitTestCase {
    *
    * @see \Drupal\views\Plugin\views\display\PathPluginBase::collectRoutes()
    */
-  public function testCollectRoutesWithNamedParameters() {
+  public function testCollectRoutesWithNamedParameters(): void {
     /** @var \Drupal\views\ViewExecutable|\PHPUnit\Framework\MockObject\MockObject $view */
     [$view] = $this->setupViewExecutableAccessPlugin();
 
@@ -429,7 +434,7 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Tests altering routes with parameters in the overridden route.
    */
-  public function testAlterRoutesWithParameters() {
+  public function testAlterRoutesWithParameters(): void {
     $collection = new RouteCollection();
     $collection->add('test_route', new Route('test_route/{parameter}', ['_controller' => 'Drupal\Tests\Core\Controller\TestController::content']));
 
@@ -466,7 +471,7 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Tests altering routes with parameters and upcasting information.
    */
-  public function testAlterRoutesWithParametersAndUpcasting() {
+  public function testAlterRoutesWithParametersAndUpcasting(): void {
     $collection = new RouteCollection();
     $collection->add('test_route', new Route('test_route/{parameter}', ['_controller' => 'Drupal\Tests\Core\Controller\TestController::content'], [], ['parameters' => ['taxonomy_term' => 'entity:entity_test']]));
 
@@ -504,7 +509,7 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Tests altering routes with optional parameters in the overridden route.
    */
-  public function testAlterRoutesWithOptionalParameters() {
+  public function testAlterRoutesWithOptionalParameters(): void {
     $collection = new RouteCollection();
     $collection->add('test_route', new Route('test_route/{parameter}', ['_controller' => 'Drupal\Tests\Core\Controller\TestController::content']));
 
@@ -539,7 +544,7 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Tests the getRouteName method.
    */
-  public function testGetRouteName() {
+  public function testGetRouteName(): void {
     [$view] = $this->setupViewExecutableAccessPlugin();
 
     $display = [];
@@ -557,7 +562,7 @@ class PathPluginBaseTest extends UnitTestCase {
   /**
    * Returns some mocked view entity, view executable, and access plugin.
    */
-  protected function setupViewExecutableAccessPlugin() {
+  protected function setupViewExecutableAccessPlugin(): array {
     $view_entity = $this->getMockBuilder('Drupal\views\Entity\View')
       ->disableOriginalConstructor()
       ->getMock();
@@ -576,7 +581,7 @@ class PathPluginBaseTest extends UnitTestCase {
 
     $access_plugin = $this->getMockBuilder('Drupal\views\Plugin\views\access\AccessPluginBase')
       ->disableOriginalConstructor()
-      ->getMockForAbstractClass();
+      ->getMock();
     $this->accessPluginManager->expects($this->any())
       ->method('createInstance')
       ->willReturn($access_plugin);

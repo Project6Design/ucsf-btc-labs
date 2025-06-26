@@ -14,13 +14,16 @@ class FieldRdfaDatatypeCallbackTest extends FieldRdfaTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $fieldType = 'text';
+  protected string $fieldType = 'text';
 
   /**
    * {@inheritdoc}
    */
   protected static $modules = ['text', 'filter', 'rdf_test'];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -49,7 +52,7 @@ class FieldRdfaDatatypeCallbackTest extends FieldRdfaTestBase {
   /**
    * Tests the default formatter.
    */
-  public function testDefaultFormatter() {
+  public function testDefaultFormatter(): void {
     // Expected value is the output of the datatype callback, not the raw value.
     $this->assertFormatterRdfa(['type' => 'text_default'], 'http://schema.org/interactionCount', ['value' => 'foo' . $this->testValue]);
   }

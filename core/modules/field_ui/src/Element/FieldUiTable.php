@@ -3,14 +3,14 @@
 namespace Drupal\field_ui\Element;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Render\Attribute\RenderElement;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Element\Table;
 
 /**
  * Provides a field_ui table element.
- *
- * @RenderElement("field_ui_table")
  */
+#[RenderElement('field_ui_table')]
 class FieldUiTable extends Table {
 
   /**
@@ -227,7 +227,7 @@ class FieldUiTable extends Table {
    *   Array where rendering order has been determined.
    */
   public static function reduceOrder($array, $a) {
-    $array = !$array ? [] : $array;
+    $array = $array ?: [];
     if (!empty($a['name'])) {
       $array[] = $a['name'];
     }

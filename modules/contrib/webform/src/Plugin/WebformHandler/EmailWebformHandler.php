@@ -7,6 +7,7 @@ use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\OptGroup;
 use Drupal\Core\Render\Markup;
+use Drupal\Core\StringTranslation\ByteSizeMarkup;
 use Drupal\Core\Url;
 use Drupal\webform\Element\WebformAjaxElementTrait;
 use Drupal\webform\Element\WebformHtmlEditor;
@@ -19,6 +20,7 @@ use Drupal\webform\Twig\WebformTwigExtension;
 use Drupal\webform\Utility\WebformElementHelper;
 use Drupal\webform\Utility\WebformMailHelper;
 use Drupal\webform\Utility\WebformOptionsHelper;
+use Drupal\webform\Utility\WebformUserHelper;
 use Drupal\webform\WebformSubmissionInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -382,7 +384,7 @@ class EmailWebformHandler extends WebformHandlerBase implements WebformHandlerMe
     // Get roles.
     $roles_element_options = [];
     if ($roles = $this->configFactory->get('webform.settings')->get('mail.roles')) {
-      $role_names = array_map('\Drupal\Component\Utility\Html::escape', user_role_names(TRUE));
+      $role_names = array_map('\Drupal\Component\Utility\Html::escape', WebformUserHelper::getRoleNames(TRUE));
       if (!in_array('authenticated', $roles)) {
         $role_names = array_intersect_key($role_names, array_combine($roles, $roles));
       }
@@ -1064,7 +1066,7 @@ class EmailWebformHandler extends WebformHandlerBase implements WebformHandlerMe
     $emails = array_filter($emails);
     // Make sure all email addresses are unique.
     $emails = array_unique($emails);
-    // Sort email addresses to make it easier to debug queuing and/or sending
+    // Sort email addresses to make it easier to debug queueing and/or sending
     // issues.
     asort($emails);
 
@@ -1561,17 +1563,17 @@ class EmailWebformHandler extends WebformHandlerBase implements WebformHandlerMe
    *   TRUE if the element is required.
    * @param array $element_options
    *   The element options.
-   * @param array $options_options
+   * @param array|null $options_options
    *   The options options.
-   * @param array $role_options
+   * @param array|null $role_options
    *   The (user) role options.
-   * @param array $other_options
+   * @param array|null $other_options
    *   The other options.
    *
    * @return array
    *   A select other element.
    */
-  protected function buildElement($name, $title, $label, $required = FALSE, array $element_options = [], array $options_options = NULL, array $role_options = NULL, array $other_options = NULL) {
+  protected function buildElement($name, $title, $label, $required = FALSE, array $element_options = [], ?array $options_options = NULL, ?array $role_options = NULL, ?array $other_options = NULL) {
     [$element_name, $element_type] = (strpos($name, '_') !== FALSE) ? explode('_', $name) : [$name, 'text'];
 
     $default_option = $this->getDefaultConfigurationValue($name);
@@ -1737,7 +1739,7 @@ class EmailWebformHandler extends WebformHandlerBase implements WebformHandlerMe
       $t_args = [
         '@filename' => $attachment['filename'],
         '@filemime' => $attachment['filemime'],
-        '@filesize' => format_size(mb_strlen($attachment['filecontent'])),
+        '@filesize' => ByteSizeMarkup::create(mb_strlen($attachment['filecontent'])),
       ];
       if (!empty($attachment['_fileurl'])) {
         $t_args[':href'] = $attachment['_fileurl'];

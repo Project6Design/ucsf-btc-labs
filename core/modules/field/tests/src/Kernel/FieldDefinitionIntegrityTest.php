@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel;
 
 use Drupal\Component\Plugin\Discovery\DiscoveryInterface;
@@ -25,7 +27,7 @@ class FieldDefinitionIntegrityTest extends KernelTestBase {
   /**
    * Tests the integrity of field plugin definitions.
    */
-  public function testFieldPluginDefinitionIntegrity() {
+  public function testFieldPluginDefinitionIntegrity(): void {
     // Enable all core modules that provide field plugins, and their
     // dependencies.
     $this->enableModules(
@@ -90,7 +92,7 @@ class FieldDefinitionIntegrityTest extends KernelTestBase {
   /**
    * Tests to load field plugin definitions used in core's existing entities.
    */
-  public function testFieldPluginDefinitionAvailability() {
+  public function testFieldPluginDefinitionAvailability(): void {
     $this->enableModules(
       $this->modulesWithSubdirectory('src' . DIRECTORY_SEPARATOR . 'Entity')
     );
@@ -141,7 +143,7 @@ class FieldDefinitionIntegrityTest extends KernelTestBase {
    * @param string $display_context
    *   Defines which display options should be loaded.
    */
-  protected function checkDisplayOption($entity_type_id, $field_id, BaseFieldDefinition $field_definition, DiscoveryInterface $plugin_manager, $display_context) {
+  protected function checkDisplayOption($entity_type_id, $field_id, BaseFieldDefinition $field_definition, DiscoveryInterface $plugin_manager, $display_context): void {
     $display_options = $field_definition->getDisplayOptions($display_context);
     if (!empty($display_options['type'])) {
       $plugin = $plugin_manager->getDefinition($display_options['type'], FALSE);
@@ -169,7 +171,7 @@ class FieldDefinitionIntegrityTest extends KernelTestBase {
    *   - containing the required $subdirectory
    *   and all modules required by any of these modules.
    */
-  protected function modulesWithSubdirectory($subdirectory) {
+  protected function modulesWithSubdirectory($subdirectory): array {
     $modules = \Drupal::service('extension.list.module')->getList();
     $modules = array_filter($modules, function (Extension $module) use ($subdirectory) {
       // Filter contrib, hidden, already enabled modules and modules in the

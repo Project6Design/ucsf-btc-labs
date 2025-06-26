@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\options\Functional;
 
 use Drupal\field\Entity\FieldConfig;
@@ -7,16 +9,14 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\Tests\field\Functional\FieldTestBase;
 
 /**
- * Tests option fields can be updated and created through config synchronization.
+ * Tests option fields can be updated and created by config synchronization.
  *
  * @group options
  */
 class OptionsFloatFieldImportTest extends FieldTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'node',
@@ -55,7 +55,7 @@ class OptionsFloatFieldImportTest extends FieldTestBase {
   /**
    * Tests that importing list_float fields works.
    */
-  public function testImport() {
+  public function testImport(): void {
     $field_name = 'field_options_float';
     $type = 'options_install_test';
 

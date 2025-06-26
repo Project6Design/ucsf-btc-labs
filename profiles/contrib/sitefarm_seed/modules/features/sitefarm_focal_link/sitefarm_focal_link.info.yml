@@ -1,7 +1,7 @@
 name: 'Focal Link'
 description: 'Focal Link custom block type'
 type: module
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^9 || ^10 || ^11
 dependencies:
   - block
   - block_content

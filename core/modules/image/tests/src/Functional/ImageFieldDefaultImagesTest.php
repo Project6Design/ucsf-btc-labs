@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\image\Functional;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
-use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\File\FileExists;
 use Drupal\field\Entity\FieldConfig;
-use Drupal\file\Entity\File;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\file\Entity\File;
 use Drupal\Tests\EntityViewTrait;
 use Drupal\Tests\TestFileCreationTrait;
 
@@ -26,9 +28,7 @@ class ImageFieldDefaultImagesTest extends ImageFieldTestBase {
   }
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['field_ui'];
 
@@ -40,7 +40,7 @@ class ImageFieldDefaultImagesTest extends ImageFieldTestBase {
   /**
    * Tests CRUD for fields and field storages with default images.
    */
-  public function testDefaultImages() {
+  public function testDefaultImages(): void {
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');
     // Create files to use as the default images.
     $files = $this->drupalGetTestFiles('image');
@@ -48,7 +48,7 @@ class ImageFieldDefaultImagesTest extends ImageFieldTestBase {
     for ($i = 1; $i <= 10; $i++) {
       $filename = $this->randomMachineName() . "$i";
       $desired_filepath = 'public://' . $filename;
-      \Drupal::service('file_system')->copy($files[0]->uri, $desired_filepath, FileSystemInterface::EXISTS_ERROR);
+      \Drupal::service('file_system')->copy($files[0]->uri, $desired_filepath, FileExists::Error);
       $file = File::create(['uri' => $desired_filepath, 'filename' => $filename, 'name' => $filename]);
       $file->save();
     }
@@ -79,7 +79,7 @@ class ImageFieldDefaultImagesTest extends ImageFieldTestBase {
     $widget_settings = [
       'preview_image_style' => 'medium',
     ];
-    $field = $this->createImageField($field_name, 'article', $storage_settings, $field_settings, $widget_settings);
+    $field = $this->createImageField($field_name, 'node', 'article', $storage_settings, $field_settings, $widget_settings);
 
     // The field default image id should be 2.
     $this->assertEquals($default_images['field']->uuid(), $field->getSetting('default_image')['uuid']);
@@ -145,6 +145,27 @@ class ImageFieldDefaultImagesTest extends ImageFieldTestBase {
     $article = $this->drupalCreateNode(['type' => 'article']);
     $article_built = $this->drupalBuildEntityView($article);
     $this->assertEquals($default_images['field']->id(), $article_built[$field_name][0]['#item']->target_id, "A new article node without an image has the expected default image file ID of {$default_images['field']->id()}.");
+    // Confirm that the default image entity _referringItem property is set to
+    // the field item on the article node.
+    $article_default_image_referring_entity = $article_built[$field_name][0]['#item']->entity->_referringItem->getEntity();
+    $this->assertEquals($article->id(), $article_default_image_referring_entity->id());
+
+    // Confirm that the image default is shown for another new article node.
+    $article2 = $this->drupalCreateNode(['type' => 'article']);
+    $article2_built = $this->drupalBuildEntityView($article2);
+    $this->assertEquals($default_images['field']->id(), $article2_built[$field_name][0]['#item']->target_id, "A new article node without an image has the expected default image file ID of {$default_images['field']->id()}.");
+    // Confirm that the default image entity _referringItem property is set to
+    // the field item on the second article node.
+    $article2_default_image_referring_entity = $article2_built[$field_name][0]['#item']->entity->_referringItem->getEntity();
+    $this->assertEquals($article2->id(), $article2_default_image_referring_entity->id());
+    // Confirm that the default image entity _referringItem property on the
+    // first article is still set to the field item on the article node.
+    $article_default_image_referring_entity = $article_built[$field_name][0]['#item']->entity->_referringItem->getEntity();
+    $this->assertEquals($article->id(), $article_default_image_referring_entity->id());
+
+    // Confirm that the _referringItem values for the default image entities on
+    // the two nodes are referring to field items on different nodes.
+    $this->assertNotEquals($article_default_image_referring_entity->id(), $article2_default_image_referring_entity->id());
 
     // Also check that the field renders without warnings when the label is
     // hidden.
@@ -258,7 +279,7 @@ class ImageFieldDefaultImagesTest extends ImageFieldTestBase {
   /**
    * Tests image field and field storage having an invalid default image.
    */
-  public function testInvalidDefaultImage() {
+  public function testInvalidDefaultImage(): void {
     $field_storage = FieldStorageConfig::create([
       'field_name' => $this->randomMachineName(),
       'entity_type' => 'node',

@@ -4,7 +4,9 @@
   "type": "drupal-module",
   "license": "GPL-2.0-or-later",
   "require": {
-    "drupal/core": "^9.4 || ^10.0",
-    "easyrdf/easyrdf": "^0.9 || ^1.0"
+    "drupal/core": "^10.3 || ^11.0"
+  },
+  "require-dev": {
+    "easyrdf/easyrdf": "^1.0 || ^1.1"
   }
 }

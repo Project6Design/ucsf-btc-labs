@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\Render;
 
 use Drupal\Core\Url;
@@ -16,9 +18,7 @@ class UrlBubbleableMetadataBubblingTest extends BrowserTestBase {
   use AssertPageCacheContextsAndTagsTrait;
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['cache_test'];
 
@@ -28,16 +28,9 @@ class UrlBubbleableMetadataBubblingTest extends BrowserTestBase {
   protected $defaultTheme = 'stark';
 
   /**
-   * {@inheritdoc}
-   */
-  protected function setUp(): void {
-    parent::setUp();
-  }
-
-  /**
    * Tests that URL bubbleable metadata is correctly bubbled.
    */
-  public function testUrlBubbleableMetadataBubbling() {
+  public function testUrlBubbleableMetadataBubbling(): void {
     // Test that regular URLs bubble up bubbleable metadata when converted to
     // string.
     $url = Url::fromRoute('cache_test.url_bubbling');

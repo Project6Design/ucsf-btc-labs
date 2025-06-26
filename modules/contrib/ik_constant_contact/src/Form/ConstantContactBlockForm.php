@@ -225,7 +225,9 @@ class ConstantContactBlockForm extends FormBase {
       }
 
       foreach ($list_ids as $id) {
-        $options[$id] = $listConfig['lists_all'][$id]->name;
+        if (isset($listConfig['lists_all'][$id])) {
+          $options[$id] = $listConfig['lists_all'][$id]->name;
+        }
       }
 
       if ($listConfig['lists_user_select'] === 1) {

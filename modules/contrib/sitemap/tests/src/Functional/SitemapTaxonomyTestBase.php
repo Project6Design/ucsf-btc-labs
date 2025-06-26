@@ -6,7 +6,7 @@ use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\field\Traits\EntityReferenceFieldCreationTrait;
 use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 
 /**
@@ -15,7 +15,7 @@ use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
 abstract class SitemapTaxonomyTestBase extends SitemapBrowserTestBase {
 
   use TaxonomyTestTrait;
-  use EntityReferenceTestTrait;
+  use EntityReferenceFieldCreationTrait;
   use StringTranslationTrait;
 
   /**

@@ -4,7 +4,7 @@ namespace Drupal\block\Plugin\migrate\source\d7;
 
 use Drupal\block\Plugin\migrate\source\Block;
 
-// cspell:ignore objectid objectindex
+// cspell:ignore objectid objectindex plid textgroup
 
 /**
  * Drupal 7 i18n block data from database.
@@ -59,7 +59,6 @@ class BlockTranslation extends Block {
 
     // The i18n_string module adds a status column to locale_target. It was
     // originally 'status' in a later revision it was named 'i18n_status'.
-    /** @var \Drupal\Core\Database\Schema $db */
     if ($this->getDatabase()->schema()->fieldExists('locales_target', 'status')) {
       $query->addField('lt', 'status', 'i18n_status');
     }

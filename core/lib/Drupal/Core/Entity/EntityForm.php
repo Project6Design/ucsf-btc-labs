@@ -62,7 +62,7 @@ class EntityForm extends FormBase implements EntityFormInterface {
    * {@inheritdoc}
    */
   public function getBaseFormId() {
-    // Assign ENTITYTYPE_form as base form ID to invoke corresponding
+    // Assign ENTITY_TYPE_form as base form ID to invoke corresponding
     // hook_form_alter(), #validate, #submit, and #theme callbacks, but only if
     // it is different from the actual form ID, since callbacks would be invoked
     // twice otherwise.
@@ -304,7 +304,12 @@ class EntityForm extends FormBase implements EntityFormInterface {
     // properties.
     if (isset($form['#entity_builders'])) {
       foreach ($form['#entity_builders'] as $function) {
-        call_user_func_array($form_state->prepareCallback($function), [$entity->getEntityTypeId(), $entity, &$form, &$form_state]);
+        call_user_func_array($form_state->prepareCallback($function), [
+          $entity->getEntityTypeId(),
+          $entity,
+          &$form,
+          &$form_state,
+        ]);
       }
     }
 

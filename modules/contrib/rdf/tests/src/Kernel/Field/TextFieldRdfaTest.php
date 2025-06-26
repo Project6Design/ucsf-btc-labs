@@ -14,27 +14,30 @@ class TextFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $fieldType = 'text';
+  protected string $fieldType = 'text';
 
   /**
    * The 'value' property value for testing.
    *
    * @var string
    */
-  protected $testValue = 'test_text_value';
+  protected string $testValue = 'test_text_value';
 
   /**
    * The 'summary' property value for testing.
    *
    * @var string
    */
-  protected $testSummary = 'test_summary_value';
+  protected string $testSummary = 'test_summary_value';
 
   /**
    * {@inheritdoc}
    */
   protected static $modules = ['text', 'filter'];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 

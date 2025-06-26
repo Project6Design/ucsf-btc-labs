@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\System;
 
 use Drupal\Core\Test\AssertMailTrait;
@@ -19,9 +21,7 @@ class SiteMaintenanceTest extends BrowserTestBase {
   }
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['node'];
 
@@ -30,6 +30,11 @@ class SiteMaintenanceTest extends BrowserTestBase {
    */
   protected $defaultTheme = 'stark';
 
+  /**
+   * The test user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
   protected $adminUser;
 
   /**
@@ -65,7 +70,7 @@ class SiteMaintenanceTest extends BrowserTestBase {
   /**
    * Verifies site maintenance mode functionality.
    */
-  public function testSiteMaintenance() {
+  public function testSiteMaintenance(): void {
 
     // Verify that permission message is displayed.
     $this->drupalGet(Url::fromRoute('system.site_maintenance_mode'));
@@ -143,7 +148,8 @@ class SiteMaintenanceTest extends BrowserTestBase {
     $this->assertEquals('Site under maintenance', $this->cssSelect('main h1')[0]->getText());
     $this->assertSession()->pageTextContains($offline_message);
 
-    // Verify that custom site offline message is not displayed on user/password.
+    // Verify that custom site offline message is not displayed on
+    // user/password.
     $this->drupalGet('user/password');
     $this->assertSession()->pageTextContains('Username or email address');
 
@@ -175,7 +181,7 @@ class SiteMaintenanceTest extends BrowserTestBase {
   /**
    * Tests responses to non-HTML requests when in maintenance mode.
    */
-  public function testNonHtmlRequest() {
+  public function testNonHtmlRequest(): void {
     $this->drupalLogout();
     \Drupal::state()->set('system.maintenance_mode', TRUE);
     $formats = ['json', 'xml', 'non-existing'];

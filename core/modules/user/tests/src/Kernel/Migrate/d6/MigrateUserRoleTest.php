@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Kernel\Migrate\d6;
 
 use Drupal\migrate\Plugin\MigrationInterface;
@@ -33,7 +35,7 @@ class MigrateUserRoleTest extends MigrateDrupal6TestBase {
    * @param \Drupal\migrate\Plugin\MigrateIdMapInterface $id_map
    *   The migration ID map plugin.
    */
-  public function assertMessages(array $role_data, MigrateIdMapInterface $id_map) {
+  public function assertMessages(array $role_data, MigrateIdMapInterface $id_map): void {
     foreach ($id_map->getMessages() as $message) {
       $permissions = implode("', '", $role_data[$message->dest_id]['invalid']);
       $expected_message = "Permission(s) '" . $permissions . "' not found.";
@@ -46,7 +48,7 @@ class MigrateUserRoleTest extends MigrateDrupal6TestBase {
   /**
    * Asserts there are no duplicate roles.
    */
-  public function assertNoDuplicateRoles() {
+  public function assertNoDuplicateRoles(): void {
     $roles = [
       'anonymous1',
       'authenticated1',
@@ -100,7 +102,7 @@ class MigrateUserRoleTest extends MigrateDrupal6TestBase {
   /**
    * Data provider for user role migration tests.
    */
-  public function providerTestUserRole() {
+  public static function providerTestUserRole() {
     return [
       'filter only' => [
         'modules' => [],
@@ -281,7 +283,7 @@ class MigrateUserRoleTest extends MigrateDrupal6TestBase {
    *
    * @dataProvider providerTestUserRole
    */
-  public function testUserRole(array $modules, array $migrations, array $role_data) {
+  public function testUserRole(array $modules, array $migrations, array $role_data): void {
     if ($modules) {
       // Install modules that have migrations that may provide permissions.
       \Drupal::service('module_installer')->install($modules);

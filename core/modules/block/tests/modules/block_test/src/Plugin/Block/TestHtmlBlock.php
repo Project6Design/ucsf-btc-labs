@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\block_test\Plugin\Block;
 
 use Drupal\Core\Block\Attribute\Block;
@@ -20,8 +22,8 @@ class TestHtmlBlock extends BlockBase {
    */
   public function build() {
     return [
-      '#attributes' => \Drupal::state()->get('block_test.attributes'),
-      '#children' => \Drupal::state()->get('block_test.content'),
+      '#attributes' => \Drupal::keyvalue('block_test')->get('attributes'),
+      '#children' => \Drupal::keyValue('block_test')->get('content'),
     ];
   }
 

@@ -2,6 +2,7 @@
 
 namespace Drupal\social_media_links_field\Plugin\Field\FieldWidget;
 
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\Validator\ConstraintViolationInterface;
@@ -54,8 +55,8 @@ class SocialMediaLinksFieldSelectWidget extends SocialMediaLinksFieldBaseWidget 
   /**
    * {@inheritdoc}
    */
-  public function errorElement(array $element, ConstraintViolationInterface $violation, array $form, FormStateInterface $form_state) {
-    $error_element = NestedArray::getValue($element['platform_element'], $violation->arrayPropertyPath);
+  public function errorElement(array $element, ConstraintViolationInterface $error, array $form, FormStateInterface $form_state) {
+    $error_element = NestedArray::getValue($element['platform_element'], $error->arrayPropertyPath);
     return is_array($error_element) ? $error_element : FALSE;
   }
 

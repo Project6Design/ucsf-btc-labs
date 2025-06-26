@@ -51,12 +51,6 @@ class TestSiteInstallCommand extends Command {
    */
   protected array $originalShutdownCallbacks = [];
 
-  /**
-   * The translation file directory for the test environment.
-   *
-   * This is set in BrowserTestBase::prepareEnvironment().
-   */
-  protected string $translationFilesDirectory;
 
   /**
    * The config importer that can be used in a test.
@@ -101,7 +95,7 @@ class TestSiteInstallCommand extends Command {
       ->addOption('json', NULL, InputOption::VALUE_NONE, 'Output test site connection details in JSON.')
       ->addUsage('--setup-file core/tests/Drupal/TestSite/TestSiteMultilingualInstallTestScript.php --json')
       ->addUsage('--install-profile demo_umami --langcode fr')
-      ->addUsage('--base-url "http://example.com" --db-url "mysql://username:password@localhost/databasename#table_prefix"');
+      ->addUsage('--base-url "http://example.com" --db-url "mysql://username:password@localhost/database_name#table_prefix"');
   }
 
   /**

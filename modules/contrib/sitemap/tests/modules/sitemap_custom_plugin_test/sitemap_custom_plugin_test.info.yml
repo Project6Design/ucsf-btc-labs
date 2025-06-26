@@ -6,7 +6,7 @@ package: Testing
 dependencies:
   - sitemap:sitemap
 
-# Information added by Drupal.org packaging script on 2024-03-03
-version: '8.x-2.0-beta6'
+# Information added by Drupal.org packaging script on 2024-08-28
+version: '8.x-2.0'
 project: 'sitemap'
-datestamp: 1709502116
+datestamp: 1724850104

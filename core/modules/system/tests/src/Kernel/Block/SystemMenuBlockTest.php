@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Kernel\Block;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -11,6 +13,8 @@ use Drupal\Tests\Core\Menu\MenuLinkMock;
 use Drupal\user\Entity\User;
 use Drupal\Core\Routing\RouteObjectInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -27,9 +31,7 @@ use Symfony\Component\Routing\RouteCollection;
 class SystemMenuBlockTest extends KernelTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'system',
@@ -132,14 +134,65 @@ class SystemMenuBlockTest extends KernelTestBase {
     // - 8
     // With link 6 being the only external link.
     $links = [
-      1 => MenuLinkMock::create(['id' => 'test.example1', 'route_name' => 'example1', 'title' => 'foo', 'parent' => '', 'weight' => 0]),
-      2 => MenuLinkMock::create(['id' => 'test.example2', 'route_name' => 'example2', 'title' => 'bar', 'parent' => '', 'route_parameters' => ['foo' => 'bar'], 'weight' => 1]),
-      3 => MenuLinkMock::create(['id' => 'test.example3', 'route_name' => 'example3', 'title' => 'baz', 'parent' => 'test.example2', 'weight' => 2]),
-      4 => MenuLinkMock::create(['id' => 'test.example4', 'route_name' => 'example4', 'title' => 'qux', 'parent' => 'test.example3', 'weight' => 3]),
-      5 => MenuLinkMock::create(['id' => 'test.example5', 'route_name' => 'example5', 'title' => 'foofoo', 'parent' => '', 'expanded' => TRUE, 'weight' => 4]),
-      6 => MenuLinkMock::create(['id' => 'test.example6', 'route_name' => '', 'url' => 'https://www.drupal.org/', 'title' => 'barbar', 'parent' => '', 'weight' => 5]),
-      7 => MenuLinkMock::create(['id' => 'test.example7', 'route_name' => 'example7', 'title' => 'bazbaz', 'parent' => 'test.example5', 'weight' => 6]),
-      8 => MenuLinkMock::create(['id' => 'test.example8', 'route_name' => 'example8', 'title' => 'quxqux', 'parent' => '', 'weight' => 7]),
+      1 => MenuLinkMock::create([
+        'id' => 'test.example1',
+        'route_name' => 'example1',
+        'title' => 'foo',
+        'parent' => '',
+        'weight' => 0,
+      ]),
+      2 => MenuLinkMock::create([
+        'id' => 'test.example2',
+        'route_name' => 'example2',
+        'title' => 'bar',
+        'parent' => '',
+        'route_parameters' => ['foo' => 'bar'],
+        'weight' => 1,
+      ]),
+      3 => MenuLinkMock::create([
+        'id' => 'test.example3',
+        'route_name' => 'example3',
+        'title' => 'baz',
+        'parent' => 'test.example2',
+        'weight' => 2,
+      ]),
+      4 => MenuLinkMock::create([
+        'id' => 'test.example4',
+        'route_name' => 'example4',
+        'title' => 'qux',
+        'parent' => 'test.example3',
+        'weight' => 3,
+      ]),
+      5 => MenuLinkMock::create([
+        'id' => 'test.example5',
+        'route_name' => 'example5',
+        'title' => 'title5',
+        'parent' => '',
+        'expanded' => TRUE,
+        'weight' => 4,
+      ]),
+      6 => MenuLinkMock::create([
+        'id' => 'test.example6',
+        'route_name' => '',
+        'url' => 'https://www.drupal.org/',
+        'title' => 'bar_bar',
+        'parent' => '',
+        'weight' => 5,
+      ]),
+      7 => MenuLinkMock::create([
+        'id' => 'test.example7',
+        'route_name' => 'example7',
+        'title' => 'title7',
+        'parent' => 'test.example5',
+        'weight' => 6,
+      ]),
+      8 => MenuLinkMock::create([
+        'id' => 'test.example8',
+        'route_name' => 'example8',
+        'title' => 'title8',
+        'parent' => '',
+        'weight' => 7,
+      ]),
     ];
     foreach ($links as $instance) {
       $this->menuLinkManager->addDefinition($instance->getPluginId(), $instance->getPluginDefinition());
@@ -149,7 +202,7 @@ class SystemMenuBlockTest extends KernelTestBase {
   /**
    * Tests calculation of a system menu block's configuration dependencies.
    */
-  public function testSystemMenuBlockConfigDependencies() {
+  public function testSystemMenuBlockConfigDependencies(): void {
 
     $block = Block::create([
       'plugin' => 'system_menu_block:' . $this->menu->id(),
@@ -176,7 +229,7 @@ class SystemMenuBlockTest extends KernelTestBase {
   /**
    * Tests the config start level and depth.
    */
-  public function testConfigLevelDepth() {
+  public function testConfigLevelDepth(): void {
     // Helper function to generate a configured block instance.
     $place_block = function ($level, $depth) {
       return $this->blockManager->createInstance('system_menu_block:' . $this->menu->id(), [
@@ -190,13 +243,13 @@ class SystemMenuBlockTest extends KernelTestBase {
 
     // All the different block instances we're going to test.
     $blocks = [
-      'all' => $place_block(1, 0),
+      'all' => $place_block(1, NULL),
       'level_1_only' => $place_block(1, 1),
       'level_2_only' => $place_block(2, 1),
       'level_3_only' => $place_block(3, 1),
-      'level_1_and_beyond' => $place_block(1, 0),
-      'level_2_and_beyond' => $place_block(2, 0),
-      'level_3_and_beyond' => $place_block(3, 0),
+      'level_1_and_beyond' => $place_block(1, NULL),
+      'level_2_and_beyond' => $place_block(2, NULL),
+      'level_3_and_beyond' => $place_block(3, NULL),
     ];
 
     // Scenario 1: test all block instances when there's no active trail.
@@ -233,6 +286,7 @@ class SystemMenuBlockTest extends KernelTestBase {
     $request = new Request();
     $request->attributes->set(RouteObjectInterface::ROUTE_NAME, 'example3');
     $request->attributes->set(RouteObjectInterface::ROUTE_OBJECT, $route);
+    $request->setSession(new Session(new MockArraySessionStorage()));
     $this->container->get('request_stack')->push($request);
     // \Drupal\Core\Menu\MenuActiveTrail uses the cache collector pattern, which
     // includes static caching. Since this second scenario simulates a second
@@ -286,13 +340,20 @@ class SystemMenuBlockTest extends KernelTestBase {
    *
    * @dataProvider configExpandedTestCases
    */
-  public function testConfigExpanded($active_route, $menu_block_level, $expected_items) {
+  public function testConfigExpanded($active_route, $menu_block_level, $expected_items): void {
+    // Replace the path.matcher service so it always returns FALSE when
+    // checking whether a route is the front page. Otherwise, the default
+    // service throws an exception when checking routes because all of these
+    // are mocked.
+    $service_definition = $this->container->getDefinition('path.matcher');
+    $service_definition->setClass(StubPathMatcher::class);
+
     $block = $this->blockManager->createInstance('system_menu_block:' . $this->menu->id(), [
       'region' => 'footer',
       'id' => 'machine_name',
       'theme' => 'stark',
       'level' => $menu_block_level,
-      'depth' => 0,
+      'depth' => NULL,
       'expand_all_items' => TRUE,
     ]);
 
@@ -300,6 +361,7 @@ class SystemMenuBlockTest extends KernelTestBase {
     $request = new Request();
     $request->attributes->set(RouteObjectInterface::ROUTE_NAME, $active_route);
     $request->attributes->set(RouteObjectInterface::ROUTE_OBJECT, $route);
+    $request->setSession(new Session(new MockArraySessionStorage()));
     $this->container->get('request_stack')->push($request);
 
     $block_build = $block->build();
@@ -309,8 +371,9 @@ class SystemMenuBlockTest extends KernelTestBase {
 
   /**
    * @return array
+   *   An array of test cases for the config expanded option.
    */
-  public function configExpandedTestCases() {
+  public static function configExpandedTestCases() {
     return [
       'All levels' => [
         'example5',

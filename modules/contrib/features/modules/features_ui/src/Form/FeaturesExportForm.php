@@ -378,7 +378,9 @@ class FeaturesExportForm extends FormBase implements TrustedCallbackInterface {
     foreach ($package->getDependencies() as $dependency) {
       $package_config['dependencies'][] = [
         'name' => $dependency,
-        'label' => $this->moduleHandler->moduleExists($dependency) ? $this->moduleHandler->getName($dependency) : $dependency,
+        'label' => $this->moduleHandler->moduleExists($dependency) 
+                  ? $this->moduleList->getName($dependency) 
+                  : $dependency,
         'class' => '',
       ];
     }

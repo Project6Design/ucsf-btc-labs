@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\node\Functional;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 
@@ -16,10 +19,10 @@ use Drupal\Tests\BrowserTestBase;
  */
 class NodeTypeTranslationTest extends BrowserTestBase {
 
+  use StringTranslationTrait;
+
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'block',
@@ -102,7 +105,7 @@ class NodeTypeTranslationTest extends BrowserTestBase {
   /**
    * Tests the node type translation.
    */
-  public function testNodeTypeTranslation() {
+  public function testNodeTypeTranslation(): void {
     $type = $this->randomMachineName(16);
     $name = $this->randomString();
     $this->drupalLogin($this->adminUser);
@@ -115,7 +118,8 @@ class NodeTypeTranslationTest extends BrowserTestBase {
       "translation[config_names][node.type.$type][name]" => $translated_name,
     ];
 
-    // Edit the title label to avoid having an exception when we save the translation.
+    // Edit the title label to avoid having an exception when we save the
+    // translation.
     $this->drupalGet("admin/structure/types/manage/{$type}/translate/{$langcode}/add");
     $this->submitForm($edit, 'Save translation');
 
@@ -125,7 +129,7 @@ class NodeTypeTranslationTest extends BrowserTestBase {
     $this->drupalGet("$langcode/node/add/$type");
     // This is a Spanish page, so ensure the text asserted is translated in
     // Spanish and not French by adding the langcode option.
-    $this->assertSession()->responseContains(t('Create @name', ['@name' => $translated_name], ['langcode' => $langcode]));
+    $this->assertSession()->responseContains($this->t('Create @name', ['@name' => $translated_name], ['langcode' => $langcode]));
 
     // Check the name is translated with admin theme for editing.
     $this->drupalGet('admin/appearance');
@@ -133,13 +137,13 @@ class NodeTypeTranslationTest extends BrowserTestBase {
     $this->drupalGet("$langcode/node/add/$type");
     // This is a Spanish page, so ensure the text asserted is translated in
     // Spanish and not French by adding the langcode option.
-    $this->assertSession()->responseContains(t('Create @name', ['@name' => $translated_name], ['langcode' => $langcode]));
+    $this->assertSession()->responseContains($this->t('Create @name', ['@name' => $translated_name], ['langcode' => $langcode]));
   }
 
   /**
    * Tests the node type title label translation.
    */
-  public function testNodeTypeTitleLabelTranslation() {
+  public function testNodeTypeTitleLabelTranslation(): void {
     $type = $this->randomMachineName(16);
     $name = $this->randomString();
     $this->drupalLogin($this->adminUser);
@@ -150,7 +154,8 @@ class NodeTypeTranslationTest extends BrowserTestBase {
     $this->drupalGet("admin/structure/types/manage/{$type}");
     $this->submitForm(['title_label' => 'Edited title'], 'Save');
 
-    // Assert that the title label is displayed on the translation form with the right value.
+    // Assert that the title label is displayed on the translation form with the
+    // right value.
     $this->drupalGet("admin/structure/types/manage/$type/translate/$langcode/add");
     $this->assertSession()->pageTextContains('Edited title');
 
@@ -168,13 +173,14 @@ class NodeTypeTranslationTest extends BrowserTestBase {
 
     // Add an email field.
     $this->drupalGet("admin/structure/types/manage/{$type}/fields/add-field");
+    $this->clickLink('Email');
+    $this->submitForm([], 'Continue');
     $this->submitForm([
-      'new_storage_type' => 'email',
       'label' => 'Email',
       'field_name' => 'email',
     ], 'Continue');
     $this->submitForm([], 'Update settings');
-    $this->submitForm([], 'Save settings');
+    $this->submitForm([], 'Save');
 
     $type = $this->randomMachineName(16);
     $name = $this->randomString();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\KernelTests\Core\Theme;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -40,7 +42,7 @@ class FrontMatterTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function register(ContainerBuilder $container) {
+  public function register(ContainerBuilder $container): void {
     parent::register($container);
 
     $definition = new Definition(FilesystemLoader::class, [[sys_get_temp_dir()]]);
@@ -70,7 +72,7 @@ class FrontMatterTest extends KernelTestBase {
    * @covers \Drupal\Core\Template\TwigEnvironment::getTemplateMetadata
    * @covers \Drupal\Component\FrontMatter\Exception\FrontMatterParseException
    */
-  public function testFrontMatterBroken() {
+  public function testFrontMatterBroken(): void {
     $source = "---\ncollection:\n-  key: foo\n  foo: bar\n---\n" . ComponentFrontMatterTest::SOURCE;
     $file = $this->createTwigTemplate($source);
     $this->expectException(SyntaxError::class);
@@ -93,7 +95,7 @@ class FrontMatterTest extends KernelTestBase {
    *
    * @dataProvider \Drupal\Tests\Component\FrontMatter\FrontMatterTest::providerFrontMatterData
    */
-  public function testFrontMatter($yaml, $line, $content = ComponentFrontMatterTest::SOURCE) {
+  public function testFrontMatter($yaml, $line, $content = ComponentFrontMatterTest::SOURCE): void {
     // Create a temporary Twig template.
     $source = ComponentFrontMatterTest::createFrontMatterSource($yaml, $content);
     $file = $this->createTwigTemplate($source);
@@ -101,7 +103,7 @@ class FrontMatterTest extends KernelTestBase {
 
     // Ensure the proper metadata is returned.
     $metadata = $this->twig->getTemplateMetadata($name);
-    $this->assertEquals($yaml === NULL ? [] : $yaml, $metadata);
+    $this->assertEquals($yaml ?? [], $metadata);
 
     // Ensure the metadata is never rendered.
     $output = $this->twig->load($name)->render();

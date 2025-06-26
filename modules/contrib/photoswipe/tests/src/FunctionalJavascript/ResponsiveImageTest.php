@@ -2,10 +2,8 @@
 
 namespace Drupal\Tests\photoswipe\FunctionalJavascript;
 
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\file\Entity\File;
-use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
-use Drupal\media\Entity\Media;
-use Drupal\node\Entity\Node;
 use Drupal\Tests\TestFileCreationTrait;
 
 /**
@@ -13,7 +11,7 @@ use Drupal\Tests\TestFileCreationTrait;
  *
  * @group photoswipe
  */
-class ResponsiveImageTest extends WebDriverTestBase {
+class ResponsiveImageTest extends PhotoswipeJsTestBase {
   use TestFileCreationTrait;
 
   /**
@@ -22,27 +20,8 @@ class ResponsiveImageTest extends WebDriverTestBase {
    * @var array
    */
   protected static $modules = [
-    'photoswipe_responsive_image_setup',
+    'responsive_image',
   ];
-
-  /**
-   * A user with admin permissions.
-   *
-   * @var \Drupal\Core\Session\AccountInterface
-   */
-  protected $adminUser;
-
-  /**
-   * A user with authenticated permissions.
-   *
-   * @var \Drupal\Core\Session\AccountInterface
-   */
-  protected $user;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected $defaultTheme = 'stark';
 
   /**
    * {@inheritdoc}
@@ -50,43 +29,50 @@ class ResponsiveImageTest extends WebDriverTestBase {
   protected function setUp(): void {
     parent::setUp();
 
-    $this->adminUser = $this->drupalCreateUser();
-    $this->adminUser->addRole($this->createAdminRole('admin', 'admin'));
-    $this->adminUser->save();
-    $this->drupalLogin($this->adminUser);
+    $this->createImageField(
+      'field_responsive_image',
+      'node',
+      'article',
+      ['cardinality' => FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED],
+      [],
+      [],
+      [
+        'photoswipe_thumbnail_style_first' => '',
+        'photoswipe_thumbnail_style' => '',
+        'photoswipe_image_style' => '',
+        'photoswipe_reference_image_field' => '',
+        'photoswipe_view_mode' => '',
+      ],
+      'photoswipe_responsive_field_formatter',
+    );
   }
 
+  /**
+   * Sets up a node containing an image field with the responsive formatter.
+   *
+   * @todo Move to PhotoswipeTestBase and adjust Media and Image tests.
+   */
   protected function setupNodeDisplayingImage() {
     $images = $this->getTestFiles('image');
-    $medias = [];
+    $fileFieldEntries = [];
     for ($i = 0; $i < 3; $i++) {
       $file = File::create([
         'uri' => $images[$i]->uri,
       ]);
       $file->save();
-
-      $media = Media::create([
-        'bundle' => 'image',
-        'name' => 'Test Image Media',
-        'field_media_image' => [
-          [
-            'target_id' => $file->id(),
-            'alt' => "count-$i",
-            'title' => 'default title',
-          ],
-        ],
-      ]);
-      $media->save();
-      $medias[] = $media;
+      $fileFieldEntries[] = [
+        'target_id' => $file->id(),
+        'alt' => 'count-' . $i,
+        'title' => '',
+      ];
     }
 
-    $node = Node::create([
+    $node = $this->createNode([
       'title' => 'Test',
-      'type' => 'node',
-      'field_responsive_image' => $medias,
+      'type' => 'article',
+      'field_responsive_image' => $fileFieldEntries,
     ]);
     $node->save();
-
   }
 
   /**
@@ -95,22 +81,27 @@ class ResponsiveImageTest extends WebDriverTestBase {
   public function testPhotoswipeResponsiveHideOption() {
     $session = $this->assertSession();
     $this->container->get('config.factory')
-      ->getEditable('core.entity_view_display.node.node.default')
-      ->set('content.field_responsive_image.settings.photoswipe_node_style', 'hide')
-      ->set('content.field_responsive_image.settings.photoswipe_node_style_first', 'wide')
+      ->getEditable('core.entity_view_display.node.article.default')
+      ->set('content.field_responsive_image.settings.photoswipe_thumbnail_style', 'hide')
+      ->set('content.field_responsive_image.settings.photoswipe_thumbnail_style_first', 'wide')
       ->save();
 
     $this->setupNodeDisplayingImage();
 
     $this->drupalGet('/node/1');
-    $session->waitForElement('css', '.photoswipe-gallery');
-    $session->elementExists('css', '.photoswipe-gallery a img[alt="count-0"]');
-    $session->elementNotExists('css', '.photoswipe-gallery a img[alt="count-1"]');
-    $session->elementNotExists('css', '.photoswipe-gallery a img[alt="count-2"]');
+    $this->assertNotNull($session->waitForElement('css', '.photoswipe-gallery'));
+    $session->elementExists('css', 'div.photoswipe-gallery a.photoswipe');
+    // We have 3 field items, so 3 anchor tags should exist:
+    $session->elementsCount('css', 'div.photoswipe-gallery a.photoswipe', 3);
+    // Only the first image element should exist, as the other two should be
+    // unset:
+    $session->elementExists('css', 'div.photoswipe-gallery a.photoswipe img[alt="count-0"]');
+    $session->elementNotExists('css', 'div.photoswipe-gallery a.photoswipe img[alt="count-1"]');
+    $session->elementNotExists('css', 'div.photoswipe-gallery a.photoswipe img[alt="count-2"]');
 
     $this->getSession()->getPage()->find('css', '.photoswipe-gallery a.photoswipe:not(.hidden)')->click();
-    $session->waitForElementVisible('css', '.pswp');
-    $session->elementsCount('css', '.pswp .pswp__container .pswp__item', 3);
+    $this->assertNotNull($session->waitForElementVisible('css', '.pswp'));
+    $session->elementExists('css', '#pswp__items img.pswp__img');
     $session->elementTextEquals('css', '.pswp .pswp__scroll-wrap .pswp__counter', '1 / 3');
   }
 
@@ -120,22 +111,27 @@ class ResponsiveImageTest extends WebDriverTestBase {
   public function testPhotoswipeResponsiveHideFirstOption() {
     $session = $this->assertSession();
     $this->container->get('config.factory')
-      ->getEditable('core.entity_view_display.node.node.default')
-      ->set('content.field_responsive_image.settings.photoswipe_node_style', 'wide')
-      ->set('content.field_responsive_image.settings.photoswipe_node_style_first', 'hide')
+      ->getEditable('core.entity_view_display.node.article.default')
+      ->set('content.field_responsive_image.settings.photoswipe_thumbnail_style', 'wide')
+      ->set('content.field_responsive_image.settings.photoswipe_thumbnail_style_first', 'hide')
       ->save();
 
     $this->setupNodeDisplayingImage();
 
     $this->drupalGet('/node/1');
-    $session->waitForElement('css', '.photoswipe-gallery');
-    $session->elementNotExists('css', '.photoswipe-gallery a img[alt="count-0"]');
-    $session->elementExists('css', '.photoswipe-gallery a img[alt="count-1"]');
-    $session->elementExists('css', '.photoswipe-gallery a img[alt="count-2"]');
+    $this->assertNotNull($session->waitForElement('css', '.photoswipe-gallery'));
+    $session->elementExists('css', 'div.photoswipe-gallery a.photoswipe');
+    // We have 3 field items, so 3 anchor tags should exist:
+    $session->elementsCount('css', 'div.photoswipe-gallery a.photoswipe', 3);
+    // Only the last two image element should exist, as the other one should be
+    // unset:
+    $session->elementNotExists('css', 'div.photoswipe-gallery a.photoswipe img[alt="count-0"]');
+    $session->elementExists('css', 'div.photoswipe-gallery a.photoswipe img[alt="count-1"]');
+    $session->elementExists('css', 'div.photoswipe-gallery a.photoswipe img[alt="count-2"]');
 
-    $this->getSession()->getPage()->find('css', '.photoswipe-gallery a.photoswipe:not(.hidden)')->click();
+    $this->getSession()->getPage()->find('css', 'div.photoswipe-gallery > div > div:nth-child(2) > a.photoswipe:not(.hidden)')->click();
     $session->waitForElementVisible('css', '.pswp');
-    $session->elementsCount('css', '.pswp .pswp__container .pswp__item', 3);
+    $session->elementExists('css', '#pswp__items img.pswp__img');
     $session->elementTextEquals('css', '.pswp .pswp__scroll-wrap .pswp__counter', '2 / 3');
   }
 

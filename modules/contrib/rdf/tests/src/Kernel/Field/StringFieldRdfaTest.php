@@ -14,22 +14,25 @@ class StringFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $fieldType = 'string';
+  protected string $fieldType = 'string';
 
   /**
    * The 'value' property value for testing.
    *
    * @var string
    */
-  protected $testValue = 'test_text_value';
+  protected string $testValue = 'test_text_value';
 
   /**
    * The 'summary' property value for testing.
    *
    * @var string
    */
-  protected $testSummary = 'test_summary_value';
+  protected string $testSummary = 'test_summary_value';
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
 
@@ -50,7 +53,7 @@ class StringFieldRdfaTest extends FieldRdfaTestBase {
   /**
    * Tests string formatters.
    */
-  public function testStringFormatters() {
+  public function testStringFormatters(): void {
     // Tests the string formatter.
     $this->assertFormatterRdfa(['type' => 'string'], 'http://schema.org/text', ['value' => $this->testValue]);
   }

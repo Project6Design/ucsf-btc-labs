@@ -21,7 +21,10 @@ function linkit_help($route_name, RouteMatchInterface $route_match) {
       $output .= '<h3>' . t('Uses') . '</h3>';
       $output .= '<dl>';
       $output .= '<dt>' . t('Managing Linkit profiles') . '</dt>';
-      $output .= '<dd>' . t('You can create and edit Linkit profiles on the <a href=":profiles">Linkit profile page</a>. You can create a Linkit profile by clicking "<a href=":add_profile">Add profile</a>".', [':profiles' => Url::fromRoute('entity.linkit_profile.collection')->toString(), ':add_profile' => Url::fromRoute('entity.linkit_profile.add_form')->toString()]) . '</dd>';
+      $output .= '<dd>' . t('You can create and edit Linkit profiles on the <a href=":profiles">Linkit profile page</a>. You can create a Linkit profile by clicking "<a href=":add_profile">Add profile</a>".', [
+        ':profiles' => Url::fromRoute('entity.linkit_profile.collection')->toString(),
+        ':add_profile' => Url::fromRoute('entity.linkit_profile.add_form')->toString(),
+      ]) . '</dd>';
       $output .= '</dl>';
       return $output;
 
@@ -33,15 +36,6 @@ function linkit_help($route_name, RouteMatchInterface $route_match) {
     case 'linkit.matchers':
       $output = '<p>' . t('Matchers defines how different data can be queried and displayed in the autocomplete suggestion list. Multiple matchers of the same type can be used at the same time to granulate the suggestions. The order of the added matchers defines in which order the suggestions will be presented.') . '</p>';
       return $output;
-  }
-}
-
-/**
- * Implements hook_ckeditor_plugin_info_alter().
- */
-function linkit_ckeditor_plugin_info_alter(array &$plugins) {
-  if (isset($plugins['drupallink'])) {
-    $plugins['drupallink']['class'] = "Drupal\\linkit\\Plugin\\CKEditorPlugin\\LinkitDrupalLink";
   }
 }
 

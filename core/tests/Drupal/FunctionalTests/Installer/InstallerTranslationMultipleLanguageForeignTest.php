@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 /**
@@ -24,7 +26,7 @@ class InstallerTranslationMultipleLanguageForeignTest extends InstallerTranslati
   /**
    * {@inheritdoc}
    */
-  protected function setUpLanguage() {
+  protected function setUpLanguage(): void {
     parent::setUpLanguage();
     $this->translations['Save and continue'] = 'Save and continue de';
   }

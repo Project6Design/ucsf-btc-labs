@@ -38,10 +38,13 @@ function block_exclude_pages_blockhelptext() {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function block_exclude_pages_form_block_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-  $description = block_exclude_pages_blockhelptext();
-  $currenthelper = $form['visibility']['request_path']['pages']['#description'];
-  $form['visibility']['request_path']['pages']['#description'] = $currenthelper . $description;
+function block_exclude_pages_form_block_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // Check if the necessary array keys exist before accessing them
+  if (isset($form['visibility']['request_path']['pages']['#description'])) {
+    $description = block_exclude_pages_blockhelptext();
+    $currenthelper = $form['visibility']['request_path']['pages']['#description'];
+    $form['visibility']['request_path']['pages']['#description'] = $currenthelper . $description;
+  }
 }
 
 /**

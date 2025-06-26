@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\block\Functional;
 
 use Drupal\Component\Utility\Html;
@@ -7,20 +9,18 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\language\Plugin\LanguageNegotiation\LanguageNegotiationUrl;
 use Drupal\Tests\BrowserTestBase;
 
-// cspell:ignore scriptalertxsssubjectscript
+// cspell:ignore displaymessage scriptalertxsssubjectscript
+// cspell:ignore testcontextawareblock
 
 /**
  * Tests that the block configuration UI exists and stores data correctly.
  *
  * @group block
- * @group #slow
  */
 class BlockUiTest extends BrowserTestBase {
 
   /**
-   * Modules to install.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'block',
@@ -33,8 +33,6 @@ class BlockUiTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
-
-  protected $regions;
 
   /**
    * The submitted block values used by this test.
@@ -52,6 +50,8 @@ class BlockUiTest extends BrowserTestBase {
 
   /**
    * An administrative user to configure the test environment.
+   *
+   * @var \Drupal\user\Entity\User|false
    */
   protected $adminUser;
 
@@ -93,7 +93,7 @@ class BlockUiTest extends BrowserTestBase {
   /**
    * Tests block demo page exists and functions correctly.
    */
-  public function testBlockDemoUiPage() {
+  public function testBlockDemoUiPage(): void {
     $this->drupalPlaceBlock('help_block', ['region' => 'help']);
     $this->drupalGet('admin/structure/block');
     $this->clickLink('Demonstrate block regions (Stark)');
@@ -127,7 +127,7 @@ class BlockUiTest extends BrowserTestBase {
   /**
    * Tests block admin page exists and functions correctly.
    */
-  public function testBlockAdminUiPage() {
+  public function testBlockAdminUiPage(): void {
     // Visit the blocks admin ui.
     $this->drupalGet('admin/structure/block');
     // Look for the blocks table.
@@ -190,7 +190,7 @@ class BlockUiTest extends BrowserTestBase {
   /**
    * Tests the block categories on the listing page.
    */
-  public function testCandidateBlockList() {
+  public function testCandidateBlockList(): void {
     $this->drupalGet('admin/structure/block');
     $this->clickLink('Place block');
     $this->assertSession()->elementExists('xpath', '//tr[.//td/div[text()="Display message"] and .//td[text()="Block test"] and .//td//a[contains(@href, "admin/structure/block/add/test_block_instantiation/stark")]]');
@@ -207,7 +207,7 @@ class BlockUiTest extends BrowserTestBase {
   /**
    * Tests the behavior of unsatisfied context-aware blocks.
    */
-  public function testContextAwareUnsatisfiedBlocks() {
+  public function testContextAwareUnsatisfiedBlocks(): void {
     $this->drupalGet('admin/structure/block');
     $this->clickLink('Place block');
     // Verify that the context-aware test block does not appear.
@@ -220,7 +220,7 @@ class BlockUiTest extends BrowserTestBase {
   /**
    * Tests the behavior of context-aware blocks.
    */
-  public function testContextAwareBlocks() {
+  public function testContextAwareBlocks(): void {
     $expected_text = '<div id="test_context_aware--username">' . \Drupal::currentUser()->getAccountName() . '</div>';
     $this->drupalGet('');
     $this->assertSession()->pageTextNotContains('Test context-aware block');
@@ -246,9 +246,9 @@ class BlockUiTest extends BrowserTestBase {
     $this->assertSession()->responseContains($expected_text);
 
     // Test context mapping form element is not visible if there are no valid
-    // context options for the block (the test_context_aware_no_valid_context_options
-    // block has one context defined which is not available for it on the
-    // Block Layout interface).
+    // context options for the block (the
+    // test_context_aware_no_valid_context_options block has one context defined
+    // which is not available for it on the Block Layout interface).
     $this->drupalGet('admin/structure/block/add/test_context_aware_no_valid_context_options/stark');
     $this->assertSession()->fieldNotExists('edit-settings-context-mapping-email');
 
@@ -271,7 +271,7 @@ class BlockUiTest extends BrowserTestBase {
   /**
    * Tests that the BlockForm populates machine name correctly.
    */
-  public function testMachineNameSuggestion() {
+  public function testMachineNameSuggestion(): void {
     // Check the form uses the raw machine name suggestion when no instance
     // already exists.
     $url = 'admin/structure/block/add/test_block_instantiation/stark';
@@ -297,7 +297,7 @@ class BlockUiTest extends BrowserTestBase {
   /**
    * Tests the block placement indicator.
    */
-  public function testBlockPlacementIndicator() {
+  public function testBlockPlacementIndicator(): void {
     // Test the block placement indicator with using the domain as URL language
     // indicator. This causes destination query parameters to be absolute URLs.
     \Drupal::service('module_installer')->install(['language', 'locale']);
@@ -335,25 +335,23 @@ class BlockUiTest extends BrowserTestBase {
     // block placement indicator. Click the first 'Place block' link to bring up
     // the list of blocks to place in the first available region.
     $this->clickLink('Place block');
-    // Select the first available block, which is the 'test_xss_title' plugin,
-    // with a default machine name 'scriptalertxsssubjectscript' that is used
+    // Select the first available block, which is the 'test_block_instantiation'
+    // plugin, with a default machine name 'stark-displaymessage' that is used
     // for the 'block-placement' querystring parameter.
     $this->clickLink('Place block');
     $this->submitForm([], 'Save block');
-    $this->assertSession()->addressEquals('admin/structure/block/list/stark?block-placement=stark-scriptalertxsssubjectscript');
+    $this->assertSession()->addressEquals('admin/structure/block/list/stark?block-placement=stark-displaymessage');
 
     // Removing a block will remove the block placement indicator.
     $this->clickLink('Remove');
     $this->submitForm([], 'Remove');
-    // @todo https://www.drupal.org/project/drupal/issues/2980527 this should be
-    //   'admin/structure/block/list/stark' but there is a bug.
-    $this->assertSession()->addressEquals('admin/structure/block');
+    $this->assertSession()->addressEquals('admin/structure/block/list/stark');
   }
 
   /**
    * Tests if validation errors are passed plugin form to the parent form.
    */
-  public function testBlockValidateErrors() {
+  public function testBlockValidateErrors(): void {
     $this->drupalGet('admin/structure/block/add/test_settings_validation/stark');
     $this->submitForm([
       'region' => 'content',
@@ -367,7 +365,7 @@ class BlockUiTest extends BrowserTestBase {
   /**
    * Tests that the enable/disable routes are protected from CSRF.
    */
-  public function testRouteProtection() {
+  public function testRouteProtection(): void {
     // Get the first block generated in our setUp method.
     /** @var \Drupal\block\BlockInterface $block */
     $block = reset($this->blocks);
@@ -381,7 +379,7 @@ class BlockUiTest extends BrowserTestBase {
   /**
    * Tests that users without permission are not able to view broken blocks.
    */
-  public function testBrokenBlockVisibility() {
+  public function testBrokenBlockVisibility(): void {
     $assert_session = $this->assertSession();
 
     $block = $this->drupalPlaceBlock('broken');
@@ -395,14 +393,14 @@ class BlockUiTest extends BrowserTestBase {
     $this->drupalGet('');
     $assert_session->statusCodeEquals(200);
     // Check that this user can view the Broken Block message.
-    $assert_session->pageTextContains('This block is broken or missing. You may be missing content or you might need to enable the original module.');
+    $assert_session->pageTextContains('This block is broken or missing. You may be missing content or you might need to install the original module.');
     $this->drupalLogout();
 
     // Visit the same page as anonymous.
     $this->drupalGet('');
     $assert_session->statusCodeEquals(200);
     // Check that this user cannot view the Broken Block message.
-    $assert_session->pageTextNotContains('This block is broken or missing. You may be missing content or you might need to enable the original module.');
+    $assert_session->pageTextNotContains('This block is broken or missing. You may be missing content or you might need to install the original module.');
 
     // Visit same page as an authorized user that does not have access to
     // administer blocks.
@@ -410,7 +408,7 @@ class BlockUiTest extends BrowserTestBase {
     $this->drupalGet('');
     $assert_session->statusCodeEquals(200);
     // Check that this user cannot view the Broken Block message.
-    $assert_session->pageTextNotContains('This block is broken or missing. You may be missing content or you might need to enable the original module.');
+    $assert_session->pageTextNotContains('This block is broken or missing. You may be missing content or you might need to install the original module.');
   }
 
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\user\Functional;
 
 use Drupal\Core\Test\AssertMailTrait;
@@ -19,9 +21,7 @@ class UserAdminTest extends BrowserTestBase {
   }
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['taxonomy', 'views'];
 
@@ -46,7 +46,7 @@ class UserAdminTest extends BrowserTestBase {
   /**
    * Registers a user and deletes it.
    */
-  public function testUserAdmin() {
+  public function testUserAdmin(): void {
     $config = $this->config('user.settings');
     $user_a = $this->drupalCreateUser();
     $user_a->name = 'User A';
@@ -75,7 +75,10 @@ class UserAdminTest extends BrowserTestBase {
     $this->assertSession()->pageTextContains($admin_user->getAccountName());
 
     // Test for existence of edit link in table.
-    $link = $user_a->toLink('Edit', 'edit-form', ['query' => ['destination' => $user_a->toUrl('collection')->toString()]])->toString();
+    $link = $user_a->toLink('Edit', 'edit-form', [
+      'query' => ['destination' => $user_a->toUrl('collection')->toString()],
+      'attributes' => ['aria-label' => 'Edit ' . $user_a->label()],
+    ])->toString();
     $this->assertSession()->responseContains($link);
 
     // Test exposed filter elements.
@@ -132,7 +135,6 @@ class UserAdminTest extends BrowserTestBase {
     $this->submitForm($edit, 'Apply to selected items');
     $site_name = $this->config('system.site')->get('name');
     $this->assertMailString('body', 'Your account on ' . $site_name . ' has been blocked.', 1, 'Blocked message found in the mail sent to user C.');
-    $user_storage->resetCache([$user_c->id()]);
     $account = $user_storage->load($user_c->id());
     $this->assertTrue($account->isBlocked(), 'User C blocked');
 
@@ -142,7 +144,8 @@ class UserAdminTest extends BrowserTestBase {
     $this->assertSession()->elementNotExists('xpath', static::getLinkSelectorForUser($user_b));
     $this->assertSession()->elementExists('xpath', static::getLinkSelectorForUser($user_c));
 
-    // Test unblocking of a user from /admin/people page and sending of activation mail
+    // Test unblocking of a user from /admin/people page and sending of
+    // activation mail
     $edit_unblock = [];
     $edit_unblock['action'] = 'user_unblock_user_action';
     $edit_unblock['user_bulk_form[4]'] = TRUE;
@@ -152,23 +155,20 @@ class UserAdminTest extends BrowserTestBase {
       'query' => ['order' => 'name', 'sort' => 'asc'],
     ]);
     $this->submitForm($edit_unblock, 'Apply to selected items');
-    $user_storage->resetCache([$user_c->id()]);
     $account = $user_storage->load($user_c->id());
     $this->assertTrue($account->isActive(), 'User C unblocked');
     $this->assertMail("to", $account->getEmail(), "Activation mail sent to user C");
 
-    // Test blocking and unblocking another user from /user/[uid]/edit form and sending of activation mail
+    // Test blocking and unblocking another user from /user/[uid]/edit form and
+    // sending of activation mail.
     $user_d = $this->drupalCreateUser([]);
-    $user_storage->resetCache([$user_d->id()]);
     $account1 = $user_storage->load($user_d->id());
     $this->drupalGet('user/' . $account1->id() . '/edit');
     $this->submitForm(['status' => 0], 'Save');
-    $user_storage->resetCache([$user_d->id()]);
     $account1 = $user_storage->load($user_d->id());
     $this->assertTrue($account1->isBlocked(), 'User D blocked');
     $this->drupalGet('user/' . $account1->id() . '/edit');
     $this->submitForm(['status' => TRUE], 'Save');
-    $user_storage->resetCache([$user_d->id()]);
     $account1 = $user_storage->load($user_d->id());
     $this->assertTrue($account1->isActive(), 'User D unblocked');
     $this->assertMail("to", $account1->getEmail(), "Activation mail sent to user D");
@@ -177,7 +177,7 @@ class UserAdminTest extends BrowserTestBase {
   /**
    * Tests the alternate notification email address for user mails.
    */
-  public function testNotificationEmailAddress() {
+  public function testNotificationEmailAddress(): void {
     // Test that the Notification Email address field is on the config page.
     $admin_user = $this->drupalCreateUser([
       'administer users',

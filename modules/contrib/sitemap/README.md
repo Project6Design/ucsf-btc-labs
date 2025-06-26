@@ -1,7 +1,6 @@
 # Sitemap
 
-This module provides a site map that gives visitors an overview of your site. It
-can also display the RSS feeds for all blogs and categories.
+The Sitemap module displays one or more a human-readable lists of links on a page. A sitemap is a way for visitors to navigate your website using an overview of notable pages on the site. Sitemaps tend to be useful for sites with lots of lightly-organized content, for example, colleges and universities, governments, or organizations with many different units.
 
 
 ## Requirements
@@ -89,10 +88,11 @@ of Sitemap plugins defined in other modules may be documented in that module.
         the Sitemap configuration page.
     - These plugins are defined in the `\Drupal\sitemap\Plugin\Sitemap\Menu`
         class.
-- If Drupal Core's "Book" module (`book`) is enabled, then you can enable a
-    section for each Book defined on the site. Enabling a sitemap plugin for a
-    book will display an unordered list with the pages in that book on the
-    sitemap.
+- If the "Book" module (`book`) is enabled (note the Book module is a contrib
+    module in Drupal 11; but part of Drupal core in D10 and earlier), then you
+    can enable a section for each Book defined on the site. Enabling a sitemap
+    plugin for a book will display an unordered list with the pages in that book
+    on the sitemap.
     - In "Plugin settings":
         - You can change the Title of the heading displayed before the unordered
             list of book pages (the heading will default to the book title).

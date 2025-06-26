@@ -2,6 +2,9 @@
 
 namespace Drupal\rdf;
 
+/**
+ * Provides a converter for schema.org data.
+ */
 class SchemaOrgDataConverter {
 
   /**
@@ -22,7 +25,7 @@ class SchemaOrgDataConverter {
    *
    * @see http://schema.org/UserInteraction
    */
-  public static function interactionCount($count, $arguments) {
+  public static function interactionCount(int $count, array $arguments): string {
     $interaction_type = $arguments['interaction_type'];
     return "$interaction_type:$count";
   }

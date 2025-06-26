@@ -24,7 +24,7 @@ class CustomBlockVisibilityTest extends BlockContentTestBase {
    */
   protected $permissions = [
     'administer blocks',
-    'access administration pages',
+    'administer block content',
   ];
 
   /**
@@ -52,9 +52,7 @@ class CustomBlockVisibilityTest extends BlockContentTestBase {
       'region' => 'content',
     ]);
 
-    $this->drupalGet('admin/structure/block/block-content/types');
-    $this->drupalGet('admin/structure/block/block-content');
-    $this->drupalGet('block/' . $block->id());
+    $this->drupalGet('admin/content/block/' . $block->id());
     $assert->pageTextContains('Block description');
 
     // Go to the block instance configuration page.

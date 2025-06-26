@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Entity;
 
 use Drupal\Core\Entity\Controller\VersionHistoryController;
@@ -105,7 +107,7 @@ class RevisionVersionHistoryTest extends BrowserTestBase {
     $entity->save();
 
     $this->drupalGet($entity->toUrl('version-history'));
-    $this->assertSession()->elementTextContains('css', 'table tbody tr:nth-child(1)', '02/02/2013 - 16:00');
+    $this->assertSession()->elementTextContains('css', 'table tbody tr:nth-child(1)', '2 Feb 2013 - 16:00');
     $this->assertSession()->elementTextContains('css', 'table tbody tr:nth-child(1)', $user->getAccountName());
   }
 

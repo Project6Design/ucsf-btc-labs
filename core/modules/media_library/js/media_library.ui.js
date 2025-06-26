@@ -58,7 +58,7 @@
       $(once('media-library-menu-item', $menu.find('a')))
         .on('keypress', (e) => {
           // The AJAX link has the button role, so we need to make sure the link
-          // is also triggered when pressing the spacebar.
+          // is also triggered when pressing the space bar.
           if (e.which === 32) {
             e.preventDefault();
             e.stopPropagation();
@@ -326,15 +326,14 @@
         const id = e.currentTarget.value;
 
         // Update the selection.
-        const position = currentSelection.indexOf(id);
         if (e.currentTarget.checked) {
           // Check if the ID is not already in the selection and add if needed.
-          if (position === -1) {
+          if (!currentSelection.includes(id)) {
             currentSelection.push(id);
           }
-        } else if (position !== -1) {
+        } else if (currentSelection.includes(id)) {
           // Remove the ID when it is in the current selection.
-          currentSelection.splice(position, 1);
+          currentSelection.splice(currentSelection.indexOf(id), 1);
         }
 
         const mediaLibraryModalSelection = document.querySelector(
@@ -382,7 +381,7 @@
       if (!once('media-library-selection-info', 'html').length) {
         return;
       }
-      $(window).on('dialog:aftercreate', () => {
+      window.addEventListener('dialog:aftercreate', () => {
         // Since the dialog HTML is not part of the context, we can't use
         // context here.
         const $buttonPane = $(
@@ -410,8 +409,10 @@
       if (!once('media-library-clear-selection', 'html').length) {
         return;
       }
-      $(window).on('dialog:afterclose', () => {
-        Drupal.MediaLibrary.currentSelection = [];
+      window.addEventListener('dialog:afterclose', () => {
+        // This empty the array while keeping the existing array reference,
+        // to keep event listeners working.
+        Drupal.MediaLibrary.currentSelection.length = 0;
       });
     },
   };

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\Core\Test;
 
-use Drupal\Component\Utility\Random;
 use Drupal\Tests\DrupalTestBrowser;
 use Drupal\Tests\UnitTestCase;
 use Drupal\Tests\BrowserTestBase;
@@ -26,10 +25,10 @@ class BrowserTestBaseTest extends UnitTestCase {
       ->method('getDriver')
       ->willReturn($driver);
 
-    $btb = $this->getMockBuilder(BrowserTestBase::class)
+    $btb = $this->getMockBuilder(BrowserTestBaseMockableClass::class)
       ->disableOriginalConstructor()
       ->onlyMethods(['getSession'])
-      ->getMockForAbstractClass();
+      ->getMock();
     $btb->expects($this->any())
       ->method('getSession')
       ->willReturn($session);
@@ -40,13 +39,13 @@ class BrowserTestBaseTest extends UnitTestCase {
   /**
    * @covers ::getHttpClient
    */
-  public function testGetHttpClient() {
+  public function testGetHttpClient(): void {
     // Our stand-in for the Guzzle client object.
     $expected = new \stdClass();
 
     $browserkit_client = $this->getMockBuilder(DrupalTestBrowser::class)
       ->onlyMethods(['getClient'])
-      ->getMockForAbstractClass();
+      ->getMock();
     $browserkit_client->expects($this->once())
       ->method('getClient')
       ->willReturn($expected);
@@ -63,7 +62,7 @@ class BrowserTestBaseTest extends UnitTestCase {
   /**
    * @covers ::getHttpClient
    */
-  public function testGetHttpClientException() {
+  public function testGetHttpClientException(): void {
     // A driver type that isn't BrowserKitDriver. This should cause a
     // RuntimeException.
     $btb = $this->mockBrowserTestBaseWithDriver(new \stdClass());
@@ -80,29 +79,23 @@ class BrowserTestBaseTest extends UnitTestCase {
    *
    * @covers ::tearDown
    */
-  public function testTearDownWithoutSetUp() {
+  public function testTearDownWithoutSetUp(): void {
     $method = 'cleanupEnvironment';
     $this->assertTrue(method_exists(BrowserTestBase::class, $method));
-    $btb = $this->getMockBuilder(BrowserTestBase::class)
+    $btb = $this->getMockBuilder(BrowserTestBaseMockableClass::class)
       ->disableOriginalConstructor()
       ->onlyMethods([$method])
-      ->getMockForAbstractClass();
+      ->getMock();
     $btb->expects($this->never())->method($method);
     $ref_tearDown = new \ReflectionMethod($btb, 'tearDown');
     $ref_tearDown->invoke($btb);
   }
 
-  /**
-   * Tests the deprecation of accessing the randomGenerator property directly.
-   *
-   * @group legacy
-   */
-  public function testGetRandomGeneratorPropertyDeprecation() {
-    $this->expectDeprecation('Accessing the randomGenerator property is deprecated in drupal:10.2.0 and is removed from drupal:11.0.0. Use getRandomGenerator() instead. See https://www.drupal.org/node/3358445');
-    // We purposely test accessing an undefined property here. We need to tell
-    // PHPStan to ignore that.
-    // @phpstan-ignore-next-line
-    $this->assertInstanceOf(Random::class, $this->randomGenerator);
-  }
+}
+
+/**
+ * A class extending BrowserTestBase for testing purposes.
+ */
+class BrowserTestBaseMockableClass extends BrowserTestBase {
 
 }

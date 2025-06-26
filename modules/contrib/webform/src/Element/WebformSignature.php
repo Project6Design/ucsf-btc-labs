@@ -4,14 +4,14 @@ namespace Drupal\webform\Element;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
-use Drupal\Core\Render\Element\FormElement;
+use Drupal\Core\Render\Element\FormElementBase;
 
 /**
  * Provides a webform element for entering a signature.
  *
  * @FormElement("webform_signature")
  */
-class WebformSignature extends FormElement {
+class WebformSignature extends FormElementBase {
 
   /**
    * {@inheritdoc}
@@ -114,13 +114,34 @@ class WebformSignature extends FormElement {
       return FALSE;
     }
 
-    // Make sure signature's image size can be read.
+    // Create a temp webform_signature_* image.
     /** @var \Drupal\Core\File\FileSystemInterface $file_system */
     $file_system = \Drupal::service('file_system');
     $temp_image = $file_system->tempnam('temporary://', 'webform_signature_');
     $encoded_image = explode(',', $value)[1];
     $decoded_image = base64_decode($encoded_image);
     file_put_contents($temp_image, $decoded_image);
+
+    // Validate the temp signature image.
+    $result = static::validateTempSignatureImage($temp_image);
+
+    // Delete the temp webform_signature_* image.
+    unlink($temp_image);
+
+    return $result;
+  }
+
+  /**
+   * Validate the temp signature image.
+   *
+   * @param string $temp_image
+   *   The temp signature image.
+   *
+   * @return bool
+   *   TRUE is the temp signature image is valid.
+   */
+  protected static function validateTempSignatureImage($temp_image) {
+    // Make sure we can get the image size.
     $image_size = getimagesize($temp_image);
     if (!$image_size) {
       return FALSE;

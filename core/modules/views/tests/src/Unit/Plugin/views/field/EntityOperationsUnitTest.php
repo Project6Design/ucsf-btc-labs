@@ -77,7 +77,7 @@ class EntityOperationsUnitTest extends UnitTestCase {
       ->getMock();
     $display = $this->getMockBuilder('\Drupal\views\Plugin\views\display\DisplayPluginBase')
       ->disableOriginalConstructor()
-      ->getMockForAbstractClass();
+      ->getMock();
     $view->display_handler = $display;
     $this->plugin->init($view, $display);
   }
@@ -85,14 +85,14 @@ class EntityOperationsUnitTest extends UnitTestCase {
   /**
    * @covers ::usesGroupBy
    */
-  public function testUsesGroupBy() {
+  public function testUsesGroupBy(): void {
     $this->assertFalse($this->plugin->usesGroupBy());
   }
 
   /**
    * @covers ::defineOptions
    */
-  public function testDefineOptions() {
+  public function testDefineOptions(): void {
     $options = $this->plugin->defineOptions();
     $this->assertIsArray($options);
     $this->assertArrayHasKey('destination', $options);
@@ -101,7 +101,7 @@ class EntityOperationsUnitTest extends UnitTestCase {
   /**
    * @covers ::render
    */
-  public function testRenderWithDestination() {
+  public function testRenderWithDestination(): void {
     $entity_type_id = $this->randomMachineName();
     $entity = $this->getMockBuilder('\Drupal\user\Entity\Role')
       ->disableOriginalConstructor()
@@ -134,6 +134,9 @@ class EntityOperationsUnitTest extends UnitTestCase {
     $expected_build = [
       '#type' => 'operations',
       '#links' => $operations,
+      '#attached' => [
+        'library' => ['core/drupal.dialog.ajax'],
+      ],
     ];
     $expected_build['#links']['foo']['query'] = ['destination' => 'foobar'];
     $build = $this->plugin->render($result);
@@ -143,7 +146,7 @@ class EntityOperationsUnitTest extends UnitTestCase {
   /**
    * @covers ::render
    */
-  public function testRenderWithoutDestination() {
+  public function testRenderWithoutDestination(): void {
     $entity_type_id = $this->randomMachineName();
     $entity = $this->getMockBuilder('\Drupal\user\Entity\Role')
       ->disableOriginalConstructor()
@@ -176,6 +179,9 @@ class EntityOperationsUnitTest extends UnitTestCase {
     $expected_build = [
       '#type' => 'operations',
       '#links' => $operations,
+      '#attached' => [
+        'library' => ['core/drupal.dialog.ajax'],
+      ],
     ];
     $build = $this->plugin->render($result);
     $this->assertSame($expected_build, $build);
@@ -184,7 +190,7 @@ class EntityOperationsUnitTest extends UnitTestCase {
   /**
    * @covers ::render
    */
-  public function testRenderWithoutEntity() {
+  public function testRenderWithoutEntity(): void {
     $this->setUpMockLoggerWithMissingEntity();
 
     $entity = NULL;

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\locale\Kernel;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
@@ -11,17 +14,17 @@ use Drupal\KernelTests\KernelTestBase;
  */
 class LocaleStringIsSafeTest extends KernelTestBase {
 
+  use StringTranslationTrait;
+
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['locale', 'locale_test'];
 
   /**
    * Tests for locale_string_is_safe().
    */
-  public function testLocaleStringIsSafe() {
+  public function testLocaleStringIsSafe(): void {
     // Check a translatable string without HTML.
     $string = 'Hello world!';
     $result = locale_string_is_safe($string);
@@ -42,6 +45,11 @@ class LocaleStringIsSafeTest extends KernelTestBase {
     $string = 'Hi <a href="[current-user:url]">user</a>';
     $result = locale_string_is_safe($string);
     $this->assertTrue($result);
+
+    // Check a translatable string which includes a wbr tag.
+    $string = 'DrupalLocaleModule<wbr>Test<wbr>Example';
+    $result = locale_string_is_safe($string);
+    $this->assertTrue($result);
   }
 
   /**
@@ -50,7 +58,7 @@ class LocaleStringIsSafeTest extends KernelTestBase {
    * In each assert* call we add a new line at the expected result to match the
    * newline at the end of the template file.
    */
-  public function testLocalizedTokenizedString() {
+  public function testLocalizedTokenizedString(): void {
     $tests_to_do = [
       1 => [
         'original' => 'Go to the <a href="[locale_test:security_test1]">frontpage</a>',
@@ -74,7 +82,8 @@ class LocaleStringIsSafeTest extends KernelTestBase {
       );
 
       // Pass the original string to the t() function to get it marked as safe.
-      $safe_string = t($original_string);
+      // phpcs:ignore Drupal.Semantics.FunctionT.NotLiteralString
+      $safe_string = $this->t($original_string);
       $rendered_safe_string = \Drupal::theme()->render('locale_test_tokenized', ['content' => $safe_string]);
       // t() function always marks the string as safe so it won't be escaped,
       // and should be the same as the original.

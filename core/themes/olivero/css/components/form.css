@@ -47,6 +47,9 @@ tr .form-item,
 .form-item__label {
   display: block;
   margin-block: var(--sp0-5);
+  font-size: var(--font-size-s);
+  font-weight: bold;
+  line-height: var(--line-height-s);
 }
 
 .container-inline .form-item__label {
@@ -153,9 +156,16 @@ tr .form-item,
   margin-block: var(--sp0-5);
 }
 
-.form-actions .button,
+.form-actions .button {
+  margin-block: 0;
+}
+
 .form-actions .action-link {
   margin-block: var(--sp0-5);
+}
+
+.form-actions > .form-wrapper {
+  margin-inline-end: var(--sp1);
 }
 
 .form-actions .ajax-progress--throbber {
@@ -209,4 +219,8 @@ tr .form-item,
 
 .form--inline .form-actions {
   margin-top: var(--sp1-5);
+}
+
+.layout-builder-form .form-actions {
+  align-items: center;
 }

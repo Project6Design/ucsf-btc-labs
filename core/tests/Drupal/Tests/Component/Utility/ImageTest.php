@@ -18,7 +18,7 @@ class ImageTest extends TestCase {
    *
    * @dataProvider providerTestScaleDimensions
    */
-  public function testScaleDimensions($input, $output) {
+  public function testScaleDimensions($input, $output): void {
     // Process the test dataset.
     $return_value = Image::scaleDimensions($input['dimensions'], $input['width'], $input['height'], $input['upscale']);
 
@@ -44,7 +44,7 @@ class ImageTest extends TestCase {
    *
    * @see testScaleDimensions()
    */
-  public function providerTestScaleDimensions() {
+  public static function providerTestScaleDimensions() {
     // Define input / output datasets to test different branch conditions.
     $tests = [];
 
@@ -155,6 +155,86 @@ class ImageTest extends TestCase {
     ];
 
     return $tests;
+  }
+
+  /**
+   * @covers ::getKeywordOffset
+   */
+  public function testInvalidGetKeywordOffset(): void {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('Invalid anchor \'foo\' provided to getKeywordOffset()');
+    Image::getKeywordOffset('foo', 0, 0);
+  }
+
+  /**
+   * @covers ::getKeywordOffset
+   *
+   * @dataProvider providerTestGetKeywordOffset
+   */
+  public function testGetKeywordOffset(array $input, int $expected): void {
+    $this->assertSame($expected, Image::getKeywordOffset($input['anchor'], $input['current'], $input['new']));
+  }
+
+  /**
+   * Provides data for testGetKeywordOffset().
+   *
+   * @return \Generator
+   *   Test scenarios.
+   *
+   * @see testGetKeywordOffset()
+   */
+  public static function providerTestGetKeywordOffset(): \Generator {
+    yield "'left' => return 0" => [
+      'input' => [
+        'anchor' => 'left',
+        'current' => 100,
+        'new' => 20,
+      ],
+      'expected' => 0,
+    ];
+    yield "'top' => return 0" => [
+      'input' => [
+        'anchor' => 'top',
+        'current' => 100,
+        'new' => 20,
+      ],
+      'expected' => 0,
+    ];
+
+    yield "'right' => return (current - new)" => [
+      'input' => [
+        'anchor' => 'right',
+        'current' => 100,
+        'new' => 20,
+      ],
+      'expected' => 80,
+    ];
+    yield "'bottom' => return (current - new)" => [
+      'input' => [
+        'anchor' => 'bottom',
+        'current' => 100,
+        'new' => 30,
+      ],
+      'expected' => 70,
+    ];
+
+    yield "a) 'center' => return (current - new)/2" => [
+      'input' => [
+        'anchor' => 'center',
+        'current' => 100,
+        'new' => 20,
+      ],
+      'expected' => 40,
+    ];
+    yield "b) 'center' => return (current - new)/2" => [
+      'input' => [
+        'anchor' => 'center',
+        'current' => 100,
+        'new' => 91,
+      ],
+      'expected' => 5,
+    ];
+
   }
 
 }

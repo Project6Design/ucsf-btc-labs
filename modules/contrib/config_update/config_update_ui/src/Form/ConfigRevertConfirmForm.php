@@ -2,11 +2,11 @@
 
 namespace Drupal\config_update_ui\Form;
 
+use Drupal\config_update\ConfigListInterface;
+use Drupal\config_update\ConfigRevertInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\config_update\ConfigListInterface;
-use Drupal\config_update\ConfigRevertInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -98,7 +98,12 @@ class ConfigRevertConfirmForm extends ConfirmFormBase {
       throw new NotFoundHttpException();
     }
 
-    return $this->t('Are you sure you want to revert the %type config %item to its source configuration?', ['%type' => $type_label, '%item' => $this->name]);
+    return $this->t('Are you sure you want to revert the %type config %item to its source configuration?',
+      [
+        '%type' => $type_label,
+        '%item' => $this->name,
+      ]
+    );
   }
 
   /**

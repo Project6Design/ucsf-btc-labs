@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\editor_file\Plugin\CKEditorPlugin;
 
-use Drupal\ckeditor\CKEditorPluginBase;
-use Drupal\ckeditor\CKEditorPluginConfigurableInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\ckeditor\CKEditorPluginBase;
+use Drupal\ckeditor\CKEditorPluginConfigurableInterface;
 use Drupal\editor\Entity\Editor;
 
 /**
@@ -16,6 +18,10 @@ use Drupal\editor\Entity\Editor;
  *   label = @Translation("File upload"),
  *   module = "ckeditor"
  * )
+ *
+ * @deprecated in editor_file:2.0.0 and is removed from editor_file:2.1.0. This
+ *  code is only used for the now unsupported CKEditor4 plugin.
+ * @see https://www.drupal.org/project/editor_file/issues/3415204
  */
 class DrupalFile extends CKEditorPluginBase implements CKEditorPluginConfigurableInterface {
 
@@ -25,7 +31,8 @@ class DrupalFile extends CKEditorPluginBase implements CKEditorPluginConfigurabl
    * {@inheritdoc}
    */
   public function getFile() {
-    return \Drupal::service('extension.list.module')->getPath('editor_file') . '/js/plugins/drupalfile/plugin.js';
+    return \Drupal::service('extension.list.module')
+      ->getPath('editor_file') . '/js/plugins/drupalfile/plugin.js';
   }
 
   /**
@@ -51,7 +58,8 @@ class DrupalFile extends CKEditorPluginBase implements CKEditorPluginConfigurabl
    * {@inheritdoc}
    */
   public function getButtons() {
-    $path = \Drupal::service('extension.list.module')->getPath('editor_file') . '/js/plugins/drupalfile';
+    $path = \Drupal::service('extension.list.module')
+      ->getPath('editor_file') . '/js/plugins/drupalfile';
     return [
       'DrupalFile' => [
         'label' => $this->t('File'),
@@ -71,7 +79,8 @@ class DrupalFile extends CKEditorPluginBase implements CKEditorPluginConfigurabl
     $form['file_upload'] = editor_file_upload_settings_form($editor);
     $form['file_upload']['#attached']['library'][] = 'editor_file/drupal.ckeditor.drupalfile.admin';
     $form['file_upload']['#element_validate'][] = [
-      $this, 'validateFileUploadSettings',
+      $this,
+      'validateFileUploadSettings',
     ];
     return $form;
   }

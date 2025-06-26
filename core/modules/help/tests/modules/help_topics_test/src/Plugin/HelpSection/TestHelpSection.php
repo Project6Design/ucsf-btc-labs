@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\help_topics_test\Plugin\HelpSection;
 
 use Drupal\help\SearchableHelpInterface;
@@ -7,20 +9,21 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Link;
 use Drupal\help\Plugin\HelpSection\HelpSectionPluginBase;
+use Drupal\help\Attribute\HelpSection;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 // cspell:ignore asdrsad barmm foomm sqruct wcsrefsdf sdeeeee
 
 /**
  * Provides a searchable help section for testing.
- *
- * @HelpSection(
- *   id = "help_topics_test",
- *   title = @Translation("Test section"),
- *   weight = 100,
- *   description = @Translation("For testing search"),
- *   permission = "access test help"
- * )
  */
+#[HelpSection(
+  id: 'help_topics_test',
+  title: new TranslatableMarkup('Test section'),
+  description: new TranslatableMarkup('For testing search'),
+  permission: 'access test help',
+  weight: 100
+)]
 class TestHelpSection extends HelpSectionPluginBase implements SearchableHelpInterface {
 
   /**

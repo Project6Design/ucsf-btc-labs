@@ -363,7 +363,7 @@ class BlockStyleBaseTest extends UnitTestCase {
   /**
    * Provider for testExclude()
    */
-  public function excludeProvider() {
+  public static function excludeProvider() {
     return [
       'No exclude options are passed' => [FALSE, NULL, FALSE],
       'Exclude basic_block' => ['basic_block', NULL, TRUE],

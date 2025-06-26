@@ -1,7 +1,7 @@
 name: 'Photo Gallery'
 description: 'Provides Photo Gallery content type and related configuration. Create a multi-image gallery of photos.'
 type: module
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^9 || ^10 || ^11
 dependencies:
   - block
   - block_content

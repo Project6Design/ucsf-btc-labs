@@ -8,6 +8,6 @@ table.config-update-report {
 }
 
 table.config-update-report caption {
-  font-weight: bold;
   font-size: 1.1em;
+  font-weight: bold;
 }

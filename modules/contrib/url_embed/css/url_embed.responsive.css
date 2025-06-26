@@ -1,0 +1,10 @@
+.responsive-embed {
+  /* Default 16:9 aspect ratio will be overridden with an inline style */
+  --responsive-embed-ratio: 56.5;
+}
+
+.responsive-embed :where(iframe, object, embed) {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 100 / var(--responsive-embed-ratio);
+}

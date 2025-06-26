@@ -25,7 +25,7 @@ class MigrateSqlIdMapEnsureTablesTest extends MigrateTestCase {
   /**
    * Tests the ensureTables method when the tables do not exist.
    */
-  public function testEnsureTablesNotExist() {
+  public function testEnsureTablesNotExist(): void {
     $fields['source_ids_hash'] = [
       'type' => 'varchar',
       'length' => 64,
@@ -128,7 +128,7 @@ class MigrateSqlIdMapEnsureTablesTest extends MigrateTestCase {
   /**
    * Tests the ensureTables method when the tables exist.
    */
-  public function testEnsureTablesExist() {
+  public function testEnsureTablesExist(): void {
     $schema = $this->prophesize('Drupal\Core\Database\Schema');
     $schema->tableExists('migrate_map_sql_idmap_test')->willReturn(TRUE);
     $schema->fieldExists('migrate_map_sql_idmap_test', 'rollback_action')->willReturn(FALSE);
@@ -166,7 +166,7 @@ class MigrateSqlIdMapEnsureTablesTest extends MigrateTestCase {
    *   ensureTables() which in turn calls this object and the expectations on
    *   it are the actual test and there are no additional asserts added.
    */
-  protected function runEnsureTablesTest($schema) {
+  protected function runEnsureTablesTest($schema): void {
     $database = $this->getMockBuilder('Drupal\Core\Database\Connection')
       ->disableOriginalConstructor()
       ->getMock();
@@ -174,7 +174,7 @@ class MigrateSqlIdMapEnsureTablesTest extends MigrateTestCase {
       ->method('schema')
       ->willReturn($schema);
     $database->expects($this->any())
-      ->method('tablePrefix')
+      ->method('getPrefix')
       ->willReturn('');
     $migration = $this->getMigration();
     $plugin = $this->createMock('Drupal\migrate\Plugin\MigrateSourceInterface');

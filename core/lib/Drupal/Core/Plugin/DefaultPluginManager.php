@@ -6,6 +6,7 @@ use Drupal\Component\Assertion\Inspector;
 use Drupal\Component\Plugin\Attribute\AttributeInterface;
 use Drupal\Component\Plugin\Definition\PluginDefinitionInterface;
 use Drupal\Component\Plugin\Discovery\CachedDiscoveryInterface;
+use Drupal\Core\Extension\ModuleExtensionList;
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Cache\UseCacheBackendTrait;
@@ -67,6 +68,13 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
   protected $moduleHandler;
+
+  /**
+   * The module extension list.
+   *
+   * @var \Drupal\Core\Extension\ModuleExtensionList
+   */
+  protected ?ModuleExtensionList $moduleExtensionList;
 
   /**
    * A set of defaults to be referenced by $this->processDefinition().
@@ -134,8 +142,8 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    * @param string|null $plugin_definition_attribute_name
    *   (optional) The name of the attribute that contains the plugin definition.
    * @param string|array|null $plugin_definition_annotation_name
-   *   (optional) The name of the annotation that contains the plugin definition.
-   *   Defaults to 'Drupal\Component\Annotation\Plugin'.
+   *   (optional) The name of the annotation that contains the plugin
+   *   definition. Defaults to 'Drupal\Component\Annotation\Plugin'.
    * @param string[] $additional_annotation_namespaces
    *   (optional) Additional namespaces to scan for annotation definitions.
    *
@@ -143,7 +151,7 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    * 'Drupal\Component\Plugin\Attribute\Plugin' once annotations are no longer
    * supported.
    */
-  public function __construct($subdir, \Traversable $namespaces, ModuleHandlerInterface $module_handler, $plugin_interface = NULL, ?string $plugin_definition_attribute_name = NULL, string|array $plugin_definition_annotation_name = NULL, array $additional_annotation_namespaces = []) {
+  public function __construct($subdir, \Traversable $namespaces, ModuleHandlerInterface $module_handler, $plugin_interface = NULL, ?string $plugin_definition_attribute_name = NULL, string|array|null $plugin_definition_annotation_name = NULL, array $additional_annotation_namespaces = []) {
     $this->subdir = $subdir;
     $this->namespaces = $namespaces;
     $this->moduleHandler = $module_handler;
@@ -157,6 +165,9 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
       // Backward compatibility.
       $this->pluginDefinitionAnnotationName = $plugin_definition_attribute_name ?? 'Drupal\Component\Annotation\Plugin';
       $this->additionalAnnotationNamespaces = $plugin_definition_annotation_name ?? [];
+      if ($plugin_definition_attribute_name) {
+        @trigger_error('Not supporting attribute discovery in ' . __CLASS__ . ' is deprecated in drupal:11.2.0 and is removed from drupal:12.0.0. Provide an Attribute class and an Annotation class for BC. See https://www.drupal.org/node/3395582', E_USER_DEPRECATED);
+      }
     }
   }
 
@@ -190,7 +201,7 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    *
    * @param string $alter_hook
    *   Name of the alter hook; for example, to invoke
-   *   hook_mymodule_data_alter() pass in "mymodule_data".
+   *   hook_my_module_data_alter() pass in "my_module_data".
    */
   protected function alterInfo($alter_hook) {
     $this->alterHook = $alter_hook;
@@ -220,6 +231,9 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
       else {
         $this->cacheBackend->delete($this->cacheKey);
       }
+    }
+    if ($this->discovery instanceof CachedDiscoveryInterface) {
+      $this->discovery->clearCachedDefinitions();
     }
     $this->definitions = NULL;
   }
@@ -255,6 +269,9 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    * {@inheritdoc}
    */
   public function useCaches($use_caches = FALSE) {
+    if ($this->discovery instanceof CachedDiscoveryInterface) {
+      $this->discovery->useCaches($use_caches);
+    }
     $this->useCaches = $use_caches;
     if (!$use_caches) {
       $this->definitions = NULL;
@@ -341,7 +358,7 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
    *
    * @param mixed $plugin_definition
    *   The plugin definition. Usually either an array or an instance of
-   *   \Drupal\Component\Plugin\Definition\PluginDefinitionInterface
+   *   \Drupal\Component\Plugin\Definition\PluginDefinitionInterface.
    *
    * @return string|null
    *   The provider string, if it exists. NULL otherwise.
@@ -364,7 +381,7 @@ class DefaultPluginManager extends PluginManagerBase implements PluginManagerInt
   /**
    * Invokes the hook to alter the definitions if the alter hook is set.
    *
-   * @param $definitions
+   * @param array $definitions
    *   The discovered plugin definitions.
    */
   protected function alterDefinitions(&$definitions) {

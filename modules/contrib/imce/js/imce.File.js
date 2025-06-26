@@ -67,4 +67,26 @@
     }
   };
 
+  /**
+   * Check if the file can be used as an image source.
+   */
+  File.isImageSource = function () {
+    if (this.width) {
+      return true;
+    }
+    // Allow svg files to be previewed without dimensions.
+    if ((this.ext || '').toLowerCase() === 'svg') {
+      return true;
+    }
+    // Width might be missing because of lazy dimensions.
+    return imce.getConf('lazy_dimensions') && this.hasImageExtension();
+  };
+
+  /**
+   * Check if the file name has image extension.
+   */
+  File.hasImageExtension = function () {
+    return imce.hasImageExtension(this.name);
+  };
+
 })(jQuery, Drupal, imce);

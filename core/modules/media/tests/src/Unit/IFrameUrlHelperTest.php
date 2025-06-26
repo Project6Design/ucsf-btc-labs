@@ -22,8 +22,9 @@ class IFrameUrlHelperTest extends UnitTestCase {
    * @see ::testIsSecure()
    *
    * @return array
+   *   An array of test data.
    */
-  public function providerIsSecure() {
+  public static function providerIsSecure() {
     return [
       'no domain' => [
         '/path/to/media.php',
@@ -77,7 +78,7 @@ class IFrameUrlHelperTest extends UnitTestCase {
    *
    * @dataProvider providerIsSecure
    */
-  public function testIsSecure($url, $base_url, $secure) {
+  public function testIsSecure($url, $base_url, $secure): void {
     $request_context = $this->createMock(RequestContext::class);
     $request_context->expects($this->any())
       ->method('getCompleteBaseUrl')

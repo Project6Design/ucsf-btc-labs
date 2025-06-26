@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\taxonomy\Functional\Rest;
 
 use Drupal\Core\Cache\Cache;
@@ -7,13 +9,17 @@ use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
 use Drupal\Tests\rest\Functional\EntityResource\EntityResourceTestBase;
 use GuzzleHttp\RequestOptions;
+use PHPUnit\Framework\Attributes\Before;
 
+/**
+ * Resource test base for taxonomy term entity.
+ */
 abstract class TermResourceTestBase extends EntityResourceTestBase {
 
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['taxonomy', 'path'];
+  protected static $modules = ['content_translation', 'path', 'taxonomy'];
 
   /**
    * {@inheritdoc}
@@ -31,6 +37,16 @@ abstract class TermResourceTestBase extends EntityResourceTestBase {
    * @var \Drupal\taxonomy\TermInterface
    */
   protected $entity;
+
+  /**
+   * Marks some tests as skipped because XML cannot be deserialized.
+   */
+  #[Before]
+  public function termResourceTestBaseSkipTests(): void {
+    if (static::$format === 'xml' && $this->name() === 'testPatchPath') {
+      $this->markTestSkipped('Deserialization of the XML format is not supported.');
+    }
+  }
 
   /**
    * {@inheritdoc}
@@ -281,7 +297,7 @@ abstract class TermResourceTestBase extends EntityResourceTestBase {
    *
    * @see \Drupal\Tests\rest\Functional\EntityResource\Node\NodeResourceTestBase::testPatchPath()
    */
-  public function testPatchPath() {
+  public function testPatchPath(): void {
     $this->initAuthentication();
     $this->provisionEntityResource();
     $this->setUpAuthorization('GET');
@@ -330,7 +346,7 @@ abstract class TermResourceTestBase extends EntityResourceTestBase {
    *
    * @dataProvider providerTestGetTermWithParent
    */
-  public function testGetTermWithParent(array $parent_term_ids) {
+  public function testGetTermWithParent(array $parent_term_ids): void {
     // Create all possible parent terms.
     Term::create(['vid' => Vocabulary::load('camelids')->id()])
       ->setName('Lamoids')
@@ -356,7 +372,10 @@ abstract class TermResourceTestBase extends EntityResourceTestBase {
     $this->assertSame($expected, $actual);
   }
 
-  public function providerTestGetTermWithParent() {
+  /**
+   * Data provider for ::testGetTermWithParent().
+   */
+  public static function providerTestGetTermWithParent() {
     return [
       'root parent: [0] (= no parent)' => [
         [0],

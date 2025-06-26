@@ -22,6 +22,7 @@ use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Renders the batch processing page based on the current state of the batch.
@@ -42,8 +43,8 @@ function _batch_page(Request $request) {
   if (!$batch) {
     $batch = \Drupal::service('batch.storage')->load($request_id);
     if (!$batch) {
-      \Drupal::messenger()->addError(t('No active batch.'));
-      return new RedirectResponse(Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString());
+      \Drupal::messenger()->addError(t('No batch with ID @batch exists.', ['@batch' => $request_id]));
+      throw new NotFoundHttpException(sprintf('No batch with ID %s exists.', $request_id));
     }
   }
 
@@ -145,7 +146,7 @@ function _batch_do() {
  *
  * @see _batch_process()
  */
-function _batch_progress_page() {
+function _batch_progress_page(): array {
   $batch = &batch_get();
 
   $current_set = _batch_current_set();
@@ -222,7 +223,8 @@ function _batch_progress_page() {
           'batch_progress_meta_refresh',
         ],
       ],
-      // Adds JavaScript code and settings for clients where JavaScript is enabled.
+      // Adds JavaScript code and settings for clients where JavaScript is
+      // enabled.
       'drupalSettings' => [
         'batch' => [
           'errorMessage' => $current_set['error_message'] . '<br />' . $batch['error_message'],
@@ -474,11 +476,14 @@ function _batch_finished() {
       }
     }
     // Clean-up the session. Not needed for CLI updates.
-    if (isset($_SESSION)) {
-      unset($_SESSION['batches'][$batch['id']]);
-      if (empty($_SESSION['batches'])) {
-        unset($_SESSION['batches']);
-      }
+    $session = \Drupal::request()->getSession();
+    $batches = $session->get('batches', []);
+    unset($batches[$batch['id']]);
+    if (empty($batches)) {
+      $session->remove('batches');
+    }
+    else {
+      $session->set('batches', $batches);
     }
   }
   $_batch = $batch;
@@ -531,7 +536,8 @@ function _batch_finished() {
     // form needs to be rebuilt, save the final $form_state for
     // \Drupal\Core\Form\FormBuilderInterface::buildForm().
     if ($_batch['form_state']->isRebuilding()) {
-      $_SESSION['batch_form_state'] = $_batch['form_state'];
+      $session = \Drupal::request()->getSession();
+      $session->set('batch_form_state', $_batch['form_state']);
     }
     $callback = $_batch['redirect_callback'];
     $_batch['source_url']->mergeOptions(['query' => ['op' => 'finish', 'id' => $_batch['id']]]);
@@ -551,7 +557,7 @@ function _batch_finished() {
  * @see _batch_page()
  * @see drupal_register_shutdown_function()
  */
-function _batch_shutdown() {
+function _batch_shutdown(): void {
   if (($batch = batch_get()) && _batch_needs_update()) {
     \Drupal::service('batch.storage')->update($batch);
   }

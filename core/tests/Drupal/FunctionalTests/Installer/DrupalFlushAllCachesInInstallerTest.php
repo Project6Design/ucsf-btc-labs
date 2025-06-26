@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Serialization\Yaml;
@@ -25,7 +27,7 @@ class DrupalFlushAllCachesInInstallerTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function prepareEnvironment() {
+  protected function prepareEnvironment(): void {
     parent::prepareEnvironment();
     $info = [
       'type' => 'profile',
@@ -54,7 +56,7 @@ EOF;
   /**
    * Confirms that the installation succeeded.
    */
-  public function testInstalled() {
+  public function testInstalled(): void {
     $this->assertTrue(\Drupal::state()->get('cache_flush_test'));
   }
 

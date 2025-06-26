@@ -12,6 +12,7 @@ use Drupal\Core\Routing\Router;
 use Drupal\Core\Routing\UrlGeneratorInterface;
 use Drupal\Tests\UnitTestCase;
 use Prophecy\Argument;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -24,7 +25,7 @@ class RouterTest extends UnitTestCase {
   /**
    * @covers ::applyFitOrder
    */
-  public function testMatchesWithDifferentFitOrder() {
+  public function testMatchesWithDifferentFitOrder(): void {
     $route_provider = $this->prophesize(RouteProviderInterface::class);
 
     $route_collection = new RouteCollection();
@@ -59,6 +60,9 @@ class RouterTest extends UnitTestCase {
     $result = $router->match('/user/login');
 
     $this->assertEquals('user_login', $result['_route']);
+
+    $this->expectException(ResourceNotFoundException::class);
+    $router->match('/user/login ');
   }
 
 }

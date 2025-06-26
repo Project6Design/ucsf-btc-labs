@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\url_embed\Form\UrlEmbedCke5Dialog.
- */
-
 namespace Drupal\url_embed\Form;
 
 use Drupal\Core\Ajax\AjaxResponse;
@@ -72,7 +67,7 @@ class UrlEmbedCke5Dialog extends FormBase {
    * @param \Drupal\editor\EditorInterface $editor
    *   The editor to which this dialog corresponds.
    */
-  public function buildForm(array $form, FormStateInterface $form_state, EditorInterface $editor = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, EditorInterface|null $editor = NULL) {
     $values = $form_state->getValues();
     $input = $form_state->getUserInput();
     // Populate value from existing CKEditor attribute.
@@ -81,55 +76,55 @@ class UrlEmbedCke5Dialog extends FormBase {
     // validateForm() function.
     $form_state->set('editor', $editor);
     // Initialize URL element with form attributes, if present.
-    $url_element = empty($values['attributes']) ? array() : $values['attributes'];
-    $url_element += empty($input['attributes']) ? array() : $input['attributes'];
+    $url_element = empty($values['attributes']) ? [] : $values['attributes'];
+    $url_element += empty($input['attributes']) ? [] : $input['attributes'];
     // The default values are set directly from \Drupal::request()->request,
     // provided by the editor plugin opening the dialog.
     if (!$form_state->get('url_element')) {
-      $form_state->set('url_element', isset($input['editor_object']) ? $input['editor_object'] : array());
+      $form_state->set('url_element', $input['editor_object'] ?? []);
     }
     $url_element += $form_state->get('url_element');
-    $url_element += array(
+    $url_element += [
       'data-embed-url' => $url,
       'data-url-provider' => '',
-    );
+    ];
     $form_state->set('url_element', $url_element);
     $form['#tree'] = TRUE;
     $form['#attached']['library'][] = 'editor/drupal.editor.dialog';
     $form['#prefix'] = '<div id="url-embed-dialog-form">';
     $form['#suffix'] = '</div>';
-    $form['attributes']['data-embed-url'] = array(
+    $form['attributes']['data-embed-url'] = [
       '#type' => 'textfield',
       '#title' => 'URL',
       '#default_value' => $url_element['data-embed-url'],
       '#required' => TRUE,
-    );
+    ];
     try {
       if (!empty($url_element['data-embed-url']) && $info = $this->urlEmbed()->getEmbed($url_element['data-embed-url'])) {
         $url_element['data-url-provider'] = $info->providerName;
       }
     }
     catch (\Exception $e) {
-      watchdog_exception('url_embed', $e);
+      \Drupal::logger('url_embed')->error($e->getMessage());
     }
-    $form['attributes']['data-url-provider'] = array(
+    $form['attributes']['data-url-provider'] = [
       '#type' => 'value',
       '#value' => $url_element['data-url-provider'],
-    );
-    $form['actions'] = array(
+    ];
+    $form['actions'] = [
       '#type' => 'actions',
-    );
-    $form['actions']['save_modal'] = array(
+    ];
+    $form['actions']['save_modal'] = [
       '#type' => 'submit',
       '#value' => $this->t('Embed'),
       '#button_type' => 'primary',
       // No regular submit-handler. This form only works via JavaScript.
-      '#submit' => array(),
-      '#ajax' => array(
+      '#submit' => [],
+      '#ajax' => [
         'callback' => '::submitForm',
         'event' => 'click',
-      ),
-    );
+      ],
+    ];
     return $form;
   }
 
@@ -156,10 +151,10 @@ class UrlEmbedCke5Dialog extends FormBase {
     // Display errors in form, if any.
     if ($form_state->hasAnyErrors()) {
       unset($form['#prefix'], $form['#suffix']);
-      $form['status_messages'] = array(
+      $form['status_messages'] = [
         '#type' => 'status_messages',
         '#weight' => -10,
-      );
+      ];
       $response->addCommand(new HtmlCommand('#url-embed-dialog-form', $form));
     }
     else {
@@ -168,4 +163,5 @@ class UrlEmbedCke5Dialog extends FormBase {
     }
     return $response;
   }
+
 }

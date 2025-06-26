@@ -2,9 +2,9 @@
 
 namespace Drupal\Tests\config_update\Unit;
 
+use Drupal\config_update\ConfigDeleteInterface;
 use Drupal\config_update\ConfigReverter;
 use Drupal\config_update\ConfigRevertInterface;
-use Drupal\config_update\ConfigDeleteInterface;
 
 /**
  * Tests the \Drupal\config_update\ConfigReverter class.
@@ -359,7 +359,7 @@ class ConfigReverterTest extends ConfigUpdateUnitTestBase {
     }
     $save_config = $this->configStorage;
 
-    // Call the deleter and test the Boolean result.
+    // Call the configReverter delete method and test the Boolean result.
     $result = $this->configReverter->delete($type, $name);
     $this->assertEquals($expected, $result);
 

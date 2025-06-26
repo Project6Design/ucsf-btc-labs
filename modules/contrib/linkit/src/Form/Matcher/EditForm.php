@@ -37,7 +37,7 @@ class EditForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ProfileInterface $linkit_profile = NULL, $plugin_instance_id = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?ProfileInterface $linkit_profile = NULL, ?string $plugin_instance_id = NULL) {
     $this->linkitProfile = $linkit_profile;
     $this->linkitMatcher = $this->linkitProfile->getMatcher($plugin_instance_id);
 

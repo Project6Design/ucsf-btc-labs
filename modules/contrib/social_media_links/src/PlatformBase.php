@@ -2,10 +2,10 @@
 
 namespace Drupal\social_media_links;
 
-use Drupal\Component\Utility\UrlHelper;
-use Drupal\Core\Plugin\PluginBase;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\UrlHelper;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\Url;
 
 /**
@@ -55,21 +55,21 @@ class PlatformBase extends PluginBase implements PlatformInterface {
    * {@inheritdoc}
    */
   public function getFieldDescription() {
-    return isset($this->pluginDefinition['fieldDescription']) ? $this->pluginDefinition['fieldDescription'] : '';
+    return $this->pluginDefinition['fieldDescription'] ?? '';
   }
 
   /**
    * {@inheritdoc}
    */
   public function getUrlPrefix() {
-    return isset($this->pluginDefinition['urlPrefix']) ? $this->pluginDefinition['urlPrefix'] : '';
+    return $this->pluginDefinition['urlPrefix'] ?? '';
   }
 
   /**
    * {@inheritdoc}
    */
   public function getUrlSuffix() {
-    return isset($this->pluginDefinition['urlSuffix']) ? $this->pluginDefinition['urlSuffix'] : '';
+    return $this->pluginDefinition['urlSuffix'] ?? '';
   }
 
   /**

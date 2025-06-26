@@ -5,6 +5,7 @@ namespace Drupal\ik_constant_contact\Service;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
@@ -16,7 +17,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ClientException;
 
-
 /**
  * Class ConstantContact.
  *
@@ -24,6 +24,7 @@ use GuzzleHttp\Exception\ClientException;
  */
 class ConstantContact {
 
+  use DependencySerializationTrait;
   use StringTranslationTrait;
 
   /**
@@ -340,8 +341,6 @@ class ConstantContact {
    * @see https://v3.developer.constantcontact.com/api_reference/index.html#!/Contacts/createContact
    */
   private function createContact(array $data, $listIDs) {
-    $config = $this->getConfig();
-
     $body = (object) [
       'email_address' => (object) [
         'address' => NULL,
@@ -363,6 +362,10 @@ class ConstantContact {
 
     $this->moduleHandler->invokeAll('ik_constant_contact_contact_data_alter', [$data, &$body]);
     $this->moduleHandler->invokeAll('ik_constant_contact_contact_create_data_alter', [$data, &$body]);
+
+    // Waiting to pull the configuration until now in case the refreshToken()
+    // call changes the active tokens.
+    $config = $this->getConfig();
 
     try {
       $response = $this->httpClient->request('POST', $config['contact_url'], [
@@ -604,7 +607,6 @@ class ConstantContact {
    * 
    */
   public function getContactLists($cached = true) {
-    $config = $this->getConfig();
     $cid = 'ik_constant_contact.lists';
     $cache = ($cached === true ? $this->cache->get($cid) : null);
 
@@ -614,6 +616,10 @@ class ConstantContact {
     else {
       // Update access tokens.
       $this->refreshToken(false);
+
+      // Waiting to pull the configuration until now in case the refreshToken()
+      // call changes the active tokens.
+      $config = $this->getConfig();
 
       if (isset($config['access_token'])) {
         try {
@@ -638,20 +644,20 @@ class ConstantContact {
             return $lists;
           }
           else {
-            $this->messenger->addMessage($this->t('There was a problem getting your available contact lists.'), 'error');
+            $this->messenger->addMessage(t('There was a problem getting your available contact lists.'), 'error');
           }
         }
         catch (RequestException $e) {
           $this->handleRequestException($e);
-          $this->messenger->addMessage($this->t('There was a problem getting your available contact lists.'), 'error');
+          $this->messenger->addMessage(t('There was a problem getting your available contact lists.'), 'error');
         }
         catch (ClientException $e) {
           $this->handleRequestException($e);
-          $this->messenger->addMessage($this->t('There was a problem getting your available contact lists.'), 'error');
+          $this->messenger->addMessage(t('There was a problem getting your available contact lists.'), 'error');
         }
         catch (\Exception $e) {
           $this->loggerFactory->error($e);
-          $this->messenger->addMessage($this->t('There was a problem getting your available contact lists.'), 'error');
+          $this->messenger->addMessage(t('There was a problem getting your available contact lists.'), 'error');
         }
       }
       else {
@@ -999,8 +1005,6 @@ class ConstantContact {
    * an array here and an object in updateContact.
    */
   private function putContact(array $contact, array $data, $listIDs) {
-    $config = $this->getConfig();
-
     $body = (object) $contact;
 
     $body = $this->buildResponseBody($data, $body);
@@ -1013,6 +1017,10 @@ class ConstantContact {
 
     $this->moduleHandler->invokeAll('ik_constant_contact_contact_data_alter', [$data, &$body]);
     $this->moduleHandler->invokeAll('ik_constant_contact_contact_update_data_alter', [$data, &$body]);
+
+    // Waiting to pull the config until now so that any config changes can take
+    // immediate effect.
+    $config = $this->getConfig();
 
     try {
       $response = $this->httpClient->request('PUT', $config['contact_url'] . '/' . $contact['contact_id'], [
@@ -1081,7 +1089,6 @@ class ConstantContact {
       return $this->handleRequestException($e);
     }
     catch (\Exception $e) {
-      dpm($e);
       $this->loggerFactory->error($e);
 
       // Return the error to show an error on form submission
@@ -1226,6 +1233,10 @@ class ConstantContact {
     $this->moduleHandler->invokeAll('ik_constant_contact_contact_data_alter', [$data, &$body]);
     $this->moduleHandler->invokeAll('ik_constant_contact_contact_form_submission_alter', [$data, &$body]);
 
+    // Pulling the config again so that any config changes can take immediate
+    // effect.
+    $config = $this->getConfig();
+
     try {
       $response = $this->httpClient->request('POST', $config['contact_url'] . '/sign_up_form', [
         'headers' => [
@@ -1268,7 +1279,6 @@ class ConstantContact {
    *
    */
   public function unsubscribeContact(array $data) {
-    $config = $this->getConfig();
     // Check if contact already exists.
     $exists = (array) $this->getContact($data);
     $body = null;
@@ -1291,6 +1301,10 @@ class ConstantContact {
 
       $this->moduleHandler->invokeAll('ik_constant_contact_contact_data_alter', [$data, &$body]);
       $this->moduleHandler->invokeAll('ik_constant_contact_contact_unsubscribe_data_alter', [$data, &$body]);
+
+      // Waiting to pull the config until now so that any config changes can take
+      // immediate effect.
+      $config = $this->getConfig();
 
       try {
         $response = $this->httpClient->request('PUT', $config['contact_url'] . '/' . $exists->contact_id, [
@@ -1336,8 +1350,6 @@ class ConstantContact {
    * @see https://v3.developer.constantcontact.com/api_reference/index.html#!/Contacts/putContact
    */
   private function updateContact(array $data, $contact, $listIDs) {
-    $config = $this->getConfig();
-
     if ($contact && property_exists($contact, 'contact_id')) {
       
       $body = $contact;
@@ -1351,6 +1363,10 @@ class ConstantContact {
 
       $this->moduleHandler->invokeAll('ik_constant_contact_contact_data_alter', [$data, &$body]);
       $this->moduleHandler->invokeAll('ik_constant_contact_contact_update_data_alter', [$data, &$body]);
+
+      // Waiting to pull the config until now so that any config changes can take
+      // immediate effect.
+      $config = $this->getConfig();
 
       try {
         $response = $this->httpClient->request('PUT', $config['contact_url'] . '/' . $contact->contact_id, [

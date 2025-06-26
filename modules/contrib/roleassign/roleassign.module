@@ -8,6 +8,7 @@
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
+use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
 /**
@@ -67,25 +68,42 @@ function roleassign_help($route_name, RouteMatchInterface $route_match) {
 function roleassign_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   if (_roleassign_restrict_access()) {
     $user_forms = [
-      'user_register_form',
       'user_form',
       'bulk_add_cas_users',
     ];
 
+    /******************************
+     * Include form id for all user forms,
+     * including custom form modes.
+     ******************************/
+    if (isset($form_state->getBuildInfo()['base_form_id']) && ($form_state->getBuildInfo()['base_form_id']) == 'user_form') {
+      $user_forms[] = $form_id;
+    }
+
     if (in_array($form_id, $user_forms)) {
-      $roles = user_role_names(TRUE);
+      $roles = array_filter(Role::loadMultiple(), fn(RoleInterface $role) => $role->id() !== RoleInterface::ANONYMOUS_ID);
+      $roles = array_map(fn(RoleInterface $role) => $role->label(), $roles);
       $assignable_roles = _roleassign_get_assignable_roles();
       $sticky_roles = [];
 
       switch ($form_id) {
+
         /******************************
-         * User Register Form
-         * User Form
+         * Bulk Add CAS users
+         * - Add handling for the CAS module
          ******************************/
-        case 'user_register_form':
-        case 'user_form':
+        case 'bulk_add_cas_users':
+          if (\Drupal::service('module_handler')->moduleExists('cas')) {
+            $form['roles']['#options'] = $assignable_roles;
+          }
+          break;
+
+        /******************************
+         * Otherwise assume it's a user form
+         ******************************/
+        default:
           /******************************
-           * Get currently asssigned roles
+           * Get currently assigned roles
            ******************************/
           if ($form_id === 'user_form') {
             $current_account = $form_state->getFormObject()->getEntity();
@@ -160,16 +178,6 @@ function roleassign_form_alter(&$form, FormStateInterface $form_state, $form_id)
             $user_form['roles'] = $roles_field;
           }
           break;
-
-        /******************************
-         * Bulk Add CAS users
-         * - Add handling for the CAS module
-         ******************************/
-        case 'bulk_add_cas_users':
-          if (\Drupal::service('module_handler')->moduleExists('cas')) {
-            $form['roles']['#options'] = $assignable_roles;
-          }
-          break;
       }
     }
   }
@@ -233,12 +241,12 @@ function _roleassign_restrict_access() {
 function _roleassign_get_assignable_roles() {
   $config = \Drupal::service('config.factory');
   $roleassign_roles = array_flip($config->get('roleassign.settings')->get('roleassign_roles'));
-  $roles = user_role_names(TRUE);
+  $roles = Role::loadMultiple();
+  unset($roles[RoleInterface::ANONYMOUS_ID]);
   // Ignore Authenticated user as this is not required.
   unset($roles[RoleInterface::AUTHENTICATED_ID]);
-  $assignable_roles = array_intersect_key($roles, $roleassign_roles);
-
-  return $assignable_roles;
+  $roles = array_map(fn(RoleInterface $role) => $role->label(), $roles);
+  return array_intersect_key($roles, $roleassign_roles);
 }
 
 /**
@@ -248,11 +256,11 @@ function _roleassign_get_assignable_roles() {
  * that only has "assign roles" permission, not "administer permissions".
  */
 function _roleassign_get_unassignable_roles() {
-  $roles = user_role_names(TRUE);
+  $roles = Role::loadMultiple();
+  unset($roles[RoleInterface::ANONYMOUS_ID]);
   // Ignore Authenticated user as this is not required.
   unset($roles[RoleInterface::AUTHENTICATED_ID]);
+  $roles = array_map(fn(RoleInterface $role) => $role->label(), $roles);
   $assignable_roles = _roleassign_get_assignable_roles();
-  $unassignable_roles = array_diff($roles, $assignable_roles);
-
-  return $unassignable_roles;
+  return array_diff($roles, $assignable_roles);
 }

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Functional\System;
 
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\Core\Site\Settings;
 use Drupal\Tests\BrowserTestBase;
 
@@ -22,7 +25,7 @@ class SitesDirectoryHardeningTest extends BrowserTestBase {
    *
    * Checks both the current sites directory and settings.php.
    */
-  public function testSitesDirectoryHardening() {
+  public function testSitesDirectoryHardening(): void {
     $site_path = $this->kernel->getSitePath();
     $settings_file = $this->settingsFile($site_path);
 
@@ -43,7 +46,7 @@ class SitesDirectoryHardeningTest extends BrowserTestBase {
   /**
    * Tests writable files remain writable when directory hardening is disabled.
    */
-  public function testSitesDirectoryHardeningConfig() {
+  public function testSitesDirectoryHardeningConfig(): void {
     $site_path = $this->kernel->getSitePath();
     $settings_file = $this->settingsFile($site_path);
 
@@ -56,9 +59,9 @@ class SitesDirectoryHardeningTest extends BrowserTestBase {
 
     // Manually trigger the requirements check.
     $requirements = $this->checkSystemRequirements();
-    $this->assertEquals(REQUIREMENT_WARNING, $requirements['configuration_files']['severity'], 'Warning severity is properly set.');
+    $this->assertEquals(RequirementSeverity::Warning, $requirements['configuration_files']['severity'], 'Warning severity is properly set.');
     $this->assertEquals('Protection disabled', (string) $requirements['configuration_files']['value']);
-    $description = strip_tags((string) \Drupal::service('renderer')->renderPlain($requirements['configuration_files']['description']));
+    $description = strip_tags((string) \Drupal::service('renderer')->renderInIsolation($requirements['configuration_files']['description']));
     $this->assertStringContainsString('settings.php is not protected from modifications and poses a security risk.', $description);
     $this->assertStringContainsString('services.yml is not protected from modifications and poses a security risk.', $description);
 
@@ -99,7 +102,7 @@ class SitesDirectoryHardeningTest extends BrowserTestBase {
    * @param string $site_path
    *   The sites directory path, such as 'sites/default'.
    */
-  protected function makeWritable($site_path) {
+  protected function makeWritable($site_path): void {
     chmod($site_path, 0755);
     chmod($this->settingsFile($site_path), 0644);
   }
@@ -113,7 +116,7 @@ class SitesDirectoryHardeningTest extends BrowserTestBase {
    * @return string
    *   The path to settings.php.
    */
-  protected function settingsFile($site_path) {
+  protected function settingsFile($site_path): string {
     $settings_file = $site_path . '/settings.php';
     return $settings_file;
   }

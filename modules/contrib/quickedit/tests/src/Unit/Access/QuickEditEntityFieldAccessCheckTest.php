@@ -27,6 +27,7 @@ class QuickEditEntityFieldAccessCheckTest extends UnitTestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    parent::setUp();
     $this->editAccessCheck = new QuickEditEntityFieldAccessCheck();
 
     $cache_contexts_manager = $this->prophesize(CacheContextsManager::class);
@@ -42,7 +43,7 @@ class QuickEditEntityFieldAccessCheckTest extends UnitTestCase {
    *
    * @see \Drupal\Tests\edit\Unit\quickedit\Access\QuickEditEntityFieldAccessCheckTest::testAccess()
    */
-  public function providerTestAccess() {
+  public static function providerTestAccess() {
     $data = [];
     $data[] = [TRUE, TRUE, AccessResult::allowed()];
     $data[] = [FALSE, TRUE, AccessResult::neutral()];
@@ -107,7 +108,7 @@ class QuickEditEntityFieldAccessCheckTest extends UnitTestCase {
   /**
    * Provides test data for testAccessForbidden.
    */
-  public function providerTestAccessForbidden() {
+  public static function providerTestAccessForbidden() {
     $data = [];
     // Tests the access method without a field_name.
     $data[] = [NULL, LanguageInterface::LANGCODE_NOT_SPECIFIED];
@@ -126,9 +127,7 @@ class QuickEditEntityFieldAccessCheckTest extends UnitTestCase {
    * @return \Drupal\Core\Entity\EntityInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   protected function createMockEntity() {
-    $entity = $this->getMockBuilder('Drupal\entity_test\Entity\EntityTest')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $entity = $this->createMock('Drupal\entity_test\Entity\EntityTest');
 
     $entity->expects($this->any())
       ->method('hasTranslation')

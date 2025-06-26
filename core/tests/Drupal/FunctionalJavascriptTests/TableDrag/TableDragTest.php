@@ -63,7 +63,7 @@ class TableDragTest extends WebDriverTestBase {
   /**
    * Tests row weight switch.
    */
-  public function testRowWeightSwitch() {
+  public function testRowWeightSwitch(): void {
     $this->state->set('tabledrag_test_table', array_flip(range(1, 3)));
 
     $this->drupalGet('tabledrag_test');
@@ -100,7 +100,7 @@ class TableDragTest extends WebDriverTestBase {
   /**
    * Tests draggable table drag'n'drop.
    */
-  public function testDragAndDrop() {
+  public function testDragAndDrop(): void {
     $this->state->set('tabledrag_test_table', array_flip(range(1, 3)));
     $this->drupalGet('tabledrag_test');
 
@@ -147,7 +147,7 @@ class TableDragTest extends WebDriverTestBase {
   /**
    * Tests accessibility through keyboard of the tabledrag functionality.
    */
-  public function testKeyboardAccessibility() {
+  public function testKeyboardAccessibility(): void {
     $this->assertKeyboardAccessibility();
   }
 
@@ -248,7 +248,7 @@ class TableDragTest extends WebDriverTestBase {
   /**
    * Tests the root and leaf behaviors for rows.
    */
-  public function testRootLeafDraggableRowsWithKeyboard() {
+  public function testRootLeafDraggableRowsWithKeyboard(): void {
     $this->state->set('tabledrag_test_table', [
       1 => [],
       2 => ['parent' => 1, 'depth' => 1, 'classes' => ['tabledrag-leaf']],
@@ -298,7 +298,7 @@ class TableDragTest extends WebDriverTestBase {
   /**
    * Tests the warning that appears upon making changes to a tabledrag table.
    */
-  public function testTableDragChangedWarning() {
+  public function testTableDragChangedWarning(): void {
     $this->drupalGet('tabledrag_test');
 
     // By default no text is visible.
@@ -347,7 +347,7 @@ class TableDragTest extends WebDriverTestBase {
   /**
    * Tests nested draggable tables through keyboard.
    */
-  public function testNestedDraggableTables() {
+  public function testNestedDraggableTables(): void {
     $this->state->set('tabledrag_test_table', array_flip(range(1, 5)));
     $this->drupalGet('tabledrag_test_nested');
     $this->assertKeyboardAccessibility('');
@@ -548,7 +548,7 @@ class TableDragTest extends WebDriverTestBase {
   /**
    * Finds a row in the test table by the row ID.
    *
-   * @param string $id
+   * @param string|int $id
    *   The ID of the row.
    * @param string $table_id
    *   The ID of the parent table. Defaults to 'tabledrag-test-table'.
@@ -556,7 +556,7 @@ class TableDragTest extends WebDriverTestBase {
    * @return \Behat\Mink\Element\NodeElement
    *   The row element.
    */
-  protected function findRowById($id, $table_id = 'tabledrag-test-table') {
+  protected function findRowById($id, $table_id = 'tabledrag-test-table'): NodeElement {
     $xpath = "//table[@id='$table_id']/tbody/tr[.//input[@name='table[$id][id]']]";
     $row = $this->getSession()->getPage()->find('xpath', $xpath);
     $this->assertNotEmpty($row);
@@ -572,7 +572,7 @@ class TableDragTest extends WebDriverTestBase {
    * @return \Behat\Mink\Element\NodeElement
    *   The toggle element.
    */
-  protected function findWeightsToggle($expected_text) {
+  protected function findWeightsToggle($expected_text): NodeElement {
     $toggle = $this->getSession()->getPage()->findButton($expected_text);
     $this->assertNotEmpty($toggle);
     return $toggle;
@@ -589,7 +589,7 @@ class TableDragTest extends WebDriverTestBase {
    * @param int $repeat
    *   (optional) How many times to press the arrow button. Defaults to 1.
    */
-  protected function moveRowWithKeyboard(NodeElement $row, $arrow, $repeat = 1) {
+  protected function moveRowWithKeyboard(NodeElement $row, $arrow, $repeat = 1): void {
     $keys = [
       'left' => 37,
       'right' => 39,
@@ -627,7 +627,7 @@ class TableDragTest extends WebDriverTestBase {
    * @throws \Exception
    *   Thrown when the class is not added successfully to the handle.
    */
-  protected function markRowHandleForDragging(NodeElement $handle) {
+  protected function markRowHandleForDragging(NodeElement $handle): void {
     $class = self::DRAGGING_CSS_CLASS;
     $script = <<<JS
 document.evaluate("{$handle->getXpath()}", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
@@ -653,7 +653,7 @@ JS;
    * @throws \Exception
    *   Thrown when the dragging operations are not completed on time.
    */
-  protected function waitUntilDraggingCompleted(NodeElement $handle) {
+  protected function waitUntilDraggingCompleted(NodeElement $handle): void {
     $class_removed = $this->getSession()->getPage()->waitFor(1, function () use ($handle) {
       return !$handle->hasClass($this::DRAGGING_CSS_CLASS);
     });

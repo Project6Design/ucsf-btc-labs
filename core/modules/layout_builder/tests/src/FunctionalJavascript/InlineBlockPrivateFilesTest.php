@@ -63,7 +63,7 @@ class InlineBlockPrivateFilesTest extends InlineBlockTestBase {
   /**
    * Tests access to private files added to inline blocks in the layout builder.
    */
-  public function testPrivateFiles() {
+  public function testPrivateFiles(): void {
     $assert_session = $this->assertSession();
     LayoutBuilderEntityViewDisplay::load('node.bundle_with_section_field.default')
       ->enableLayoutBuilder()
@@ -169,7 +169,7 @@ class InlineBlockPrivateFilesTest extends InlineBlockTestBase {
    * @param \Drupal\file\FileInterface $file
    *   The file entity.
    */
-  protected function replaceFileInBlock(FileInterface $file) {
+  protected function replaceFileInBlock(FileInterface $file): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
     $this->clickContextualLink(static::INLINE_BLOCK_LOCATOR, 'Configure');
@@ -189,7 +189,7 @@ class InlineBlockPrivateFilesTest extends InlineBlockTestBase {
    * @param \Drupal\file\Entity\File $file
    *   The file entity.
    */
-  protected function addInlineFileBlockToLayout($title, File $file) {
+  protected function addInlineFileBlockToLayout($title, File $file): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
     $page->clickLink('Add block');
@@ -258,7 +258,7 @@ class InlineBlockPrivateFilesTest extends InlineBlockTestBase {
    * @return string
    *   The text secret.
    */
-  protected function getFileSecret(FileInterface $file) {
+  protected function getFileSecret(FileInterface $file): string {
     return "The secret in {$file->label()}";
   }
 
@@ -268,7 +268,7 @@ class InlineBlockPrivateFilesTest extends InlineBlockTestBase {
    * @param \Drupal\file\FileInterface $file
    *   The file to be attached.
    */
-  protected function attachFileToBlockForm(FileInterface $file) {
+  protected function attachFileToBlockForm(FileInterface $file): void {
     $assert_session = $this->assertSession();
     $page = $this->getSession()->getPage();
     $this->assertSession()->waitForElementVisible('named', ['field', 'files[settings_block_form_field_file_0]']);
@@ -283,7 +283,7 @@ class InlineBlockPrivateFilesTest extends InlineBlockTestBase {
    * @param int $node_id
    *   The node id.
    */
-  protected function createNewNodeRevision($node_id) {
+  protected function createNewNodeRevision($node_id): void {
     $node = Node::load($node_id);
     $node->setTitle('Update node');
     $node->setNewRevision();

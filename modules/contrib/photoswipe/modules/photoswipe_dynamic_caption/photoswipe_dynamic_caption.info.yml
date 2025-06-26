@@ -1,0 +1,13 @@
+name: PhotoSwipe Dynamic Caption
+description: 'Provides dynamic captions to the photoswipe field formatters'
+core_version_requirement: ^9.3 || ^10 || ^11
+type: module
+package: Media
+dependencies:
+  - photoswipe:photoswipe
+configure: photoswipe_dynamic_caption.settings
+
+# Information added by Drupal.org packaging script on 2025-05-07
+version: '5.0.5'
+project: 'photoswipe'
+datestamp: 1746623731

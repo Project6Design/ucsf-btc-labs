@@ -21,7 +21,7 @@ class DoTrustedCallbackTraitTest extends UnitTestCase {
    * @covers ::doTrustedCallback
    * @dataProvider providerTestTrustedCallbacks
    */
-  public function testTrustedCallbacks(callable $callback, $extra_trusted_interface = NULL) {
+  public function testTrustedCallbacks(callable $callback, $extra_trusted_interface = NULL): void {
     $return = $this->doTrustedCallback($callback, [], '%s is not trusted', TrustedCallbackInterface::THROW_EXCEPTION, $extra_trusted_interface);
     $this->assertSame('test', $return);
   }
@@ -29,7 +29,7 @@ class DoTrustedCallbackTraitTest extends UnitTestCase {
   /**
    * Data provider for ::testTrustedCallbacks().
    */
-  public function providerTestTrustedCallbacks() {
+  public static function providerTestTrustedCallbacks() {
     $closure = function () {
       return 'test';
     };
@@ -50,7 +50,7 @@ class DoTrustedCallbackTraitTest extends UnitTestCase {
    * @covers ::doTrustedCallback
    * @dataProvider providerTestUntrustedCallbacks
    */
-  public function testUntrustedCallbacks(callable $callback, $extra_trusted_interface = NULL) {
+  public function testUntrustedCallbacks(callable $callback, $extra_trusted_interface = NULL): void {
     $this->expectException(UntrustedCallbackException::class);
     $this->doTrustedCallback($callback, [], '%s is not trusted', TrustedCallbackInterface::THROW_EXCEPTION, $extra_trusted_interface);
   }
@@ -58,7 +58,7 @@ class DoTrustedCallbackTraitTest extends UnitTestCase {
   /**
    * Data provider for ::testUntrustedCallbacks().
    */
-  public function providerTestUntrustedCallbacks() {
+  public static function providerTestUntrustedCallbacks() {
     $tests['TrustedCallbackInterface_object'] = [[new TrustedMethods(), 'unTrustedCallback'], TrustedInterface::class];
     $tests['TrustedCallbackInterface_static_string'] = ['\Drupal\Tests\Core\Security\TrustedMethods::unTrustedCallback', TrustedInterface::class];
     $tests['TrustedCallbackInterface_static_array'] = [[TrustedMethods::class, 'unTrustedCallback'], TrustedInterface::class];
@@ -72,7 +72,7 @@ class DoTrustedCallbackTraitTest extends UnitTestCase {
   /**
    * @dataProvider errorTypeProvider
    */
-  public function testException($callback) {
+  public function testException($callback): void {
     $this->expectException(UntrustedCallbackException::class);
     $this->expectExceptionMessage('Drupal\Tests\Core\Security\UntrustedObject::callback is not trusted');
     $this->doTrustedCallback($callback, [], '%s is not trusted');
@@ -82,24 +82,15 @@ class DoTrustedCallbackTraitTest extends UnitTestCase {
    * @dataProvider errorTypeProvider
    * @group legacy
    */
-  public function testSilencedDeprecation($callback) {
+  public function testSilencedDeprecation($callback): void {
     $this->expectDeprecation('Drupal\Tests\Core\Security\UntrustedObject::callback is not trusted');
     $this->doTrustedCallback($callback, [], '%s is not trusted', TrustedCallbackInterface::TRIGGER_SILENCED_DEPRECATION);
   }
 
   /**
-   * @dataProvider errorTypeProvider
-   */
-  public function testWarning($callback) {
-    $this->expectWarning();
-    $this->expectWarningMessage('Drupal\Tests\Core\Security\UntrustedObject::callback is not trusted');
-    $this->doTrustedCallback($callback, [], '%s is not trusted', TrustedCallbackInterface::TRIGGER_WARNING);
-  }
-
-  /**
    * Data provider for tests of ::doTrustedCallback $error_type argument.
    */
-  public function errorTypeProvider() {
+  public static function errorTypeProvider() {
     $tests['untrusted_object'] = [[new UntrustedObject(), 'callback']];
     $tests['untrusted_object_static_string'] = ['Drupal\Tests\Core\Security\UntrustedObject::callback'];
     $tests['untrusted_object_static_array'] = [[UntrustedObject::class, 'callback']];
@@ -108,9 +99,15 @@ class DoTrustedCallbackTraitTest extends UnitTestCase {
 
 }
 
+/**
+ * Interface representing classes with trusted callbacks.
+ */
 interface TrustedInterface {
 }
 
+/**
+ * Class with a trusted interface implementation with callback.
+ */
 class TrustedObject implements TrustedInterface {
 
   public static function callback() {
@@ -119,6 +116,9 @@ class TrustedObject implements TrustedInterface {
 
 }
 
+/**
+ * Class representing untrusted callback.
+ */
 class UntrustedObject {
 
   public static function callback() {
@@ -127,6 +127,9 @@ class UntrustedObject {
 
 }
 
+/**
+ * Invokable untrusted test class.
+ */
 class InvokableUntrustedObject {
 
   public function __invoke() {
@@ -135,6 +138,9 @@ class InvokableUntrustedObject {
 
 }
 
+/**
+ * Test class with implemented trusted callbacks.
+ */
 class TrustedMethods implements TrustedCallbackInterface {
 
   public static function trustedCallbacks() {

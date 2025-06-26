@@ -95,7 +95,7 @@ class EntityListBuilderTest extends UnitTestCase {
   /**
    * @covers ::getOperations
    */
-  public function testGetOperations() {
+  public function testGetOperations(): void {
     $operation_name = $this->randomMachineName();
     $operations = [
       $operation_name => [
@@ -146,6 +146,9 @@ class EntityListBuilderTest extends UnitTestCase {
 
 }
 
+/**
+ * Stub class for testing EntityListBuilder.
+ */
 class TestEntityListBuilder extends EntityTestListBuilder {
 
   public function buildOperations(EntityInterface $entity) {

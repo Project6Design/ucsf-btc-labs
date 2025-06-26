@@ -1,5 +1,5 @@
 # This is so your IDE knows about the syntax for fixes and autocomplete.
-$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
 
 # The human readable name.
 name: Title
@@ -16,6 +16,8 @@ props:
       type: Drupal\Core\Template\Attribute
       title: Attributes
       description: Wrapper attributes.
+    label:
+      type: string
     html_tag:
       type: string
       title: HTML tag for title
@@ -28,11 +30,22 @@ props:
         - h5
         - h6
         - span
+      meta:enum:
+        h1: Heading 1
+        h2: Heading 2
+        h3: Heading 3
+        h4: Heading 4
+        h5: Heading 5
+        h6: Heading 6
+        span: Inline
+      x-translation-context: HTML tag
       # Provide a default value
       default: h2
-    title_prefix:
-      type: object
-      title: Title prefix
-    title_suffix:
-      type: object
-      title: Title suffix
+
+slots:
+  title_prefix:
+    type: object
+    title: Title prefix
+  title_suffix:
+    type: object
+    title: Title suffix

@@ -44,7 +44,7 @@ abstract class AccountForm extends ContentEntityForm implements TrustedCallbackI
    * @param \Drupal\Component\Datetime\TimeInterface $time
    *   The time service.
    */
-  public function __construct(EntityRepositoryInterface $entity_repository, LanguageManagerInterface $language_manager, EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, TimeInterface $time = NULL) {
+  public function __construct(EntityRepositoryInterface $entity_repository, LanguageManagerInterface $language_manager, ?EntityTypeBundleInfoInterface $entity_type_bundle_info = NULL, ?TimeInterface $time = NULL) {
     parent::__construct($entity_repository, $entity_type_bundle_info, $time);
     $this->languageManager = $language_manager;
   }
@@ -105,7 +105,8 @@ abstract class AccountForm extends ContentEntityForm implements TrustedCallbackI
       '#access' => $account->mail->access('edit'),
     ];
 
-    // Only show name field on registration form or user can change own username.
+    // Only show name field on registration form or user can change own
+    // username.
     $form['account']['name'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Username'),
@@ -157,12 +158,13 @@ abstract class AccountForm extends ContentEntityForm implements TrustedCallbackI
         ];
         $form_state->set('user', $account);
 
-        // The user may only change their own password without their current
-        // password if they logged in via a one-time login link.
-        if (!$form_state->get('user_pass_reset')) {
-          $form['account']['current_pass']['#description'] = $this->t('Required if you want to change the %mail or %pass below. <a href=":request_new_url" title="Send password reset instructions via email.">Reset your password</a>.', [
-            '%mail' => $form['account']['mail']['#title'],
-            '%pass' => $this->t('Password'),
+        // If logged in via a one-time login link entering a new password is
+        // required and the user does not need to enter their current password.
+        if ($form_state->get('user_pass_reset')) {
+          $form['account']['pass']['#required'] = TRUE;
+        }
+        else {
+          $form['account']['current_pass']['#description'] = $this->t('Required if you want to change the <em>Email address</em> or the <em>Password</em> field below. <a href=":request_new_url" title="Send password reset instructions via email.">Reset your password</a>.', [
             ':request_new_url' => Url::fromRoute('user.pass')->toString(),
           ]);
         }
@@ -199,7 +201,7 @@ abstract class AccountForm extends ContentEntityForm implements TrustedCallbackI
       '#title' => $this->t('Status'),
       '#default_value' => $status,
       '#options' => [$this->t('Blocked'), $this->t('Active')],
-      '#access' => $account->status->access('edit'),
+      '#access' => $account->status->access('edit') && $user->id() !== $account->id(),
     ];
 
     $roles = Role::loadMultiple();

@@ -73,7 +73,7 @@ function drush_photoswipe_plugin() {
   }
 
   // Set the directory to the download location.
-  $olddir = getcwd();
+  $old_dir = getcwd();
   chdir($path);
 
   // Download the zip archive.
@@ -106,5 +106,5 @@ function drush_photoswipe_plugin() {
   }
 
   // Set working directory back to the previous working directory.
-  chdir($olddir);
+  chdir($old_dir);
 }

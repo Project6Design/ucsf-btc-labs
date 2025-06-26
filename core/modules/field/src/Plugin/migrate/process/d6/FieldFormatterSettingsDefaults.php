@@ -2,17 +2,15 @@
 
 namespace Drupal\field\Plugin\migrate\process\d6;
 
+use Drupal\migrate\Attribute\MigrateProcess;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\Row;
 
 /**
  * Set the default field settings.
- *
- * @MigrateProcessPlugin(
- *   id = "field_formatter_settings_defaults"
- * )
  */
+#[MigrateProcess('field_formatter_settings_defaults')]
 class FieldFormatterSettingsDefaults extends ProcessPluginBase {
 
   /**
@@ -44,7 +42,7 @@ class FieldFormatterSettingsDefaults extends ProcessPluginBase {
   /**
    * @param string $type
    *   The field type.
-   * @param $format
+   * @param string $format
    *   The format selected for the field on the display.
    *
    * @return array

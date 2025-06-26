@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\demo_umami\Functional;
 
 use Drupal\FunctionalTests\Installer\InstallerTestBase;
@@ -8,6 +10,7 @@ use Drupal\FunctionalTests\Installer\InstallerTestBase;
  * Tests the multilingual installer installing the Umami profile.
  *
  * @group Installer
+ * @group #slow
  */
 class UmamiMultilingualInstallTest extends InstallerTestBase {
 
@@ -24,16 +27,16 @@ class UmamiMultilingualInstallTest extends InstallerTestBase {
   /**
    * Ensures that Umami can be installed with Spanish as the default language.
    */
-  public function testUmami() {
+  public function testUmami(): void {
     $this->drupalGet('');
     // cSpell:disable-next-line
-    $this->assertSession()->pageTextContains('Quiche mediterráneo profundo');
+    $this->assertSession()->pageTextContains('Crema catalana');
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function setUpLanguage() {
+  protected function setUpLanguage(): void {
     // Place custom local translations in the translations directory to avoid
     // getting translations from localize.drupal.org.
     mkdir(DRUPAL_ROOT . '/' . $this->siteDirectory . '/files/translations', 0777, TRUE);
@@ -51,7 +54,7 @@ class UmamiMultilingualInstallTest extends InstallerTestBase {
    * @return string
    *   Contents for the test .po file.
    */
-  protected function getPo($langcode) {
+  protected function getPo($langcode): string {
     return <<<PO
 msgid ""
 msgstr ""

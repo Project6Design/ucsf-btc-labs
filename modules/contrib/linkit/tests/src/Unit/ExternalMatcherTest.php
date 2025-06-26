@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\linkit\Unit;
 
 use Drupal\linkit\Plugin\Linkit\Matcher\ExternalMatcher;

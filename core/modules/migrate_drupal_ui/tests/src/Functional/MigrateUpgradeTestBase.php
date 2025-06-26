@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal_ui\Functional;
 
 use Drupal\Core\Database\Database;
@@ -82,7 +84,7 @@ abstract class MigrateUpgradeTestBase extends BrowserTestBase {
     $default_db = Database::getConnection()->getKey();
     Database::setActiveConnection($this->sourceDatabase->getKey());
 
-    if (substr($path, -3) == '.gz') {
+    if (str_ends_with($path, '.gz')) {
       $path = 'compress.zlib://' . $path;
     }
     require $path;
@@ -188,7 +190,7 @@ abstract class MigrateUpgradeTestBase extends BrowserTestBase {
       $session->pageTextContains($label);
     }
     $session->pageTextContainsOnce('content items');
-    $session->pageTextContains('There is translated content of these types:');
+    $session->pageTextContains('Check whether there is translated content of these types:');
   }
 
   /**
@@ -203,7 +205,7 @@ abstract class MigrateUpgradeTestBase extends BrowserTestBase {
    *
    * @throws \Behat\Mink\Exception\ExpectationException
    */
-  protected function assertReviewForm(array $available_paths = NULL, array $missing_paths = NULL) {
+  protected function assertReviewForm(?array $available_paths = NULL, ?array $missing_paths = NULL) {
     $session = $this->assertSession();
     $session->pageTextContains('What will be upgraded?');
 
@@ -237,7 +239,7 @@ abstract class MigrateUpgradeTestBase extends BrowserTestBase {
    */
   protected function assertUpgrade(array $entity_counts) {
     $session = $this->assertSession();
-    $session->pageTextContains(t('Congratulations, you upgraded Drupal!'));
+    $session->pageTextContains('Congratulations, you upgraded Drupal!');
 
     // Assert the count of entities after the upgrade. First, reset all the
     // statics after migration to ensure entities are loadable.
@@ -338,6 +340,16 @@ abstract class MigrateUpgradeTestBase extends BrowserTestBase {
    */
   protected function getSourcePrivateBasePath() {
     return NULL;
+  }
+
+  /**
+   * Gets the file data.
+   *
+   * @return string[][]
+   *   Data from the source file_managed table.
+   */
+  protected function getManagedFiles() {
+    return [];
   }
 
   /**

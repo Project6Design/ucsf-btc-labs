@@ -25,11 +25,8 @@ class PrimitiveTypeConstraintValidator extends ConstraintValidator {
 
   /**
    * {@inheritdoc}
-   *
-   * phpcs:ignore Drupal.Commenting.FunctionComment.VoidReturn
-   * @return void
    */
-  public function validate($value, Constraint $constraint) {
+  public function validate($value, Constraint $constraint): void {
 
     if (!isset($value)) {
       return;
@@ -63,7 +60,7 @@ class PrimitiveTypeConstraintValidator extends ConstraintValidator {
     if ($typed_data instanceof UriInterface && in_array(parse_url($value, PHP_URL_SCHEME), [NULL, FALSE], TRUE)) {
       $valid = FALSE;
     }
-    // @todo: Move those to separate constraint validators.
+    // @todo Move those to separate constraint validators.
     try {
       if ($typed_data instanceof DateTimeInterface && $typed_data->getDateTime() && $typed_data->getDateTime()->hasErrors()) {
         $valid = FALSE;
@@ -72,13 +69,13 @@ class PrimitiveTypeConstraintValidator extends ConstraintValidator {
         $valid = FALSE;
       }
     }
-    catch (\Exception $e) {
+    catch (\Exception) {
       // Invalid durations or dates might throw exceptions.
       $valid = FALSE;
     }
 
     if (!$valid) {
-      // @todo: Provide a good violation message for each problem.
+      // @todo Provide a good violation message for each problem.
       $this->context->addViolation($constraint->message, [
         '%value' => is_object($value) ? get_class($value) : (is_array($value) ? 'Array' : (string) $value),
       ]);

@@ -6,6 +6,8 @@ namespace Drupal\Tests\editor\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 
+// cspell:ignore sulaco
+
 /**
  * @group editor
  */
@@ -47,7 +49,7 @@ class EditorAdminTest extends WebDriverTestBase {
   /**
    * Tests that editor selection can be toggled without breaking ajax.
    */
-  public function testEditorSelection() {
+  public function testEditorSelection(): void {
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
 
@@ -63,7 +65,8 @@ class EditorAdminTest extends WebDriverTestBase {
     $this->drupalGet('/admin/config/content/formats/manage/sulaco');
     // Deselect and reselect an editor.
     $page->selectFieldOption('editor[editor]', '');
-    $this->assertNotEmpty($this->assertSession()->waitForElementRemoved('named', ['field', 'editor[settings][ponies_too]']));
+    $this->assertNotEmpty(
+      $this->assertSession()->waitForElementRemoved('named', ['field', 'editor[settings][ponies_too]']));
     $page->selectFieldOption('editor[editor]', 'unicorn');
     $this->assertNotEmpty($this->assertSession()->waitForField('editor[settings][ponies_too]'));
   }
@@ -73,11 +76,11 @@ class EditorAdminTest extends WebDriverTestBase {
    *
    * The order in which the different editors are selected is significant,
    * because the form state must change accordingly.
+   *
    * @see https://www.drupal.org/project/drupal/issues/3230829
    */
-  public function testEditorCreation() {
+  public function testEditorCreation(): void {
     $page = $this->getSession()->getPage();
-    $assert_session = $this->assertSession();
 
     $this->drupalGet('/admin/config/content/formats/add');
     $page->fillField('name', $this->randomString());

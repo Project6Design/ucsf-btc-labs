@@ -2,10 +2,10 @@
 
 namespace Drupal\Tests\rdf\Kernel;
 
+use Drupal\comment\Entity\Comment;
 use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Field\Plugin\Field\FieldType\CreatedItem;
 use Drupal\KernelTests\Core\Entity\EntityKernelTestBase;
-use Drupal\comment\Entity\Comment;
 
 /**
  * Tests rdf_comment_storage_load.

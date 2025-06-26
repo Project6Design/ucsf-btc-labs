@@ -6,7 +6,7 @@ package: Testing
 dependencies:
   - default_content:default_content
 
-# Information added by Drupal.org packaging script on 2022-08-02
-version: '2.0.0-alpha2'
+# Information added by Drupal.org packaging script on 2024-08-24
+version: '2.0.0-alpha3'
 project: 'default_content'
-datestamp: 1659466708
+datestamp: 1724492423

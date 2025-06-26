@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\comment\Functional;
 
 use Drupal\Core\Url;
@@ -55,7 +57,7 @@ class CommentTypeTest extends CommentTestBase {
   /**
    * Tests creating a comment type programmatically and via a form.
    */
-  public function testCommentTypeCreation() {
+  public function testCommentTypeCreation(): void {
     // Create a comment type programmatically.
     $type = $this->createCommentType('other');
 
@@ -107,7 +109,6 @@ class CommentTypeTest extends CommentTestBase {
     // Save the form and ensure the entity-type value is preserved even though
     // the field isn't present.
     $this->submitForm([], 'Save');
-    \Drupal::entityTypeManager()->getStorage('comment_type')->resetCache(['foo']);
     $comment_type = CommentType::load('foo');
     $this->assertEquals('node', $comment_type->getTargetEntityTypeId());
 
@@ -119,7 +120,7 @@ class CommentTypeTest extends CommentTestBase {
   /**
    * Tests editing a comment type using the UI.
    */
-  public function testCommentTypeEditing() {
+  public function testCommentTypeEditing(): void {
     $this->drupalLogin($this->adminUser);
 
     $field = FieldConfig::loadByName('comment', 'comment', 'comment_body');
@@ -154,7 +155,7 @@ class CommentTypeTest extends CommentTestBase {
   /**
    * Tests deleting a comment type that still has content.
    */
-  public function testCommentTypeDeletion() {
+  public function testCommentTypeDeletion(): void {
     // Create a comment type programmatically.
     $type = $this->createCommentType('foo');
     $this->drupalCreateContentType(['type' => 'page']);
@@ -198,7 +199,7 @@ class CommentTypeTest extends CommentTestBase {
       $this->addDefaultCommentField('comment', 'comment', 'bar');
       $this->fail('Exception not thrown.');
     }
-    catch (\InvalidArgumentException $e) {
+    catch (\InvalidArgumentException) {
       // Expected exception; just continue testing.
     }
 

@@ -5,8 +5,6 @@
 
 (function ($, Drupal, once) {
 
-  'use strict';
-
   // Revert: Set currency prefix to empty by default #2066.
   // @see https://github.com/RobinHerbots/Inputmask/issues/2066
   if (window.Inputmask) {
@@ -39,6 +37,36 @@
         autoGroup: true,
         digits: 2,
         digitsOptional: false,
+        clearMaskOnLostFocus: false
+      },
+      decimal: {
+        prefix: '',
+        groupSeparator: ',',
+        alias: 'numeric',
+        placeholder: '0',
+        autoGroup: true,
+        digits: 3,
+        digitsOptional: true,
+        clearMaskOnLostFocus: false
+      },
+      decimal_negative: {
+        prefix: '',
+        groupSeparator: ',',
+        alias: 'numeric',
+        placeholder: '0',
+        autoGroup: true,
+        digits: 3,
+        digitsOptional: true,
+        clearMaskOnLostFocus: false
+      },
+      decimal_positive_negative: {
+        prefix: '',
+        groupSeparator: ',',
+        alias: 'numeric',
+        placeholder: '0',
+        autoGroup: true,
+        digits: 3,
+        digitsOptional: true,
         clearMaskOnLostFocus: false
       }
     });

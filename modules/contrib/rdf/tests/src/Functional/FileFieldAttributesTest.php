@@ -3,8 +3,8 @@
 namespace Drupal\Tests\rdf\Functional;
 
 use Drupal\Core\Url;
-use Drupal\Tests\file\Functional\FileFieldTestBase;
 use Drupal\file\Entity\File;
+use Drupal\Tests\file\Functional\FileFieldTestBase;
 use Drupal\Tests\rdf\Traits\RdfParsingTrait;
 
 /**
@@ -56,6 +56,9 @@ class FileFieldAttributesTest extends FileFieldTestBase {
    */
   protected $node;
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
     $node_storage = $this->container->get('entity_type.manager')->getStorage('node');

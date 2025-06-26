@@ -6,7 +6,7 @@ namespace Drupal\linkit\Plugin\CKEditor5Plugin;
 
 use Drupal\ckeditor5\Plugin\CKEditor5PluginConfigurableTrait;
 use Drupal\ckeditor5\Plugin\CKEditor5PluginDefault;
-use Drupal\ckeditor5\Plugin\CKEditor5PluginConfigurableInterface;
+use Drupal\ckeditor5\Plugin\CKEditor5PluginElementsSubsetInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 /**
  * CKEditor 5 Linkit plugin configuration.
  */
-class Linkit extends CKEditor5PluginDefault implements CKEditor5PluginConfigurableInterface, ContainerFactoryPluginInterface {
+class Linkit extends CKEditor5PluginDefault implements CKEditor5PluginElementsSubsetInterface, ContainerFactoryPluginInterface {
 
   use CKEditor5PluginConfigurableTrait;
 
@@ -47,6 +47,14 @@ class Linkit extends CKEditor5PluginDefault implements CKEditor5PluginConfigurab
       $plugin_definition,
       $container->get('entity_type.manager')->getStorage('linkit_profile')
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getElementsSubset(): array {
+    // @see \Drupal\linkit\Plugin\Filter\LinkitFilter
+    return ['<a data-entity-type data-entity-uuid data-entity-substitution>'];
   }
 
   /**
@@ -84,12 +92,12 @@ class Linkit extends CKEditor5PluginDefault implements CKEditor5PluginConfigurab
    */
   public static function requireProfileIfEnabled(array $values, ExecutionContextInterface $context): void {
     if ($values['linkit_enabled'] === TRUE && empty($values['linkit_profile'])) {
-      $context->buildViolation(t('Linkit is enabled, please select the Linkit profile you wish to use.'))
+      $context->buildViolation('Linkit is enabled, please select the Linkit profile you wish to use.')
         ->atPath('linkit_profile')
         ->addViolation();
     }
     elseif ($values['linkit_enabled'] === FALSE && !empty($values['linkit_profile'])) {
-      $context->buildViolation(t('Linkit is disabled; it does not make sense to associate a Linkit profile.'))
+      $context->buildViolation('Linkit is disabled; it does not make sense to associate a Linkit profile.')
         ->atPath('linkit_profile')
         ->addViolation();
     }
@@ -149,7 +157,7 @@ class Linkit extends CKEditor5PluginDefault implements CKEditor5PluginConfigurab
         'profile' => $this->configuration['linkit_profile'],
         'autocompleteUrl' => Url::fromRoute('linkit.autocomplete', ['linkit_profile_id' => $this->configuration['linkit_profile']])
           ->toString(TRUE)
-          ->getGeneratedUrl()
+          ->getGeneratedUrl(),
       ],
     ];
   }

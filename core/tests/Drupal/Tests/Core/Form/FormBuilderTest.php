@@ -7,6 +7,7 @@ namespace Drupal\Tests\Core\Form;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\Context\CacheContextsManager;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Form\EnforcedResponseException;
@@ -22,6 +23,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
 
 /**
  * @coversDefaultClass \Drupal\Core\Form\FormBuilder
@@ -53,7 +56,7 @@ class FormBuilderTest extends FormTestBase {
    *
    * @covers ::getFormId
    */
-  public function testGetFormIdWithString() {
+  public function testGetFormIdWithString(): void {
     $form_arg = 'foo';
     $form_state = new FormState();
     $this->expectException(\InvalidArgumentException::class);
@@ -64,8 +67,8 @@ class FormBuilderTest extends FormTestBase {
   /**
    * @covers ::getFormId
    */
-  public function testGetFormIdWithNonFormClass() {
-    $form_arg = __CLASS__;
+  public function testGetFormIdWithNonFormClass(): void {
+    $form_arg = \stdClass::class;
     $form_state = new FormState();
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage("The form argument $form_arg must be an instance of \Drupal\Core\Form\FormInterface.");
@@ -75,7 +78,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the getFormId() method with a class name form ID.
    */
-  public function testGetFormIdWithClassName() {
+  public function testGetFormIdWithClassName(): void {
     $form_arg = 'Drupal\Tests\Core\Form\TestForm';
 
     $form_state = new FormState();
@@ -88,7 +91,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the getFormId() method with an injected class name form ID.
    */
-  public function testGetFormIdWithInjectedClassName() {
+  public function testGetFormIdWithInjectedClassName(): void {
     $container = $this->createMock('Symfony\Component\DependencyInjection\ContainerInterface');
     \Drupal::setContainer($container);
 
@@ -104,7 +107,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the getFormId() method with a form object.
    */
-  public function testGetFormIdWithObject() {
+  public function testGetFormIdWithObject(): void {
     $expected_form_id = 'my_module_form_id';
 
     $form_arg = $this->getMockForm($expected_form_id);
@@ -119,7 +122,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the getFormId() method with a base form object.
    */
-  public function testGetFormIdWithBaseForm() {
+  public function testGetFormIdWithBaseForm(): void {
     $expected_form_id = 'my_module_form_id';
     $base_form_id = 'my_module';
 
@@ -144,7 +147,7 @@ class FormBuilderTest extends FormTestBase {
    *
    * @dataProvider formStateResponseProvider
    */
-  public function testHandleFormStateResponse($class, $form_state_key) {
+  public function testHandleFormStateResponse($class, $form_state_key): void {
     $form_id = 'test_form_id';
     $expected_form = $form_id();
 
@@ -175,7 +178,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Provides test data for testHandleFormStateResponse().
    */
-  public function formStateResponseProvider() {
+  public static function formStateResponseProvider() {
     return [
       ['Symfony\Component\HttpFoundation\Response', 'response'],
       ['Symfony\Component\HttpFoundation\RedirectResponse', 'redirect'],
@@ -185,7 +188,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the handling of a redirect when FormStateInterface::$response exists.
    */
-  public function testHandleRedirectWithResponse() {
+  public function testHandleRedirectWithResponse(): void {
     $form_id = 'test_form_id';
     $expected_form = $form_id();
 
@@ -224,7 +227,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the getForm() method with a string based form ID.
    */
-  public function testGetFormWithString() {
+  public function testGetFormWithString(): void {
     $form_id = 'test_form_id';
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('The form class test_form_id could not be found or loaded.');
@@ -234,7 +237,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the getForm() method with a form object.
    */
-  public function testGetFormWithObject() {
+  public function testGetFormWithObject(): void {
     $form_id = 'test_form_id';
     $expected_form = $form_id();
 
@@ -248,7 +251,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the getForm() method with a class name based form ID.
    */
-  public function testGetFormWithClassString() {
+  public function testGetFormWithClassString(): void {
     $form_id = '\Drupal\Tests\Core\Form\TestForm';
     $object = new TestForm();
     $form = [];
@@ -263,7 +266,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the buildForm() method with a string based form ID.
    */
-  public function testBuildFormWithString() {
+  public function testBuildFormWithString(): void {
     $form_id = 'test_form_id';
     $this->expectException(\InvalidArgumentException::class);
     $this->expectExceptionMessage('The form class test_form_id could not be found or loaded.');
@@ -273,7 +276,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the buildForm() method with a class name based form ID.
    */
-  public function testBuildFormWithClassString() {
+  public function testBuildFormWithClassString(): void {
     $form_id = '\Drupal\Tests\Core\Form\TestForm';
     $object = new TestForm();
     $form = [];
@@ -288,7 +291,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the buildForm() method with a form object.
    */
-  public function testBuildFormWithObject() {
+  public function testBuildFormWithObject(): void {
     $form_id = 'test_form_id';
     $expected_form = $form_id();
 
@@ -313,7 +316,7 @@ class FormBuilderTest extends FormTestBase {
    *
    * @dataProvider providerTestBuildFormWithTriggeringElement
    */
-  public function testBuildFormWithTriggeringElement($element_value, $input_value) {
+  public function testBuildFormWithTriggeringElement($element_value, $input_value): void {
     $form_id = 'test_form_id';
     $expected_form = $form_id();
 
@@ -335,7 +338,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Data provider for ::testBuildFormWithTriggeringElement().
    */
-  public function providerTestBuildFormWithTriggeringElement() {
+  public static function providerTestBuildFormWithTriggeringElement() {
     $plain_text = 'Other submit value';
     $markup = 'Other submit <input> value';
     return [
@@ -351,7 +354,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the rebuildForm() method for a POST submission.
    */
-  public function testRebuildForm() {
+  public function testRebuildForm(): void {
     $form_id = 'test_form_id';
     $expected_form = $form_id();
 
@@ -391,7 +394,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the rebuildForm() method for a GET submission.
    */
-  public function testRebuildFormOnGetRequest() {
+  public function testRebuildFormOnGetRequest(): void {
     $form_id = 'test_form_id';
     $expected_form = $form_id();
 
@@ -429,7 +432,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests the getCache() method.
    */
-  public function testGetCache() {
+  public function testGetCache(): void {
     $form_id = 'test_form_id';
     $expected_form = $form_id();
     $expected_form['#token'] = FALSE;
@@ -472,7 +475,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests that HTML IDs are unique when rebuilding a form with errors.
    */
-  public function testUniqueHtmlId() {
+  public function testUniqueHtmlId(): void {
     $form_id = 'test_form_id';
     $expected_form = $form_id();
     $expected_form['test']['#required'] = TRUE;
@@ -498,7 +501,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests that HTML IDs are unique between 2 forms with the same element names.
    */
-  public function testUniqueElementHtmlId() {
+  public function testUniqueElementHtmlId(): void {
     $form_id_1 = 'test_form_id';
     $form_id_2 = 'test_form_id_2';
     $expected_form = $form_id_1();
@@ -528,7 +531,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests that a cached form is deleted after submit.
    */
-  public function testFormCacheDeletionCached() {
+  public function testFormCacheDeletionCached(): void {
     $form_id = 'test_form_id';
     $form_build_id = $this->randomMachineName();
 
@@ -555,7 +558,7 @@ class FormBuilderTest extends FormTestBase {
   /**
    * Tests that an uncached form does not trigger cache set or delete.
    */
-  public function testFormCacheDeletionUncached() {
+  public function testFormCacheDeletionUncached(): void {
     $form_id = 'test_form_id';
     $form_build_id = $this->randomMachineName();
 
@@ -573,8 +576,9 @@ class FormBuilderTest extends FormTestBase {
   /**
    * @covers ::buildForm
    */
-  public function testExceededFileSize() {
+  public function testExceededFileSize(): void {
     $request = new Request([FormBuilderInterface::AJAX_FORM_REQUEST => TRUE]);
+    $request->setSession(new Session(new MockArraySessionStorage()));
     $request_stack = new RequestStack();
     $request_stack->push($request);
     $this->formBuilder = $this->getMockBuilder('\Drupal\Core\Form\FormBuilder')
@@ -598,6 +602,7 @@ class FormBuilderTest extends FormTestBase {
   public function testPostAjaxRequest(): void {
     $request = new Request([FormBuilderInterface::AJAX_FORM_REQUEST => TRUE], ['form_id' => 'different_form_id']);
     $request->setMethod('POST');
+    $request->setSession(new Session(new MockArraySessionStorage()));
     $this->requestStack->push($request);
 
     $form_state = (new FormState())
@@ -622,6 +627,7 @@ class FormBuilderTest extends FormTestBase {
     $request = new Request([FormBuilderInterface::AJAX_FORM_REQUEST => TRUE]);
     $request->query->set('form_id', 'different_form_id');
     $request->setMethod('GET');
+    $request->setSession(new Session(new MockArraySessionStorage()));
     $this->requestStack->push($request);
 
     $form_state = (new FormState())
@@ -644,7 +650,7 @@ class FormBuilderTest extends FormTestBase {
    *
    * @dataProvider providerTestChildAccessInheritance
    */
-  public function testChildAccessInheritance($element, $access_checks) {
+  public function testChildAccessInheritance($element, $access_checks): void {
     $form_arg = new TestFormWithPredefinedForm();
     $form_arg->setForm($element);
 
@@ -672,8 +678,10 @@ class FormBuilderTest extends FormTestBase {
    * Data provider for testChildAccessInheritance.
    *
    * @return array
+   *   An array of test cases, each containing a form element structure and
+   *   its expected access results.
    */
-  public function providerTestChildAccessInheritance() {
+  public static function providerTestChildAccessInheritance() {
     $data = [];
 
     $element = [
@@ -807,13 +815,13 @@ class FormBuilderTest extends FormTestBase {
    *
    * @dataProvider providerTestValueCallableIsSafe
    */
-  public function testValueCallableIsSafe($callback, $expected) {
+  public function testValueCallableIsSafe($callback, $expected): void {
     $method = new \ReflectionMethod(FormBuilder::class, 'valueCallableIsSafe');
     $is_safe = $method->invoke($this->formBuilder, $callback);
     $this->assertSame($expected, $is_safe);
   }
 
-  public function providerTestValueCallableIsSafe() {
+  public static function providerTestValueCallableIsSafe() {
     $data = [];
     $data['string_no_slash'] = [
       'Drupal\Core\Render\Element\Token::valueCallback',
@@ -843,7 +851,7 @@ class FormBuilderTest extends FormTestBase {
    *
    * @dataProvider providerTestInvalidToken
    */
-  public function testInvalidToken($expected, $valid_token, $user_is_authenticated) {
+  public function testInvalidToken($expected, $valid_token, $user_is_authenticated): void {
     $form_token = 'the_form_token';
     $form_id = 'test_form_id';
 
@@ -890,7 +898,7 @@ class FormBuilderTest extends FormTestBase {
     }
   }
 
-  public function providerTestInvalidToken() {
+  public static function providerTestInvalidToken() {
     $data = [];
     $data['authenticated_invalid'] = [TRUE, FALSE, TRUE];
     $data['authenticated_valid'] = [FALSE, TRUE, TRUE];
@@ -904,7 +912,7 @@ class FormBuilderTest extends FormTestBase {
    *
    * @dataProvider providerTestFormTokenCacheability
    */
-  public function testFormTokenCacheability($token, $is_authenticated, $expected_form_cacheability, $expected_token_cacheability, $method) {
+  public function testFormTokenCacheability($token, $is_authenticated, $method, $opted_in_for_cache): void {
     $user = $this->prophesize(AccountProxyInterface::class);
     $user->isAuthenticated()
       ->willReturn($is_authenticated);
@@ -919,6 +927,10 @@ class FormBuilderTest extends FormTestBase {
       $form['#token'] = $token;
     }
 
+    if ($opted_in_for_cache) {
+      $form['#cache']['max-age'] = Cache::PERMANENT;
+    }
+
     $form_arg = $this->createMock('Drupal\Core\Form\FormInterface');
     $form_arg->expects($this->once())
       ->method('getFormId')
@@ -929,19 +941,45 @@ class FormBuilderTest extends FormTestBase {
 
     $form_state = new FormState();
     $built_form = $this->formBuilder->buildForm($form_arg, $form_state);
-    if (!isset($expected_form_cacheability) || ($method == 'get' && !is_string($token))) {
-      $this->assertFalse(isset($built_form['#cache']));
-    }
-    else {
-      $this->assertTrue(isset($built_form['#cache']));
-      $this->assertEquals($expected_form_cacheability, $built_form['#cache']);
-    }
-    if (!isset($expected_token_cacheability)) {
+
+    // FormBuilder does not set a form token when:
+    // - #token is set to FALSE.
+    // - #method is set to 'GET' and #token is not a string. This means the GET
+    //   form did not get a form token by default, and the form did not
+    //   explicitly opt in.
+    if ($token === FALSE || ($method == 'get' && !is_string($token))) {
+      $this->assertEquals($built_form['#cache'], ['tags' => ['CACHE_MISS_IF_UNCACHEABLE_HTTP_METHOD:form']]);
       $this->assertFalse(isset($built_form['form_token']));
     }
+    // Otherwise, a form token is set, but only if the user is logged in. It is
+    // impossible (and unnecessary) to set a form token if the user is not
+    // logged in, because there is no session, and hence no CSRF token.
     else {
-      $this->assertTrue(isset($built_form['form_token']));
-      $this->assertEquals($expected_token_cacheability, $built_form['form_token']['#cache']);
+      // For forms that are eligible for form tokens, a cache context must be
+      // set that indicates the form token only exists for logged in users.
+      $this->assertTrue(isset($built_form['#cache']));
+      $expected_cacheability_metadata = [
+        'tags' => ['CACHE_MISS_IF_UNCACHEABLE_HTTP_METHOD:form'],
+        'contexts' => ['user.roles:authenticated'],
+      ];
+      if ($opted_in_for_cache) {
+        $expected_cacheability_metadata['max-age'] = Cache::PERMANENT;
+      }
+      $this->assertEquals($expected_cacheability_metadata, $built_form['#cache']);
+      // Finally, verify that a form token is generated when appropriate, with
+      // the expected cacheability metadata (or lack thereof).
+      if (!$is_authenticated) {
+        $this->assertFalse(isset($built_form['form_token']));
+      }
+      else {
+        $this->assertTrue(isset($built_form['form_token']));
+        if ($opted_in_for_cache) {
+          $this->assertFalse(isset($built_form['form_token']['#cache']));
+        }
+        else {
+          $this->assertEquals(['max-age' => 0], $built_form['form_token']['#cache']);
+        }
+      }
     }
   }
 
@@ -949,20 +987,26 @@ class FormBuilderTest extends FormTestBase {
    * Data provider for testFormTokenCacheability.
    *
    * @return array
+   *   An array of test cases, each containing a form token, the authentication,
+   *   request method, and expected cacheability outcome.
    */
-  public function providerTestFormTokenCacheability() {
+  public static function providerTestFormTokenCacheability() {
     return [
-      'token:none,authenticated:true' => [NULL, TRUE, ['contexts' => ['user.roles:authenticated']], ['max-age' => 0], 'post'],
-      'token:none,authenticated:false' => [NULL, FALSE, ['contexts' => ['user.roles:authenticated']], NULL, 'post'],
-      'token:false,authenticated:false' => [FALSE, FALSE, NULL, NULL, 'post'],
-      'token:false,authenticated:true' => [FALSE, TRUE, NULL, NULL, 'post'],
-      'token:none,authenticated:false,method:get' => [NULL, FALSE, ['contexts' => ['user.roles:authenticated']], NULL, 'get'],
-      'token:test_form_id,authenticated:false,method:get' => ['test_form_id', TRUE, ['contexts' => ['user.roles:authenticated']], ['max-age' => 0], 'get'],
+      'token:none,authenticated:true' => [NULL, TRUE, 'post', FALSE],
+      'token:none,authenticated:true,opted_in_for_cache' => [NULL, TRUE, 'post', TRUE],
+      'token:none,authenticated:false' => [NULL, FALSE, 'post', FALSE],
+      'token:false,authenticated:false' => [FALSE, FALSE, 'post', FALSE],
+      'token:false,authenticated:true' => [FALSE, TRUE, 'post', FALSE],
+      'token:none,authenticated:false,method:get' => [NULL, FALSE, 'get', FALSE],
+      'token:test_form_id,authenticated:false,method:get' => ['test_form_id', TRUE, 'get', FALSE],
     ];
   }
 
 }
 
+/**
+ * Basic test form with interface implemented.
+ */
 class TestForm implements FormInterface {
 
   public function getFormId() {
@@ -978,6 +1022,10 @@ class TestForm implements FormInterface {
   public function submitForm(array &$form, FormStateInterface $form_state) {}
 
 }
+
+/**
+ * Basic test form with container injection interface implemented.
+ */
 class TestFormInjected extends TestForm implements ContainerInjectionInterface {
 
   public static function create(ContainerInterface $container) {
@@ -986,7 +1034,9 @@ class TestFormInjected extends TestForm implements ContainerInjectionInterface {
 
 }
 
-
+/**
+ * Basic test form with predefined form set.
+ */
 class TestFormWithPredefinedForm extends TestForm {
 
   /**
@@ -994,7 +1044,7 @@ class TestFormWithPredefinedForm extends TestForm {
    */
   protected $form;
 
-  public function setForm($form) {
+  public function setForm($form): void {
     $this->form = $form;
   }
 

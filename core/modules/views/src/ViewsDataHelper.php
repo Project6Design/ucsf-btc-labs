@@ -69,7 +69,7 @@ class ViewsDataHelper {
         foreach ($table_data as $field => $info) {
           // Collect table data from this table
           if ($field == 'table') {
-            // calculate what tables this table can join to.
+            // Calculate what tables this table can join to.
             if (!empty($info['join'])) {
               $bases = array_keys($info['join']);
             }
@@ -163,8 +163,8 @@ class ViewsDataHelper {
    * Sort function for fetched fields.
    *
    * @param array $a
-   *   First item for comparison. The compared items should be associative arrays
-   *   that include a 'group' and a 'title' key.
+   *   First item for comparison. The compared items should be associative
+   *   arrays that include a 'group' and a 'title' key.
    * @param array $b
    *   Second item for comparison.
    *

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\Functional;
 
 use Drupal\Core\Database\Database;
@@ -28,7 +30,7 @@ class FileFieldRevisionTest extends FileFieldTestBase {
    *  - When the last revision that uses a file is deleted, the original file
    *    should be deleted also.
    */
-  public function testRevisions() {
+  public function testRevisions(): void {
     // This test expects unused managed files to be marked as a temporary file
     // and then deleted up by file_cron().
     $this->config('file.settings')
@@ -47,7 +49,6 @@ class FileFieldRevisionTest extends FileFieldTestBase {
     $nid = $this->uploadNodeFile($test_file, $field_name, $type_name);
 
     // Check that the file exists on disk and in the database.
-    $node_storage->resetCache([$nid]);
     $node = $node_storage->load($nid);
     $node_file_r1 = File::load($node->{$field_name}->target_id);
     $node_vid_r1 = $node->getRevisionId();
@@ -57,7 +58,6 @@ class FileFieldRevisionTest extends FileFieldTestBase {
 
     // Upload another file to the same node in a new revision.
     $this->replaceNodeFile($test_file, $field_name, $nid);
-    $node_storage->resetCache([$nid]);
     $node = $node_storage->load($nid);
     $node_file_r2 = File::load($node->{$field_name}->target_id);
     $node_vid_r2 = $node->getRevisionId();
@@ -77,7 +77,6 @@ class FileFieldRevisionTest extends FileFieldTestBase {
     // Check that the file is still the same as the previous revision.
     $this->drupalGet('node/' . $nid . '/edit');
     $this->submitForm(['revision' => '1'], 'Save');
-    $node_storage->resetCache([$nid]);
     $node = $node_storage->load($nid);
     $node_file_r3 = File::load($node->{$field_name}->target_id);
     $node_vid_r3 = $node->getRevisionId();
@@ -87,7 +86,6 @@ class FileFieldRevisionTest extends FileFieldTestBase {
     // Revert to the first revision and check that the original file is active.
     $this->drupalGet('node/' . $nid . '/revisions/' . $node_vid_r1 . '/revert');
     $this->submitForm([], 'Revert');
-    $node_storage->resetCache([$nid]);
     $node = $node_storage->load($nid);
     $node_file_r4 = File::load($node->{$field_name}->target_id);
     $this->assertEquals($node_file_r1->id(), $node_file_r4->id(), 'Original revision file still in place after reverting to the original revision.');
@@ -125,7 +123,7 @@ class FileFieldRevisionTest extends FileFieldTestBase {
     $connection = Database::getConnection();
     $connection->update('file_managed')
       ->fields([
-        'changed' => REQUEST_TIME - ($this->config('system.file')->get('temporary_maximum_age') + 1),
+        'changed' => \Drupal::time()->getRequestTime() - ($this->config('system.file')->get('temporary_maximum_age') + 1),
       ])
       ->condition('fid', $node_file_r3->id())
       ->execute();
@@ -143,7 +141,7 @@ class FileFieldRevisionTest extends FileFieldTestBase {
     // would set the timestamp.
     $connection->update('file_managed')
       ->fields([
-        'changed' => REQUEST_TIME - ($this->config('system.file')->get('temporary_maximum_age') + 1),
+        'changed' => \Drupal::time()->getRequestTime() - ($this->config('system.file')->get('temporary_maximum_age') + 1),
       ])
       ->condition('fid', $node_file_r1->id())
       ->execute();

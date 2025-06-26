@@ -66,15 +66,19 @@ class NodeGrantDatabaseStorage implements NodeGrantDatabaseStorageInterface {
 
     // If no module implements the hook or the node does not have an id there is
     // no point in querying the database for access grants.
-    if (!$this->moduleHandler->hasImplementations('node_grants') || !$node->id()) {
+    if (!$this->moduleHandler->hasImplementations('node_grants') || $node->isNew()) {
       // Return the equivalent of the default grant, defined by
       // self::writeDefault().
       if ($operation === 'view') {
-        return AccessResult::allowedIf($node->isPublished());
+        $result = AccessResult::allowedIf($node->isPublished());
+        if (!$node->isNew()) {
+          $result->addCacheableDependency($node);
+        }
+
+        return $result;
       }
-      else {
-        return AccessResult::neutral();
-      }
+
+      return AccessResult::neutral();
     }
 
     // Check the database for potential access grants.
@@ -157,7 +161,7 @@ class NodeGrantDatabaseStorage implements NodeGrantDatabaseStorageInterface {
       $langcode = FALSE;
     }
 
-    // Find all instances of the base table being joined -- could appear
+    // Find all instances of the base table being joined which could appear
     // more than once in the query, and could be aliased. Join each one to
     // the node_access table.
     $grants = node_access_grants($operation, $account);
@@ -197,7 +201,20 @@ class NodeGrantDatabaseStorage implements NodeGrantDatabaseStorageInterface {
         // Now handle entities.
         $subquery->where("[$table_alias].[$field] = [na].[nid]");
 
-        $query->exists($subquery);
+        if (empty($tableinfo['join type'])) {
+          $query->exists($subquery);
+        }
+        else {
+          // If this is a join, add the node access check to the join condition.
+          // This requires using $query->getTables() to alter the table
+          // information.
+          $join_cond = $query
+            ->andConditionGroup()
+            ->exists($subquery);
+          $join_cond->where($tableinfo['condition'], $query->getTables()[$table_alias]['arguments']);
+          $query->getTables()[$table_alias]['arguments'] = [];
+          $query->getTables()[$table_alias]['condition'] = $join_cond;
+        }
       }
     }
   }

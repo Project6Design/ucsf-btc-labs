@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel;
 
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\entity_test\EntityTestHelper;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 
@@ -14,7 +17,7 @@ use Drupal\field\Entity\FieldStorageConfig;
 class FieldImportDeleteTest extends FieldKernelTestBase {
 
   /**
-   * Modules to enable.
+   * Modules to install.
    *
    * The default configuration provided by field_test_config is imported by
    * \Drupal\Tests\field\Kernel\FieldKernelTestBase::setUp() when it installs
@@ -27,7 +30,9 @@ class FieldImportDeleteTest extends FieldKernelTestBase {
   /**
    * Tests deleting field storages and fields as part of config import.
    */
-  public function testImportDelete() {
+  public function testImportDelete(): void {
+    EntityTestHelper::createBundle('test_bundle');
+
     $this->installConfig(['field_test_config']);
     // At this point there are 5 field configuration objects in the active
     // storage.
@@ -59,7 +64,7 @@ class FieldImportDeleteTest extends FieldKernelTestBase {
     $entity_test->save();
 
     // Create a second bundle for the 'Entity test' entity type.
-    entity_test_create_bundle('test_bundle');
+    EntityTestHelper::createBundle('test_bundle');
 
     // Get the uuid's for the field storages.
     $field_storage_uuid = FieldStorageConfig::load($field_storage_id)->uuid();

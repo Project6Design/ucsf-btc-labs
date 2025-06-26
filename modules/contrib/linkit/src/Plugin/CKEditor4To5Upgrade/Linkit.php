@@ -9,6 +9,8 @@ use Drupal\ckeditor5\Plugin\CKEditor4To5UpgradePluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\filter\FilterFormatInterface;
 
+// phpcs:disable Drupal.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
+
 /**
  * Provides the CKEditor 4 to 5 upgrade for Linkit's CKEditor plugin.
  *

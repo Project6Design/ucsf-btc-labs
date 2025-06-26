@@ -3,6 +3,7 @@
 namespace Drupal\ik_constant_contact\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -76,8 +77,8 @@ class ConstantContactConfig extends ConfigFormBase {
    * @param \Drupal\Core\Session\AccountProxy
    *   The current logged in user
    */
-  public function __construct(ConfigFactoryInterface $config_factory, MessengerInterface $messenger, RequestStack $request_stack, ConstantContact $constantContact, ModuleHandlerInterface $moduleHandler, AccountProxy $currentUser) {
-    parent::__construct($config_factory);
+  public function __construct(ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typed_config_manager, MessengerInterface $messenger, RequestStack $request_stack, ConstantContact $constantContact, ModuleHandlerInterface $moduleHandler, AccountProxy $currentUser) {
+    parent::__construct($config_factory, $typed_config_manager);
     $this->constantContact = $constantContact;
     $this->currentUser = $currentUser;
     $this->messenger = $messenger;
@@ -91,6 +92,7 @@ class ConstantContactConfig extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
+      $container->get('config.typed'),
       $container->get('messenger'),
       $container->get('request_stack'),
       $container->get('ik_constant_contact'),

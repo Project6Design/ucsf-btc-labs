@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\FunctionalTests\Installer;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Tests\BrowserTestBase;
 
 // cspell:ignore montag
@@ -12,6 +15,8 @@ use Drupal\Tests\BrowserTestBase;
  * @group Installer
  */
 class InstallerTranslationMultipleLanguageNonInteractiveTest extends BrowserTestBase {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}
@@ -28,7 +33,7 @@ class InstallerTranslationMultipleLanguageNonInteractiveTest extends BrowserTest
   /**
    * {@inheritdoc}
    */
-  protected function prepareEnvironment() {
+  protected function prepareEnvironment(): void {
     parent::prepareEnvironment();
     // Place custom local translations in the translations directory.
     mkdir(DRUPAL_ROOT . '/' . $this->siteDirectory . '/files/translations', 0777, TRUE);
@@ -45,7 +50,7 @@ class InstallerTranslationMultipleLanguageNonInteractiveTest extends BrowserTest
    * @return string
    *   Contents for the test .po file.
    */
-  protected function getPo($langcode) {
+  protected function getPo($langcode): string {
     return <<<PO
 msgid ""
 msgstr ""
@@ -77,7 +82,7 @@ PO;
   /**
    * Tests that translations ended up at the expected places.
    */
-  public function testTranslationsLoaded() {
+  public function testTranslationsLoaded(): void {
     $this->drupalLogin($this->createUser([], NULL, TRUE));
     // Ensure the title is correct.
     $this->assertEquals('SITE_NAME_en', \Drupal::config('system.site')->get('name'));
@@ -122,13 +127,13 @@ PO;
     $this->assertEquals('Anonymous es', $override_es->get('anonymous'));
 
     // Test translation from locale_test module.
-    $this->assertEquals('Montag', t('Monday', [], ['langcode' => 'de']));
+    $this->assertEquals('Montag', $this->t('Monday', [], ['langcode' => 'de']));
   }
 
   /**
    * Helper function to verify that the expected strings are translated.
    */
-  protected function verifyImportedStringsTranslated() {
+  protected function verifyImportedStringsTranslated(): void {
     $test_samples = ['Save and continue', 'Anonymous', 'Language'];
     $langcodes = ['de', 'es'];
 

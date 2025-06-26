@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\Kernel\Formatter;
 
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
@@ -77,7 +79,7 @@ class FileEntityFormatterTest extends KernelTestBase {
   /**
    * Tests the file_link field formatter.
    */
-  public function testFormatterFileLink() {
+  public function testFormatterFileLink(): void {
     $entity_display = EntityViewDisplay::create([
       'targetEntityType' => 'file',
       'bundle' => 'file',
@@ -92,7 +94,7 @@ class FileEntityFormatterTest extends KernelTestBase {
   /**
    * Tests the file_link field formatter.
    */
-  public function testFormatterFileUri() {
+  public function testFormatterFileUri(): void {
     $entity_display = EntityViewDisplay::create([
       'targetEntityType' => 'file',
       'bundle' => 'file',
@@ -106,7 +108,13 @@ class FileEntityFormatterTest extends KernelTestBase {
     $build = $entity_display->buildMultiple($this->files)[0]['uri'][0];
     $this->assertEquals($this->fileUrlGenerator->generateString('public://file.png'), $build['#markup']);
 
-    $entity_display->setComponent('uri', ['type' => 'file_uri', 'settings' => ['file_download_path' => TRUE, 'link_to_file' => TRUE]]);
+    $entity_display->setComponent(
+      'uri',
+      [
+        'type' => 'file_uri',
+        'settings' => ['file_download_path' => TRUE, 'link_to_file' => TRUE],
+      ]
+    );
     $build = $entity_display->buildMultiple($this->files)[0]['uri'][0];
     $this->assertEquals($this->fileUrlGenerator->generateString('public://file.png'), $build['#title']);
     $this->assertEquals($this->fileUrlGenerator->generate('public://file.png'), $build['#url']);
@@ -115,7 +123,7 @@ class FileEntityFormatterTest extends KernelTestBase {
   /**
    * Tests the file_extension field formatter.
    */
-  public function testFormatterFileExtension() {
+  public function testFormatterFileExtension(): void {
     $entity_display = EntityViewDisplay::create([
       'targetEntityType' => 'file',
       'bundle' => 'file',
@@ -128,7 +136,12 @@ class FileEntityFormatterTest extends KernelTestBase {
       $this->assertEquals($expected[$i], $build['filename'][0]['#markup']);
     }
 
-    $entity_display->setComponent('filename', ['type' => 'file_extension', 'settings' => ['extension_detect_tar' => TRUE]]);
+    $entity_display->setComponent(
+      'filename',
+      [
+        'type' => 'file_extension',
+        'settings' => ['extension_detect_tar' => TRUE],
+      ]);
 
     $expected = ['png', 'tar', 'tar.gz', ''];
     foreach (array_values($this->files) as $i => $file) {
@@ -140,14 +153,14 @@ class FileEntityFormatterTest extends KernelTestBase {
   /**
    * Tests the file_extension field formatter.
    */
-  public function testFormatterFileMime() {
+  public function testFormatterFileMime(): void {
     $entity_display = EntityViewDisplay::create([
       'targetEntityType' => 'file',
       'bundle' => 'file',
     ]);
     $entity_display->setComponent('filemime', ['type' => 'file_filemime', 'settings' => ['filemime_image' => TRUE]]);
 
-    foreach (array_values($this->files) as $i => $file) {
+    foreach (array_values($this->files) as $file) {
       $build = $entity_display->build($file);
       $this->assertEquals('image__file_icon', $build['filemime'][0]['#theme']);
       $this->assertEquals(spl_object_hash($file), spl_object_hash($build['filemime'][0]['#file']));
@@ -157,7 +170,7 @@ class FileEntityFormatterTest extends KernelTestBase {
   /**
    * Tests the file_size field formatter.
    */
-  public function testFormatterFileSize() {
+  public function testFormatterFileSize(): void {
     $entity_display = EntityViewDisplay::create([
       'targetEntityType' => 'file',
       'bundle' => 'file',
@@ -174,7 +187,7 @@ class FileEntityFormatterTest extends KernelTestBase {
   /**
    * Tests the file_link field formatter using a query string.
    */
-  public function testFormatterFileLinkWithQueryString() {
+  public function testFormatterFileLinkWithQueryString(): void {
     $file = File::create([
       'uri' => 'dummy-external-readonly://file-query-string?foo=bar',
       'filename' => 'file-query-string',

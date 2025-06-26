@@ -99,7 +99,7 @@ function hook_webform_element_translatable_properties_alter(array &$properties, 
  * @ingroup form_api
  */
 function hook_webform_element_configuration_form_alter(array &$form, \Drupal\Core\Form\FormStateInterface $form_state) {
-  /** @var Drupal\webform_ui\Form\WebformUiElementEditForm $form_object */
+  /** @var \Drupal\webform_ui\Form\WebformUiElementEditForm $form_object */
   $form_object = $form_state->getFormObject();
   $element_plugin = $form_object->getWebformElementPlugin();
 
@@ -266,7 +266,7 @@ function hook_webform_element_ELEMENT_TYPE_alter(array &$element, \Drupal\Core\F
  * @return \Drupal\Core\Access\AccessResult
  *   The access provided. Return neutral if no change.
  */
-function hook_webform_element_access($operation, array &$element, \Drupal\Core\Session\AccountInterface $account = NULL, array $context = []) {
+function hook_webform_element_access($operation, array &$element, ?\Drupal\Core\Session\AccountInterface $account = NULL, array $context = []) {
   // Load the current webform and submission for element's context.
   $webform = $context['webform'];
   $webform_submission = $context['webform_submission'];

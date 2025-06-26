@@ -2,11 +2,11 @@
 
 namespace Drupal\config_update_ui\Form;
 
+use Drupal\config_update\ConfigListInterface;
+use Drupal\config_update\ConfigRevertInterface;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Drupal\config_update\ConfigListInterface;
-use Drupal\config_update\ConfigRevertInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -96,7 +96,12 @@ class ConfigDeleteConfirmForm extends ConfirmFormBase {
       throw new NotFoundHttpException();
     }
 
-    return $this->t('Are you sure you want to delete the %type config %item?', ['%type' => $type_label, '%item' => $this->name]);
+    return $this->t('Are you sure you want to delete the %type config %item?',
+      [
+        '%type' => $type_label,
+        '%item' => $this->name,
+      ]
+    );
   }
 
   /**

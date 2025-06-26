@@ -6,6 +6,68 @@
  */
 
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\UrlHelper;
+use Drupal\editor\Entity\Editor;
+
+/**
+ * Implements hook_theme().
+ */
+function url_embed_theme($existing, $type, $theme, $path) {
+  return [
+    'responsive_embed' => [
+      'variables' => [
+        'url_output' => NULL,
+        'ratio' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_ckeditor_css_alter().
+ */
+function url_embed_ckeditor_css_alter(array &$css, Editor $editor) {
+  $filter_format = $editor->getFilterFormat();
+  if ($filter_format) {
+    $filter = $filter_format->filters('url_embed');
+    $config = $filter->getConfiguration();
+
+    // Add the responsive embed css if the url_embed module has it enabled.
+    if (!empty($config['settings']['enable_responsive'])) {
+      $css[] = \Drupal::service('extension.list.module')->getPath('url_embed') . '/css/url_embed.responsive.css';
+    }
+  }
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function url_embed_library_info_alter(&$libraries, $extension) {
+  if ($extension === 'ckeditor5') {
+    // Add paths to stylesheets specified by a modules's ckeditor5-stylesheets
+    // config property.
+    $module = 'url_embed';
+    $module_path = \Drupal::service('extension.list.module')->getPath($module);
+    $info = \Drupal::service('extension.list.module')->getExtensionInfo($module);
+    if (isset($info['ckeditor5-stylesheets']) && $info['ckeditor5-stylesheets'] !== FALSE) {
+      $css = $info['ckeditor5-stylesheets'];
+      foreach ($css as $key => $url) {
+        // CSS URL is external or relative to Drupal root.
+        if (UrlHelper::isExternal($url) || $url[0] === '/') {
+          $css[$key] = $url;
+        }
+        // CSS URL is relative to theme.
+        else {
+          $css[$key] = '/' . $module_path . '/' . $url;
+        }
+      }
+    }
+    $existing = $libraries['internal.drupal.ckeditor5.stylesheets']['css']['theme'] ?? [];
+    $url_embed = array_fill_keys(array_values($css), []);
+    $merged = array_merge($existing, $url_embed);
+    $libraries['internal.drupal.ckeditor5.stylesheets']['css']['theme'] = $merged;
+  }
+}
 
 /**
  * Performs a GET request to Facebook's graph API to retrieve token debug info.
@@ -28,7 +90,7 @@ function url_embed_debug_facebook_access_token($token) {
     if ($code == 200) {
       $data = $response->getBody()->getContents();
       $decoded = Json::decode($data);
-      return isset($decoded['data']) ? $decoded['data'] : FALSE;
+      return $decoded['data'] ?? FALSE;
     }
     else {
       return FALSE;

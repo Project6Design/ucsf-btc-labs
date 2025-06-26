@@ -36,7 +36,7 @@ class SocialMediaLinksFieldDefaultWidget extends SocialMediaLinksFieldBaseWidget
         '#type' => 'textfield',
         '#title' => $platform['name']->render(),
         '#size' => 40,
-        '#default_value' => isset($value['platform_values'][$platform_id]['value']) ? $value['platform_values'][$platform_id]['value'] : '',
+        '#default_value' => $value['platform_values'][$platform_id]['value'] ?? '',
         '#field_prefix' => $platform['instance']->getUrlPrefix(),
         '#field_suffix' => $platform['instance']->getUrlSuffix(),
         '#required' => $element['#required'] ?? FALSE,

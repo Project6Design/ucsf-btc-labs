@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\linkit\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -30,7 +32,6 @@ abstract class LinkitKernelTestBase extends KernelTestBase {
    */
   protected function setUp(): void {
     parent::setUp();
-    $this->installSchema('system', 'sequences');
     $this->installEntitySchema('user');
     $this->installConfig(['filter']);
     if ($this->container->get('entity_type.manager')->hasDefinition('path_alias')) {

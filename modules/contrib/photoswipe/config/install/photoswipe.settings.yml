@@ -1,28 +1,40 @@
 photoswipe_always_load_non_admin: false
+enable_cdn: false
 # @see http://photoswipe.com/documentation/options.html
 options:
-#  index: 0
-  showAnimationDuration:  333
-  hideAnimationDuration:  333
-  showHideOpacity:  FALSE
-  bgOpacity:  1
-  spacing:  0.12
-  allowPanToNext:  TRUE
-  maxSpreadZoom:  2
-  loop:  TRUE
-  pinchToClose:  TRUE
-  closeOnScroll:  TRUE
-  closeOnVerticalDrag:  TRUE
-  mouseUsed:  FALSE
-  escKey:  TRUE
-  arrowKeys:  TRUE
-  history:  TRUE
-#  galleryUID: 1
-#  galleryPIDs: FALSE
-  errorMsg: '<div class="pswp__error-msg"><a href="%url%" target="_blank">The image</a> could not be loaded.</div>'
+  showHideAnimationType: 'zoom'
+  showAnimationDuration: 333
+  hideAnimationDuration: 333
+  zoomAnimationDuration: 333
+  maxWidthToAnimate: 4000
+  easing: 'cubic-bezier(.4,0,.22,1)'
+  bgOpacity: 0.8
+  spacing: 0.1
+  initialZoomLevel: 'fit'
+  secondaryZoomLevel: '2.5'
+  maxZoomLevel: '4'
+  allowPanToNext: TRUE
+  loop: TRUE
+  wheelToZoom: FALSE
+  pinchToClose: TRUE
+  clickToCloseNonZoomable: TRUE
+  closeOnVerticalDrag: TRUE
+  trapFocus: TRUE
+  returnFocus: TRUE
+  escKey: TRUE
+  arrowKeys: TRUE
+  imageClickAction: 'zoom-or-close'
+  tapAction: 'toggle-controls'
+  doubleTapAction: 'zoom'
+  bgClickAction: 'close'
+  closeTitle: 'Close'
+  zoomTitle: 'Zoom'
+  arrowPrevTitle: 'Previous'
+  arrowNextTitle: 'Next'
+  indexIndicatorSep: ' / '
+  errorMsg: 'The image could not be loaded.'
   preload:
     - 1
-    - 1
-  mainClass:  NULL
-  focus:  TRUE
-  modal: TRUE
+    - 2
+  preloaderDelay: 2000
+  mainClass: ''

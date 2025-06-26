@@ -4,6 +4,7 @@ namespace Drupal\social_media_links\Plugin\SocialMediaLinks\Iconset;
 
 use Drupal\social_media_links\IconsetBase;
 use Drupal\social_media_links\IconsetInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides 'elegantthemes' iconset.
@@ -17,6 +18,22 @@ use Drupal\social_media_links\IconsetInterface;
  * )
  */
 class FontAwesome extends IconsetBase implements IconsetInterface {
+
+  /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandler
+   */
+  protected $moduleHandler;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->moduleHandler = $container->get('module_handler');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -96,7 +113,7 @@ class FontAwesome extends IconsetBase implements IconsetInterface {
    * {@inheritdoc}
    */
   public function getLibrary() {
-    if (\Drupal::service('module_handler')->moduleExists('fontawesome')) {
+    if ($this->moduleHandler->moduleExists('fontawesome')) {
       return parent::getLibrary();
     }
     else {

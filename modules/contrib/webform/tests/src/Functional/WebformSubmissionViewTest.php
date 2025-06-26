@@ -91,7 +91,7 @@ class WebformSubmissionViewTest extends WebformBrowserTestBase {
     }
 
     // Check details element.
-    $assert_session->responseContains('<summary role="button" aria-controls="test_element--standard_elements" aria-expanded="true" aria-pressed="true">Standard Elements</summary>');
+    $assert_session->responseContains('<summary role="button" aria-controls="test_element--standard_elements" aria-expanded="true">Standard Elements</summary>');
 
     // Check empty details element removed.
     $assert_session->responseNotContains('Markup Elements');

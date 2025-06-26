@@ -35,12 +35,12 @@ class WebformElementOtherTest extends WebformElementBrowserTestBase {
     $assert_session->responseContains('<span class="fieldset-legend">Select other basic</span>');
     $assert_session->responseContains('<select data-drupal-selector="edit-select-other-basic-select" id="edit-select-other-basic-select" name="select_other_basic[select]" class="form-select">');
     $assert_session->responseContains('<input data-drupal-selector="edit-select-other-basic-other" type="text" id="edit-select-other-basic-other" name="select_other_basic[other]" value="Four" size="60" maxlength="255" placeholder="Enter other…" class="form-text" />');
-    $assert_session->responseContains('<option value="_other_" selected="selected">Other…</option>');
+    $assert_session->responseMatches('#<option value="_other_"\s+selected="selected">Other…</option>#');
 
     // Check advanced select_other w/ custom label.
     $assert_session->responseContains('<span class="fieldset-legend js-form-required form-required">Select other advanced</span>');
     $assert_session->responseContains('<select data-webform-required-error="This is a custom required error message." data-drupal-selector="edit-select-other-advanced-select" id="edit-select-other-advanced-select" name="select_other_advanced[select]" class="form-select required" required="required" aria-required="true">');
-    $assert_session->responseContains('<option value="_other_" selected="selected">Is there another option you wish to enter?</option>');
+    $assert_session->responseMatches('#<option value="_other_"\s+selected="selected">Is there another option you wish to enter\?</option>#');
     $assert_session->responseContains('<label for="edit-select-other-advanced-other">Other</label>');
     $assert_session->responseContains('<input data-webform-required-error="This is a custom required error message." data-counter-type="character" data-counter-minimum="4" data-counter-maximum="10" class="js-webform-counter webform-counter form-text" minlength="4" data-drupal-selector="edit-select-other-advanced-other" aria-describedby="edit-select-other-advanced-other--description" type="text" id="edit-select-other-advanced-other" name="select_other_advanced[other]" value="Four" size="20" maxlength="10" placeholder="What is this other option" />');
     $assert_session->responseContains('<div id="edit-select-other-advanced-other--description" class="webform-element-description">Other select description</div>');
@@ -94,8 +94,7 @@ class WebformElementOtherTest extends WebformElementBrowserTestBase {
     /* ********************************************************************** */
 
     // Check form_item wrapper type.
-    $assert_session->responseContains('<div class="js-webform-select-other webform-select-other js-form-item form-item js-form-type-webform-select-other form-item-wrapper-other-form-element js-form-item-wrapper-other-form-element" id="edit-wrapper-other-form-element">');
-
+    $assert_session->responseContains('<div class="js-webform-select-other webform-select-other js-form-item form-item form-type-webform-select-other js-form-type-webform-select-other form-item-wrapper-other-form-element js-form-item-wrapper-other-form-element" id="edit-wrapper-other-form-element">');
     // Check container wrapper type.
     $assert_session->responseContains('<div data-drupal-selector="edit-wrapper-other-container" class="js-webform-select-other webform-select-other webform-select-other--wrapper fieldgroup form-composite js-form-wrapper form-wrapper" id="edit-wrapper-other-container">');
   }
@@ -188,7 +187,7 @@ wrapper_other_container: ''");
       'select_other_advanced[other]' => 'X',
     ];
     $this->submitForm($edit, 'Submit');
-    $assert_session->responseContains('Other must be longer than <em class="placeholder">4</em> characters but is currently <em class="placeholder">1</em> characters long.');
+    $assert_session->responseContains('Other must be at least <em class="placeholder">4</em> characters but is currently <em class="placeholder">1</em> characters long.');
 
     // Check select other processing w/ other.
     $this->drupalGet('/webform/test_element_other');

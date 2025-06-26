@@ -18,7 +18,7 @@ use Drupal\Core\TypedData\DataDefinition;
  *   id = "webform",
  *   label = @Translation("Webform"),
  *   description = @Translation("A webform containing default submission values."),
- *   category = @Translation("Reference"),
+ *   category = "reference",
  *   default_widget = "webform_entity_reference_select",
  *   default_formatter = "webform_entity_reference_entity_view",
  *   list_class = "\Drupal\webform\Plugin\Field\FieldType\WebformEntityReferenceFieldItemList",
@@ -111,7 +111,7 @@ class WebformEntityReferenceItem extends EntityReferenceItem {
   /**
    * {@inheritdoc}
    */
-  public function getSettableOptions(AccountInterface $account = NULL) {
+  public function getSettableOptions(?AccountInterface $account = NULL) {
     // Get webform options grouped by category.
     /** @var \Drupal\webform\WebformEntityStorageInterface $webform_storage */
     $webform_storage = \Drupal::service('entity_type.manager')->getStorage('webform');

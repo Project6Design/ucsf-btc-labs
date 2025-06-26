@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Drupal\Tests\locale\Kernel;
 
@@ -13,6 +13,9 @@ use Drupal\locale\LocaleDefaultConfigStorage;
  */
 class LocaleDefaultConfigStorageTest extends KernelTestBase {
 
+  /**
+   * {@inheritdoc}
+   */
   protected static $modules = [
     'language',
     'locale',
@@ -20,6 +23,9 @@ class LocaleDefaultConfigStorageTest extends KernelTestBase {
     'locale_test_translate',
   ];
 
+  /**
+   * Tests retrieval of component names from locale default config storage.
+   */
   public function testGetComponentNames(): void {
     $storage = new LocaleDefaultConfigStorage(
       new NullStorage(),

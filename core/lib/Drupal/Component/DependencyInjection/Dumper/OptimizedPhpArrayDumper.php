@@ -3,6 +3,7 @@
 namespace Drupal\Component\DependencyInjection\Dumper;
 
 use Drupal\Component\Utility\Crypt;
+use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -328,7 +329,6 @@ class OptimizedPhpArrayDumper extends Dumper {
     return (object) [
       'type' => 'collection',
       'value' => $code,
-      'resolve' => $resolve,
     ];
   }
 
@@ -353,7 +353,7 @@ class OptimizedPhpArrayDumper extends Dumper {
   /**
    * Gets a private service definition in a suitable format.
    *
-   * @param string $id
+   * @param string|null $id
    *   The ID of the service to get a private definition for.
    * @param \Symfony\Component\DependencyInjection\Definition $definition
    *   The definition to process.
@@ -435,13 +435,11 @@ class OptimizedPhpArrayDumper extends Dumper {
 
       return $this->getServiceClosureCall((string) $reference, $reference->getInvalidBehavior());
     }
+    elseif ($value instanceof IteratorArgument) {
+      return $this->getIterator($value);
+    }
     elseif (is_object($value)) {
-      // Drupal specific: Instantiated objects have a _serviceId parameter.
-      if (isset($value->_serviceId)) {
-        @trigger_error('_serviceId is deprecated in drupal:9.5.0 and is removed from drupal:11.0.0. Use \Drupal\Core\DrupalKernelInterface::getServiceIdMapping() instead. See https://www.drupal.org/node/3292540', E_USER_DEPRECATED);
-        return $this->getReferenceCall($value->_serviceId);
-      }
-      throw new RuntimeException('Unable to dump a service container if a parameter is an object without _serviceId.');
+      throw new RuntimeException('Unable to dump a service container if a parameter is an object.');
     }
     elseif (is_resource($value)) {
       throw new RuntimeException('Unable to dump a service container if a parameter is a resource.');
@@ -466,7 +464,7 @@ class OptimizedPhpArrayDumper extends Dumper {
    * @return string|object
    *   A suitable representation of the service reference.
    */
-  protected function getReferenceCall($id, Reference $reference = NULL) {
+  protected function getReferenceCall($id, ?Reference $reference = NULL) {
     $invalid_behavior = ContainerInterface::EXCEPTION_ON_INVALID_REFERENCE;
 
     if ($reference !== NULL) {
@@ -549,6 +547,22 @@ class OptimizedPhpArrayDumper extends Dumper {
       'type' => 'service_closure',
       'id' => $id,
       'invalidBehavior' => $invalid_behavior,
+    ];
+  }
+
+  /**
+   * Gets a service iterator in a suitable PHP array format.
+   *
+   * @param \Symfony\Component\DependencyInjection\Argument\IteratorArgument $iterator
+   *   The iterator.
+   *
+   * @return object
+   *   The PHP array representation of the iterator.
+   */
+  protected function getIterator(IteratorArgument $iterator) {
+    return (object) [
+      'type' => 'iterator',
+      'value' => array_map($this->dumpValue(...), $iterator->getValues()),
     ];
   }
 

@@ -91,11 +91,19 @@ class Captcha extends WebformElementBase {
   /**
    * {@inheritdoc}
    */
-  public function prepare(array &$element, WebformSubmissionInterface $webform_submission = NULL) {
+  public function prepare(array &$element, ?WebformSubmissionInterface $webform_submission = NULL) {
     // Hide and solve the element if the user is assigned 'skip CAPTCHA'
     // and '#captcha_admin_mode' is not enabled.
     $is_admin = $this->currentUser->hasPermission('skip CAPTCHA');
     if ($is_admin && empty($element['#captcha_admin_mode'])) {
+      $element['#access'] = FALSE;
+      $element['#captcha_admin_mode'] = TRUE;
+    }
+
+    // Hide and solve the element if the user is exempt by IP address.
+    $is_exempt = function_exists('captcha_whitelist_ip_whitelisted')
+      && captcha_whitelist_ip_whitelisted();
+    if ($is_exempt) {
       $element['#access'] = FALSE;
       $element['#captcha_admin_mode'] = TRUE;
     }

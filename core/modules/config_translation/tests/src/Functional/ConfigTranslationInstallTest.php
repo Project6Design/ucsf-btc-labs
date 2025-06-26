@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\config_translation\Functional;
 
 use Drupal\FunctionalTests\Installer\InstallerTestBase;
@@ -27,7 +29,7 @@ class ConfigTranslationInstallTest extends InstallerTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpLanguage() {
+  protected function setUpLanguage(): void {
     // Place custom local translations in the translations directory.
     mkdir(DRUPAL_ROOT . '/' . $this->siteDirectory . '/files/translations', 0777, TRUE);
     file_put_contents(DRUPAL_ROOT . '/' . $this->siteDirectory . '/files/translations/drupal-8.0.0.eo.po', $this->getPo('eo'));
@@ -46,7 +48,7 @@ class ConfigTranslationInstallTest extends InstallerTestBase {
    * @return string
    *   Contents for the test .po file.
    */
-  protected function getPo($langcode) {
+  protected function getPo($langcode): string {
     return <<<PO
 msgid ""
 msgstr ""
@@ -62,7 +64,10 @@ msgstr "Language $langcode"
 PO;
   }
 
-  public function testConfigTranslation() {
+  /**
+   * Tests install of Configuration Translation module.
+   */
+  public function testConfigTranslation(): void {
     \Drupal::service('module_installer')->install(['node', 'field_ui']);
     $this->createContentType(['type' => 'article']);
 

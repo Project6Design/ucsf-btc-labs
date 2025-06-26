@@ -51,6 +51,14 @@ class EntityListBuilder extends EntityHandlerBase implements EntityListBuilderIn
   protected $limit = 50;
 
   /**
+   * The entity key to sort the list by.
+   *
+   * This can be overridden in child classes to sort the list by a different
+   * entity key.
+   */
+  protected const SORT_KEY = 'id';
+
+  /**
    * {@inheritdoc}
    */
   public static function createInstance(ContainerInterface $container, EntityTypeInterface $entity_type) {
@@ -108,7 +116,7 @@ class EntityListBuilder extends EntityHandlerBase implements EntityListBuilderIn
   protected function getEntityListQuery(): QueryInterface {
     $query = $this->getStorage()->getQuery()
       ->accessCheck(TRUE)
-      ->sort($this->entityType->getKey('id'));
+      ->sort($this->entityType->getKey(static::SORT_KEY));
 
     // Only add the pager if a limit is specified.
     if ($this->limit) {
@@ -142,13 +150,41 @@ class EntityListBuilder extends EntityHandlerBase implements EntityListBuilderIn
   protected function getDefaultOperations(EntityInterface $entity) {
     $operations = [];
     if ($entity->access('update') && $entity->hasLinkTemplate('edit-form')) {
+      $edit_url = $this->ensureDestination($entity->toUrl('edit-form'));
+      if (!empty($entity->label())) {
+        $label = $this->t('Edit @entity_label', ['@entity_label' => $entity->label()]);
+      }
+      else {
+        $label = $this->t('Edit @entity_bundle @entity_id', [
+          '@entity_bundle' => $entity->bundle(),
+          '@entity_id' => $entity->id(),
+        ]);
+      }
+      $attributes = $edit_url->getOption('attributes') ?: [];
+      $attributes += ['aria-label' => $label];
+      $edit_url->setOption('attributes', $attributes);
+
       $operations['edit'] = [
         'title' => $this->t('Edit'),
         'weight' => 10,
-        'url' => $this->ensureDestination($entity->toUrl('edit-form')),
+        'url' => $edit_url,
       ];
     }
     if ($entity->access('delete') && $entity->hasLinkTemplate('delete-form')) {
+      $delete_url = $this->ensureDestination($entity->toUrl('delete-form'));
+      if (!empty($entity->label())) {
+        $label = $this->t('Delete @entity_label', ['@entity_label' => $entity->label()]);
+      }
+      else {
+        $label = $this->t('Delete @entity_bundle @entity_id', [
+          '@entity_bundle' => $entity->bundle(),
+          '@entity_id' => $entity->id(),
+        ]);
+      }
+      $attributes = $delete_url->getOption('attributes') ?: [];
+      $attributes += ['aria-label' => $label];
+      $delete_url->setOption('attributes', $attributes);
+
       $operations['delete'] = [
         'title' => $this->t('Delete'),
         'weight' => 100,
@@ -159,7 +195,7 @@ class EntityListBuilder extends EntityHandlerBase implements EntityListBuilderIn
             'width' => 880,
           ]),
         ],
-        'url' => $this->ensureDestination($entity->toUrl('delete-form')),
+        'url' => $delete_url,
       ];
     }
 

@@ -12,9 +12,7 @@ use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 class ProcessingTest extends WebDriverTestBase {
 
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = ['batch_test', 'test_page_test'];
 
@@ -29,7 +27,7 @@ class ProcessingTest extends WebDriverTestBase {
    * Tests that a link to the error page is shown.
    */
   public function testLinkToErrorPageAppears(): void {
-    $edit = ['batch' => 'batch_8'];
+    $edit = ['batch' => 'batch8'];
     $this->drupalGet('batch-test');
     $this->submitForm($edit, 'Submit');
     $this->assertNotNull($this->assertSession()->waitForLink('the error page'));

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\form_test\Plugin\Block;
 
 use Drupal\Core\Block\Attribute\Block;
@@ -34,7 +36,7 @@ class RedirectFormBlock extends BlockBase implements ContainerFactoryPluginInter
    * @param array $configuration
    *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
+   *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    * @param \Drupal\Core\Form\FormBuilderInterface $form_builder

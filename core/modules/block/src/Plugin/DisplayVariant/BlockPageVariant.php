@@ -7,10 +7,12 @@ use Drupal\Core\Block\MainContentBlockPluginInterface;
 use Drupal\Core\Block\TitleBlockPluginInterface;
 use Drupal\Core\Block\MessagesBlockPluginInterface;
 use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Display\Attribute\PageDisplayVariant;
 use Drupal\Core\Display\PageVariantInterface;
 use Drupal\Core\Entity\EntityViewBuilderInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Display\VariantBase;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -23,12 +25,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @see \Drupal\Core\Block\MainContentBlockPluginInterface
  * @see \Drupal\Core\Block\MessagesBlockPluginInterface
- *
- * @PageDisplayVariant(
- *   id = "block_page",
- *   admin_label = @Translation("Page with blocks")
- * )
  */
+#[PageDisplayVariant(
+  id: 'block_page',
+  admin_label: new TranslatableMarkup('Page with blocks')
+)]
 class BlockPageVariant extends VariantBase implements PageVariantInterface, ContainerFactoryPluginInterface {
 
   /**
@@ -187,8 +188,8 @@ class BlockPageVariant extends VariantBase implements PageVariantInterface, Cont
       unset($build['content']['#sorted']);
     }
 
-    // The access results' cacheability is currently added to the top level of the
-    // render array. This is done to prevent issues with empty regions being
+    // The access results' cacheability is currently added to the top level of
+    // the render array. This is done to prevent issues with empty regions being
     // displayed.
     // This would need to be changed to allow caching of block regions, as each
     // region must then have the relevant cacheable metadata.

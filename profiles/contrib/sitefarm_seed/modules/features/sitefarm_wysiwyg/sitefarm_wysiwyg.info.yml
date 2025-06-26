@@ -1,7 +1,7 @@
 name: WYSIWYG
 description: 'A WYSIWYG Editor config for CKEditor'
 type: module
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^9 || ^10 || ^11
 dependencies:
   - filter
   - url_embed

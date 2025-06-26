@@ -35,9 +35,9 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
    * @covers ::onResponse
    * @dataProvider providerTestSerialization
    */
-  public function testSerialization($data, $expected_response = FALSE) {
+  public function testSerialization($data, $expected_response = FALSE): void {
     $request = new Request();
-    $route_match = new RouteMatch('test', new Route('/rest/test', ['_rest_resource_config' => 'restplugin'], ['_format' => 'json']));
+    $route_match = new RouteMatch('test', new Route('/rest/test', ['_rest_resource_config' => 'rest_plugin'], ['_format' => 'json']));
 
     $handler_response = new ResourceResponse($data);
     $resource_response_subscriber = $this->getFunctioningResourceResponseSubscriber($route_match);
@@ -53,7 +53,10 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
     $this->assertEquals($expected_response !== FALSE ? $expected_response : Json::encode($data), $event->getResponse()->getContent());
   }
 
-  public function providerTestSerialization() {
+  /**
+   * Provides data to testSerialization().
+   */
+  public static function providerTestSerialization() {
     return [
       // The default data for \Drupal\rest\ResourceResponse.
       'default' => [NULL, ''],
@@ -70,15 +73,16 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getResponseFormat
+   * Tests the response format.
    *
    * Note this does *not* need to test formats being requested that are not
    * accepted by the server, because the routing system would have already
    * prevented those from reaching the controller.
    *
+   * @covers ::getResponseFormat
    * @dataProvider providerTestResponseFormat
    */
-  public function testResponseFormat($methods, array $supported_response_formats, array $supported_request_formats, $request_format, array $request_headers, $request_body, $expected_response_format, $expected_response_content_type, $expected_response_content) {
+  public function testResponseFormat($methods, array $supported_response_formats, array $supported_request_formats, $request_format, array $request_headers, $request_body, $expected_response_format, $expected_response_content_type, $expected_response_content): void {
     foreach ($request_headers as $key => $value) {
       unset($request_headers[$key]);
       $key = strtoupper(str_replace('-', '_', $key));
@@ -115,7 +119,7 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
    *
    * @dataProvider providerTestResponseFormat
    */
-  public function testOnResponseWithCacheableResponse($methods, array $supported_response_formats, array $supported_request_formats, $request_format, array $request_headers, $request_body, $expected_response_format, $expected_response_content_type, $expected_response_content) {
+  public function testOnResponseWithCacheableResponse($methods, array $supported_response_formats, array $supported_request_formats, $request_format, array $request_headers, $request_body, $expected_response_format, $expected_response_content_type, $expected_response_content): void {
     foreach ($request_headers as $key => $value) {
       unset($request_headers[$key]);
       $key = strtoupper(str_replace('-', '_', $key));
@@ -165,7 +169,7 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
    *
    * @dataProvider providerTestResponseFormat
    */
-  public function testOnResponseWithUncacheableResponse($methods, array $supported_response_formats, array $supported_request_formats, $request_format, array $request_headers, $request_body, $expected_response_format, $expected_response_content_type, $expected_response_content) {
+  public function testOnResponseWithUncacheableResponse($methods, array $supported_response_formats, array $supported_request_formats, $request_format, array $request_headers, $request_body, $expected_response_format, $expected_response_content_type, $expected_response_content): void {
     foreach ($request_headers as $key => $value) {
       unset($request_headers[$key]);
       $key = strtoupper(str_replace('-', '_', $key));
@@ -208,6 +212,8 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
   }
 
   /**
+   * Provides data for testing the response format.
+   *
    * @return array
    *   0. methods to test
    *   1. supported formats for route requirements
@@ -218,7 +224,7 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
    *   6. expected response content type
    *   7. expected response body
    */
-  public function providerTestResponseFormat() {
+  public static function providerTestResponseFormat() {
     $json_encoded = Json::encode(['REST' => 'Drupal']);
     $xml_encoded = "<?xml version=\"1.0\"?>\n<response><REST>Drupal</REST></response>\n";
 
@@ -338,7 +344,7 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
       ],
     ];
 
-    $unsafe_method_bodyless_test_cases = [
+    $unsafe_method_no_body_test_cases = [
       'unsafe methods without request bodies (DELETE): client requested no format, response should have the first acceptable format' => [
         ['DELETE'],
         ['xml', 'json'],
@@ -374,11 +380,14 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
       ],
     ];
 
-    return $safe_method_test_cases + $unsafe_method_bodied_test_cases + $unsafe_method_bodyless_test_cases;
+    return $safe_method_test_cases + $unsafe_method_bodied_test_cases + $unsafe_method_no_body_test_cases;
   }
 
   /**
+   * Gets the resource response subscriber.
+   *
    * @return \Drupal\rest\EventSubscriber\ResourceResponseSubscriber
+   *   A functioning ResourceResponseSubscriber.
    */
   protected function getFunctioningResourceResponseSubscriber(RouteMatchInterface $route_match) {
     // Create a dummy of the renderer service.
@@ -410,7 +419,7 @@ class ResourceResponseSubscriberTest extends UnitTestCase {
    * @return array
    *   An array of route requirements.
    */
-  protected function generateRouteRequirements(array $supported_response_formats, array $supported_request_formats) {
+  protected function generateRouteRequirements(array $supported_response_formats, array $supported_request_formats): array {
     $route_requirements = [
       '_format' => implode('|', $supported_response_formats),
     ];

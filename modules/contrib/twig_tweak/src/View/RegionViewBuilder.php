@@ -50,7 +50,7 @@ class RegionViewBuilder {
     EntityTypeManagerInterface $entity_type_manager,
     ConfigFactoryInterface $config_factory,
     RequestStack $request_stack,
-    TitleResolverInterface $title_resolver
+    TitleResolverInterface $title_resolver,
   ) {
     $this->entityTypeManager = $entity_type_manager;
     $this->configFactory = $config_factory;
@@ -70,7 +70,7 @@ class RegionViewBuilder {
    * @return array
    *   A render array to display the region content.
    */
-  public function build(string $region, string $theme = NULL): array {
+  public function build(string $region, ?string $theme = NULL): array {
 
     $blocks = $this->entityTypeManager->getStorage('block')->loadByProperties([
       'region' => $region,

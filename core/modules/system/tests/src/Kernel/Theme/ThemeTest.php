@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\system\Kernel\Theme;
 
 use Drupal\KernelTests\KernelTestBase;
@@ -28,14 +30,13 @@ class ThemeTest extends KernelTestBase {
   /**
    * Tests attribute merging.
    *
-   * Render arrays that use a render element and templates (and hence call
-   * template_preprocess()) must ensure the attributes at different occasions
-   * are all merged correctly:
+   * Drupal/Core/Theme/ThemeManagerInterface::addDefaultTemplateVariables())
+   * must ensure the attributes at different occasions are all merged correctly:
    *   - $variables['attributes'] as passed in to the theme hook implementation.
    *   - the render element's #attributes
    *   - any attributes set in the template's preprocessing function
    */
-  public function testAttributeMerging() {
+  public function testAttributeMerging(): void {
     $theme_test_render_element = [
       'elements' => [
         '#attributes' => ['data-foo' => 'bar'],
@@ -50,7 +51,7 @@ class ThemeTest extends KernelTestBase {
   /**
    * Tests that ThemeManager renders the expected data types.
    */
-  public function testThemeDataTypes() {
+  public function testThemeDataTypes(): void {
     // theme_test_false is an implemented theme hook so \Drupal::theme() service
     // should return a string or an object that implements MarkupInterface,
     // even though the theme function itself can return anything.
@@ -66,8 +67,8 @@ class ThemeTest extends KernelTestBase {
       }
     }
 
-    // suggestion_not_implemented is not an implemented theme hook so \Drupal::theme() service
-    // should return FALSE instead of a string.
+    // suggestion_not_implemented is not an implemented theme hook so
+    // \Drupal::theme() service should return FALSE instead of a string.
     $output = \Drupal::theme()->render(['suggestion_not_implemented'], []);
     $this->assertFalse($output, '\Drupal::theme() returns FALSE when a hook suggestion is not implemented.');
   }
@@ -75,7 +76,7 @@ class ThemeTest extends KernelTestBase {
   /**
    * Tests function theme_get_suggestions() for SA-CORE-2009-003.
    */
-  public function testThemeSuggestions() {
+  public function testThemeSuggestions(): void {
     // Set the front page as something random otherwise the CLI
     // test runner fails.
     $this->config('system.site')->set('page.front', '/nobody-home')->save();
@@ -102,7 +103,7 @@ class ThemeTest extends KernelTestBase {
   /**
    * Tests the listInfo() function.
    */
-  public function testListThemes() {
+  public function testListThemes(): void {
     $this->container->get('theme_installer')->install(['test_subtheme']);
     $theme_handler = $this->container->get('theme_handler');
     $themes = $theme_handler->listInfo();
@@ -112,22 +113,22 @@ class ThemeTest extends KernelTestBase {
 
     // Check if ThemeHandlerInterface::listInfo() returns disabled themes.
     // Check for base theme and subtheme lists.
-    $base_theme_list = ['test_basetheme' => 'Theme test base theme'];
+    $base_theme_list = ['test_base_theme' => 'Theme test base theme'];
     $sub_theme_list = ['test_subsubtheme' => 'Theme test subsubtheme', 'test_subtheme' => 'Theme test subtheme'];
 
-    $this->assertSame($sub_theme_list, $themes['test_basetheme']->sub_themes, 'Base theme\'s object includes list of subthemes.');
+    $this->assertSame($sub_theme_list, $themes['test_base_theme']->sub_themes, 'Base theme\'s object includes list of subthemes.');
     $this->assertSame($base_theme_list, $themes['test_subtheme']->base_themes, 'Subtheme\'s object includes list of base themes.');
     // Check for theme engine in subtheme.
     $this->assertSame('twig', $themes['test_subtheme']->engine, 'Subtheme\'s object includes the theme engine.');
     // Check for theme engine prefix.
-    $this->assertSame('twig', $themes['test_basetheme']->prefix, 'Base theme\'s object includes the theme engine prefix.');
+    $this->assertSame('twig', $themes['test_base_theme']->prefix, 'Base theme\'s object includes the theme engine prefix.');
     $this->assertSame('twig', $themes['test_subtheme']->prefix, 'Subtheme\'s object includes the theme engine prefix.');
   }
 
   /**
    * Tests child element rendering for 'render element' theme hooks.
    */
-  public function testDrupalRenderChildren() {
+  public function testDrupalRenderChildren(): void {
     $element = [
       '#theme' => 'theme_test_render_element_children',
       'child' => [
@@ -148,7 +149,7 @@ class ThemeTest extends KernelTestBase {
   /**
    * Tests drupal_find_theme_templates().
    */
-  public function testFindThemeTemplates() {
+  public function testFindThemeTemplates(): void {
     $registry = $this->container->get('theme.registry')->get();
     $templates = drupal_find_theme_templates($registry, '.html.twig', $this->getThemePath('test_theme'));
     $this->assertEquals('node--1', $templates['node__1']['template'], 'Template node--1.html.twig was found in test_theme.');
@@ -157,7 +158,7 @@ class ThemeTest extends KernelTestBase {
   /**
    * Tests the update registry is correct during theme install and uninstall.
    */
-  public function testThemeUpdateManagement() {
+  public function testThemeUpdateManagement(): void {
     // Install modules the theme is dependent on and enable the post update
     // function.
     \Drupal::state()->set('test_theme_depending_on_modules.post_update', TRUE);
@@ -184,7 +185,7 @@ class ThemeTest extends KernelTestBase {
   /**
    * Tests the update registry is correct during theme install and uninstall.
    */
-  public function testThemeUpdateManagementRemovedPostUpdates() {
+  public function testThemeUpdateManagementRemovedPostUpdates(): void {
     // Install modules the theme is dependent on and enable the removed post
     // updates function.
     \Drupal::state()->set('test_theme_depending_on_modules.removed_post_updates', TRUE);

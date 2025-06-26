@@ -2,12 +2,12 @@
 
 namespace Drupal\photoswipe\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Render\Element;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\responsive_image\Entity\ResponsiveImageStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 
 /**
  * Provides formatter that supports responsive image.
@@ -76,15 +76,15 @@ class PhotoswipeResponsiveFieldFormatter extends PhotoswipeFieldFormatter {
   public function calculateDependencies() {
     $dependencies = parent::calculateDependencies();
 
-    $resp_style_id = $this->getSetting('photoswipe_node_style');
+    $resp_style_id = $this->getSetting('photoswipe_thumbnail_style');
     /** @var \Drupal\responsive_image\ResponsiveImageStyleInterface $style */
     if ($resp_style_id && $style = ResponsiveImageStyle::load($resp_style_id)) {
       // Add the responsive image style as dependency.
       $dependencies[$style->getConfigDependencyKey()][] = $style->getConfigDependencyName();
     }
 
-    if (!empty($this->getSetting('photoswipe_node_style_first'))) {
-      $resp_style_id = $this->getSetting('photoswipe_node_style_first');
+    if (!empty($this->getSetting('photoswipe_thumbnail_style_first'))) {
+      $resp_style_id = $this->getSetting('photoswipe_thumbnail_style_first');
       /** @var \Drupal\responsive_image\ResponsiveImageStyleInterface $style */
       if ($resp_style_id && $style = ResponsiveImageStyle::load($resp_style_id)) {
         // Add the responsive image style as dependency.

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\content_moderation\Functional;
 
 use Drupal\block_content\Entity\BlockContent;
@@ -16,6 +18,16 @@ class ModerationStateBlockTest extends ModerationStateTestBase {
    * {@inheritdoc}
    */
   protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getAdministratorPermissions(): array {
+    return array_merge($this->permissions, [
+      'administer blocks',
+      'administer block content',
+    ]);
+  }
 
   /**
    * {@inheritdoc}
@@ -53,8 +65,9 @@ class ModerationStateBlockTest extends ModerationStateTestBase {
    * @see \Drupal\content_moderation\EntityOperations::entityPresave
    * @see \Drupal\content_moderation\Tests\ModerationFormTest::testModerationForm
    */
-  public function testCustomBlockModeration() {
-    $this->drupalLogin($this->rootUser);
+  public function testCustomBlockModeration(): void {
+    $this->adminUser = $this->drupalCreateUser($this->getAdministratorPermissions());
+    $this->drupalLogin($this->adminUser);
 
     // Enable moderation for content blocks.
     $edit['bundles[basic]'] = TRUE;

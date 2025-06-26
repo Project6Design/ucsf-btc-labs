@@ -1,17 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\views\Kernel\Entity;
 
-use Drupal\entity_test\Entity\EntityTestMultiValueBasefield;
+use Drupal\entity_test\Entity\EntityTestMultiValueBaseField;
 use Drupal\Tests\views\Kernel\ViewsKernelTestBase;
 use Drupal\views\Views;
+
+// cspell:ignore basefield
 
 /**
  * Tests entity views with multivalue base fields.
  *
  * @group views
  */
-class EntityViewsWithMultivalueBasefieldTest extends ViewsKernelTestBase {
+class EntityViewsWithMultivalueBaseFieldTest extends ViewsKernelTestBase {
 
   /**
    * {@inheritdoc}
@@ -35,11 +39,11 @@ class EntityViewsWithMultivalueBasefieldTest extends ViewsKernelTestBase {
   /**
    * Tests entity views with multivalue base fields.
    */
-  public function testView() {
-    EntityTestMultiValueBasefield::create([
+  public function testView(): void {
+    EntityTestMultiValueBaseField::create([
       'name' => 'test',
     ])->save();
-    EntityTestMultiValueBasefield::create([
+    EntityTestMultiValueBaseField::create([
       'name' => ['test2', 'test3'],
     ])->save();
 

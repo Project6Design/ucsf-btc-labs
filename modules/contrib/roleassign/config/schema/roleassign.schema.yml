@@ -6,5 +6,5 @@ roleassign.settings:
       type: sequence
       label: 'Select roles that should be available for assignment'
       sequence:
-          type: string
-          label: 'role'
+        type: string
+        label: 'role'

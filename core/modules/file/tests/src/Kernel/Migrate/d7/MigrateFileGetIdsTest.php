@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\file\Kernel\Migrate\d7;
 
 /**
@@ -17,7 +19,7 @@ class MigrateFileGetIdsTest extends MigrateFileTest {
   /**
    * {@inheritdoc}
    */
-  protected function getFileMigrationInfo() {
+  protected function getFileMigrationInfo(): array {
     $migration_info = parent::getFileMigrationInfo();
     $migration_info['plugin_id'] = 'd7_file_used';
     return $migration_info;

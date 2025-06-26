@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Drupal\Tests\block\Unit\Plugin\migrate\process;
 
 use Drupal\block\Plugin\migrate\process\BlockSettings;
+use Drupal\Core\Block\BlockManagerInterface;
+use Drupal\Core\Block\BlockPluginInterface;
 use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\Row;
 use Drupal\Tests\UnitTestCase;
+use Prophecy\Argument;
 
 /**
  * @coversDefaultClass \Drupal\block\Plugin\migrate\process\BlockSettings
@@ -27,12 +30,25 @@ class BlockSettingsTest extends UnitTestCase {
    *
    * @dataProvider providerTestTransform
    */
-  public function testTransform($value, $expected) {
+  public function testTransform($value, $expected): void {
     $executable = $this->prophesize(MigrateExecutableInterface::class)
       ->reveal();
     $row = $this->prophesize(Row::class)->reveal();
 
-    $plugin = new BlockSettings([], 'block_settings', []);
+    // The block plugin should be asked to provide default configuration.
+    $expected['default'] = 'value';
+
+    $mock_plugin = $this->prophesize(BlockPluginInterface::class);
+    $mock_plugin->getConfiguration()
+      ->shouldBeCalled()
+      ->willReturn($expected);
+
+    $block_manager = $this->prophesize(BlockManagerInterface::class);
+    $block_manager->createInstance($value[0], Argument::type('array'))
+      ->shouldBeCalled()
+      ->willReturn($mock_plugin->reveal());
+
+    $plugin = new BlockSettings([], 'block_settings', [], $block_manager->reveal());
     $actual = $plugin->transform($value, $executable, $row, 'foo');
     $this->assertSame($expected, $actual);
   }
@@ -40,7 +56,7 @@ class BlockSettingsTest extends UnitTestCase {
   /**
    * Provides data for testTransform.
    */
-  public function providerTestTransform() {
+  public static function providerTestTransform() {
     return [
       'title set' => [
         [

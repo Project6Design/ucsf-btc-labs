@@ -5,8 +5,10 @@ namespace Drupal\linkit\Plugin\Linkit\Substitution;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\file\FileInterface;
 use Drupal\linkit\SubstitutionInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * A substitution plugin for the URL to a file.
@@ -16,7 +18,23 @@ use Drupal\linkit\SubstitutionInterface;
  *   label = @Translation("Direct File URL"),
  * )
  */
-class File extends PluginBase implements SubstitutionInterface {
+class File extends PluginBase implements SubstitutionInterface, ContainerFactoryPluginInterface {
+
+  /**
+   * The file URL generator.
+   *
+   * @var \Drupal\Core\File\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->fileUrlGenerator = $container->get('file_url_generator');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -26,9 +44,7 @@ class File extends PluginBase implements SubstitutionInterface {
       return NULL;
     }
 
-    /** @var \Drupal\Core\File\FileUrlGeneratorInterface $file_url_generator */
-    $file_url_generator = \Drupal::service('file_url_generator');
-    return $file_url_generator->generate($entity->getFileUri());
+    return $this->fileUrlGenerator->generate($entity->getFileUri());
   }
 
   /**

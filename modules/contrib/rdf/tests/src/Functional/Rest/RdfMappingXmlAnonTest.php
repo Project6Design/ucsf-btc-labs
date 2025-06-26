@@ -6,6 +6,8 @@ use Drupal\Tests\rest\Functional\AnonResourceTestTrait;
 use Drupal\Tests\rest\Functional\EntityResource\XmlEntityNormalizationQuirksTrait;
 
 /**
+ * Tests XML Anon for RDF mappings.
+ *
  * @group rest
  */
 class RdfMappingXmlAnonTest extends RdfMappingResourceTestBase {

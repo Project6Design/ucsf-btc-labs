@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
+use Drupal\jsonapi\JsonApiSpec;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal\file\Entity\File;
@@ -14,7 +17,6 @@ use Drupal\user\Entity\User;
  * JSON:API integration test for the "Media" content entity type.
  *
  * @group jsonapi
- * @group #slow
  */
 class MediaTest extends ResourceTestBase {
 
@@ -62,7 +64,7 @@ class MediaTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpAuthorization($method) {
+  protected function setUpAuthorization($method): void {
     switch ($method) {
       case 'GET':
         $this->grantPermissionsToTestedRole(['view media', 'view any camelids media revisions']);
@@ -87,7 +89,7 @@ class MediaTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpRevisionAuthorization($method) {
+  protected function setUpRevisionAuthorization($method): void {
     parent::setUpRevisionAuthorization($method);
     $this->grantPermissionsToTestedRole(['view all media revisions']);
   }
@@ -151,7 +153,7 @@ class MediaTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedDocument() {
+  protected function getExpectedDocument(): array {
     $file = File::load(1);
     $thumbnail = File::load(3);
     $author = User::load($this->entity->getOwnerId());
@@ -164,10 +166,10 @@ class MediaTest extends ResourceTestBase {
       'jsonapi' => [
         'meta' => [
           'links' => [
-            'self' => ['href' => 'http://jsonapi.org/format/1.0/'],
+            'self' => ['href' => JsonApiSpec::SUPPORTED_SPECIFICATION_PERMALINK],
           ],
         ],
-        'version' => '1.0',
+        'version' => JsonApiSpec::SUPPORTED_SPECIFICATION_VERSION,
       ],
       'links' => [
         'self' => ['href' => $base_url->toString()],
@@ -292,7 +294,7 @@ class MediaTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getPostDocument() {
+  protected function getPostDocument(): array {
     $file = File::load(2);
     return [
       'data' => [
@@ -322,7 +324,7 @@ class MediaTest extends ResourceTestBase {
    */
   protected function getExpectedUnauthorizedAccessMessage($method) {
     switch ($method) {
-      case 'GET';
+      case 'GET':
         return "The 'view media' permission is required when the media item is published.";
 
       case 'POST':
@@ -342,7 +344,7 @@ class MediaTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getEditorialPermissions() {
+  protected function getEditorialPermissions(): array {
     return array_merge(parent::getEditorialPermissions(), ['view any unpublished content']);
   }
 
@@ -358,16 +360,16 @@ class MediaTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testPostIndividual() {
+  protected function doTestPostIndividual(): void {
     // @todo Mimic \Drupal\Tests\rest\Functional\EntityResource\Media\MediaResourceTestBase::testPost()
     // @todo Later, use https://www.drupal.org/project/drupal/issues/2958554 to upload files rather than the REST module.
-    parent::testPostIndividual();
+    parent::doTestPostIndividual();
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getExpectedGetRelationshipDocumentData($relationship_field_name, EntityInterface $entity = NULL) {
+  protected function getExpectedGetRelationshipDocumentData($relationship_field_name, ?EntityInterface $entity = NULL) {
     $data = parent::getExpectedGetRelationshipDocumentData($relationship_field_name, $entity);
     switch ($relationship_field_name) {
       case 'thumbnail':
@@ -396,7 +398,7 @@ class MediaTest extends ResourceTestBase {
    *
    * @todo Remove this in https://www.drupal.org/node/2824851.
    */
-  protected function doTestRelationshipMutation(array $request_options) {
+  protected function doTestRelationshipMutation(array $request_options): void {
     $this->grantPermissionsToTestedRole(['access content']);
     parent::doTestRelationshipMutation($request_options);
   }
@@ -404,7 +406,7 @@ class MediaTest extends ResourceTestBase {
   /**
    * {@inheritdoc}
    */
-  public function testCollectionFilterAccess() {
+  public function testCollectionFilterAccess(): void {
     $this->doTestCollectionFilterAccessForPublishableEntities('name', 'view media', 'administer media');
   }
 

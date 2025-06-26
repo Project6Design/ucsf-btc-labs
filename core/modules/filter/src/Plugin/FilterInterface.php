@@ -114,6 +114,7 @@ interface FilterInterface extends ConfigurableInterface, DependentPluginInterfac
    * Returns the administrative label for this filter plugin.
    *
    * @return string
+   *   The administrative label of the filter plugin.
    */
   public function getLabel();
 
@@ -121,6 +122,7 @@ interface FilterInterface extends ConfigurableInterface, DependentPluginInterfac
    * Returns the administrative description for this filter plugin.
    *
    * @return string
+   *   The administrative description of the filter plugin.
    */
   public function getDescription();
 
@@ -206,8 +208,8 @@ interface FilterInterface extends ConfigurableInterface, DependentPluginInterfac
    *
    *   Here is a concrete example, for a very granular filter:
    *     @code
-   *     array(
-   *       'allowed' => array(
+   *     [
+   *       'allowed' => [
    *         // Allows any attribute with any value on the <div> tag.
    *         'div' => TRUE,
    *         // Allows no attributes on the <p> tag.
@@ -215,31 +217,31 @@ interface FilterInterface extends ConfigurableInterface, DependentPluginInterfac
    *         // Allows the following attributes on the <a> tag:
    *         //  - 'href', with any value;
    *         //  - 'rel', with the value 'nofollow' value.
-   *         'a' => array(
+   *         'a' => [
    *           'href' => TRUE,
-   *           'rel' => array('nofollow' => TRUE),
-   *         ),
+   *           'rel' => ['nofollow' => TRUE],
+   *         ],
    *         // Only allows the 'src' and 'alt' attributes on the <alt> tag,
    *         // with any value.
-   *         'img' => array(
+   *         'img' => [
    *           'src' => TRUE,
    *           'alt' => TRUE,
-   *         ),
+   *         ],
    *         // Forbid the 'style' and 'on*' ('onClick' etc.) attributes on any
    *         // tag.
-   *         '*' => array(
+   *         '*' => [
    *           'style' => FALSE,
    *           'on*' => FALSE,
-   *         ),
-   *       )
-   *     )
+   *         ],
+   *       ]
+   *     ]
    *     @endcode
    *
    *   The simplest example possible: a filter that doesn't allow any HTML:
    *     @code
-   *     array(
-   *       'allowed' => array()
-   *     )
+   *     [
+   *       'allowed' => []
+   *     ]
    *     @endcode
    *
    *   And for a filter that applies no restrictions, i.e. allows any HTML:

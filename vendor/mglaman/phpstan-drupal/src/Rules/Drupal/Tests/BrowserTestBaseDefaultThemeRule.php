@@ -12,7 +12,6 @@ use PHPUnit\Framework\Test;
 use function count;
 use function in_array;
 use function interface_exists;
-use function method_exists;
 use function substr_compare;
 
 /**
@@ -46,8 +45,7 @@ final class BrowserTestBaseDefaultThemeRule implements Rule
 
         // Do some cheap preflight tests to make sure the class is in a
         // namespace that makes sense to inspect.
-        // @phpstan-ignore-next-line
-        $parts = method_exists($node->namespacedName, 'getParts') ? $node->namespacedName->getParts() : $node->namespacedName->parts;
+        $parts = $node->namespacedName->getParts();
         // The namespace is too short to be a test so skip inspection.
         if (count($parts) < 3) {
             return [];
@@ -71,6 +69,7 @@ final class BrowserTestBaseDefaultThemeRule implements Rule
 
         $excludedTestTypes = TypeCombinator::union(
             new ObjectType('Drupal\\FunctionalTests\\Update\\UpdatePathTestBase'),
+            new ObjectType('Drupal\\FunctionalTests\\Installer\\InstallerConfigDirectoryTestBase'),
             new ObjectType('Drupal\\FunctionalTests\\Installer\\InstallerExistingConfigTestBase')
         );
         if ($excludedTestTypes->isSuperTypeOf($classType)->yes()) {

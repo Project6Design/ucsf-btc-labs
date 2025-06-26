@@ -11,7 +11,7 @@ use Drupal\sitemap\Plugin\Sitemap\Vocabulary;
  * Change sitemap configuration page permission to administer sitemap.
  */
 function sitemap_update_8101() {
-  $roles = user_roles(FALSE, 'administer site configuration');
+  $roles = \Drupal::entityTypeManager()->getStorage('user_role')->loadMultiple('administer site configuration');
   if (!empty($roles)) {
     foreach ($roles as $rid => $role) {
       user_role_grant_permissions($rid, ['administer sitemap']);
@@ -66,7 +66,12 @@ function sitemap_update_8200(&$sandbox) {
   $config->clear('rss_front');
 
   // Update to the book plugin.
-  if ($books = $config->get('show_books')) {
+  if (\Drupal::moduleHandler()->moduleExists('book')
+    && $books = $config->get('show_books')
+  ) {
+    // Install the sitemap_book submodule.
+    \Drupal::moduleHandler()->install(['sitemap_book']);
+
     foreach ($books as $bid => $enabled) {
       $plugins['book:' . $bid] = [
         'enabled' => (bool) $enabled,
@@ -137,6 +142,101 @@ function sitemap_update_8200(&$sandbox) {
 }
 
 /**
+ * The sitemap path is now configurable; set it to its former, hardcoded value.
+ */
+function sitemap_update_8201(&$sandbox) {
+  $config_factory = \Drupal::configFactory();
+  $config = $config_factory->getEditable('sitemap.settings');
+  $config->set('path', 'sitemap');
+  $config->save(TRUE);
+}
+
+/**
+ * Install sitemap_book submodule if the book module is installed.
+ */
+function sitemap_update_8202(&$sandbox) {
+  if (\Drupal::moduleHandler()->moduleExists('book')) {
+    \Drupal::service('module_installer')->install(['sitemap_book']);
+  }
+}
+
+/**
+ * Adds the base_plugin key to plugin configuration.
+ */
+function sitemap_update_8203(&$sandbox) {
+  $config_factory = \Drupal::configFactory();
+  $settings = $config_factory->getEditable('sitemap.settings');
+  $manager = \Drupal::service('plugin.manager.sitemap');
+
+  foreach ($settings->get('plugins') as $id => $config) {
+    if (!$manager->hasDefinition($id)) {
+      continue;
+    }
+
+    $instance = $manager->createInstance($id, $config);
+    $base_plugin = $instance->getBaseId();
+    $settings->set("plugins.$id.base_plugin", $base_plugin);
+  }
+  $settings->save();
+}
+
+/**
+ * Re-run 8201, 8202, in case config was not exported after beta7 db update.
+ */
+function sitemap_update_8204(&$sandbox) {
+  // Shortly after sitemap-8.x-2.0-beta7 was released (which contained 8201 and
+  // 8202), we discovered in [#3466939] that some administrators had run
+  // database updates (i.e.: which created essential config); and then
+  // immediately re-imported the old config, as part of their deployment process
+  // (i.e.: undoing the database update and deleting the essential config). This
+  // put the sitemap module into a broken state, where configuration that was
+  // supposed to exist did not, and the admin had no way to re-save correct
+  // configuration.
+  //
+  // The sitemap maintainers forgot to include instructions in the beta7 and
+  // beta8 release notes (i.e.: to warn admins to run database updates, then
+  // export config). So, to accommodate sites that did break, this update hook
+  // safely re-runs 8201 and 8202. However, please note that it isn't feasible
+  // for us to accommodate for overwritten configuration every time that we make
+  // a database update.
+  //
+  // We need editable config for both 8201 and 8202.
+  $settings = \Drupal::configFactory()->getEditable('sitemap.settings');
+
+  // Safely re-run 8201: the sitemap.path config should not be null if 8201 had
+  // been captured properly; so if it is null now, then we know that we have to
+  // re-set it. Afterwards, flush cache configuration (so route rebuilding
+  // works), then rebuild routes (so the sitemap.page route is re-created).
+  if (\is_null($settings->get('path'))) {
+    $settings->set('path', 'sitemap');
+    $settings->save(TRUE);
+  }
+  \Drupal::service('cache.config')->invalidateAll();
+  \Drupal::service('router.builder')->rebuild();
+
+  // Safely re-run 8202: if the book module is installed, but sitemap_book is
+  // not, then loop through all the sitemap plugins. If we find a plugin for a
+  // book, then enable sitemap_book so that plugin does not break.
+  if (\Drupal::moduleHandler()->moduleExists('book')
+    && !\Drupal::moduleHandler()->moduleExists('sitemap_book')
+  ) {
+    $pluginManager = \Drupal::service('plugin.manager.sitemap');
+    foreach ($settings->get('plugins') as $pluginId => $pluginConfig) {
+      if (!$pluginManager->hasDefinition($pluginId)) {
+        continue;
+      }
+
+      $pluginInstance = $pluginManager->createInstance($pluginId, $pluginConfig);
+      $basePlugin = $pluginInstance->getBaseId();
+      if ($basePlugin === 'book') {
+        \Drupal::service('module_installer')->install(['sitemap_book']);
+        break;
+      }
+    }
+  }
+}
+
+/**
  * Helper function to get a book title for the 2.x settings update.
  *
  * @param int $bid
@@ -148,15 +248,17 @@ function sitemap_update_8200(&$sandbox) {
  *   Returns the book label.
  */
 function sitemap_book_title_update($bid, $show_title) {
-  if (!$show_title) {
-    return '';
-  }
-  else {
-    $book = \Drupal::service('entity_type.manager')->getStorage('node')->load($bid);
+  if ($show_title) {
+    $book = \Drupal::service('entity_type.manager')
+      ->getStorage('node')
+      ->load($bid);
     if ($book) {
       return $book->label();
     }
   }
+  // If we get here, then we weren't supposed to show the title, or the book
+  // couldn't be loaded: either way, return an empty string.
+  return '';
 }
 
 /**
@@ -213,7 +315,7 @@ function sitemap_vocab_title_update($vid) {
  * Helper function to update the term_depth setting.
  *
  * @param int $value
- *   The new Deph vocabulary value.
+ *   The new Depth vocabulary value.
  *
  * @return int
  *   Returns the value.

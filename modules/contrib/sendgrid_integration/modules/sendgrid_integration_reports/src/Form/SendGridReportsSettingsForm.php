@@ -63,35 +63,35 @@ class SendGridReportsSettingsForm extends ConfigFormBase {
     ];
 
     $form['sendgrid_integration_reports']['message'] = [
-      '#markup' => t('Data and responses from Sendgrid are cached for performance reasons. If you make changes to these settings charts cache will be dropped automatically.'),
+      '#markup' => $this->t('Data and responses from Sendgrid are cached for performance reasons. If you make changes to these settings charts cache will be dropped automatically.'),
     ];
 
     $current_date = date_format(new \Datetime(), 'Y-m-d');
     $form['sendgrid_integration_reports']['start_date'] = [
       '#type' => 'date',
-      '#title' => t('Global Stats Start Date'),
+      '#title' => $this->t('Global Stats Start Date'),
       '#default_value' => !empty($config['start_date']) ? $config['start_date'] : date_format(new \Datetime('-30 days'), 'Y-m-d'),
       '#attributes' => ['type' => 'date', 'max' => $current_date],
       '#required' => FALSE,
-      '#description' => t('Start date in the format of mm/dd/YYYY. Defaults to 30 days back.'),
+      '#description' => $this->t('Start date in the format of mm/dd/YYYY. Defaults to 30 days back.'),
     ];
 
     $form['sendgrid_integration_reports']['end_date'] = [
       '#type' => 'date',
-      '#title' => t('Global Stats End Date'),
+      '#title' => $this->t('Global Stats End Date'),
       '#default_value' => !empty($config['end_date']) ? $config['end_date'] : $current_date,
       '#attributes' => ['type' => 'date', 'max' => $current_date],
       '#required' => FALSE,
-      '#description' => t('End date in the format of mm/dd/YYYY. Defaults to today.'),
+      '#description' => $this->t('End date in the format of mm/dd/YYYY. Defaults to today.'),
     ];
 
     $options = ['day', 'week', 'month'];
     $form['sendgrid_integration_reports']['aggregated_by'] = [
       '#type' => 'select',
-      '#title' => t('Global Stats Aggregation'),
+      '#title' => $this->t('Global Stats Aggregation'),
       '#default_value' => !empty($config['aggregated_by']) ? $config['aggregated_by'] : 0,
       '#required' => FALSE,
-      '#description' => t('Aggregation of data. Defaults to day.'),
+      '#description' => $this->t('Aggregation of data. Defaults to day.'),
       '#options' => array_combine($options, $options),
     ];
 
@@ -106,7 +106,7 @@ class SendGridReportsSettingsForm extends ConfigFormBase {
     if (strtotime($values['start_date']) > strtotime($values['end_date'])) {
       $form_state->setError(
         $form['sendgrid_integration_reports']['start_date'],
-        t('The %start could not be later than %end.', [
+        $this->t('The %start could not be later than %end.', [
           '%start' => $form['sendgrid_integration_reports']['start_date']['#title'],
           '%end' => $form['sendgrid_integration_reports']['end_date']['#title'],
         ])

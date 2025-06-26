@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Kernel\KernelString;
 
 use Drupal\Component\Utility\Html;
@@ -10,6 +12,7 @@ use Drupal\entity_test\Entity\EntityTestRev;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\Tests\user\Traits\UserCreationTrait;
 
 /**
  * Tests the creation of text fields.
@@ -18,10 +21,10 @@ use Drupal\KernelTests\KernelTestBase;
  */
 class StringFormatterTest extends KernelTestBase {
 
+  use UserCreationTrait;
+
   /**
-   * Modules to enable.
-   *
-   * @var array
+   * {@inheritdoc}
    */
   protected static $modules = [
     'field',
@@ -68,7 +71,10 @@ class StringFormatterTest extends KernelTestBase {
     // Configure the theme system.
     $this->installConfig(['system', 'field']);
     $this->installEntitySchema('entity_test_rev');
-    $this->installEntitySchema('entity_test_label');
+    $this->setUpCurrentUser(permissions: [
+      'view test entity',
+      'administer entity_test content',
+    ]);
 
     $this->entityType = 'entity_test_rev';
     $this->bundle = $this->entityType;
@@ -119,12 +125,12 @@ class StringFormatterTest extends KernelTestBase {
   /**
    * Tests string formatter output.
    */
-  public function testStringFormatter() {
+  public function testStringFormatter(): void {
     $value = $this->randomString();
     $value .= "\n\n<strong>" . $this->randomString() . '</strong>';
     $value .= "\n\n" . $this->randomString();
 
-    $entity = EntityTestRev::create([]);
+    $entity = EntityTestRev::create(['name' => 'view revision']);
     $entity->{$this->fieldName}->value = $value;
 
     // Verify that all HTML is escaped and newlines are retained.
@@ -192,8 +198,9 @@ class StringFormatterTest extends KernelTestBase {
   /**
    * Test "link_to_entity" feature on fields which are added to config entity.
    */
-  public function testLinkToContentForEntitiesWithNoCanonicalPath() {
+  public function testLinkToContentForEntitiesWithNoCanonicalPath(): void {
     $this->enableModules(['entity_test']);
+    $this->installEntitySchema('entity_test_label');
     $field_name = 'test_field_name';
     $entity_type = $bundle = 'entity_test_label';
 

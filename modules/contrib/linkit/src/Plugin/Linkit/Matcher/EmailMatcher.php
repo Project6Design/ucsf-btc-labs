@@ -23,9 +23,19 @@ class EmailMatcher extends MatcherBase {
   public function execute($string) {
     $suggestions = new SuggestionCollection();
 
+    // Strip the mailto: prefix to match only the e-mail part of the string.
+    $string = str_replace('mailto:', '', $string);
+    // Strip the subject and body to match only the e-mail part of the string.
+    $stringExploded = explode('?', $string);
+    $string = $stringExploded[0];
+
     // Check for an e-mail address then return an e-mail match and create a
     // mail-to link if appropriate.
     if (filter_var($string, FILTER_VALIDATE_EMAIL)) {
+      // Add query as was initially.
+      if (isset($stringExploded[1])) {
+        $string .= '?' . $stringExploded[1];
+      }
       $suggestion = new DescriptionSuggestion();
       $suggestion->setLabel($this->t('E-mail @email', ['@email' => $string]))
         ->setPath('mailto:' . Html::escape($string))

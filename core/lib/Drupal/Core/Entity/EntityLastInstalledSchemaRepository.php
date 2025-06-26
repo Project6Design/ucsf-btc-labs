@@ -69,7 +69,7 @@ class EntityLastInstalledSchemaRepository implements EntityLastInstalledSchemaRe
 
     // Filter out field storage definitions.
     $filtered_keys = array_filter(array_keys($all_definitions), function ($key) {
-        return substr($key, -12) === '.entity_type';
+        return str_ends_with($key, '.entity_type');
     });
     $entity_type_definitions = array_intersect_key($all_definitions, array_flip($filtered_keys));
 
@@ -105,7 +105,10 @@ class EntityLastInstalledSchemaRepository implements EntityLastInstalledSchemaRe
     // isn't currently fieldable, there might be legacy definitions or an
     // empty array stored from when it was.
     $this->keyValueFactory->get('entity.definitions.installed')->delete($entity_type_id . '.field_storage_definitions');
-    $this->cacheBackend->deleteMultiple(['entity_type_definitions.installed', $entity_type_id . '.field_storage_definitions.installed']);
+    $this->cacheBackend->deleteMultiple([
+      'entity_type_definitions.installed',
+      $entity_type_id . '.field_storage_definitions.installed',
+    ]);
     $this->entityTypeDefinitions = NULL;
     return $this;
   }

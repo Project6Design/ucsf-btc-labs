@@ -4,6 +4,7 @@ namespace Drupal\ik_constant_contact\Form;
 
 use Drupal\ik_constant_contact\Service\ConstantContact;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Messenger\MessengerInterface;
@@ -43,8 +44,8 @@ class ConstantContactLists extends ConfigFormBase {
    * @param \Drupal\ik_constant_contact\Service\ConstantContact $constantContact
    *   Constant contact service.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, MessengerInterface $messenger, ConstantContact $constantContact) {
-    parent::__construct($config_factory);
+  public function __construct(ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typed_config_manager, MessengerInterface $messenger, ConstantContact $constantContact) {
+    parent::__construct($config_factory, $typed_config_manager);
     $this->messenger = $messenger;
     $this->constantContact = $constantContact;
   }
@@ -55,6 +56,7 @@ class ConstantContactLists extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
+      $container->get('config.typed'),
       $container->get('messenger'),
       $container->get('ik_constant_contact')
     );

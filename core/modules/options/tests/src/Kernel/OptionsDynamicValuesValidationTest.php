@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\options\Kernel;
 
 use Drupal\Core\Entity\EntityInterface;
@@ -49,7 +51,7 @@ class OptionsDynamicValuesValidationTest extends OptionsFieldUnitTestBase {
       'type' => 'list_string',
       'cardinality' => 1,
       'settings' => [
-        'allowed_values_function' => 'options_test_dynamic_values_callback',
+        'allowed_values_function' => '\Drupal\options_test\OptionsAllowedValues::dynamicValues',
       ],
     ])->save();
 
@@ -67,7 +69,7 @@ class OptionsDynamicValuesValidationTest extends OptionsFieldUnitTestBase {
       ->save();
 
     // Create an entity and prepare test data that will be used by
-    // options_test_dynamic_values_callback().
+    // \Drupal\options_test\OptionsAllowedValues::dynamicValues().
     $values = [
       'user_id' => 2,
       'name' => $this->randomMachineName(),

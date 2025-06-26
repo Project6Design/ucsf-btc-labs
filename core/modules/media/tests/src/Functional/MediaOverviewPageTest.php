@@ -1,10 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\media\Functional;
 
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\media\Entity\Media;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\file\Entity\File;
+use Drupal\Tests\TestFileCreationTrait;
 
 /**
  * Tests the Media overview page.
@@ -12,6 +18,8 @@ use Drupal\user\RoleInterface;
  * @group media
  */
 class MediaOverviewPageTest extends MediaFunctionalTestBase {
+
+  use TestFileCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -21,15 +29,22 @@ class MediaOverviewPageTest extends MediaFunctionalTestBase {
   /**
    * {@inheritdoc}
    */
+  protected static $modules = ['language'];
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp(): void {
     parent::setUp();
+    // Make the site multilingual to have a working language field handler.
+    ConfigurableLanguage::create(['id' => 'es', 'title' => 'Spanish title', 'label' => 'Spanish label'])->save();
     $this->drupalLogin($this->nonAdminUser);
   }
 
   /**
    * Tests that the Media overview page (/admin/content/media).
    */
-  public function testMediaOverviewPage() {
+  public function testMediaOverviewPage(): void {
     $assert_session = $this->assertSession();
 
     // Check the view exists, is access-restricted, and some defaults are there.
@@ -173,6 +188,110 @@ class MediaOverviewPageTest extends MediaFunctionalTestBase {
     $assert_session->linkByHrefExists('/media/' . $media1->id());
     $assert_session->linkByHrefExists('/media/' . $media2->id());
     $assert_session->linkByHrefExists('/media/' . $media3->id());
+  }
+
+  /**
+   * Tests the display of the alt attribute.
+   */
+  public function testImageAltTextDisplay(): void {
+    $this->drupalLogin($this->adminUser);
+    $media_type = $this->createMediaType('image');
+    $media_type_id = $media_type->id();
+    $media_type->setFieldMap(['name' => 'name']);
+    $media_type->save();
+
+    /** @var \Drupal\field\FieldConfigInterface $field */
+    $field = FieldConfig::load("media.$media_type_id.field_media_image");
+    $settings = $field->getSettings();
+    $settings['alt_field'] = TRUE;
+    $settings['alt_field_required'] = FALSE;
+    $field->set('settings', $settings);
+    $field->save();
+
+    $file = File::create([
+      'uri' => $this->getTestFiles('image')[0]->uri,
+    ]);
+    $file->save();
+
+    // Set the alt text to an empty string.
+    $media = Media::create([
+      'name' => 'Custom name',
+      'bundle' => $media_type_id,
+      'field_media_image' => [
+        [
+          'target_id' => $file->id(),
+          'alt' => '',
+          'title' => 'default title',
+        ],
+      ],
+    ]);
+    $media->save();
+
+    $this->drupalGet('/admin/content/media');
+
+    // Confirm that the alt text attribute is present.
+    $assert_session = $this->assertSession();
+    $element = $assert_session->elementAttributeExists('css', 'td.views-field-thumbnail__target-id img', 'alt');
+    $this->assertSame('', (string) $element->getAttribute('alt'));
+
+  }
+
+  /**
+   * Tests the author views filter uses the user_name plugin.
+   */
+  public function testMediaOverviewAuthorFilter(): void {
+    $this->drupalLogin($this->adminUser);
+    // Create some content for the view.
+    $media_type1 = $this->createMediaType('test');
+    $media1 = Media::create([
+      'bundle' => $media_type1->id(),
+      'name' => 'Media 1',
+      'uid' => $this->adminUser->id(),
+    ]);
+    $media1->save();
+    $media2 = Media::create([
+      'bundle' => $media_type1->id(),
+      'name' => 'Media 2',
+      'uid' => $this->adminUser->id(),
+    ]);
+    $media2->save();
+    $media3 = Media::create([
+      'bundle' => $media_type1->id(),
+      'name' => 'Media 3',
+      'uid' => $this->nonAdminUser->id(),
+    ]);
+    $media3->save();
+
+    // Add the media author filter to the media overview view.
+    $this->drupalGet('admin/structure/views/nojs/add-handler/media/media_page_list/filter');
+    $edit = [
+      'name[media_field_data.user_name]' => 1,
+    ];
+    $this->submitForm($edit, 'Add and configure filter criteria');
+
+    $edit = [
+      'options[expose_button][checkbox][checkbox]' => 1,
+    ];
+    $this->submitForm($edit, 'Expose filter');
+    $edit = [
+      'options[expose_button][checkbox][checkbox]' => 1,
+      'options[group_button][radios][radios]' => 0,
+    ];
+    $this->submitForm($edit, 'Apply');
+    $this->submitForm([], 'Save');
+
+    $role = Role::load(RoleInterface::AUTHENTICATED_ID);
+    $this->grantPermissions($role, ['access media overview']);
+    $this->drupalGet('/admin/content/media');
+    $this->assertSession()->statusCodeEquals(200);
+    // Assert we are using the user_name filter.
+    $this->assertSession()->pageTextContains('Authored by');
+    $this->submitForm([
+      'user_name' => $this->adminUser->getAccountName() . ' (' . $this->adminUser->id() . ')',
+    ], 'Filter');
+    $this->assertSession()->linkByHrefExists('/media/' . $media1->id());
+    $this->assertSession()->linkByHrefExists('/media/' . $media2->id());
+    $this->assertSession()->linkByHrefNotExists('/media/' . $media3->id());
   }
 
 }

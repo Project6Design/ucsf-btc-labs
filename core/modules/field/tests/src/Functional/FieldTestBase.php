@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\field\Functional;
 
 use Drupal\Core\Entity\EntityInterface;
@@ -14,7 +16,7 @@ abstract class FieldTestBase extends BrowserTestBase {
   /**
    * Generate random values for a field_test field.
    *
-   * @param $cardinality
+   * @param int $cardinality
    *   Number of values to generate.
    *
    * @return array
@@ -36,14 +38,14 @@ abstract class FieldTestBase extends BrowserTestBase {
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity to test.
-   * @param $field_name
-   *   The name of the field to test
-   * @param $expected_values
+   * @param string $field_name
+   *   The name of the field to test.
+   * @param array $expected_values
    *   The array of expected values.
-   * @param $langcode
+   * @param string $langcode
    *   (Optional) The language code for the values. Defaults to
    *   \Drupal\Core\Language\LanguageInterface::LANGCODE_DEFAULT.
-   * @param $column
+   * @param string $column
    *   (Optional) The name of the column to check. Defaults to 'value'.
    */
   public function assertFieldValues(EntityInterface $entity, $field_name, $expected_values, $langcode = LanguageInterface::LANGCODE_DEFAULT, $column = 'value') {

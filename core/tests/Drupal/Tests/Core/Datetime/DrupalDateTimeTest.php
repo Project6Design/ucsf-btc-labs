@@ -30,7 +30,7 @@ class DrupalDateTimeTest extends UnitTestCase {
    *
    * @dataProvider providerTestDateDiff
    */
-  public function testDateDiff($input1, $input2, $absolute, \DateInterval $expected) {
+  public function testDateDiff($input1, $input2, $absolute, \DateInterval $expected): void {
     $interval = $input1->diff($input2, $absolute);
     $this->assertEquals($interval, $expected);
   }
@@ -47,10 +47,10 @@ class DrupalDateTimeTest extends UnitTestCase {
    *
    * @dataProvider providerTestInvalidDateDiff
    */
-  public function testInvalidDateDiff($input1, $input2, $absolute) {
+  public function testInvalidDateDiff($input1, $input2, $absolute): void {
     $this->expectException(\BadMethodCallException::class);
     $this->expectExceptionMessage('Method Drupal\Component\Datetime\DateTimePlus::diff expects parameter 1 to be a \DateTime or \Drupal\Component\Datetime\DateTimePlus object');
-    $interval = $input1->diff($input2, $absolute);
+    $input1->diff($input2, $absolute);
   }
 
   /**
@@ -62,7 +62,7 @@ class DrupalDateTimeTest extends UnitTestCase {
    *
    * @see DrupalDateTimeTest::testDateDiff()
    */
-  public function providerTestDateDiff() {
+  public static function providerTestDateDiff() {
 
     $settings = ['langcode' => 'en'];
 
@@ -84,52 +84,52 @@ class DrupalDateTimeTest extends UnitTestCase {
       // There should be a 19 hour time interval between
       // new years in Sydney and new years in LA in year 2000.
       [
-        'input2' => DrupalDateTime::createFromFormat('Y-m-d H:i:s', '2000-01-01 00:00:00', new \DateTimeZone('Australia/Sydney'), $settings),
-        'input1' => DrupalDateTime::createFromFormat('Y-m-d H:i:s', '2000-01-01 00:00:00', new \DateTimeZone('America/Los_Angeles'), $settings),
+        'input1' => DrupalDateTime::createFromFormat('Y-m-d H:i:s', '2000-01-01 00:00:00', new \DateTimeZone('Australia/Sydney'), $settings),
+        'input2' => DrupalDateTime::createFromFormat('Y-m-d H:i:s', '2000-01-01 00:00:00', new \DateTimeZone('America/Los_Angeles'), $settings),
         'absolute' => FALSE,
         'expected' => $positive_19_hours,
       ],
       // In 1970 Sydney did not observe daylight savings time
       // So there is only an 18 hour time interval.
       [
-        'input2' => DrupalDateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 00:00:00', new \DateTimeZone('Australia/Sydney'), $settings),
-        'input1' => DrupalDateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 00:00:00', new \DateTimeZone('America/Los_Angeles'), $settings),
+        'input1' => DrupalDateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 00:00:00', new \DateTimeZone('Australia/Sydney'), $settings),
+        'input2' => DrupalDateTime::createFromFormat('Y-m-d H:i:s', '1970-01-01 00:00:00', new \DateTimeZone('America/Los_Angeles'), $settings),
         'absolute' => FALSE,
         'expected' => $positive_18_hours,
       ],
       [
-        'input1' => DrupalDateTime::createFromFormat('U', 3600, new \DateTimeZone('America/Los_Angeles'), $settings),
-        'input2' => DrupalDateTime::createFromFormat('U', 0, $utc_tz, $settings),
+        'input1' => DrupalDateTime::createFromFormat('U', '3600', new \DateTimeZone('America/Los_Angeles'), $settings),
+        'input2' => DrupalDateTime::createFromTimestamp(0, $utc_tz, $settings),
         'absolute' => FALSE,
         'expected' => $negative_1_hour,
       ],
       [
-        'input1' => DrupalDateTime::createFromFormat('U', 3600, $utc_tz, $settings),
-        'input2' => DrupalDateTime::createFromFormat('U', 0, $utc_tz, $settings),
+        'input1' => DrupalDateTime::createFromTimestamp(3600, $utc_tz, $settings),
+        'input2' => DrupalDateTime::createFromTimestamp(0, $utc_tz, $settings),
         'absolute' => FALSE,
         'expected' => $negative_1_hour,
       ],
       [
-        'input1' => DrupalDateTime::createFromFormat('U', 3600, $utc_tz, $settings),
+        'input1' => DrupalDateTime::createFromTimestamp(3600, $utc_tz, $settings),
         'input2' => \DateTime::createFromFormat('U', '0'),
         'absolute' => FALSE,
         'expected' => $negative_1_hour,
       ],
       [
-        'input1' => DrupalDateTime::createFromFormat('U', 3600, $utc_tz, $settings),
-        'input2' => DrupalDateTime::createFromFormat('U', 0, $utc_tz, $settings),
+        'input1' => DrupalDateTime::createFromTimestamp(3600, $utc_tz, $settings),
+        'input2' => DrupalDateTime::createFromTimestamp(0, $utc_tz, $settings),
         'absolute' => TRUE,
         'expected' => $positive_1_hour,
       ],
       [
-        'input1' => DrupalDateTime::createFromFormat('U', 3600, $utc_tz, $settings),
+        'input1' => DrupalDateTime::createFromTimestamp(3600, $utc_tz, $settings),
         'input2' => \DateTime::createFromFormat('U', '0'),
         'absolute' => TRUE,
         'expected' => $positive_1_hour,
       ],
       [
-        'input1' => DrupalDateTime::createFromFormat('U', 0, $utc_tz, $settings),
-        'input2' => DrupalDateTime::createFromFormat('U', 0, $utc_tz, $settings),
+        'input1' => DrupalDateTime::createFromTimestamp(0, $utc_tz, $settings),
+        'input2' => DrupalDateTime::createFromTimestamp(0, $utc_tz, $settings),
         'absolute' => FALSE,
         'expected' => $empty_interval,
       ],
@@ -145,17 +145,17 @@ class DrupalDateTimeTest extends UnitTestCase {
    *
    * @see DateTimePlusTest::testInvalidDateDiff()
    */
-  public function providerTestInvalidDateDiff() {
+  public static function providerTestInvalidDateDiff() {
     $settings = ['langcode' => 'en'];
     $utc_tz = new \DateTimeZone('UTC');
     return [
       [
-        'input1' => DrupalDateTime::createFromFormat('U', 3600, $utc_tz, $settings),
+        'input1' => DrupalDateTime::createFromTimestamp(3600, $utc_tz, $settings),
         'input2' => '1970-01-01 00:00:00',
         'absolute' => FALSE,
       ],
       [
-        'input1' => DrupalDateTime::createFromFormat('U', 3600, $utc_tz, $settings),
+        'input1' => DrupalDateTime::createFromTimestamp(3600, $utc_tz, $settings),
         'input2' => NULL,
         'absolute' => FALSE,
       ],
@@ -165,7 +165,7 @@ class DrupalDateTimeTest extends UnitTestCase {
   /**
    * Tests setting the default time for date-only objects.
    */
-  public function testDefaultDateTime() {
+  public function testDefaultDateTime(): void {
     $utc = new \DateTimeZone('UTC');
 
     $date = DrupalDateTime::createFromFormat('Y-m-d H:i:s', '2017-05-23 22:58:00', $utc, ['langcode' => 'en']);
@@ -179,7 +179,7 @@ class DrupalDateTimeTest extends UnitTestCase {
    *
    * @covers ::__call
    */
-  public function testChainable() {
+  public function testChainable(): void {
     $tz = new \DateTimeZone(date_default_timezone_get());
     $date = new DrupalDateTime('now', $tz, ['langcode' => 'en']);
 
@@ -197,7 +197,7 @@ class DrupalDateTimeTest extends UnitTestCase {
    *
    * @covers ::__call
    */
-  public function testChainableNonChainable() {
+  public function testChainableNonChainable(): void {
     $tz = new \DateTimeZone(date_default_timezone_get());
     $datetime1 = new DrupalDateTime('2009-10-11 12:00:00', $tz, ['langcode' => 'en']);
     $datetime2 = new DrupalDateTime('2009-10-13 12:00:00', $tz, ['langcode' => 'en']);
@@ -211,7 +211,7 @@ class DrupalDateTimeTest extends UnitTestCase {
    *
    * @covers ::__call
    */
-  public function testChainableNonCallable() {
+  public function testChainableNonCallable(): void {
     $this->expectException(\BadMethodCallException::class);
     $this->expectExceptionMessage('Call to undefined method Drupal\Core\Datetime\DrupalDateTime::nonexistent()');
     $tz = new \DateTimeZone(date_default_timezone_get());
@@ -222,7 +222,7 @@ class DrupalDateTimeTest extends UnitTestCase {
   /**
    * @covers ::getPhpDateTime
    */
-  public function testGetPhpDateTime() {
+  public function testGetPhpDateTime(): void {
     $new_york = new \DateTimeZone('America/New_York');
     $berlin = new \DateTimeZone('Europe/Berlin');
 
@@ -251,7 +251,7 @@ class DrupalDateTimeTest extends UnitTestCase {
    *
    * @covers ::format
    */
-  public function testRfc2822DateFormat() {
+  public function testRfc2822DateFormat(): void {
     $language_manager = $this->createMock(LanguageManager::class);
     $language_manager->expects($this->any())
       ->method('getCurrentLanguage')

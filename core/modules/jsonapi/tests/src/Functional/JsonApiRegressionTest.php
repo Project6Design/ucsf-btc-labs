@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\jsonapi\Functional;
 
 use Drupal\comment\Entity\Comment;
@@ -21,13 +23,10 @@ use Drupal\user\Entity\User;
 use Drupal\user\RoleInterface;
 use GuzzleHttp\RequestOptions;
 
-// cspell:ignore llamalovers catcuddlers Cuddlers
-
 /**
  * JSON:API regression tests.
  *
  * @group jsonapi
- * @group #slow
  *
  * @internal
  */
@@ -52,11 +51,11 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/2973681
    */
-  public function testDeepNestedIncludeMultiTargetEntityTypeFieldFromIssue2973681() {
+  public function testDeepNestedIncludeMultiTargetEntityTypeFieldFromIssue2973681(): void {
     // Set up data model.
     $this->assertTrue($this->container->get('module_installer')->install(['comment'], TRUE), 'Installed modules.');
     $this->addDefaultCommentField('node', 'article');
-    $this->addDefaultCommentField('taxonomy_term', 'tags', 'comment', CommentItemInterface::OPEN, 'tcomment');
+    $this->addDefaultCommentField('taxonomy_term', 'tags', 'comment', CommentItemInterface::OPEN, 'test_comment_type');
     $this->drupalCreateContentType(['type' => 'page']);
     $this->createEntityReferenceField(
       'node',
@@ -68,7 +67,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
       [
         'target_bundles' => [
           'comment' => 'comment',
-          'tcomment' => 'tcomment',
+          'test_comment_type' => 'test_comment_type',
         ],
       ],
       FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED
@@ -116,7 +115,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/2977879
    */
-  public function testGetTermWhenMultipleVocabulariesExistFromIssue2977879() {
+  public function testGetTermWhenMultipleVocabulariesExistFromIssue2977879(): void {
     // Set up data model.
     $this->assertTrue($this->container->get('module_installer')->install(['taxonomy'], TRUE), 'Installed modules.');
     Vocabulary::create([
@@ -152,7 +151,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/2984964
    */
-  public function testGetNodeCollectionWithHookNodeGrantsImplementationsFromIssue2984964() {
+  public function testGetNodeCollectionWithHookNodeGrantsImplementationsFromIssue2984964(): void {
     // Set up data model.
     $this->assertTrue($this->container->get('module_installer')->install(['node_access_test'], TRUE), 'Installed modules.');
     node_access_rebuild();
@@ -183,7 +182,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/2984647
    */
-  public function testDanglingReferencesInAnEntityReferenceFieldFromIssue2984647() {
+  public function testDanglingReferencesInAnEntityReferenceFieldFromIssue2984647(): void {
     // Set up data model.
     $this->drupalCreateContentType(['type' => 'journal_issue']);
     $this->drupalCreateContentType(['type' => 'journal_conference']);
@@ -260,6 +259,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
     ];
     $issue_node->delete();
     $response = $this->request('GET', $url, $request_options);
+    $document = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode());
 
     // Entity reference field allowing a single bundle: dangling reference's
@@ -279,7 +279,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
           ],
         ],
       ],
-    ], Json::decode((string) $response->getBody())['data']['relationships']['field_issue']['data']);
+    ], $document['data']['relationships']['field_issue']['data']);
 
     // Entity reference field allowing multiple bundles: dangling reference's
     // resource type is NOT deduced.
@@ -305,7 +305,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
           'drupal_internal__target_id' => (int) $conference_node->id(),
         ],
       ],
-    ], Json::decode((string) $response->getBody())['data']['relationships']['field_mentioned_in']['data']);
+    ], $document['data']['relationships']['field_mentioned_in']['data']);
   }
 
   /**
@@ -316,7 +316,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/2984886
    */
-  public function testThatRoutesAreRebuiltAfterDataModelChangesFromIssue2984886() {
+  public function testThatRoutesAreRebuiltAfterDataModelChangesFromIssue2984886(): void {
     $user = $this->drupalCreateUser(['access content']);
     $request_options = [
       RequestOptions::AUTH => [
@@ -342,7 +342,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
     $response = $this->request('GET', Url::fromUri('internal:/jsonapi/node/dog'), $request_options);
     $this->assertSame(200, $response->getStatusCode());
 
-    $this->createEntityReferenceField('node', 'dog', 'field_test', NULL, 'node');
+    $this->createEntityReferenceField('node', 'dog', 'field_test', '', 'node');
     \Drupal::service('router.builder')->rebuildIfNeeded();
 
     $dog = Node::create(['type' => 'dog', 'title' => 'retriever']);
@@ -351,7 +351,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
     $response = $this->request('GET', Url::fromUri('internal:/jsonapi/node/dog/' . $dog->uuid() . '/field_test'), $request_options);
     $this->assertSame(200, $response->getStatusCode());
 
-    $this->createEntityReferenceField('node', 'cat', 'field_test', NULL, 'node');
+    $this->createEntityReferenceField('node', 'cat', 'field_test', '', 'node');
     \Drupal::service('router.builder')->rebuildIfNeeded();
 
     $cat = Node::create(['type' => 'cat', 'title' => 'E. Napoleon']);
@@ -379,7 +379,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    * @see https://www.drupal.org/project/drupal/issues/3007113
    * @see https://www.drupal.org/project/jsonapi_extras/issues/3004582#comment-12817261
    */
-  public function testDenormalizeAliasedRelationshipFromIssue2953207() {
+  public function testDenormalizeAliasedRelationshipFromIssue2953207(): void {
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
     // Since the JSON:API module does not have an explicit mechanism to set up
@@ -436,7 +436,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/3009596
    */
-  public function testPageCacheFromIssue3009596() {
+  public function testPageCacheFromIssue3009596(): void {
     $anonymous_role = Role::load(RoleInterface::ANONYMOUS_ID);
     $anonymous_role->grantPermission('access content');
     $anonymous_role->trustData()->save();
@@ -474,7 +474,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/2999438
    */
-  public function testPatchingDateTimeNormalizedWrongTimeZoneIssue3021194() {
+  public function testPatchingDateTimeNormalizedWrongTimeZoneIssue3021194(): void {
     // Set up data model.
     $this->assertTrue($this->container->get('module_installer')->install(['datetime'], TRUE), 'Installed modules.');
     $this->drupalCreateContentType(['type' => 'page']);
@@ -513,8 +513,8 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
         $user->pass_raw,
       ],
     ]);
+    $doc = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode());
-    $doc = Json::decode((string) $response->getBody());
     $this->assertSame('2018-09-16T22:00:00+10:00', $doc['data']['attributes']['when']);
   }
 
@@ -523,7 +523,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/3026030
    */
-  public function testPostToIncludeUrlDoesNotReturnIncludeFromIssue3026030() {
+  public function testPostToIncludeUrlDoesNotReturnIncludeFromIssue3026030(): void {
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
     // Set up data model.
@@ -549,8 +549,8 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
       ],
     ];
     $response = $this->request('POST', $url, $request_options);
+    $doc = $this->getDocumentFromResponse($response);
     $this->assertSame(201, $response->getStatusCode());
-    $doc = Json::decode((string) $response->getBody());
     $this->assertArrayHasKey('included', $doc);
     $this->assertSame($user->label(), $doc['included'][0]['attributes']['name']);
   }
@@ -560,7 +560,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/3040590
    */
-  public function testMapFieldTypeNormalizationFromIssue3040590() {
+  public function testMapFieldTypeNormalizationFromIssue3040590(): void {
     $this->assertTrue($this->container->get('module_installer')->install(['entity_test'], TRUE), 'Installed modules.');
 
     // Create data.
@@ -586,8 +586,8 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
       RequestOptions::AUTH => [$user->getAccountName(), $user->pass_raw],
     ];
     $response = $this->request('GET', $url, $request_options);
+    $data = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode());
-    $data = Json::decode((string) $response->getBody());
     $this->assertSame([
       'foo' => 'bar',
       'baz' => 'qux',
@@ -597,15 +597,15 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
       'foo' => 'bar',
     ])->save();
     $response = $this->request('GET', $url, $request_options);
+    $data = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode());
-    $data = Json::decode((string) $response->getBody());
     $this->assertSame(['foo' => 'bar'], $data['data'][0]['attributes']['data']);
   }
 
   /**
    * Tests that the response still has meaningful error messages.
    */
-  public function testRecursionDetectedWhenResponseContainsViolationsFrom3042124() {
+  public function testRecursionDetectedWhenResponseContainsViolationsFrom3042124(): void {
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
     // Set up default request.
@@ -633,7 +633,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
     $response = $this->request('POST', $url, $request_options);
 
     // Assert that the response has a body.
-    $data = Json::decode((string) $response->getBody());
+    $data = $this->getDocumentFromResponse($response, FALSE);
     $this->assertSame(422, $response->getStatusCode());
     $this->assertNotNull($data);
     $this->assertSame(sprintf('title: This value should not be null.'), $data['errors'][0]['detail']);
@@ -644,7 +644,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
     $response = $this->request('POST', $url, $request_options);
 
     // Assert that the response has a body.
-    $data = Json::decode((string) $response->getBody());
+    $data = $this->getDocumentFromResponse($response, FALSE);
     $this->assertSame(422, $response->getStatusCode());
     $this->assertNotNull($data);
     $this->assertSame(sprintf('title: This value should not be null.'), $data['errors'][0]['detail']);
@@ -655,7 +655,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/3052954
    */
-  public function testInvalidDataTriggersUnprocessableEntityErrorFromIssue3052954() {
+  public function testInvalidDataTriggersUnprocessableEntityErrorFromIssue3052954(): void {
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
     // Set up data model.
@@ -685,7 +685,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
   /**
    * Ensure optional `@FieldType=map` fields are denormalized correctly.
    */
-  public function testEmptyMapFieldTypeDenormalization() {
+  public function testEmptyMapFieldTypeDenormalization(): void {
     $this->config('jsonapi.settings')->set('read_only', FALSE)->save(TRUE);
 
     // Set up data model.
@@ -707,8 +707,8 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
     ];
     // Retrieve the current representation of the entity.
     $response = $this->request('GET', $url, $request_options);
+    $doc = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode());
-    $doc = Json::decode((string) $response->getBody());
     // Modify the title. The @FieldType=map normalization is not changed. (The
     // name of this field is confusingly also 'data'.)
     $doc['data']['attributes']['name'] = 'bar';
@@ -718,14 +718,15 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
     ];
     $request_options[RequestOptions::BODY] = Json::encode($doc);
     $response = $this->request('PATCH', $url, $request_options);
+    $patched_document = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode());
-    $this->assertSame($doc['data']['attributes']['data'], Json::decode((string) $response->getBody())['data']['attributes']['data']);
+    $this->assertSame($doc['data']['attributes']['data'], $patched_document['data']['attributes']['data']);
   }
 
   /**
    * Ensure EntityAccessDeniedHttpException cacheability is taken into account.
    */
-  public function testLeakCacheMetadataInOmitted() {
+  public function testLeakCacheMetadataInOmitted(): void {
     $term = Term::create([
       'name' => 'Llama term',
       'vid' => 'tags',
@@ -759,12 +760,12 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
       'query' => ['include' => 'field_tags'],
     ]);
     $response = $this->request('GET', $url, $request_options);
+    $document = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode());
 
-    $response = Json::decode((string) $response->getBody());
-    $this->assertArrayNotHasKey('included', $response, 'JSON API response does not contain "included" taxonomy term as the latter is not published, i.e not accessible.');
+    $this->assertArrayNotHasKey('included', $document, 'JSON API response does not contain "included" taxonomy term as the latter is not published, i.e not accessible.');
 
-    $omitted = $response['meta']['omitted']['links'];
+    $omitted = $document['meta']['omitted']['links'];
     unset($omitted['help']);
     $omitted = reset($omitted);
     $expected_url = Url::fromUri('internal:/jsonapi/' . $term->getEntityTypeId() . '/' . $term->bundle() . '/' . $term->uuid());
@@ -774,8 +775,9 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
     $term->setPublished();
     $term->save();
     $response = $this->request('GET', $url, $request_options);
+    $document = $this->getDocumentFromResponse($response);
     $this->assertSame(200, $response->getStatusCode());
-    $this->assertEquals($term->uuid(), Json::decode((string) $response->getBody())['included'][0]['id'], 'JSON API response contains "included" taxonomy term as it became published, i.e accessible.');
+    $this->assertEquals($term->uuid(), $document['included'][0]['id'], 'JSON API response contains "included" taxonomy term as it became published, i.e accessible.');
   }
 
   /**
@@ -784,7 +786,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    * @see https://www.drupal.org/project/drupal/issues/3034786
    * @see https://www.drupal.org/project/drupal/issues/3035544
    */
-  public function testAliasedFieldsWithVirtualRelationships() {
+  public function testAliasedFieldsWithVirtualRelationships(): void {
     // Set up the data model.
     $this->assertTrue($this->container->get('module_installer')->install([
       'taxonomy',
@@ -831,7 +833,7 @@ class JsonApiRegressionTest extends JsonApiFunctionalTestBase {
    *
    * @see https://www.drupal.org/project/drupal/issues/3072076
    */
-  public function testNonCacheableMethods() {
+  public function testNonCacheableMethods(): void {
     $this->container->get('module_installer')->install([
       'jsonapi_test_non_cacheable_methods',
     ], TRUE);

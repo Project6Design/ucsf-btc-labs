@@ -2,11 +2,13 @@
 
 namespace Drupal\linkit\Plugin\Linkit\Matcher;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\file\FileInterface;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\linkit\Utility\LinkitXss;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides specific linkit matchers for the file entity type.
@@ -19,6 +21,46 @@ use Drupal\linkit\Utility\LinkitXss;
  * )
  */
 class FileMatcher extends EntityMatcher {
+
+  /**
+   * The image factory.
+   *
+   * @var \Drupal\Core\Image\ImageFactory
+   */
+  protected $imageFactory;
+
+  /**
+   * The file validator.
+   *
+   * @var \Drupal\file\Validation\FileValidatorInterface
+   */
+  protected $fileValidator;
+
+  /**
+   * The renderer.
+   *
+   * @var \Drupal\Core\Render\RendererInterface
+   */
+  protected $renderer;
+
+  /**
+   * The file URL generator.
+   *
+   * @var \Drupal\Core\File\FileUrlGeneratorInterface
+   */
+  protected $fileUrlGenerator;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->imageFactory = $container->get('image.factory');
+    $instance->fileValidator = $container->get('file.validator');
+    $instance->renderer = $container->get('renderer');
+    $instance->fileUrlGenerator = $container->get('file_url_generator');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -192,13 +234,24 @@ class FileMatcher extends EntityMatcher {
     $file = $entity->getFileUri();
 
     if ($this->configuration['images']['show_dimensions'] || $this->configuration['images']['show_thumbnail']) {
-      $image_factory = \Drupal::service('image.factory');
-      $supported_extensions = $image_factory->getSupportedExtensions();
-
+      $supported_extensions = $this->imageFactory->getSupportedExtensions();
+      $file_validator = $this->fileValidator;
+      $extensions = implode(' ', $supported_extensions);
+      $validators = ['FileExtension' => ['extensions' => $extensions]];
       // Check if the file extension is supported by the image toolkit.
-      if (empty(file_validate_extensions($entity, implode(' ', $supported_extensions)))) {
-        /** @var \Drupal\Core\Image\ImageInterface $image */
-        $image = $image_factory->get($file);
+      $result = DeprecationHelper::backwardsCompatibleCall(
+       \Drupal::VERSION,
+        '10.2',
+        static function () use ($entity, $file_validator, $validators) {
+          return $file_validator->validate($entity, $validators);
+        },
+        static function () use ($entity, $extensions) {
+          // @phpstan-ignore-next-line
+          return file_validate_extensions($entity, $extensions);
+        }
+      );
+      if (empty($result)) {
+        $image = $this->imageFactory->get($file);
         if ($image->isValid()) {
           if ($this->configuration['images']['show_dimensions']) {
             $description_array[] = $image->getWidth() . 'x' . $image->getHeight() . 'px';
@@ -212,7 +265,7 @@ class FileMatcher extends EntityMatcher {
               '#uri' => $entity->getFileUri(),
             ];
 
-            $description_array[] = (string) \Drupal::service('renderer')->render($image_element);
+            $description_array[] = (string) $this->renderer->render($image_element);
           }
         }
       }
@@ -227,7 +280,7 @@ class FileMatcher extends EntityMatcher {
    */
   protected function buildPath(EntityInterface $entity) {
     /** @var \Drupal\file\FileInterface $entity */
-    return \Drupal::service('file_url_generator')->generateString($entity->getFileUri());
+    return $this->fileUrlGenerator->generateString($entity->getFileUri());
   }
 
 }

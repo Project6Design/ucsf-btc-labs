@@ -12,7 +12,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 interface AccessManagerInterface {
 
   /**
-   * Checks a named route with parameters against applicable access check services.
+   * Checks a named route with parameters against access check services.
    *
    * Determines whether the route is accessible or not.
    *
@@ -33,7 +33,7 @@ interface AccessManagerInterface {
    *   returned, i.e. TRUE means access is explicitly allowed, FALSE means
    *   access is either explicitly forbidden or "no opinion".
    */
-  public function checkNamedRoute($route_name, array $parameters = [], AccountInterface $account = NULL, $return_as_object = FALSE);
+  public function checkNamedRoute($route_name, array $parameters = [], ?AccountInterface $account = NULL, $return_as_object = FALSE);
 
   /**
    * Execute access checks against the incoming request.
@@ -53,7 +53,7 @@ interface AccessManagerInterface {
    *   returned, i.e. TRUE means access is explicitly allowed, FALSE means
    *   access is either explicitly forbidden or "no opinion".
    */
-  public function checkRequest(Request $request, AccountInterface $account = NULL, $return_as_object = FALSE);
+  public function checkRequest(Request $request, ?AccountInterface $account = NULL, $return_as_object = FALSE);
 
   /**
    * Checks a route against applicable access check services.
@@ -78,6 +78,6 @@ interface AccessManagerInterface {
    *   returned, i.e. TRUE means access is explicitly allowed, FALSE means
    *   access is either explicitly forbidden or "no opinion".
    */
-  public function check(RouteMatchInterface $route_match, AccountInterface $account = NULL, Request $request = NULL, $return_as_object = FALSE);
+  public function check(RouteMatchInterface $route_match, ?AccountInterface $account = NULL, ?Request $request = NULL, $return_as_object = FALSE);
 
 }

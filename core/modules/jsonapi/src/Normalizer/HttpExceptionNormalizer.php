@@ -2,6 +2,7 @@
 
 namespace Drupal\jsonapi\Normalizer;
 
+use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\jsonapi\Normalizer\Value\HttpExceptionNormalizerValue;
@@ -43,7 +44,12 @@ class HttpExceptionNormalizer extends NormalizerBase {
    */
   public function normalize($object, $format = NULL, array $context = []): array|string|int|float|bool|\ArrayObject|NULL {
     $cacheability = new CacheableMetadata();
-    $cacheability->addCacheableDependency($object);
+    if ($object instanceof CacheableDependencyInterface) {
+      $cacheability->addCacheableDependency($object);
+    }
+    else {
+      $cacheability->setCacheMaxAge(0);
+    }
 
     $cacheability->addCacheTags(['config:system.logging']);
     if (\Drupal::config('system.logging')->get('error_level') === ERROR_REPORTING_DISPLAY_VERBOSE) {
@@ -120,7 +126,7 @@ class HttpExceptionNormalizer extends NormalizerBase {
    */
   public static function getInfoUrl($status_code) {
     // Depending on the error code we'll return a different URL.
-    $url = 'http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html';
+    $url = 'https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html';
     $sections = [
       '100' => '#sec10.1.1',
       '101' => '#sec10.1.2',
@@ -164,15 +170,6 @@ class HttpExceptionNormalizer extends NormalizerBase {
       '505' => '#sec10.5.6',
     ];
     return empty($sections[$status_code]) ? NULL : $url . $sections[$status_code];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function hasCacheableSupportsMethod(): bool {
-    @trigger_error(__METHOD__ . '() is deprecated in drupal:10.1.0 and is removed from drupal:11.0.0. Use getSupportedTypes() instead. See https://www.drupal.org/node/3359695', E_USER_DEPRECATED);
-
-    return TRUE;
   }
 
   /**

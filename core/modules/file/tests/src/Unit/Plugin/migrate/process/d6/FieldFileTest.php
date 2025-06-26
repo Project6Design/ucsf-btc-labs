@@ -12,6 +12,8 @@ use Drupal\migrate\Row;
 use Drupal\Tests\UnitTestCase;
 
 /**
+ * Tests the file field process plugin.
+ *
  * @group file
  */
 class FieldFileTest extends UnitTestCase {
@@ -19,7 +21,7 @@ class FieldFileTest extends UnitTestCase {
   /**
    * Tests that alt and title attributes are included in transformed values.
    */
-  public function testTransformAltTitle() {
+  public function testTransformAltTitle(): void {
     $executable = $this->prophesize(MigrateExecutableInterface::class)->reveal();
     $row = $this->prophesize(Row::class)->reveal();
     $migration = $this->prophesize(MigrationInterface::class)->reveal();

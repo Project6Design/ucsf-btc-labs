@@ -21,16 +21,18 @@ class PlaceholderGeneratorTest extends RendererTestBase {
   protected $placeholderGenerator;
 
   /**
+   * Ensure that the generated placeholder markup is valid.
+   *
+   * If it is not, then simply using DOMDocument on HTML that contains
+   * placeholders may modify the placeholders' markup, which would make it
+   * impossible to replace the placeholders: the placeholder markup in
+   * #attached versus that in the HTML processed by DOMDocument would no longer
+   * match.
+   *
    * @covers ::createPlaceholder
    * @dataProvider providerCreatePlaceholderGeneratesValidHtmlMarkup
-   *
-   * Ensure that the generated placeholder markup is valid. If it is not, then
-   * simply using DOMDocument on HTML that contains placeholders may modify the
-   * placeholders' markup, which would make it impossible to replace the
-   * placeholders: the placeholder markup in #attached versus that in the HTML
-   * processed by DOMDocument would no longer match.
    */
-  public function testCreatePlaceholderGeneratesValidHtmlMarkup(array $element) {
+  public function testCreatePlaceholderGeneratesValidHtmlMarkup(array $element): void {
     $build = $this->placeholderGenerator->createPlaceholder($element);
 
     $original_placeholder_markup = (string) $build['#markup'];
@@ -47,7 +49,7 @@ class PlaceholderGeneratorTest extends RendererTestBase {
    *
    * @covers ::createPlaceholder
    */
-  public function testRenderPlaceholdersDifferentSortedContextsTags() {
+  public function testRenderPlaceholdersDifferentSortedContextsTags(): void {
     $contexts_1 = ['user', 'foo'];
     $contexts_2 = ['foo', 'user'];
     $tags_1 = ['current-temperature', 'foo'];
@@ -84,8 +86,9 @@ class PlaceholderGeneratorTest extends RendererTestBase {
 
   /**
    * @return array
+   *   An array of test cases with different placeholder inputs.
    */
-  public function providerCreatePlaceholderGeneratesValidHtmlMarkup() {
+  public static function providerCreatePlaceholderGeneratesValidHtmlMarkup() {
     return [
       'multiple-arguments' => [['#lazy_builder' => ['Drupal\Tests\Core\Render\PlaceholdersTest::callback', ['foo', 'bar']]]],
       'special-character-&' => [['#lazy_builder' => ['Drupal\Tests\Core\Render\PlaceholdersTest::callback', ['foo&bar']]]],

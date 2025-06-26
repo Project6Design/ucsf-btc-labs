@@ -45,9 +45,9 @@ interface RdfMappingInterface extends ConfigEntityInterface {
    * -Map the 'article' bundle to 'sioc:Post'.
    * @code
    * rdf_get_mapping('node', 'article')
-   *   ->setBundleMapping(array(
-   *     'types' => array('sioc:Post'),
-   *   ))
+   *   ->setBundleMapping([
+   *     'types' => ['sioc:Post'],
+   *   ])
    *   ->save();
    * @endcode
    *

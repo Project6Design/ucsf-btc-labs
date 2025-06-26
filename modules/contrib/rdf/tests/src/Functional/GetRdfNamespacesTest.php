@@ -26,7 +26,7 @@ class GetRdfNamespacesTest extends BrowserTestBase {
   /**
    * Tests getting RDF namespaces.
    */
-  public function testGetRdfNamespaces() {
+  public function testGetRdfNamespaces(): void {
     // Fetches the front page and extracts RDFa 1.1 prefixes.
     $this->drupalGet('');
 

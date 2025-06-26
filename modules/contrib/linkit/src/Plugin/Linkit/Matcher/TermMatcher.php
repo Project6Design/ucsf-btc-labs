@@ -40,7 +40,7 @@ class TermMatcher extends EntityMatcher {
    * {@inheritdoc}
    */
   protected function buildDescription(EntityInterface $entity) {
-    $description = \Drupal::token()->replace($this->configuration['metadata'], ['term' => $entity], []);
+    $description = $this->token->replace($this->configuration['metadata'], ['term' => $entity], []);
     return LinkitXss::descriptionFilter($description);
   }
 

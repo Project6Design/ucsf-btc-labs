@@ -25,40 +25,15 @@ class SitemapBlock extends BlockBase implements ContainerFactoryPluginInterface 
    *
    * @var \Drupal\Core\DependencyInjection\ClassResolverInterface
    */
-  protected $classResolver;
-
-  /**
-   * Constructs a new ControllerBlock object.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   * @param string $plugin_id
-   *   The plugin_id for the plugin instance.
-   * @param string $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\Core\DependencyInjection\ClassResolverInterface $class_resolver
-   *   The class resolver service.
-   */
-  public function __construct(
-    array $configuration,
-    $plugin_id,
-    $plugin_definition,
-    ClassResolverInterface $class_resolver
-  ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->classResolver = $class_resolver;
-  }
+  protected ClassResolverInterface $classResolver;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('class_resolver')
-    );
+    $instance = new static($configuration, $plugin_id, $plugin_definition);
+    $instance->classResolver = $container->get('class_resolver');
+    return $instance;
   }
 
   /**

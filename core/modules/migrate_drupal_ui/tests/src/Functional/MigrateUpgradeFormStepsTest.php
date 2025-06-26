@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\Tests\migrate_drupal_ui\Functional;
 
 use Drupal\migrate_drupal\MigrationConfigurationTrait;
-use Drupal\Tests\migrate_drupal\Traits\CreateTestContentEntitiesTrait;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\WebAssert;
 
@@ -15,7 +16,6 @@ use Drupal\Tests\WebAssert;
 class MigrateUpgradeFormStepsTest extends BrowserTestBase {
 
   use MigrationConfigurationTrait;
-  use CreateTestContentEntitiesTrait;
 
   /**
    * {@inheritdoc}
@@ -39,7 +39,7 @@ class MigrateUpgradeFormStepsTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function getSourceBasePath() {
+  protected function getSourceBasePath(): string {
     return __DIR__ . '/files';
   }
 
@@ -52,7 +52,7 @@ class MigrateUpgradeFormStepsTest extends BrowserTestBase {
    * this order; Overview or Incremental, if a migration has already been run
    * then Credential, Id conflict, if conflicts are detected, and lastly Review.
    */
-  public function testMigrateUpgradeReviewPage() {
+  public function testMigrateUpgradeReviewPage(): void {
     /** @var \Drupal\Core\TempStore\PrivateTempStore  $store */
     $store = \Drupal::service('tempstore.private')->get('migrate_drupal_ui');
     $state = \Drupal::service('state');
