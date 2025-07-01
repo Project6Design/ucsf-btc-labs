@@ -65,8 +65,7 @@ class FeaturesConfigInstaller extends ConfigInstaller {
    * {@inheritdoc}
    */
   public function findPreExistingConfiguration(StorageInterface $storage, array $previous_config_names = []) {
-    // Override
-    // Drupal\Core\Config\ConfigInstaller::findPreExistingConfiguration().
+    // Override Drupal\Core\Config\ConfigInstaller::findPreExistingConfiguration().
     // Allow config that already exists coming from Features.
     $features_config = array_keys($this->featuresManager->listExistingConfig());
     // Map array so we can use isset instead of in_array for faster access.
