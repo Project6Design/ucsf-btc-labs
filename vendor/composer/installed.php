@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '0acfefdc0dc79aa195303f99bdd521e7af984eef',
+        'reference' => 'cd07dba072342d644b7961ea2c11db1e358f58bc',
         'name' => 'drupal/legacy-project',
         'dev' => true,
     ),
@@ -727,7 +727,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '0acfefdc0dc79aa195303f99bdd521e7af984eef',
+            'reference' => 'cd07dba072342d644b7961ea2c11db1e358f58bc',
             'dev_requirement' => false,
         ),
         'drupal/linkit' => array(
@@ -1188,6 +1188,15 @@
             'install_path' => __DIR__ . '/../oscarotero/html-parser',
             'aliases' => array(),
             'reference' => '10f3219267a365d9433f2f7d1694209c9d436c8d',
+            'dev_requirement' => false,
+        ),
+        'pantheon-systems/drupal-integrations' => array(
+            'pretty_version' => '11.2.0',
+            'version' => '11.2.0.0',
+            'type' => 'project',
+            'install_path' => __DIR__ . '/../pantheon-systems/drupal-integrations',
+            'aliases' => array(),
+            'reference' => 'fa9405e979ebe04c2580b3e96ce2b1e4dba9a39c',
             'dev_requirement' => false,
         ),
         'pear/archive_tar' => array(

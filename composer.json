@@ -80,7 +80,8 @@
         "drupal/webform_views": "^5.5",
         "drush/drush": "13.3.3",
         "embed/embed": "^4.4",
-        "mglaman/composer-drupal-lenient": "^1.0"
+        "mglaman/composer-drupal-lenient": "^1.0",
+        "pantheon-systems/drupal-integrations": "^11"
     },
     "conflict": {
         "drupal/drupal": "*"

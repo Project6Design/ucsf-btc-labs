@@ -58,6 +58,7 @@ return array(
     'PhpTuf\\ComposerStager\\' => array($vendorDir . '/php-tuf/composer-stager/src'),
     'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
     'Peast\\' => array($vendorDir . '/mck89/peast/lib/Peast'),
+    'Pantheon\\Integrations\\' => array($vendorDir . '/pantheon-systems/drupal-integrations/src'),
     'PHPStan\\' => array($vendorDir . '/phpstan/phpstan-deprecation-rules/src'),
     'Masterminds\\' => array($vendorDir . '/masterminds/html5/src'),
     'ML\\JsonLD\\' => array($vendorDir . '/ml/json-ld'),

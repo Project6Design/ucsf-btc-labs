@@ -111,6 +111,7 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
             'PhpTuf\\ComposerStager\\' => 22,
             'PhpParser\\' => 10,
             'Peast\\' => 6,
+            'Pantheon\\Integrations\\' => 22,
             'PHPStan\\' => 8,
         ),
         'M' => 
@@ -394,6 +395,10 @@ class ComposerStaticInit69d43ccac25aa9b83c19d1d7e5d95646
         'Peast\\' => 
         array (
             0 => __DIR__ . '/..' . '/mck89/peast/lib/Peast',
+        ),
+        'Pantheon\\Integrations\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/pantheon-systems/drupal-integrations/src',
         ),
         'PHPStan\\' => 
         array (
