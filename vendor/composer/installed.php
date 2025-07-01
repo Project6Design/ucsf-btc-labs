@@ -5,7 +5,7 @@
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '431e47451cf2bfc8f979deb7a2dd243918a4b4e9',
+        'reference' => '0acfefdc0dc79aa195303f99bdd521e7af984eef',
         'name' => 'drupal/legacy-project',
         'dev' => true,
     ),
@@ -727,7 +727,7 @@
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '431e47451cf2bfc8f979deb7a2dd243918a4b4e9',
+            'reference' => '0acfefdc0dc79aa195303f99bdd521e7af984eef',
             'dev_requirement' => false,
         ),
         'drupal/linkit' => array(
@@ -949,12 +949,14 @@
             'dev_requirement' => false,
         ),
         'drupal/webform' => array(
-            'pretty_version' => '6.3.0-beta2',
-            'version' => '6.3.0.0-beta2',
+            'pretty_version' => 'dev-6.3.x',
+            'version' => 'dev-6.3.x',
             'type' => 'drupal-module',
             'install_path' => __DIR__ . '/../../modules/contrib/webform',
-            'aliases' => array(),
-            'reference' => '6.3.0-beta2',
+            'aliases' => array(
+                0 => '6.3.x-dev',
+            ),
+            'reference' => '46671264915f49e26507f121e81ac80580c5435a',
             'dev_requirement' => false,
         ),
         'drupal/webform_views' => array(

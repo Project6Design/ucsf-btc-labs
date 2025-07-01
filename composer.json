@@ -76,7 +76,7 @@
         "drupal/twig_tweak": "^3.4",
         "drupal/upgrade_status": "^4.3",
         "drupal/url_embed": "^3.0",
-        "drupal/webform": "^6.3@beta",
+        "drupal/webform": "6.3.x-dev@dev",
         "drupal/webform_views": "^5.5",
         "drush/drush": "13.3.3",
         "embed/embed": "^4.4",
