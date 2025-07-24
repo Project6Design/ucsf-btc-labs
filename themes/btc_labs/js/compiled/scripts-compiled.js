@@ -24,6 +24,13 @@
         }
       }
 
+       // Enable Photoswipe.
+       $('.node-type-gallery .gallery-item').click(function (e) {
+        e.preventDefault();
+        var item_index = $(this).parents('.field__value').index();
+        openPhotoswipe('.node-type-gallery .field--name-field-photos', item_index);
+      });
+
       //down icon scroll
       $(".arrow-down-icon", context).click(function () {
         $('html, body').animate({
@@ -225,31 +232,33 @@
         mainContent.classList.remove("menu-active");
       });
       function openPhotoswipe(selector, index) {
-        var items = [];
-        var pswpElement = document.querySelectorAll('.pswp')[0];
-        $(selector).find('.gallery-item').each(function () {
-          var source = $(this).find('a').attr('href');
-          var width = $(this).attr('data-width');
-          var height = $(this).attr('data-height');
-          var caption = $(this).find('.gallery-item__caption').html();
-          var item = {
-            src: source,
-            w: width,
-            h: height
-          };
-          if (caption !== undefined) {
-            item.title = caption;
-          }
-          items.push(item);
+        const pswpElement = document.querySelector('.pswp');
+        const items = [];
+      
+        // Collect gallery items
+        document.querySelectorAll(selector + ' .gallery-item').forEach((el) => {
+          const link = el.querySelector('a');
+          items.push({
+            src: link.href,
+            w: parseInt(el.dataset.width, 10) || 800,
+            h: parseInt(el.dataset.height, 10) || 600,
+            title: el.querySelector('.gallery-item__caption')?.innerHTML || ''
+          });
         });
-        var options = {
-          // galleryUID: $(selector).attr('data-pswp-uid'),
-          index: index
+      
+        const options = {
+          index: index || 0,
+          showHideAnimationType: 'fade'
         };
-
-        // Pass data to PhotoSwipe and initialize it
-        var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, options);
-        gallery.init();
+      
+        // Initialize PhotoSwipe 5
+        const lightbox = new PhotoSwipeLightbox({
+          gallery: selector,
+          children: '.gallery-item a',
+          pswpModule: PhotoSwipe
+        });
+      
+        lightbox.loadAndOpen(index);
       }
     }
   };
