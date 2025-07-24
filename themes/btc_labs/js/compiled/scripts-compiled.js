@@ -16,13 +16,6 @@
   // To understand behaviors, see https://www.drupal.org/node/2269515
   Drupal.behaviors.btc_labs = {
     attach: function (context, settings) {
-      // Enable Photoswipe.
-      $('.node-type-gallery .gallery-item').click(function (e) {
-        e.preventDefault();
-        var item_index = $(this).parents('.field__value').index();
-        openPhotoswipe('.node-type-gallery .field--name-field-photos', item_index);
-      });
-
       // Handle page sidebar for desktop
       if ($(window).width() > 1024) {
         if ($('.sf-page .sidebar').length > 0) {

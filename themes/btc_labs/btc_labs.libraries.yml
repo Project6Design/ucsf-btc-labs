@@ -16,7 +16,7 @@ global:
     js/modernizr.js: {}
     js/lity.js: {}
     js/picturefill.js: {}
-    js/build/scripts.js: {}
+    js/compiled/scripts-compiled.js: {}
   dependencies:
    - core/drupal
    - core/jquery
