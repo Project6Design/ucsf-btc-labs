@@ -38,24 +38,27 @@
  * @ingroup themeable
  */
 #}
-{%
-  set classes = [
-    'paragraph',
-    'paragraph--type--' ~ paragraph.bundle|clean_class,
-    view_mode ? 'paragraph--view-mode--' ~ view_mode|clean_class,
-  ]
-%}
+{% set classes = [
+  'paragraph',
+  'paragraph--type--' ~ paragraph.bundle|clean_class,
+  view_mode ? 'paragraph--view-mode--' ~ view_mode|clean_class,
+] %}
 {% block paragraph %}
   <div{{ attributes.addClass(classes) }}>
 
     {% block content %}
-      <figure class="gallery-item" data-width="{{ paragraph.field_image.width }}"
-              data-height="{{ paragraph.field_image.height }}" itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
-        <a href="{{ paragraph.field_image.0.entity.uri.value|image_style('sf_gallery_full') }}" itemprop="contentUrl">
-          <img src="{{ paragraph.field_image.0.entity.uri.value|image_style('gallery_listing') }}" alt="{{ paragraph.field_image.alt }}">
+      <figure class="gallery-item" itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
+        <a href="{{ paragraph.field_image.0.entity.uri.value|image_style('sf_gallery_full') }}"
+           data-pswp-width="{{ paragraph.field_image.width }}"
+           data-pswp-height="{{ paragraph.field_image.height }}"
+           itemprop="contentUrl">
+          <img src="{{ paragraph.field_image.0.entity.uri.value|image_style('gallery_listing') }}"
+               alt="{{ paragraph.field_image.alt }}"
+               itemprop="thumbnail"/>
         </a>
         {% if paragraph.field_caption %}
-          <figcaption itemprop="caption description" class="gallery-item__caption">{{ content.field_caption }}</figcaption>
+          <figcaption itemprop="caption description"
+                      class="gallery-item__caption">{{ content.field_caption }}</figcaption>
         {% endif %}
       </figure>
     {% endblock %}
