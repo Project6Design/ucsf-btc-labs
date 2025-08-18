@@ -25,14 +25,26 @@
       }
 
       // Enable Photoswipe with automatic initialization.
-      const lightbox = new PhotoSwipeLightbox({
-        gallery: '.node-type-gallery .field--name-field-photos',
-        children: '.gallery-item a',
-        pswpModule: PhotoSwipe,
-        paddingFn: () => ({top: 0, bottom: 0, left: 0, right: 0}),
-        maxZoomLevel: 1
-      });
-      lightbox.init();
+      (function initPswpOnce() {
+        const gallerySelector = '.node-type-gallery .field--name-field-photos';
+        const galleryEl = document.querySelector(gallerySelector);
+        
+        // Run only if there is a gallery
+        if (galleryEl && !galleryEl.dataset.pswpInit &&
+          typeof window.PhotoSwipeLightbox === 'function' &&
+          typeof window.PhotoSwipe !== 'undefined'
+        ) {
+          const lightbox = new PhotoSwipeLightbox({
+            gallery: gallerySelector,
+            children: '.gallery-item a',
+            pswpModule: PhotoSwipe,
+            paddingFn: () => ({top: 0, bottom: 0, left: 0, right: 0}),
+            maxZoomLevel: 1
+          });
+          lightbox.init();
+          galleryEl.dataset.pswpInit = '1';
+        }
+      })();
 
       //down icon scroll
       $(".arrow-down-icon", context).click(function () {
