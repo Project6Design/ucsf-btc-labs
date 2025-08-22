@@ -28,7 +28,7 @@
       (function initPswpOnce() {
         const gallerySelector = '.node-type-gallery .field--name-field-photos';
         const galleryEl = document.querySelector(gallerySelector);
-        
+
         // Run only if there is a gallery
         if (galleryEl && !galleryEl.dataset.pswpInit &&
           typeof window.PhotoSwipeLightbox === 'function' &&
@@ -59,10 +59,24 @@
         $accordion.last().addClass('last');
       }
 
-      //check for accordion
-      $(".paragraph--type--accordion", context).click(function () {
-        $(this).toggleClass("open");
-      });
+      if (typeof once === 'function') {
+        once('btc-accordion', '.paragraph--type--accordion', context).forEach((el) => {
+          el.addEventListener('click', function () {
+            this.classList.toggle('open');
+          });
+        });
+      } else {
+        // Fallback without once: guard with a data-flag
+        $(context)
+          .find('.paragraph--type--accordion')
+          .each(function () {
+            if (this.dataset.btcAccordionBound) return;
+            this.dataset.btcAccordionBound = '1';
+            $(this).on('click', function () {
+              $(this).toggleClass('open');
+            });
+          });
+      }
 
       //Stay informed bar
       const stayInformed = document.querySelector("#block-stayinformed");
@@ -236,7 +250,6 @@
           e.target.classList.toggle("open");
         }
       });
-
       //main menu dropdowns
       const mainMenu = document.querySelector("#main-menu");
       const mainContent = document.querySelector("body");
@@ -250,4 +263,3 @@
     }
   };
 })(Drupal, jQuery);
-//# sourceMappingURL=scripts-compiled.js.map
