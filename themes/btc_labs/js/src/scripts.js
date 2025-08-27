@@ -190,44 +190,64 @@
         });
       }
 
+      // jQuery 4 compatibility for Slick: provide $.type if missing.
+      if (typeof $.type !== 'function') {
+        $.type = function (obj) {
+          if (obj == null) return String(obj);
+          const str = Object.prototype.toString.call(obj);
+          return str.slice(8, -1).toLowerCase();
+        };
+      }
+
       // Home slider
-      $('.block-views-block-home-carousel-block-1 .item-list ul', context).each(function () {
-        $(this).slick({
-          adaptiveHeight: true,
-          infinite: true,
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          arrows: false,
-          dots: true,
-          responsive: [{
-            breakpoint: 768,
-            settings: {
-              slidesToShow: 1,
-              slidesToScroll: 1
-            }
-          }]
+      if ($.fn && typeof $.fn.slick === 'function') {
+        $('.block-views-block-home-carousel-block-1 .item-list ul', context).each(function () {
+          $(this).slick({
+            adaptiveHeight: true,
+            infinite: true,
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            arrows: false,
+            dots: true,
+            responsive: [{
+              breakpoint: 768,
+              settings: {
+                slidesToShow: 1,
+                slidesToScroll: 1
+              }
+            }]
+          });
         });
-      });
+      } else {
+        if (window.console && console.warn) {
+          console.warn('Slick not available when initializing Home slider');
+        }
+      }
 
       // News slider
-      $('.block-views-block-news-block-latest .item-list ul', context).each(function () {
-        $(this).slick({
-          adaptiveHeight: true,
-          infinite: true,
-          slidesToShow: 3,
-          slidesToScroll: 3,
-          arrows: false,
-          dots: true,
-          responsive: [{
-            breakpoint: 768,
-            settings: {
-              slidesToShow: 1,
-              slidesToScroll: 1
-            }
-          }]
+      if ($.fn && typeof $.fn.slick === 'function') {
+        $('.block-views-block-news-block-latest .item-list ul', context).each(function () {
+          $(this).slick({
+            adaptiveHeight: true,
+            infinite: true,
+            slidesToShow: 3,
+            slidesToScroll: 3,
+            arrows: false,
+            dots: true,
+            responsive: [{
+              breakpoint: 768,
+              settings: {
+                slidesToShow: 1,
+                slidesToScroll: 1
+              }
+            }]
+          });
         });
-      });
-
+      } else {
+        if (window.console && console.warn) {
+          console.warn('Slick not available when initializing News slider');
+        }
+      }
       //mobile menu
       const triggerMobileMenu = document.querySelector("#trigger-mobile-menu");
       const mobileMenu = document.querySelector("#mobile-menu");
