@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <div class="footer__copyright">{{ copyright|raw }}</div>
+      <div class="footer__copyright">© {{ drupal_token('current-date:html_year') }} {{ copyright|raw }}</div>
 
         {{ page.footer }}
     </div>
