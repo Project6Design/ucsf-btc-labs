@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\menu_link_content\Kernel;
 
+use Drupal\Core\Link;
 use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\entity_test\Entity\EntityTestExternal;
 use Drupal\KernelTests\KernelTestBase;
@@ -11,12 +12,14 @@ use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\menu_link_content\Plugin\Menu\MenuLinkContent as MenuLinkContentPlugin;
 use Drupal\system\Entity\Menu;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests handling of menu links hierarchies.
- *
- * @group Menu
  */
+#[Group('Menu')]
+#[RunTestsInSeparateProcesses]
 class MenuLinksTest extends KernelTestBase {
 
   /**
@@ -329,7 +332,7 @@ class MenuLinksTest extends KernelTestBase {
   /**
    * Tests handling of pending revisions.
    *
-   * @covers \Drupal\menu_link_content\Plugin\Validation\Constraint\MenuTreeHierarchyConstraintValidator::validate
+   * @legacy-covers \Drupal\menu_link_content\Plugin\Validation\Constraint\MenuTreeHierarchyConstraintValidator::validate
    */
   public function testPendingRevisions(): void {
     /** @var \Drupal\Core\Entity\RevisionableStorageInterface $storage */
@@ -475,6 +478,34 @@ class MenuLinksTest extends KernelTestBase {
     // the links menu name doesn't exist.
     $build = \Drupal::service('entity.form_builder')->getForm($menu_link);
     static::assertIsArray($build);
+  }
+
+  /**
+   * Assert that attributes are filtered.
+   */
+  public function testXssFiltering(): void {
+    $options = [
+      'menu_name' => 'menu-test',
+      'bundle' => 'menu_link_content',
+      'link' => [
+        [
+          'uri' => 'https://www.drupal.org/',
+          'options' => [
+            'attributes' => [
+              'class' => 'classy',
+              'onmouseover' => 'alert(document.cookie)',
+            ],
+          ],
+        ],
+      ],
+      'title' => 'Link test',
+    ];
+    $link = MenuLinkContent::create($options);
+    $link->save();
+    assert($link instanceof MenuLinkContent);
+    $output = Link::fromTextAndUrl($link->getTitle(), $link->getUrlObject())->toString()->getGeneratedLink();
+    $this->assertStringContainsString('<a href="https://www.drupal.org/" class="classy">', $output);
+    $this->assertStringNotContainsString('onmouseover=', $output);
   }
 
 }

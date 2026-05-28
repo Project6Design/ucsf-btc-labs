@@ -4,9 +4,6 @@
  */
 
 (function ($, Drupal, debounce, once) {
-
-  'use strict';
-
   // @see https://github.com/szimek/signature_pad#options
   Drupal.webform = Drupal.webform || {};
   Drupal.webform.signaturePad = Drupal.webform.signaturePad || {};
@@ -56,6 +53,12 @@
             $input.val(signaturePad.toDataURL());
           }
         }, Drupal.webform.signaturePad.options);
+
+        // Allow custom options.
+        if ($input.attr('data-options')) {
+          options = $.extend(true, options, JSON.parse($input.attr('data-options')));
+        }
+
         var signaturePad = new SignaturePad(canvas, options);
 
         // Disable the signature pad when input is disabled or readonly.

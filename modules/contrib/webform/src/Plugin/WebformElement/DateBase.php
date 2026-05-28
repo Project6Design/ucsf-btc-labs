@@ -621,10 +621,24 @@ abstract class DateBase extends WebformElementBase {
     $format = DateFormat::load('html_datetime')->getPattern();
     if (!empty($element['#date_year_range'])) {
       [$min, $max] = static::datetimeRangeYears($element['#date_year_range']);
+      $min = strtotime("$min-01-01 00:00:00");
+      $max = strtotime("$max-01-01 00:00:00");
+    }
+    elseif (!empty($element['#date_date_min']) && empty($element['#date_date_max'])) {
+      $min = strtotime($element['#date_date_min']);
+      $max = max($min, strtotime('+20 years') ?: PHP_INT_MAX);
+    }
+    elseif (!empty($element['#date_date_max']) && empty($element['#date_date_min'])) {
+      $max = strtotime($element['#date_date_max']);
+      $min = min($max, strtotime('-10 years'));
+    }
+    elseif (empty($element['#date_date_min']) && empty($element['#date_date_max'])) {
+      $min = strtotime('-10 years');
+      $max = max($min, strtotime('+20 years') ?: PHP_INT_MAX);
     }
     else {
-      $min = !empty($element['#date_date_min']) ? strtotime($element['#date_date_min']) : strtotime('-10 years');
-      $max = !empty($element['#date_date_max']) ? strtotime($element['#date_date_max']) : max($min, strtotime('+20 years') ?: PHP_INT_MAX);
+      $min = strtotime($element['#date_date_min']);
+      $max = strtotime($element['#date_date_max']);
     }
     return static::formatDate($format, rand($min, $max));
   }
@@ -648,7 +662,10 @@ abstract class DateBase extends WebformElementBase {
   protected static function datetimeRangeYears($string, $date = NULL) {
     $datetime = new DrupalDateTime();
     $this_year = $datetime->format('Y');
-    [$min_year, $max_year] = explode(':', $string);
+    // Ensure we always have two elements, even if $string is malformed.
+    $parts = explode(':', $string ?? '');
+    $min_year = $parts[0] ?? '';
+    $max_year = $parts[1] ?? '';
 
     // Valid patterns would be -5:+5, 0:+1, 2008:2010.
     $plus_pattern = '@[\+|\-][0-9]{1,4}@';

@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace Drupal\workspaces_test\Hook;
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\KeyValueStore\KeyValueFactoryInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\workspaces\WorkspaceInformationInterface;
+use Drupal\workspaces\WorkspaceManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
@@ -17,6 +22,8 @@ class WorkspacesTestHooks {
   public function __construct(
     #[Autowire(service: 'keyvalue')]
     protected readonly KeyValueFactoryInterface $keyValueFactory,
+    protected readonly WorkspaceManagerInterface $workspaceManager,
+    protected readonly WorkspaceInformationInterface $workspaceInformation,
   ) {}
 
   /**
@@ -33,13 +40,29 @@ class WorkspacesTestHooks {
   }
 
   /**
+   * Implements hook_entity_base_field_info().
+   */
+  #[Hook('entity_base_field_info')]
+  public function entityBaseFieldInfo(EntityTypeInterface $entity_type): array {
+    $fields = [];
+
+    // Add the workspace revision field test to entity_test_mulrevpub.
+    if ($entity_type->id() === 'entity_test_mulrevpub') {
+      $fields['revision_test_field'] = BaseFieldDefinition::create('revision_test_field')
+        ->setLabel(new TranslatableMarkup('Workspace Revision Field Test'))
+        ->setDescription(new TranslatableMarkup('A test field that tracks isNewRevision() status during field presave.'))
+        ->setRevisionable(TRUE);
+    }
+
+    return $fields;
+  }
+
+  /**
    * Implements hook_ENTITY_TYPE_translation_create() for 'entity_test_mulrevpub'.
    */
   #[Hook('entity_test_mulrevpub_translation_create')]
   public function entityTranslationCreate(): void {
-    /** @var \Drupal\workspaces\WorkspaceManagerInterface $workspace_manager */
-    $workspace_manager = \Drupal::service('workspaces.manager');
-    $this->keyValueFactory->get('ws_test')->set('workspace_was_active', $workspace_manager->hasActiveWorkspace());
+    $this->keyValueFactory->get('ws_test')->set('workspace_was_active', $this->workspaceManager->hasActiveWorkspace());
   }
 
   /**
@@ -56,6 +79,22 @@ class WorkspacesTestHooks {
   #[Hook('entity_presave')]
   public function entityPresave(EntityInterface $entity): void {
     $this->incrementHookCount('hook_entity_presave', $entity);
+
+    if (!$this->workspaceInformation->isEntitySupported($entity)) {
+      return;
+    }
+
+    /** @var \Drupal\Core\Entity\RevisionableInterface|\Drupal\Core\Entity\EntityPublishedInterface $entity */
+    // Track the sequence of revisions created for this entity.
+    $sequence_key = $entity->getEntityTypeId() . '.' . $entity->uuid() . '.revision_sequence';
+    $sequence = $this->keyValueFactory->get('ws_test')->get($sequence_key, []);
+    $sequence[] = [
+      'is_new' => $entity->isNew(),
+      'is_new_revision' => $entity->isNewRevision(),
+      'is_published' => $entity->isPublished(),
+      'is_default_revision' => $entity->isDefaultRevision(),
+    ];
+    $this->keyValueFactory->get('ws_test')->set($sequence_key, $sequence);
   }
 
   /**
@@ -72,6 +111,16 @@ class WorkspacesTestHooks {
   #[Hook('entity_update')]
   public function entityUpdate(EntityInterface $entity): void {
     $this->incrementHookCount('hook_entity_update', $entity);
+  }
+
+  /**
+   * Implements hook_cron().
+   */
+  #[Hook('cron')]
+  public function cron(): void {
+    // Record the active workspace ID (or FALSE if no workspace is active).
+    $active_workspace_id = $this->workspaceManager->getActiveWorkspace()?->id() ?? FALSE;
+    $this->keyValueFactory->get('ws_test')->set('cron_active_workspace', $active_workspace_id);
   }
 
   /**

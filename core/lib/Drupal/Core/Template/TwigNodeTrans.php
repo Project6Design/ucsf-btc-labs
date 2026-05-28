@@ -82,7 +82,7 @@ class TwigNodeTrans extends Node {
     // leave as an empty array.
     $compiler->raw(', [');
     foreach ($tokens as $token) {
-      $compiler->string($token->getAttribute('placeholder'))->raw(' => ')->subcompile($token)->raw(', ');
+      $compiler->string($token->getAttribute('placeholder'))->raw(' => $this->env->getExtension(\Drupal\Core\Template\TwigExtension::class)->renderVar(')->subcompile($token)->raw('), ');
     }
     $compiler->raw(']');
 
@@ -138,6 +138,9 @@ class TwigNodeTrans extends Node {
           // Support TwigExtension->renderVar() function in chain.
           if ($args instanceof FunctionExpression) {
             $args = $n->getNode('arguments')->getNode(0);
+          }
+          if ($args instanceof CheckToStringNode) {
+            $args = $args->getNode('expr');
           }
 
           // Detect if a token implements one of the filters reserved for

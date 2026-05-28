@@ -6,15 +6,16 @@ namespace Drupal\Tests\config_translation\Functional;
 
 use Drupal\Core\Language\Language;
 use Drupal\Core\Language\LanguageInterface;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 // cspell:ignore anonyme viewsviewfiles
-
 /**
  * Translate settings and entities to various languages.
- *
- * @group config_translation
- * @group #slow
  */
+#[Group('config_translation')]
+#[Group('#slow')]
+#[RunTestsInSeparateProcesses]
 class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
 
   /**
@@ -253,7 +254,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
   public function testSingleLanguageUI(): void {
     $this->drupalLogin($this->adminUser);
 
-    // Delete French language
+    // Delete French language.
     $this->drupalGet('admin/config/regional/language/delete/fr');
     $this->submitForm([], 'Delete');
     $this->assertSession()->pageTextContains('The French (fr) language has been removed.');
@@ -266,7 +267,7 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
     $this->submitForm($edit, 'Save configuration');
     $this->assertSession()->pageTextContains('Configuration saved.');
 
-    // Delete English language
+    // Delete English language.
     $this->drupalGet('admin/config/regional/language/delete/en');
     $this->submitForm([], 'Delete');
     $this->assertSession()->pageTextContains('The English (en) language has been removed.');
@@ -332,6 +333,26 @@ class ConfigTranslationUiTest extends ConfigTranslationUiTestBase {
       ->get('config_translation_test.content')
       ->get('animals');
     $this->assertEquals($expected, $actual);
+  }
+
+  /**
+   * Tests escaping of source configuration label.
+   */
+  public function testLabelEscaping(): void {
+    $this->drupalLogin($this->adminUser);
+
+    // Testing via translating a role configuration.
+    $role_id = $this->randomMachineName(16);
+    $malicious_role_name = '">\'><img src="http://127.0.0.1/evil">';
+    $this->drupalCreateRole([], $role_id, $malicious_role_name);
+
+    // Visit the form that adds the translation of this label.
+    $translate_link = 'admin/people/roles/manage/' . $role_id . '/translate/fr/add';
+    $this->drupalGet($translate_link);
+
+    // Ensure that the displayed label is escaped.
+    $this->assertSession()->responseNotContains('<img src="http://127.0.0.1/evil">');
+    $this->assertSession()->responseContains('<span lang="en">&quot;&gt;&#039;&gt;&lt;img src=&quot;http://127.0.0.1/evil&quot;&gt;</span>');
   }
 
 }

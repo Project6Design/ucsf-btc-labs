@@ -15,12 +15,14 @@ use Drupal\Core\TypedData\Type\IntegerInterface;
 use Drupal\Core\TypedData\Type\StringInterface;
 use Drupal\image\ImageEffectInterface;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests schema for configuration objects.
- *
- * @group config
  */
+#[Group('config')]
+#[RunTestsInSeparateProcesses]
 class ConfigSchemaTest extends KernelTestBase {
 
   /**
@@ -28,8 +30,6 @@ class ConfigSchemaTest extends KernelTestBase {
    */
   protected static $modules = [
     'system',
-    'language',
-    'field',
     'image',
     'config_test',
     'config_schema_test',
@@ -459,9 +459,13 @@ class ConfigSchemaTest extends KernelTestBase {
     ];
 
     // Save config which has a schema that enforces types.
-    $this->config('config_schema_test.schema_data_types')
+    $config_object = $this->config('config_schema_test.schema_data_types');
+    $config_object
       ->setData($untyped_to_typed)
       ->save();
+    // Ensure the schemaWrapper property is reset after saving to prevent a
+    // memory leak.
+    $this->assertNull((new \ReflectionObject($config_object))->getProperty('schemaWrapper')->getValue($config_object));
     $this->assertSame($typed_values, $this->config('config_schema_test.schema_data_types')->get());
 
     // Save config which does not have a schema that enforces types.

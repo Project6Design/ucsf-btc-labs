@@ -38,7 +38,7 @@ use Drupal\Core\Database\TransactionOutOfOrderException;
  * is active, and mysqli does not fail when rolling back and no transaction
  * active.
  */
-class DriverSpecificTransactionTestBase extends DriverSpecificDatabaseTestBase {
+abstract class DriverSpecificTransactionTestBase extends DriverSpecificDatabaseTestBase {
 
   /**
    * Keeps track of the post-transaction callback action executed.
@@ -432,9 +432,6 @@ class DriverSpecificTransactionTestBase extends DriverSpecificDatabaseTestBase {
 
   /**
    * Tests rollback after a DDL statement when no transactional DDL supported.
-   *
-   * @todo In drupal:12.0.0, rollBack will throw a
-   *   TransactionOutOfOrderException. Adjust the test accordingly.
    */
   public function testRollbackAfterDdlStatementForNonTransactionalDdlDatabase(): void {
     if ($this->connection->supportsTransactionalDDL()) {
@@ -523,7 +520,7 @@ class DriverSpecificTransactionTestBase extends DriverSpecificDatabaseTestBase {
    * @internal
    */
   public function assertRowPresent(string $name, ?string $message = NULL): void {
-    $present = (boolean) $this->connection->query('SELECT 1 FROM {test} WHERE [name] = :name', [':name' => $name])->fetchField();
+    $present = (bool) $this->connection->query('SELECT 1 FROM {test} WHERE [name] = :name', [':name' => $name])->fetchField();
     $this->assertTrue($present, $message ?? "Row '{$name}' should be present, but it actually does not exist.");
   }
 
@@ -538,7 +535,7 @@ class DriverSpecificTransactionTestBase extends DriverSpecificDatabaseTestBase {
    * @internal
    */
   public function assertRowAbsent(string $name, ?string $message = NULL): void {
-    $present = (boolean) $this->connection->query('SELECT 1 FROM {test} WHERE [name] = :name', [':name' => $name])->fetchField();
+    $present = (bool) $this->connection->query('SELECT 1 FROM {test} WHERE [name] = :name', [':name' => $name])->fetchField();
     $this->assertFalse($present, $message ?? "Row '{$name}' should be absent, but it actually exists.");
   }
 
@@ -919,9 +916,6 @@ class DriverSpecificTransactionTestBase extends DriverSpecificDatabaseTestBase {
    * transaction including DDL statements is not possible, since a commit
    * happened already. We cannot decide what should be the status of the
    * callback, an exception is thrown.
-   *
-   * @todo In drupal:12.0.0, rollBack will throw a
-   *   TransactionOutOfOrderException. Adjust the test accordingly.
    */
   public function testRootTransactionEndCallbackFailureUponDdlAndRollbackForNonTransactionalDdlDatabase(): void {
     if ($this->connection->supportsTransactionalDDL()) {

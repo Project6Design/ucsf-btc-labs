@@ -13,6 +13,8 @@ use Symfony\Component\Validator\ConstraintViolationInterface;
 // cspell:ignore sourceediting
 
 /**
+ * Provides a base class for testing the source editing function.
+ *
  * @internal
  */
 abstract class SourceEditingTestBase extends CKEditor5TestBase {
@@ -87,6 +89,7 @@ abstract class SourceEditingTestBase extends CKEditor5TestBase {
             'properties' => [
               'reversed' => FALSE,
               'startIndex' => FALSE,
+              'styles' => FALSE,
             ],
             'multiBlock' => TRUE,
           ],

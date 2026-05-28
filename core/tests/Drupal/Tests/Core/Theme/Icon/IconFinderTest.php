@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\Core\Theme\Icon;
 
-// cspell:ignore corge grault garply quux plugh
 use Drupal\Core\File\FileUrlGeneratorInterface;
 use Drupal\Core\Theme\Icon\IconFinder;
 use Drupal\Tests\UnitTestCase;
+// cspell:ignore corge grault garply quux plugh
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Psr\Log\LoggerInterface;
 
 /**
- * @coversDefaultClass \Drupal\Core\Theme\Icon\IconFinder
- *
- * @group icon
+ * Tests Drupal\Core\Theme\Icon\IconFinder.
  */
+#[CoversClass(IconFinder::class)]
+#[Group('icon')]
 class IconFinderTest extends UnitTestCase {
 
   private const TEST_ICONS_PATH = 'core/modules/system/tests/modules/icon_test';
@@ -155,9 +158,8 @@ class IconFinderTest extends UnitTestCase {
    *   The list of remote.
    * @param array<string, string> $expected
    *   The expected result.
-   *
-   * @dataProvider providerGetFilesFromSourcesUrl
    */
+  #[DataProvider('providerGetFilesFromSourcesUrl')]
   public function testGetFilesFromSourcesUrl(array $sources, array $expected = []): void {
     $result = $this->iconFinder->getFilesFromSources(
       $sources,
@@ -606,9 +608,8 @@ class IconFinderTest extends UnitTestCase {
    *   The list of remote.
    * @param array<string, string> $expected
    *   The expected result.
-   *
-   * @dataProvider providerGetFilesFromSourcesPath
    */
+  #[DataProvider('providerGetFilesFromSourcesPath')]
   public function testGetFilesFromSourcesPath(array $sources, array $expected = []): void {
     $this->fileUrlGenerator
       ->expects($this->any())
@@ -644,7 +645,6 @@ class IconFinderTest extends UnitTestCase {
    */
   public function testGetFilesFromPathEmptyWarning(): void {
     $method = new \ReflectionMethod(IconFinder::class, 'getFilesFromPath');
-    $method->setAccessible(TRUE);
 
     $this->logger->expects($this->once())
       ->method('warning')
@@ -658,7 +658,6 @@ class IconFinderTest extends UnitTestCase {
    */
   public function testGetFilesFromPathInvalidExtensionWarning(): void {
     $method = new \ReflectionMethod(IconFinder::class, 'getFilesFromPath');
-    $method->setAccessible(TRUE);
 
     $this->logger->expects($this->once())
       ->method('warning');
@@ -671,7 +670,6 @@ class IconFinderTest extends UnitTestCase {
    */
   public function testGetFileFromUrlWarning(): void {
     $method = new \ReflectionMethod(IconFinder::class, 'getFileFromUrl');
-    $method->setAccessible(TRUE);
 
     $this->logger->expects($this->once())
       ->method('warning')
@@ -685,7 +683,6 @@ class IconFinderTest extends UnitTestCase {
    */
   public function testFindFilesWarning(): void {
     $method = new \ReflectionMethod(IconFinder::class, 'findFiles');
-    $method->setAccessible(TRUE);
 
     $this->logger->expects($this->once())
       ->method('warning')
@@ -699,7 +696,6 @@ class IconFinderTest extends UnitTestCase {
    */
   public function testFindFilesEmptyWarning(): void {
     $method = new \ReflectionMethod(IconFinder::class, 'findFiles');
-    $method->setAccessible(TRUE);
 
     $this->logger->expects($this->once())
       ->method('warning');
@@ -760,12 +756,10 @@ class IconFinderTest extends UnitTestCase {
    *   The path with {icon_id}.
    * @param string $expected
    *   The expected result.
-   *
-   * @dataProvider providerExtractIconIdFromFilename
    */
+  #[DataProvider('providerExtractIconIdFromFilename')]
   public function testExtractIconIdFromFilename(string $filename, string $filename_pattern, string $expected): void {
     $method = new \ReflectionMethod(IconFinder::class, 'extractIconIdFromFilename');
-    $method->setAccessible(TRUE);
 
     $this->assertEquals($expected, $method->invoke($this->iconFinder, $filename, $filename_pattern));
   }
@@ -775,9 +769,8 @@ class IconFinderTest extends UnitTestCase {
    */
   public function testExtractIconIdFromFilenameWarning(): void {
     $method = new \ReflectionMethod(IconFinder::class, 'extractIconIdFromFilename');
-    $method->setAccessible(TRUE);
 
-    // PHPUnit 10 cannot expect warnings, so we have to catch them ourselves.
+    // PHPUnit cannot expect warnings, so we have to catch them ourselves.
     // Thanks to: Drupal\Tests\Component\PhpStorage\FileStorageTest.
     $messages = [];
     set_error_handler(function (int $errno, string $errstr) use (&$messages): void {
@@ -839,9 +832,8 @@ class IconFinderTest extends UnitTestCase {
    *   The uri to test result.
    * @param bool $expected
    *   The result of the file content is expected or not.
-   *
-   * @dataProvider providerGetFileContents
    */
+  #[DataProvider('providerGetFileContents')]
   public function testGetFileContents(string $uri, bool $expected): void {
     if ($expected) {
       $result = $this->iconFinder->getFileContents($uri);

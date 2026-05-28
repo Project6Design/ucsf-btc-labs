@@ -13,7 +13,6 @@ use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for entity translation controllers.
@@ -35,17 +34,6 @@ class ContentTranslationController extends ControllerBase {
     protected EntityFieldManagerInterface $entityFieldManager,
     protected TimeInterface $time,
   ) {
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('content_translation.manager'),
-      $container->get('entity_field.manager'),
-      $container->get('datetime.time'),
-    );
   }
 
   /**
@@ -395,6 +383,7 @@ class ContentTranslationController extends ControllerBase {
 
     // @todo Exploit the upcoming hook_entity_prepare() when available.
     // See https://www.drupal.org/node/1810394.
+    $entity = clone $entity;
     $this->prepareTranslation($entity, $source, $target);
 
     // @todo Provide a way to figure out the default form operation in

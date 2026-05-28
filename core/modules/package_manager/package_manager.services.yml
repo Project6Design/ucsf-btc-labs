@@ -1,3 +1,7 @@
+parameters:
+  package_manager.skip_procedural_hook_scan: true
+  package_manager.allow_overwrite: ['|^/recipes/.|']
+
 services:
   _defaults:
     autoconfigure: true
@@ -13,10 +17,9 @@ services:
   # provide additional functionality.
   Drupal\package_manager\ExecutableFinder:
     public: false
+    calls:
+      - [setLogger, ['@logger.channel.package_manager']]
     decorates: 'PhpTuf\ComposerStager\API\Finder\Service\ExecutableFinderInterface'
-  Drupal\package_manager\ProcessFactory:
-    public: false
-    decorates: 'PhpTuf\ComposerStager\API\Process\Factory\ProcessFactoryInterface'
   Drupal\package_manager\TranslatableStringFactory:
     public: false
     decorates: 'PhpTuf\ComposerStager\API\Translation\Factory\TranslatableFactoryInterface'
@@ -69,7 +72,6 @@ services:
   Drupal\package_manager\Validator\DuplicateInfoFileValidator: {}
   Drupal\package_manager\Validator\EnabledExtensionsValidator: {}
   Drupal\package_manager\Validator\OverwriteExistingPackagesValidator: {}
-  Drupal\package_manager\Validator\AllowedScaffoldPackagesValidator: {}
   Drupal\package_manager\Validator\SandboxDatabaseUpdatesValidator: {}
   Drupal\package_manager\PathExcluder\TestSiteExcluder: {}
   Drupal\package_manager\PathExcluder\VendorHardeningExcluder: {}
@@ -175,7 +177,7 @@ services:
   PhpTuf\ComposerStager\API\Process\Factory\ProcessFactoryInterface:
     class: PhpTuf\ComposerStager\Internal\Process\Factory\ProcessFactory
   PhpTuf\ComposerStager\API\Process\Service\ComposerProcessRunnerInterface:
-    class: PhpTuf\ComposerStager\Internal\Process\Service\ComposerProcessRunner
+    class: Drupal\package_manager\ComposerRunner
   PhpTuf\ComposerStager\API\Process\Service\OutputCallbackInterface:
     class: PhpTuf\ComposerStager\Internal\Process\Service\OutputCallback
   PhpTuf\ComposerStager\API\Process\Service\ProcessInterface:

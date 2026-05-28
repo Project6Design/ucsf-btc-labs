@@ -50,6 +50,7 @@ class ViewsViewsHooks {
       'help' => $this->t('Displays the actual position of the view result'),
       'field' => [
         'id' => 'counter',
+        'click sortable' => FALSE,
       ],
     ];
     $data['views']['area'] = [
@@ -184,7 +185,11 @@ class ViewsViewsHooks {
           if (is_array($result)) {
             $data = NestedArray::mergeDeep($result, $data);
           }
-          \Drupal::moduleHandler()->invoke($field_storage->getTypeProvider(), 'field_views_data_views_data_alter', [&$data, $field_storage]);
+          \Drupal::moduleHandler()
+            ->invoke($field_storage->getTypeProvider(), 'field_views_data_views_data_alter', [
+              &$data,
+              $field_storage,
+            ]);
         }
       }
     }

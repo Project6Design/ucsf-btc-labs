@@ -14,15 +14,18 @@ use Drupal\Core\Language\Language;
 use Drupal\Core\Menu\LocalTaskInterface;
 use Drupal\Core\Menu\LocalTaskManager;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * @coversDefaultClass \Drupal\Core\Menu\LocalTaskManager
- * @group Menu
+ * Tests Drupal\Core\Menu\LocalTaskManager.
  */
+#[CoversClass(LocalTaskManager::class)]
+#[Group('Menu')]
 class LocalTaskManagerTest extends UnitTestCase {
 
   /**
@@ -395,7 +398,7 @@ class LocalTaskManagerTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getTasksBuild
+   * Tests get tasks build with cacheability metadata.
    */
   public function testGetTasksBuildWithCacheabilityMetadata(): void {
     $definitions = $this->getLocalTaskFixtures();
@@ -432,6 +435,93 @@ class LocalTaskManagerTest extends UnitTestCase {
     // Ensure that all cacheability metadata is merged together.
     $this->assertEqualsCanonicalizing(['tag.example1', 'tag.example2'], $cacheability->getCacheTags());
     $this->assertEqualsCanonicalizing(['context.example1', 'context.example2', 'route', 'user.permissions'], $cacheability->getCacheContexts());
+  }
+
+  /**
+   * Test multiple parallel calls with fibers.
+   */
+  public function testGetTasksBuildWithFibers(): void {
+    $definitions = $this->getLocalTaskFixtures();
+
+    $this->pluginDiscovery->expects($this->once())
+      ->method('getDefinitions')
+      ->willReturn($definitions);
+
+    $active_plugin_id = 'menu_local_task_test_tasks_view';
+    $map = [];
+
+    foreach ($definitions as $plugin_id => $info) {
+      $mock = $this->prophesize(LocalTaskInterface::class);
+      $mock->willImplement(CacheableDependencyInterface::class);
+      $mock->getRouteName()->willReturn($info['route_name']);
+      $mock->getTitle()->willReturn($info['title']);
+      $mock->getRouteParameters(Argument::cetera())->willReturn([]);
+      $mock->getOptions(Argument::cetera())->willReturn([]);
+      $mock->getActive()->willReturn($plugin_id === $active_plugin_id);
+      $mock->getWeight()->willReturn($info['weight'] ?? 0);
+      $mock->getCacheContexts()->willReturn([]);
+      $mock->getCacheTags()->willReturn([]);
+      $mock->getCacheMaxAge()->willReturn(Cache::PERMANENT);
+      $map[] = [$info['id'], [], $mock->reveal()];
+    }
+
+    // Simulate an access callback that suspends a fiber.
+    $this->accessManager->expects($this->any())
+      ->method('checkNamedRoute')
+      ->willReturnCallback(function (string $route_name) {
+        if ($route_name === 'menu_local_task_test_tasks_edit') {
+          \Fiber::suspend();
+        }
+        return AccessResult::allowed();
+      });
+
+    $this->factory->expects($this->any())
+      ->method('createInstance')
+      ->willReturnMap($map);
+    $this->setupLocalTaskManager();
+
+    $this->argumentResolver->expects($this->any())
+      ->method('getArguments')
+      ->willReturn([]);
+
+    $this->routeMatch->expects($this->any())
+      ->method('getRouteName')
+      ->willReturn('menu_local_task_test_tasks_view');
+    $this->routeMatch->expects($this->any())
+      ->method('getRawParameters')
+      ->willReturn(new InputBag());
+
+    $first_fiber = new \Fiber(fn () => $this->manager->getLocalTasks('menu_local_task_test_tasks_view', 0));
+    $second_fiber = new \Fiber(fn () => $this->manager->getLocalTasks('menu_local_task_test_tasks_view', 1));
+
+    $fibers = [$first_fiber, $second_fiber];
+    $suspended = FALSE;
+    do {
+      foreach ($fibers as $key => $fiber) {
+        if (!$fiber->isStarted()) {
+          $fiber->start();
+        }
+        elseif ($fiber->isSuspended()) {
+          $suspended = TRUE;
+          $fiber->resume();
+        }
+        elseif ($fiber->isTerminated()) {
+          unset($fibers[$key]);
+        }
+      }
+    } while (!empty($fibers));
+
+    // Ensure that the fibers were suspended at least once to make sure that
+    // the expected scenario is tested here.
+    $this->assertTrue($suspended);
+
+    // Assert that both fibers return the correct result.
+    $this->assertEquals([
+      'menu_local_task_test_tasks_settings',
+      'menu_local_task_test_tasks_edit',
+      'menu_local_task_test_tasks_view.tab',
+    ], array_keys($first_fiber->getReturn()['tabs']));
+    $this->assertEquals(['menu_local_task_test_tasks_view_child1', 'menu_local_task_test_tasks_view_child2'], array_keys($second_fiber->getReturn()['tabs']));
   }
 
   protected function setupFactoryAndLocalTaskPlugins(array $definitions, $active_plugin_id): void {
@@ -472,125 +562,21 @@ class LocalTaskManagerTest extends UnitTestCase {
 
     $cache_context_manager = $this->prophesize(CacheContextsManager::class);
 
-    foreach ([NULL, ['user.permissions'], ['route'], ['route', 'context.example1'], ['context.example1', 'route'], ['route', 'context.example1', 'context.example2'], ['context.example1', 'context.example2', 'route'], ['route', 'context.example1', 'context.example2', 'user.permissions']] as $argument) {
+    foreach ([
+      NULL,
+      ['user.permissions'],
+      ['route'],
+      ['route', 'context.example1'],
+      ['context.example1', 'route'],
+      ['route', 'context.example1', 'context.example2'],
+      ['context.example1', 'context.example2', 'route'],
+      ['route', 'context.example1', 'context.example2', 'user.permissions'],
+    ] as $argument) {
       $cache_context_manager->assertValidTokens($argument)->willReturn(TRUE);
     }
 
     $container->set('cache_contexts_manager', $cache_context_manager->reveal());
     \Drupal::setContainer($container);
-  }
-
-  /**
-   * Tests the getLocalTasksForRoute method.
-   *
-   * @dataProvider providerTestGetLocalTasks
-   */
-  public function testGetLocalTasks($new_weights, $expected): void {
-    $definitions = $this->getLocalTaskFixtures();
-
-    // Add another child, that will be first in an alphabetical sort.
-    $definitions['menu_local_task_test_tasks_view_a_child'] = [
-      'route_name' => 'menu_local_task_test_tasks_a_child_page',
-      'title' => 'Settings child a_child',
-      'parent_id' => 'menu_local_task_test_tasks_view.tab',
-      'id' => 'menu_local_task_test_tasks_view_a_child',
-      'route_parameters' => [],
-      'base_route' => '',
-      'weight' => 0,
-      'options' => [],
-      'class' => 'Drupal\Core\Menu\LocalTaskDefault',
-    ];
-
-    // Update the task weights.
-    foreach ($new_weights as $local_task => $weight) {
-      $definitions[$local_task] = array_merge($definitions[$local_task], $weight);
-    }
-
-    $this->pluginDiscovery->expects($this->once())
-      ->method('getDefinitions')
-      ->willReturn($definitions);
-
-    $this->setupFactoryAndLocalTaskPlugins($definitions, 'menu_local_task_test_tasks_view');
-    $this->setupLocalTaskManager();
-
-    $this->argumentResolver->expects($this->any())
-      ->method('getArguments')
-      ->willReturn([]);
-
-    $this->routeMatch->expects($this->any())
-      ->method('getRouteName')
-      ->willReturn('menu_local_task_test_tasks_view');
-    $this->routeMatch->expects($this->any())
-      ->method('getRawParameters')
-      ->willReturn(new InputBag());
-
-    $cacheability = new CacheableMetadata();
-    $this->manager->getTasksBuild('menu_local_task_test_tasks_view', $cacheability);
-
-    // Get the local tasks for each level and assert that the order is as
-    // expected.
-    foreach ([0, 1] as $level) {
-      $local_tasks = $this->manager->getLocalTasks('menu_local_task_test_tasks_view', $level);
-      $data = $local_tasks['tabs'];
-      $this->assertEquals($expected[$level], array_keys($data));
-    }
-  }
-
-  /**
-   * Data provider for testGetLocalTasks.
-   */
-  public static function providerTestGetLocalTasks(): array {
-    return [
-      // Weights as setup in getLocalTaskFixtures.
-      'weights_from_fixture' => [
-        'new_weights' => [],
-        'expected' => [
-          // Level 0.
-          [
-            'menu_local_task_test_tasks_settings',
-            'menu_local_task_test_tasks_view.tab',
-            'menu_local_task_test_tasks_edit',
-          ],
-          // Level 1. All weights are 0, so the sort is alphabetical.
-          [
-            'menu_local_task_test_tasks_view_a_child',
-            'menu_local_task_test_tasks_view_child1',
-            'menu_local_task_test_tasks_view_child2',
-          ],
-        ],
-      ],
-      // Change the weights in both levels.
-      'both_levels' => [
-        'new_weights' => [
-          'menu_local_task_test_tasks_view_a_child' => [
-            'weight' => 99,
-          ],
-          'menu_local_task_test_tasks_view_child1' => [
-            'weight' => 100,
-          ],
-          'menu_local_task_test_tasks_view_child2' => [
-            'weight' => -1,
-          ],
-          'menu_local_task_test_tasks_settings' => [
-            'weight' => 100,
-          ],
-        ],
-        'expected' => [
-          // Level 0.
-          [
-            'menu_local_task_test_tasks_view.tab',
-            'menu_local_task_test_tasks_edit',
-            'menu_local_task_test_tasks_settings',
-          ],
-          // Level 1.
-          [
-            'menu_local_task_test_tasks_view_child2',
-            'menu_local_task_test_tasks_view_a_child',
-            'menu_local_task_test_tasks_view_child1',
-          ],
-        ],
-      ],
-    ];
   }
 
 }

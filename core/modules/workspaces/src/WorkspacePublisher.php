@@ -2,7 +2,9 @@
 
 namespace Drupal\workspaces;
 
+use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityChangedInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Site\Settings;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -23,7 +25,20 @@ class WorkspacePublisher implements WorkspacePublisherInterface {
 
   use StringTranslationTrait;
 
-  public function __construct(protected EntityTypeManagerInterface $entityTypeManager, protected Connection $database, protected WorkspaceManagerInterface $workspaceManager, protected WorkspaceAssociationInterface $workspaceAssociation, protected EventDispatcherInterface $eventDispatcher, protected WorkspaceInterface $sourceWorkspace, protected LoggerInterface $logger) {
+  public function __construct(
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected Connection $database,
+    protected WorkspaceManagerInterface $workspaceManager,
+    protected WorkspaceTrackerInterface $workspaceTracker,
+    protected EventDispatcherInterface $eventDispatcher,
+    protected WorkspaceInterface $sourceWorkspace,
+    protected LoggerInterface $logger,
+    protected ?TimeInterface $time = NULL,
+  ) {
+    if ($time === NULL) {
+      @trigger_error('Calling ' . __CLASS__ . ' constructor without the $time argument is deprecated in drupal:11.3.0 and it will be required in drupal:12.0.0. See https://www.drupal.org/project/drupal/issues/3531037', E_USER_DEPRECATED);
+      $this->time = \Drupal::time();
+    }
   }
 
   /**
@@ -38,7 +53,7 @@ class WorkspacePublisher implements WorkspacePublisherInterface {
       throw new WorkspaceConflictException();
     }
 
-    $tracked_entities = $this->workspaceAssociation->getTrackedEntities($this->sourceWorkspace->id());
+    $tracked_entities = $this->workspaceTracker->getTrackedEntities($this->sourceWorkspace->id());
     $event = new WorkspacePrePublishEvent($this->sourceWorkspace, $tracked_entities);
     $this->eventDispatcher->dispatch($event);
 
@@ -56,22 +71,28 @@ class WorkspacePublisher implements WorkspacePublisherInterface {
         foreach ($tracked_entities as $entity_type_id => $revision_difference) {
           $entity_revisions = $this->entityTypeManager->getStorage($entity_type_id)
             ->loadMultipleRevisions(array_keys($revision_difference));
-          $default_revisions = $this->entityTypeManager->getStorage($entity_type_id)
-            ->loadMultiple(array_values($revision_difference));
 
           /** @var \Drupal\Core\Entity\ContentEntityInterface $entity */
           foreach ($entity_revisions as $entity) {
+            // We might be saving a lot of entities during workspace publishing,
+            // so we set the original entity manually for performance.
+            $entity->setOriginal(clone $entity);
+
             // When pushing workspace-specific revisions to the default
             // workspace (Live), we simply need to mark them as default
             // revisions.
             $entity->setSyncing(TRUE);
             $entity->isDefaultRevision(TRUE);
 
+            // Update the changed time of the entity to be the publishing time.
+            if ($entity instanceof EntityChangedInterface) {
+              $entity->setChangedTime($this->time->getRequestTime());
+            }
+
             // The default revision is not workspace-specific anymore.
             $field_name = $entity->getEntityType()->getRevisionMetadataKey('workspace');
             $entity->{$field_name}->target_id = NULL;
 
-            $entity->setOriginal($default_revisions[$entity->id()]);
             $entity->save();
             $counter++;
 
@@ -126,7 +147,7 @@ class WorkspacePublisher implements WorkspacePublisherInterface {
   public function getDifferringRevisionIdsOnTarget() {
     $target_revision_difference = [];
 
-    $tracked_entities = $this->workspaceAssociation->getTrackedEntities($this->sourceWorkspace->id());
+    $tracked_entities = $this->workspaceTracker->getTrackedEntities($this->sourceWorkspace->id());
     foreach ($tracked_entities as $entity_type_id => $tracked_revisions) {
       $entity_type = $this->entityTypeManager->getDefinition($entity_type_id);
 
@@ -156,8 +177,8 @@ class WorkspacePublisher implements WorkspacePublisherInterface {
    * {@inheritdoc}
    */
   public function getDifferringRevisionIdsOnSource() {
-    // Get the Workspace association revisions which haven't been pushed yet.
-    return $this->workspaceAssociation->getTrackedEntities($this->sourceWorkspace->id());
+    // Get the tracked revisions that haven't been published.
+    return $this->workspaceTracker->getTrackedEntities($this->sourceWorkspace->id());
   }
 
   /**

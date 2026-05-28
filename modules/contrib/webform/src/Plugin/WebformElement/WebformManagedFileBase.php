@@ -353,7 +353,7 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
 
       default:
         $theme = str_replace('webform_', 'webform_element_', $this->getPluginId());
-        if (strpos($theme, 'webform_') !== 0) {
+        if (!str_starts_with($theme, 'webform_')) {
           $theme = 'webform_element_' . $theme;
         }
         return [
@@ -800,7 +800,7 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
         // Don't allow anonymous temporary files to be previewed.
         // @see template_preprocess_file_link().
         // @see webform_preprocess_file_link().
-        if ($file->isTemporary() && $file->getOwner()->isAnonymous() && strpos($file->getFileUri(), 'private://') === 0) {
+        if ($file->isTemporary() && $file->getOwner()->isAnonymous() && str_starts_with($file->getFileUri(), 'private://')) {
           continue;
         }
 
@@ -945,8 +945,11 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
 
     // If has access and total file size exceeds file limit then display error.
     if (Element::isVisibleElement($element) && $total_file_size > $file_limit) {
+      $file_limit_message = $webform_submission->getWebform()->getSetting('form_file_limit_message')
+        ?: \Drupal::config('webform.settings')->get('settings.default_form_file_limit_message')
+        ?: '';
       $t_args = ['%quota' => ByteSizeMarkup::create($file_limit)];
-      $message = t("This form's file upload quota of %quota has been exceeded. Please remove some files.", $t_args);
+      $message = t($file_limit_message, $t_args);
       $form_state->setError($element, $message);
     }
   }
@@ -1225,7 +1228,7 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
       if ($source_uri !== $destination_uri) {
         $destination_uri = $this->fileSystem->move($source_uri, $destination_uri);
         $file->setFileUri($destination_uri);
-        $file->setFileName($this->fileSystem->basename($destination_uri));
+        $file->setFileName(\basename($destination_uri));
         $file->save();
         $this->entityTypeManager->getStorage('file')->resetCache([$file->id()]);
       }
@@ -1379,9 +1382,7 @@ abstract class WebformManagedFileBase extends WebformElementBase implements Webf
       // Return file content headers.
       $headers = file_get_content_headers($file);
 
-      /** @var \Drupal\Core\File\FileSystemInterface $file_system */
-      $file_system = \Drupal::service('file_system');
-      $filename = $file_system->basename($uri);
+      $filename = \basename($uri);
       // Fallback name in case file name contains none ASCII characters.
       $filename_fallback = \Drupal::transliteration()->transliterate($filename);
       // Remove other characters not removed by Transliteration.

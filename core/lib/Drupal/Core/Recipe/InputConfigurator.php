@@ -25,11 +25,11 @@ final class InputConfigurator {
   private array $data = [];
 
   /**
-   * The collected input values.
+   * The collected input values, or NULL if none have been collected yet.
    *
-   * @var mixed[]
+   * @var mixed[]|null
    */
-  private array $values = [];
+  private ?array $values = NULL;
 
   /**
    * @param array<string, array<string, mixed>> $definitions
@@ -96,7 +96,7 @@ final class InputConfigurator {
    *   The collected input values, keyed by name.
    */
   public function getValues(): array {
-    return $this->values;
+    return $this->values ?? [];
   }
 
   /**
@@ -131,23 +131,20 @@ final class InputConfigurator {
    * @throws \Symfony\Component\Validator\Exception\ValidationFailedException
    *   Thrown if any of the collected values violate their validation
    *   constraints.
-   * @throws \LogicException
-   *   Thrown if input values have already been collected for this recipe.
    */
   public function collectAll(InputCollectorInterface $collector, array &$processed = []): void {
     // Don't bother collecting values for a recipe we've already seen.
-    if (in_array($this->prefix, $processed, TRUE)) {
+    if (in_array($this->prefix, $processed, TRUE) || is_array($this->values)) {
       return;
     }
-    if ($this->values) {
-      throw new \LogicException('Input values cannot be changed once they have been set.');
-    }
+
     // First, collect values for the recipe's dependencies.
     /** @var \Drupal\Core\Recipe\Recipe $dependency */
     foreach ($this->dependencies->recipes as $dependency) {
       $dependency->input->collectAll($collector, $processed);
     }
 
+    $this->values = [];
     foreach ($this->data as $key => $data) {
       $definition = $data->getDataDefinition();
 
@@ -156,13 +153,13 @@ final class InputConfigurator {
         $definition,
         $this->getDefaultValue($definition),
       );
-      $data->setValue($value, FALSE);
+      $data->setValue($value);
 
       $violations = $data->validate();
       if (count($violations) > 0) {
         throw new ValidationFailedException($data, $violations);
       }
-      $this->values[$key] = $data->getCastedValue();
+      $this->values[$key] = $data->getValue();
     }
     $processed[] = $this->prefix;
   }
@@ -171,12 +168,19 @@ final class InputConfigurator {
    * Returns the default value for an input definition.
    *
    * @param array $definition
-   *   An input definition. Must contain a `source` element, which can be either
-   *   'config' or 'value'. If `source` is 'config', then there must also be a
-   *   `config` element, which is a two-element indexed array containing
-   *   (in order) the name of an extant config object, and a property path
-   *   within that object. If `source` is 'value', then there must be a `value`
-   *   element, which will be returned as-is.
+   *   An input definition. Must contain a `source` element, which can be one
+   *   of `config`, `env`, or `value`:
+   *   - If `source` is `config`, there must also be a `config` element, which
+   *     is a two-element indexed array containing (in order) the name of an
+   *     extant config object, and a property path within that object. If the
+   *     config doesn't exist and there is no fallback value set, an exception
+   *     is thrown.
+   *   - If `source` is `env`, there must also be an `env` element, which is
+   *     the name of an environment variable to return. The value will always
+   *     be returned as a string. If the environment variable is not set and
+   *     there is no fallback value set, an exception is thrown.
+   *   - If `source` is 'value', then there must be a `value` element, which
+   *    will be returned as-is.
    *
    * @return mixed
    *   The default value.
@@ -188,9 +192,30 @@ final class InputConfigurator {
       [$name, $key] = $settings['config'];
       $config = \Drupal::config($name);
       if ($config->isNew()) {
-        throw new \RuntimeException("The '$name' config object does not exist.");
+        return array_key_exists('fallback', $settings)
+          ? $settings['fallback']
+          : throw new \RuntimeException("The '$name' config object does not exist.");
       }
       return $config->get($key);
+    }
+    elseif ($settings['source'] === 'env') {
+      // getenv() accepts NULL to return an array of all environment variables,
+      // but this makes no sense in a recipe. There is no valid situation where
+      // the name of the environment variable should be empty.
+      if (empty($settings['env'])) {
+        throw new \RuntimeException("The name of the environment variable cannot be empty.");
+      }
+      $name = $settings['env'];
+      $value = getenv($name);
+      // If the variable is defined, getenv() will return it as a string.
+      // Otherwise, try to return a fallback value, and if that fails, throw an
+      // exception (to be consistent with the `config` behavior).
+      if (is_string($value)) {
+        return $value;
+      }
+      return array_key_exists('fallback', $settings)
+        ? $settings['fallback']
+        : throw new \RuntimeException("The '$name' environment variable is not defined.");
     }
     return $settings['value'];
   }

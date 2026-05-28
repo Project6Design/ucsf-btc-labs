@@ -90,8 +90,8 @@ class Datetime extends DateElementBase {
       else {
         $date_input = $element['#date_date_element'] != 'none' && !empty($input['date']) ? $input['date'] : '';
         $time_input = $element['#date_time_element'] != 'none' && !empty($input['time']) ? $input['time'] : '';
-        $date_format = $element['#date_date_format'] != 'none' ? static::getHtml5DateFormat($element) : '';
-        $time_format = $element['#date_time_element'] != 'none' ? static::getHtml5TimeFormat($element) : '';
+        $date_format = $element['#date_date_element'] != 'none' && $element['#date_date_format'] != 'none' ? static::getHtml5DateFormat($element) : '';
+        $time_format = $element['#date_time_element'] != 'none' && $element['#date_time_format'] != 'none' ? static::getHtml5TimeFormat($element) : '';
       }
 
       // Seconds will be omitted in a post in case there's no entry.
@@ -389,7 +389,21 @@ class Datetime extends DateElementBase {
         // If the date is valid, set it.
         $date = $input['object'];
         if ($date instanceof DrupalDateTime && !$date->hasErrors()) {
-          $form_state->setValueForElement($element, $date);
+          $range = static::datetimeRangeYears($element['#date_year_range']);
+          $min = DrupalDateTime::createFromArray(['year' => $range[0]], $date->getTimezone());
+          $max = DrupalDateTime::createFromArray(['year' => $range[1] + 1], $date->getTimezone());
+
+          // Validate the date. It's valid if it's within the valid year range.
+          if ($date->getTimestamp() < $min->getTimestamp() || $date->getTimestamp() >= $max->getTimestamp()) {
+            $form_state->setError(
+              $element,
+              t('The %field date is invalid. Date should be in the %min-%max year range.',
+                ['%field' => $title, '%min' => $range[0], '%max' => $range[1]])
+            );
+          }
+          else {
+            $form_state->setValueForElement($element, $date);
+          }
         }
         // If the date is invalid, set an error. A reminder of the required
         // format in the message provides a good UX.

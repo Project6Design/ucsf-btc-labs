@@ -20,7 +20,6 @@ Product managers
 - Dries Buytaert 'dries' https://www.drupal.org/u/dries
 - Gábor Hojtsy 'Gábor Hojtsy' https://www.drupal.org/u/gábor-hojtsy
 - Lauri Timmanee 'lauriii' https://www.drupal.org/u/lauriii
-- Roy Scholten 'yoroy' https://www.drupal.org/u/yoroy
 
 User Experience (UX) managers
 - Cristina Chumillas 'ckrina' https://www.drupal.org/u/ckrina
@@ -46,6 +45,7 @@ Release managers
 - Dave Long 'longwave' https://www.drupal.org/u/longwave
 - Jess Myrbo 'xjm' https://www.drupal.org/u/xjm
 - Victoria Spagnolo 'quietone' https://www.drupal.org/u/quietone
+- (provisional) Edward Wu 'godotislate' https://www.drupal.org/u/godotislate
 
 Core JavaScript packages
 - Théodore Biadala 'nod_' https://www.drupal.org/u/nod_
@@ -61,6 +61,7 @@ Initiative facilitators
 General core committers
 - Drew Webber 'mcdruid' https://www.drupal.org/u/mcdruid
 - Juraj Nemec 'poker10' https://www.drupal.org/u/poker10
+- (provisional) Andrei Mateescu 'amateescu' https://www.drupal.org/u/amateescu
 
 Subsystem maintainers
 ---------------------
@@ -70,15 +71,21 @@ subsystems. See https://www.drupal.org/contribute/core-maintainers for more
 information on their responsibilities, and to find out how to become a subsystem
 maintainer. Current subsystem maintainers:
 
+Admin theme
+- Jürgen Haas 'jurgenhaas' https://www.drupal.org/u/jurgenhaas
+- Sascha Eggenberger 'saschaeggi' https://www.drupal.org/u/saschaeggi
+
 Ajax
 - Alex Bronstein 'effulgentsia' https://www.drupal.org/u/effulgentsia
+- Shawn Duncan 'fathershawn' https://www.drupal.org/u/fathershawn
 - Tim Plunkett 'tim.plunkett' https://www.drupal.org/u/tim.plunkett
 
 Asset Library API
-- ?
+- Pierre Dureau 'pdureau' https://www.drupal.org/u/pdureau
+- Florent Torregrosa 'grimreaper' https://www.drupal.org/u/grimreaper
 
 Authentication and Authorization
-- ?
+- Lucas Hedding 'heddn' https://www.drupal.org/u/heddn
 
 Automated Cron
 - ?
@@ -90,7 +97,7 @@ Base system
 - See "Framework managers" above.
 
 Basic Auth
-- Juampy Novillo Requena 'juampy' https://www.drupal.org/u/juampy
+- 'codebymikey' https://www.drupal.org/u/codebymikey
 
 Batch API
 - John Cook 'John Cook' https://www.drupal.org/u/john-cook
@@ -101,7 +108,6 @@ BigPipe
 
 Block
 - Tim Plunkett 'tim.plunkett' https://www.drupal.org/u/tim.plunkett
-- Ben Dougherty 'benjy' https://www.drupal.org/u/benjy
 
 Block Content
 - Adam Bramley 'acbramley' https://www.drupal.org/u/acbramley
@@ -113,21 +119,17 @@ Bootstrap
 
 Breakpoint
 - Peter Droogmans 'attiks' https://www.drupal.org/u/attiks
-- Heather Brooke Drummond 'RainbowArray' https://www.drupal.org/u/rainbowarray
 
 Cache
 - Nathaniel Catchpole 'catch' https://www.drupal.org/u/catch
 - Kristiaan Van den Eynde 'kristiaanvandeneynde' https://www.drupal.org/u/kristiaanvandeneynde
 
 CKEditor 5
-- Lauri Timmanee 'lauriii' https://www.drupal.org/u/lauriii
-- Wim Leers 'Wim Leers' https://www.drupal.org/u/wim-leers
 - Ben Mullins 'bnjmnm' https://www.drupal.org/u/bnjmnm
 
 Claro
 - Cristina Chumillas 'ckrina' https://www.drupal.org/u/ckrina
 - Sascha Eggenberger 'saschaeggi' https://www.drupal.org/u/saschaeggi
-- Lauri Timmanee 'lauriii' https://www.drupal.org/u/lauriii
 - Ben Mullins 'bnjmnm' https://www.drupal.org/u/bnjmnm
 
 Comment
@@ -154,10 +156,11 @@ Contact
 - Andrey Postnikov 'andypost' https://www.drupal.org/u/andypost
 
 Content Moderation
-- Sam Becker 'Sam152' https://www.drupal.org/u/sam152
+- Andrei Mateescu 'amateescu' https://www.drupal.org/u/amateescu
+- Derek Wright 'dww' https://www.drupal.org/u/dww
 
 Content Translation
-- ?
+- Christian López Espínola 'penyaskito' https://www.drupal.org/u/penyaskito
 
 Contextual
 - Lee Rowlands 'larowlan' https://www.drupal.org/u/larowlan
@@ -173,7 +176,7 @@ Database API
 - David Bekker 'daffie' https://www.drupal.org/u/daffie
 
   MySQL DB driver
-  - David Strauss 'David Strauss' https://www.drupal.org/u/david-strauss
+  - ?
 
   PostgreSQL DB driver
   - ?
@@ -189,11 +192,9 @@ Database Update API
 
 DateTime
 - Jonathan Hedstrom 'jhedstrom' https://www.drupal.org/u/jhedstrom
-- Matthew Donadio 'mpdonadio' https://www.drupal.org/u/mpdonadio
 
 DateTime Range
 - Jonathan Hedstrom 'jhedstrom' https://www.drupal.org/u/jhedstrom
-- Matthew Donadio 'mpdonadio' https://www.drupal.org/u/mpdonadio
 
 Default Content
 - Alex Pott 'alexpott' https://www.drupal.org/u/alexpott
@@ -206,7 +207,6 @@ Dynamic Page Cache
 
 Editor
 - Henrik Danielsson 'TwoD' https://www.drupal.org/u/TwoD
-- Wim Leers 'Wim Leers' https://www.drupal.org/u/wim-leers
 
 Entity API
 - Nathaniel Catchpole 'catch' https://www.drupal.org/u/catch
@@ -220,10 +220,10 @@ Field API
 - Andrei Mateescu 'amateescu' https://www.drupal.org/u/amateescu
 
 Field UI
-- Yves Chedemois 'yched' https://www.drupal.org/u/yched
 - Andrei Mateescu 'amateescu' https://www.drupal.org/u/amateescu
 
 File
+- Mohit Aghera 'mohit_aghera' https://www.drupal.org/u/mohit_aghera
 - Kim Pepper 'kim.pepper' https://www.drupal.org/u/kimpepper
 
 Filter
@@ -242,10 +242,10 @@ Help
 - Andrey Postnikov 'andypost' https://www.drupal.org/u/andypost
 
 Image
-- ?
+- Lucas Hedding 'heddn' https://www.drupal.org/u/heddn
 
 Inline Form Errors
-- Daniël Smidt 'dmsmidt' https://www.drupal.org/u/dmsmidt
+- ?
 
 Installer
 - ?
@@ -260,11 +260,9 @@ JavaScript
 JSON:API
 - Mateu Aguiló Bosch 'e0ipso' https://www.drupal.org/u/e0ipso
 - Björn Brala 'bbrala' https://www.drupal.org/u/bbrala
-- Gabe Sullice 'gabesullice' https://www.drupal.org/u/gabesullice
-- Wim Leers 'Wim Leers' https://www.drupal.org/u/wim-leers
 
 Language
-- Daniel F. Kudwien 'sun' https://www.drupal.org/u/sun
+- Christian López Espínola 'penyaskito' https://www.drupal.org/u/penyaskito
 
 Layout Builder
 - Ted Bowman 'tedbow' https://www.drupal.org/u/tedbow
@@ -273,7 +271,7 @@ Layout Builder
 - Daniel Veza 'DanielVeza' https://www.drupal.org/u/DanielVeza
 
 Link Field
-- Weber Macedo 'Mac_Weber' https://www.drupal.org/u/mac_weber
+- David Cameron 'dcam' https://www.drupal.org/u/dcam
 
 Lock
 - ?
@@ -282,7 +280,7 @@ Mail
 - ?
 
 Markup
-- ?
+- Mark Conroy 'markconroy' https://www.drupal.org/u/markconroy
 
 Media
 - Sean Blommaert 'seanB' https://www.drupal.org/u/seanb
@@ -300,7 +298,8 @@ Menu Link Content
 - Peter Wolanin 'pwolanin' https://www.drupal.org/u/pwolanin
 
 Menu UI
-- ?
+- Stephen Mustgrave 'smustgrave' https://www.drupal.org/u/smustgrave
+- Max Pogonowski 'darvanen' https://www.drupal.org/u/darvanen
 
 Migrate
 - Benji Fisher 'benjifisher' https://www.drupal.org/u/benjifisher
@@ -325,13 +324,12 @@ Node Access
 
 Olivero
 - Mike Herchel 'mherchel' https://www.drupal.org/u/mherchel
-- Putra Bonaccorsi 'proeung' https://www.drupal.org/u/proeung
 - Jen Witkowski 'jwitkowski79' https://www.drupal.org/u/jwitkowski79
 - Konstantin Shupenko 'kostyashupenko' https://www.drupal.org/u/kostyashupenko
 - Andy Blum 'andy-blum' https://www.drupal.org/u/andy-blum
 
 Options
-- ?
+- Stephen Mustgrave 'smustgrave' https://www.drupal.org/u/smustgrave
 
 Page Cache
 - Lorenz Schori 'znerol' https://www.drupal.org/u/znerol
@@ -365,12 +363,10 @@ Request Processing
 - ?
 
 REST
-- Wim Leers 'Wim Leers' https://www.drupal.org/u/wim-leers
+- ?
 
 Responsive Image
 - Peter Droogmans 'attiks' https://www.drupal.org/u/attiks
-- Heather Brooke Drummond 'RainbowArray' https://www.drupal.org/u/rainbowarray
-- Jelle Sebreghts 'Jelle_S' https://www.drupal.org/u/jelle_s
 
 Routing
 - Tim Plunkett 'tim.plunkett' https://www.drupal.org/u/tim.plunkett
@@ -380,10 +376,10 @@ Search
 
 Serialization
 - Brad Jones 'bradjones1' https://www.drupal.org/u/bradjones1
-- Damian Lee 'damiankloip' https://www.drupal.org/u/damiankloip
 
 Settings Tray
-- Ted Bowman 'tedbow' https://www.drupal.org/u/tedbow
+- Mark Conroy 'markconroy' https://www.drupal.org/u/markconroy
+- Chris Weber 'cosmicdreams' https://www.drupal.org/u/cosmicdreams
 
 Shortcut
 - Jibran Ijaz 'jibran' https://www.drupal.org/u/jibran
@@ -398,7 +394,7 @@ Syslog
 - Mariano D'Agostino 'dagmar' https://www.drupal.org/u/dagmar
 
 System (module)
-- ?
+- Michael Strelan 'mstrelan' https://www.drupal.org/u/mstrelan
 
 Taxonomy
 - Jess Myrbo 'xjm' https://www.drupal.org/u/xjm
@@ -420,7 +416,7 @@ Theme API
   - Jean Valverde 'mogtofu33' https://www.drupal.org/u/mogtofu33
 
 Token
-- ?
+- Max Pogonowski 'darvanen' https://www.drupal.org/u/darvanen
 
 Toolbar
 - Théodore Biadala 'nod_' https://www.drupal.org/u/nod_
@@ -433,9 +429,7 @@ Typed Data
 
 Umami demo
 - Mark Conroy 'markconroy' https://www.drupal.org/u/markconroy
-- Gareth Goodwin 'smaz' https://www.drupal.org/u/smaz
 - Keith Jay 'kjay' https://www.drupal.org/u/kjay
-- Ofer Shaal 'shaal' https://www.drupal.org/u/shaal
 - Ivan Berdinsky 'finnsky' https://www.drupal.org/u/finnsky
 
 Update Status
@@ -448,12 +442,11 @@ User
 
 Views
 - Tim Plunkett 'tim.plunkett' https://www.drupal.org/u/tim.plunkett
-- Damian Lee 'damiankloip' https://www.drupal.org/u/damiankloip
 - Jess Myrbo 'xjm' https://www.drupal.org/u/xjm
 - Len Swaneveld 'Lendude' https://www.drupal.org/u/lendude
 
 Workflows
-- Sam Becker 'Sam152' https://www.drupal.org/u/sam152
+- Andrei Mateescu 'amateescu' https://www.drupal.org/u/amateescu
 
 Workspaces
 - Andrei Mateescu 'amateescu' https://www.drupal.org/u/amateescu
@@ -467,10 +460,9 @@ proposed changes must pass. https://www.drupal.org/contribute/core/maintainers
 provides more information on their responsibilities.
 
 Accessibility
-- Rain Breaw Michaels 'rainbreaw' https://www.drupal.org/u/rainbreaw
 - Mike Gifford 'mgifford' https://www.drupal.org/u/mgifford
-- Andrew Macpherson 'andrewmacpherson' https://www.drupal.org/u/andrewmacpherson
 - Ben Mullins 'bnjmnm' https://www.drupal.org/u/bnjmnm
+- Kent Richards 'kentr' https://www.drupal.org/u/kentr
 
 Documentation
 - ?
@@ -485,8 +477,6 @@ Testing
 
 Usability
 - Cristina Chumillas 'ckrina' https://www.drupal.org/u/ckrina
-- Roy Scholten 'yoroy' https://www.drupal.org/u/yoroy
-- Bojhan Somers 'Bojhan' https://www.drupal.org/u/bojhan
 
 
 Security team
@@ -528,7 +518,6 @@ get involved. They organize communications and logistics, and actively
 participate in mentoring.
 
 - Chris Darke 'chrisdarke' https://www.drupal.org/u/chrisdarke
-- Brian Gilbert 'realityloop' https://www.drupal.org/u/realityloop
 - Lucas Hedding 'heddn' https://www.drupal.org/u/heddn
 - Rachel Lawson 'rachel_norfolk' https://www.drupal.org/u/rachel_norfolk
 - Elli Ludwigson 'ekl1773' https://www.drupal.org/u/ekl1773

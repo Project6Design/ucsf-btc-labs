@@ -11,12 +11,14 @@ use Drupal\image\Entity\ImageStyle;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\Tests\TestFileCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the functions for generating paths and URLs for image styles.
- *
- * @group image
  */
+#[Group('image')]
+#[RunTestsInSeparateProcesses]
 class ImageStylesPathAndUrlTest extends BrowserTestBase {
 
   use TestFileCreationTrait {
@@ -259,7 +261,7 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
       // make sure that access is denied.
       $file_no_access = array_shift($files);
       $original_uri_no_access = $file_system->copy($file_no_access->uri, $scheme . '://', FileExists::Rename);
-      $generated_uri_no_access = $scheme . '://styles/' . $this->style->id() . '/' . $scheme . '/' . $file_system->basename($original_uri_no_access);
+      $generated_uri_no_access = $scheme . '://styles/' . $this->style->id() . '/' . $scheme . '/' . basename($original_uri_no_access);
       $this->assertFileDoesNotExist($generated_uri_no_access);
       $generate_url_no_access = $this->style->buildUrl($original_uri_no_access);
 
@@ -321,7 +323,7 @@ class ImageStylesPathAndUrlTest extends BrowserTestBase {
     // Check that a security token is still required when generating a second
     // image derivative using the first one as a source.
     $nested_url = $this->style->buildUrl($generated_uri, $clean_url);
-    $matches_expected_url_format = (boolean) preg_match('/styles\/' . $this->style->id() . '\/' . $scheme . '\/styles\/' . $this->style->id() . '\/' . $scheme . '/', $nested_url);
+    $matches_expected_url_format = (bool) preg_match('/styles\/' . $this->style->id() . '\/' . $scheme . '\/styles\/' . $this->style->id() . '\/' . $scheme . '/', $nested_url);
     $this->assertTrue($matches_expected_url_format, "URL for a derivative of an image style matches expected format.");
     $nested_url_with_wrong_token = str_replace(IMAGE_DERIVATIVE_TOKEN . '=', 'wrong_parameter=', $nested_url);
     $this->drupalGet($nested_url_with_wrong_token);

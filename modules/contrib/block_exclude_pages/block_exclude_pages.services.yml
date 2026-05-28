@@ -1,0 +1,4 @@
+services:
+  logger.channel.block_exclude_pages:
+    class: Drupal\Core\Logger\LoggerChannel
+    arguments: ['block_exclude_pages']

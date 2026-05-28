@@ -6,12 +6,14 @@ namespace Drupal\FunctionalJavascriptTests\Ajax;
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests AJAX responses.
- *
- * @group Ajax
  */
+#[Group('Ajax')]
+#[RunTestsInSeparateProcesses]
 class AjaxTest extends WebDriverTestBase {
 
   /**
@@ -167,6 +169,12 @@ JS;
 JS;
     $expected = '<div class="div-wrapper-forever"></div>';
     $this->assertInsert('empty', $expected, $custom_wrapper_new_content);
+
+    // Checking inserting table elements.
+    $expected = '<tr><td>table-row</td></tr>';
+    $this->drupalGet('ajax-test/insert-table-wrapper');
+    $this->clickLink('Link table-row');
+    $this->assertWaitPageContains('<div class="ajax-target-wrapper"><table><tbody id="ajax-target">' . $expected . '</tbody></table></div>');
   }
 
   /**
@@ -351,6 +359,14 @@ JS;
     $this->assertSession()->assertWaitOnAjaxRequest();
     $has_focus_id = $this->getSession()->evaluateScript('document.activeElement.id');
     $this->assertEquals('edit-textfield-3', $has_focus_id);
+
+    $this->assertNotNull($email_field1 = $this->assertSession()->elementExists('css', '#edit-email-field-1'));
+    // Test email field with 'blur' event listener.
+    $email_field1->setValue('user@example.com');
+    $email_field1->focus();
+    $this->assertSession()->assertWaitOnAjaxRequest();
+    $has_focus_id = $this->getSession()->evaluateScript('document.activeElement.id');
+    $this->assertEquals('edit-email-field-1', $has_focus_id);
   }
 
 }

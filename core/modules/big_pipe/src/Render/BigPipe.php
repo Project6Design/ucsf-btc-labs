@@ -19,6 +19,7 @@ use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Routing\LocalRedirectResponse;
 use Drupal\Core\Routing\RequestContext;
+use Drupal\Core\Utility\FiberResumeType;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -250,7 +251,7 @@ class BigPipe {
     // that strings in inline JavaScript or CDATA sections aren't used instead.
     $parts = explode('</body>', $content);
     $post_body = array_pop($parts);
-    $pre_body = implode('', $parts);
+    $pre_body = implode('</body>', $parts);
 
     $this->sendPreBody($pre_body, $nojs_placeholders, $cumulative_assets);
     $this->sendPlaceholders($placeholders, $this->getPlaceholderOrder($pre_body, $placeholders), $cumulative_assets);
@@ -518,7 +519,7 @@ class BigPipe {
             if ($iterations) {
               $fiber = \Fiber::getCurrent();
               if ($fiber !== NULL) {
-                $fiber->suspend();
+                $fiber->suspend(FiberResumeType::Immediate);
               }
             }
             continue;

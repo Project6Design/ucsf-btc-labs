@@ -64,7 +64,7 @@ class WebformEntitySettingsFormForm extends WebformEntitySettingsBaseForm {
 
     // @see \Drupal\webform\Plugin\Field\FieldWidget\WebformEntityReferenceAutocompleteWidget::formElement
     $form['form_settings']['scheduled'] = [
-      '#type' => 'fieldgroup',
+      '#type' => 'fieldset',
       '#states' => [
         'visible' => [
           ':input[name="status"]' => ['value' => WebformInterface::STATUS_SCHEDULED],
@@ -643,6 +643,12 @@ class WebformEntitySettingsFormForm extends WebformEntitySettingsBaseForm {
       '#element_validate' => [['\Drupal\webform\Form\AdminConfig\WebformAdminConfigElementsForm', 'validateMaxFilesize']],
       '#size' => 10,
       '#default_value' => $settings['form_file_limit'],
+    ];
+    $form['file_settings']['form_file_limit_message'] = [
+      '#type' => 'webform_html_editor',
+      '#title' => $this->t('File upload limit per form message'),
+      '#description' => $this->t('Enter message to be displayed when file upload limit is reached. You may use %quota as a placeholder.'),
+      '#default_value' => $settings['form_file_limit_message'],
     ];
 
     // Custom settings.

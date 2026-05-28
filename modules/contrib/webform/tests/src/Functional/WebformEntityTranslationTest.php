@@ -3,6 +3,7 @@
 namespace Drupal\Tests\webform\Functional;
 
 use Drupal\Component\Serialization\Yaml;
+use Drupal\Component\Utility\Html;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\webform\Entity\Webform;
 
@@ -46,7 +47,8 @@ class WebformEntityTranslationTest extends WebformBrowserTestBase {
 
     // Check custom HTML source and translation.
     $mail_default_body_html = \Drupal::config('webform.settings')->get('mail.default_body_html');
-    $assert_session->responseContains('<span lang="en">' . $mail_default_body_html . '</span>');
+    $assert_session->responseContains('<span lang="en">' . Html::escape($mail_default_body_html) . '</span>');
+
     $this->assertCssSelect('textarea[name="translation[config_names][webform.settings][settings][default_form_open_message][value][value]"]');
 
     // Check custom YAML source and translation.
@@ -449,6 +451,55 @@ class WebformEntityTranslationTest extends WebformBrowserTestBase {
     $this->drupalGet('/fr/webform/test_translation', ['query' => ['variant' => 'test']]);
     $assert_session->responseContains('<label for="edit-textfield">Text field</label>');
     $assert_session->responseContains('<label for="edit-select-options">Select (options)</label>');
+  }
+
+  /**
+   * Tests email translation.
+   */
+  public function testEmailsTranslate() {
+    // Check that the email is sent in Spanish (es).
+    $this->drupalGet('/es/webform/test_translation');
+    $edit = ['textfield' => 'Spanish Submission'];
+    $this->submitForm($edit, 'Enviar mensaje');
+    $email = $this->getLastEmail();
+    $this->assertStringContainsString('
+*Campo de texto*
+Spanish Submission
+*Computado (token)*
+Site name: Drupal',
+      $email['body']
+    );
+    $this->assertStringContainsString('Formulario de envío de: ', $email['subject']);
+
+    // Switch the email confirmation to be in English (en).
+    /** @var \Drupal\webform\WebformInterface $webform */
+    $webform = Webform::load('test_translation');
+    /** @var \Drupal\webform\Plugin\WebformHandler\EmailWebformHandler $email_handler */
+    $email_handler = $webform->getHandler('email_confirmation');
+    $email_handler->setSetting('langcode', 'en');
+    $webform->save();
+
+    // Check that the email is sent in English (en).
+    $this->drupalGet('/es/webform/test_translation');
+    $edit = ['textfield' => 'Spanish Submission'];
+    $this->submitForm($edit, 'Enviar mensaje');
+    $email = $this->getLastEmail();
+    $this->assertStringNotContainsString('
+*Campo de texto*
+Spanish Submission
+*Computado (token)*
+Site name: Drupal',
+      $email['body']
+    );
+    $this->assertStringNotContainsString('Formulario de envío de: ', $email['subject']);
+    $this->assertStringContainsString('
+*Text field*
+Spanish Submission
+*Computed (token)*
+Site name: Drupal',
+      $email['body']
+    );
+    $this->assertStringContainsString('Webform submission from: Test: Translations', $email['subject']);
   }
 
 }

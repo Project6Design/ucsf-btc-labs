@@ -6,3 +6,8 @@ dependencies:
   - 'drupal:block'
   - 'drupal:block_content'
   - 'webform:webform'
+
+# Information added by Drupal.org packaging script on 2026-05-04
+version: '6.3.0-beta9'
+project: 'webform'
+datestamp: 1777906735

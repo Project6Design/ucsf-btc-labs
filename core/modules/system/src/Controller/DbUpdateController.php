@@ -228,7 +228,7 @@ class DbUpdateController extends ControllerBase {
     $this->keyValueExpirableFactory->get('update_available_release')->deleteAll();
 
     $build['info_header'] = [
-      '#markup' => '<p>' . $this->t('Use this utility to update your database whenever a module, theme, or the core software is updated.') . '</p><p>' . $this->t('For more detailed information, see the <a href="https://www.drupal.org/upgrade">upgrading handbook</a>. If you are unsure what these terms mean you should probably contact your hosting provider.') . '</p>',
+      '#markup' => '<p>' . $this->t('Use this utility to update your database whenever a module, theme, or the core software is updated.') . '</p><p>' . $this->t('For more detailed information, see the <a href="https://www.drupal.org/docs/updating-drupal">Updating Drupal guide</a>. If you are unsure what these terms mean you should probably contact your hosting provider.') . '</p>',
     ];
 
     $info[] = $this->t("<strong>Back up your code</strong>. Hint: when backing up module code, do not leave that backup in the 'modules' or 'sites/*/modules' directories as this may confuse Drupal's auto-discovery mechanism.");
@@ -705,16 +705,20 @@ class DbUpdateController extends ControllerBase {
       'title' => $this->t('Front page'),
       'url' => Url::fromRoute('<front>')->setOption('base_url', $base_url),
     ];
-    if ($this->account->hasPermission('access administration pages')) {
+
+    $admin_url = Url::fromRoute('system.admin')->setOption('base_url', $base_url);
+    if ($admin_url->access($this->account)) {
       $links['admin-pages'] = [
         'title' => $this->t('Administration pages'),
-        'url' => Url::fromRoute('system.admin')->setOption('base_url', $base_url),
+        'url' => $admin_url,
       ];
     }
-    if ($this->account->hasPermission('administer site configuration')) {
+
+    $status_report_url = Url::fromRoute('system.status')->setOption('base_url', $base_url);
+    if ($status_report_url->access($this->account)) {
       $links['status-report'] = [
         'title' => $this->t('Status report'),
-        'url' => Url::fromRoute('system.status')->setOption('base_url', $base_url),
+        'url' => $status_report_url,
       ];
     }
     return $links;

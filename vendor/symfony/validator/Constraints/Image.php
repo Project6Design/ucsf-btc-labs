@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\Validator\Constraints;
 
+use Symfony\Component\Validator\Attribute\HasNamedArguments;
+
 /**
  * Validates that a file (or a path to a file) is a valid image.
  *
@@ -89,7 +91,6 @@ class Image extends File
     public string $corruptedMessage = 'The image file is corrupted.';
 
     /**
-     * @param array<string,mixed>|null $options
      * @param positive-int|string|null $maxSize                     The max size of the underlying file
      * @param bool|null                $binaryFormat                Pass true to use binary-prefixed units (KiB, MiB, etc.) or false to use SI-prefixed units (kB, MB) in displayed messages. Pass null to guess the format from the maxSize option. (defaults to null)
      * @param non-empty-string[]|null  $mimeTypes                   Acceptable media types
@@ -118,6 +119,7 @@ class Image extends File
      *
      * @see https://www.iana.org/assignments/media-types/media-types.xhtml Existing media types
      */
+    #[HasNamedArguments]
     public function __construct(
         ?array $options = null,
         int|string|null $maxSize = null,

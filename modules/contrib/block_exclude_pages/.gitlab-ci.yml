@@ -10,13 +10,13 @@
 
 # For information on alternative values for 'ref' see https://project.pages.drupalcode.org/gitlab_templates/info/templates-version/
 # To test a Drupal 7 project, change the first include filename from .main.yml to .main-d7.yml
-include:
-  - project: $_GITLAB_TEMPLATES_REPO
-    ref: $_GITLAB_TEMPLATES_REF
-    file:
-      - '/includes/include.drupalci.main.yml'
-      - '/includes/include.drupalci.variables.yml'
-      - '/includes/include.drupalci.workflows.yml'
+# include:
+#   - project: $_GITLAB_TEMPLATES_REPO
+#     ref: $_GITLAB_TEMPLATES_REF
+#     file:
+#       - '/includes/include.drupalci.main.yml'
+#       - '/includes/include.drupalci.variables.yml'
+#       - '/includes/include.drupalci.workflows.yml'
 
 ################
 # Pipeline configuration variables are defined with default values and descriptions in the file
@@ -24,15 +24,29 @@ include:
 # Uncomment the lines below if you want to override any of the variables. The following is just an example.
 ################
 variables:
+  SKIP_UNIT_TESTS: "true" # Set to "true" to skip unit tests
   # SKIP_ESLINT: 1
   # SKIP_CSPELL: 1
   # _CURL_TEMPLATES_REF: main
 
   # Set to '1' to opt in testing against various additional Drupal core versions relative to the current stable version of Drupal.
-  OPT_IN_TEST_PREVIOUS_MAJOR: 1
-  OPT_IN_TEST_PREVIOUS_MINOR: 1
-  OPT_IN_TEST_NEXT_MINOR: 1
-  OPT_IN_TEST_NEXT_MAJOR: 1
+  OPT_IN_TEST_PREVIOUS_MINOR: 0
+  OPT_IN_TEST_NEXT_MINOR: 0
+  OPT_IN_TEST_PREVIOUS_MAJOR: 0
+  OPT_IN_TEST_NEXT_MAJOR: 0
 
   # Set to 1 to opt in testing against the maximum/latest supported version of PHP for the current stable version of Drupal.
-  OPT_IN_TEST_MAX_PHP: 1
+  OPT_IN_TEST_MAX_PHP: 0
+
+
+################
+# Optional: Explicitly disable specific test jobs if necessary.
+################
+unit_test:
+  script:
+    - echo "Unit tests are running..."
+    - vendor/bin/phpunit
+  rules:
+    - if: '$SKIP_UNIT_TESTS == "true"'
+      when: never
+    - when: on_success

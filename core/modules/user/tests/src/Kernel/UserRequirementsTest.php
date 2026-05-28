@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Drupal\Tests\user\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\user\Traits\UserCreationTrait;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests user_requirements().
- *
- * @group user
  */
+#[Group('user')]
+#[RunTestsInSeparateProcesses]
 class UserRequirementsTest extends KernelTestBase {
 
   use UserCreationTrait;
@@ -65,6 +68,23 @@ class UserRequirementsTest extends KernelTestBase {
 
     $this->createUser([], 'User A', FALSE, ['mail' => '']);
     $this->createUser([], 'User B', FALSE, ['mail' => '']);
+
+    $output = $this->moduleHandler->invoke('user', 'runtime_requirements');
+    $this->assertArrayNotHasKey('conflicting emails', $output);
+  }
+
+  /**
+   * Tests that the requirements check does not flag user translations.
+   */
+  public function testTranslatedUserEmail(): void {
+    \Drupal::service('module_installer')->install(['language']);
+    ConfigurableLanguage::createFromLangcode('is')->save();
+
+    $output = $this->moduleHandler->invoke('user', 'runtime_requirements');
+    $this->assertArrayNotHasKey('conflicting emails', $output);
+
+    $user = $this->createUser([], 'User A', FALSE, ['mail' => 'unique@example.com']);
+    $user->addTranslation('is')->save();
 
     $output = $this->moduleHandler->invoke('user', 'runtime_requirements');
     $this->assertArrayNotHasKey('conflicting emails', $output);

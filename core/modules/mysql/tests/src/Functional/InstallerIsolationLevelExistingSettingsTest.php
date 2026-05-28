@@ -6,12 +6,14 @@ namespace Drupal\Tests\mysql\Functional;
 
 use Drupal\Core\Database\Database;
 use Drupal\FunctionalTests\Installer\InstallerExistingSettingsTest;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the isolation_level setting with existing database settings.
- *
- * @group Installer
  */
+#[Group('Installer')]
+#[RunTestsInSeparateProcesses]
 class InstallerIsolationLevelExistingSettingsTest extends InstallerExistingSettingsTest {
 
   /**
@@ -45,6 +47,9 @@ class InstallerIsolationLevelExistingSettingsTest extends InstallerExistingSetti
     unset($driver_test_connection['isolation_level']);
     unset($driver_test_connection['init_commands']);
 
+    $connection = Database::getConnection('default', 'default');
+    $query = $connection->isMariaDb() ? 'SELECT @@SESSION.tx_isolation' : 'SELECT @@SESSION.transaction_isolation';
+    $original_transaction_level = $connection->query($query)->fetchField();
     Database::renameConnection('default', 'original_database_connection');
     Database::addConnectionInfo('default', 'default', $driver_test_connection);
     // Close and reopen the database connection, so the database init commands
@@ -52,10 +57,8 @@ class InstallerIsolationLevelExistingSettingsTest extends InstallerExistingSetti
     Database::closeConnection('default', 'default');
     $connection = Database::getConnection('default', 'default');
 
-    $query = $connection->isMariaDb() ? 'SELECT @@SESSION.tx_isolation' : 'SELECT @@SESSION.transaction_isolation';
-
-    // Test that transaction level is REPEATABLE READ.
-    $this->assertEquals('REPEATABLE-READ', $connection->query($query)->fetchField());
+    // Test that transaction level has not changed.
+    $this->assertEquals($original_transaction_level, $connection->query($query)->fetchField());
 
     // Restore the old database connection.
     Database::addConnectionInfo('default', 'default', $connection_info['default']);

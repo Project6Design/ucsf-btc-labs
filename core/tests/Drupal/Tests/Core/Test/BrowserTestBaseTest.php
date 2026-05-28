@@ -4,16 +4,19 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\Core\Test;
 
-use Drupal\Tests\DrupalTestBrowser;
-use Drupal\Tests\UnitTestCase;
-use Drupal\Tests\BrowserTestBase;
 use Behat\Mink\Driver\BrowserKitDriver;
 use Behat\Mink\Session;
+use Drupal\Tests\BrowserTestBase;
+use Drupal\Tests\DrupalTestBrowser;
+use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\Tests\BrowserTestBase
- * @group Test
+ * Tests Drupal\Tests\BrowserTestBase.
  */
+#[CoversClass(BrowserTestBase::class)]
+#[Group('Test')]
 class BrowserTestBaseTest extends UnitTestCase {
 
   protected function mockBrowserTestBaseWithDriver($driver) {
@@ -25,7 +28,7 @@ class BrowserTestBaseTest extends UnitTestCase {
       ->method('getDriver')
       ->willReturn($driver);
 
-    $btb = $this->getMockBuilder(BrowserTestBaseMockableClass::class)
+    $btb = $this->getMockBuilder(BrowserTestBaseMockableClassTest::class)
       ->disableOriginalConstructor()
       ->onlyMethods(['getSession'])
       ->getMock();
@@ -37,7 +40,7 @@ class BrowserTestBaseTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getHttpClient
+   * Tests get http client.
    */
   public function testGetHttpClient(): void {
     // Our stand-in for the Guzzle client object.
@@ -60,7 +63,7 @@ class BrowserTestBaseTest extends UnitTestCase {
   }
 
   /**
-   * @covers ::getHttpClient
+   * Tests get http client exception.
    */
   public function testGetHttpClientException(): void {
     // A driver type that isn't BrowserKitDriver. This should cause a
@@ -76,13 +79,11 @@ class BrowserTestBaseTest extends UnitTestCase {
 
   /**
    * Tests that tearDown doesn't call cleanupEnvironment if setUp is not called.
-   *
-   * @covers ::tearDown
    */
   public function testTearDownWithoutSetUp(): void {
     $method = 'cleanupEnvironment';
     $this->assertTrue(method_exists(BrowserTestBase::class, $method));
-    $btb = $this->getMockBuilder(BrowserTestBaseMockableClass::class)
+    $btb = $this->getMockBuilder(BrowserTestBaseMockableClassTest::class)
       ->disableOriginalConstructor()
       ->onlyMethods([$method])
       ->getMock();
@@ -95,7 +96,9 @@ class BrowserTestBaseTest extends UnitTestCase {
 
 /**
  * A class extending BrowserTestBase for testing purposes.
+ *
+ * @phpstan-ignore testClass.missingAttribute.Group, testClass.missingAttribute.RunInSeparateProcesses
  */
-class BrowserTestBaseMockableClass extends BrowserTestBase {
+class BrowserTestBaseMockableClassTest extends BrowserTestBase {
 
 }

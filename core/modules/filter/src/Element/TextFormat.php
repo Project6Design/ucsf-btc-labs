@@ -93,6 +93,9 @@ class TextFormat extends RenderElementBase {
       '#process',
       // Ensure #pre_render functions will be run.
       '#pre_render',
+      // Do not copy #config_target to prevent multiple elements targeting the
+      // same property.
+      '#config_target',
       // Description is handled by theme_text_format_wrapper().
       '#description',
       // Ensure proper ordering of children.
@@ -213,9 +216,9 @@ class TextFormat extends RenderElementBase {
     ];
 
     $all_formats = filter_formats();
-    $format_exists = isset($all_formats[$element['#format']]);
+    $format_exists = isset($element['#format'], $all_formats[$element['#format']]);
     $format_allowed = !isset($element['#allowed_formats']) || in_array($element['#format'], $element['#allowed_formats']);
-    $user_has_access = isset($formats[$element['#format']]);
+    $user_has_access = isset($element['#format'], $formats[$element['#format']]);
     $user_is_admin = $user->hasPermission('administer filters');
 
     // If the stored format does not exist or if it is not among the allowed

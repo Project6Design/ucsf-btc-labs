@@ -12,3 +12,8 @@ dependencies:
   - 'webform:webform_options_limit'
   - 'webform:webform_scheduled_email'
   - 'webform:webform_share'
+
+# Information added by Drupal.org packaging script on 2026-05-04
+version: '6.3.0-beta9'
+project: 'webform'
+datestamp: 1777906735

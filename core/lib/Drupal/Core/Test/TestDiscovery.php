@@ -61,7 +61,7 @@ class TestDiscovery {
    *
    * @param string $root
    *   The app root.
-   * @param class-string $class_loader
+   * @param \Composer\Autoload\ClassLoader $class_loader
    *   The class loader. Normally Composer's ClassLoader, as included by the
    *   front controller, but may also be decorated.
    */
@@ -113,11 +113,11 @@ class TestDiscovery {
 
     // Expose tests provided by core recipes.
     $base_path = $this->root . '/core/recipes';
-    if (@opendir($base_path)) {
-      while (($recipe = readdir()) !== FALSE) {
+    if ($handle = @opendir($base_path)) {
+      while (($recipe = readdir($handle)) !== FALSE) {
         $this->testNamespaces["Drupal\\FunctionalTests\\Recipe\\Core\\$recipe\\"][] = "$base_path/$recipe/tests/src/Functional";
       }
-      closedir();
+      closedir($handle);
     }
 
     foreach ($this->testNamespaces as $prefix => $paths) {

@@ -46,7 +46,7 @@ class PackageManagerHooks {
         $output .= '  <li>' . $this->t('It associates the temporary copy of the site with the user or session that originally created it, and only that user or session can make changes to it.') . '</li>';
         $output .= '  <li>' . $this->t('It does not allow modules to be uninstalled while syncing changes into live site.') . '</li>';
         $output .= '</ul>';
-        $output .= '<p>' . $this->t('For more information, see the <a href=":url">online documentation for the Package Manager module</a>.', [':url' => 'https://www.drupal.org/docs/8/core/modules/package-manager']) . '</p>';
+        $output .= '<p>' . $this->t('For more information, see the <a href=":url">online documentation for the Package Manager module</a>.', [':url' => 'https://www.drupal.org/docs/develop/core-modules-and-themes/core-modules/package-manager-module']) . '</p>';
         $output .= '<h3 id="package-manager-faq">' . $this->t('FAQ') . '</h3>';
         $output .= '<h4 id="package-manager-composer-related-faq">' . $this->t('FAQs related to Composer') . '</h4>';
         $output .= '<ul>';
@@ -54,15 +54,15 @@ class PackageManagerHooks {
         $output .= '    <p>' . $this->t('Ask your system administrator to remove <code>proc_open()</code> from the <a href=":url">disable_functions</a> setting in <code>php.ini</code>.', [':url' => 'https://www.php.net/manual/en/ini.core.php#ini.disable-functions']) . '</p>';
         $output .= '  </li>';
         $output .= '  <li>' . $this->t('What if it says the <code>composer</code> executable cannot be found?');
-        $output .= '    <p>' . $this->t("If the <code>composer</code> executable's path cannot be automatically determined, it can be explicitly set by adding the following line to <code>settings.php</code>:") . '</p>';
-        $output .= "    <pre><code>\$config['package_manager.settings']['executables']['composer'] = '/full/path/to/composer.phar';</code></pre>";
+        $output .= '    <p>' . $this->t("If the <code>composer</code> executable's path cannot be automatically determined, you will need to add Composer to your project by running the following command: <code>composer require \"composer/composer:@version\"</code>:", [
+          '@version' => ComposerInspector::SUPPORTED_VERSION,
+        ]) . '</p>';
         $output .= '  </li>';
         $output .= '  <li>' . $this->t('What if it says the detected version of Composer is not supported?');
-        $output .= '    <p>' . $this->t('The version of the <code>composer</code> executable must satisfy <code>@version</code>. See the <a href=":url">the Composer documentation</a> for more information, or use this command to update Composer:', [
+        $output .= '    <p>' . $this->t('The version of the <code>composer</code> executable must satisfy <code>@version</code>. See the <a href=":url">the Composer documentation</a> for more information, or use this command to add Composer to your project: <code>composer require "composer/composer:@version"</code>', [
           '@version' => ComposerInspector::SUPPORTED_VERSION,
           ':url' => 'https://getcomposer.org/doc/03-cli.md#self-update-selfupdate',
         ]) . '</p>';
-        $output .= '    <pre><code>composer self-update</code></pre>';
         $output .= '  </li>';
         $output .= '  <li>' . $this->t('What if it says the <code>composer validate</code> command failed?');
         $output .= '    <p>' . $this->t('Composer detected problems with your <code>composer.json</code> and/or <code>composer.lock</code> files, and the project is not in a completely valid state. See <a href=":url">the Composer documentation</a> for more information.', [':url' => 'https://getcomposer.org/doc/04-schema.md']) . '</p>';
@@ -87,7 +87,7 @@ class PackageManagerHooks {
         $output .= "composer tuf:protect https://packages.drupal.org/8\n";
         $output .= '</code></pre>';
         $output .= '<h4 id="package-manager-faq-unsupported-composer-plugin">' . $this->t('What if it says I have unsupported Composer plugins in my codebase?') . '</h4>';
-        $output .= '<p>' . $this->t('A fresh Drupal installation only uses supported Composer plugins, but some modules or themes may depend on additional Composer plugins. <a href=":new-issue">Create a new issue</a> when you encounter this.', [':new-issue' => 'https://www.drupal.org/node/add/project-issue/auto_updates']) . '</p>';
+        $output .= '<p>' . $this->t('A fresh Drupal installation only uses supported Composer plugins, but some modules or themes may depend on additional Composer plugins. <a href=":new-issue">Create a new issue</a> when you encounter this.', [':new-issue' => 'https://www.drupal.org/node/add/project-issue/automatic_updates']) . '</p>';
         $output .= '<p>' . $this->t('It is possible to <em>trust</em> additional Composer plugins, but this requires significant expertise: understanding the code of that Composer plugin, what the effects on the file system are and how it affects the Package Manager module. Some Composer plugins could result in a broken site!') . '</p>';
         $output .= '<h4 id="package-manager-faq-composer-patches-installed-or-removed">' . $this->t('What if it says <code>cweagans/composer-patches</code> cannot be installed/removed?') . '</h4>';
         $output .= '<p>' . $this->t('Installation or removal of <code>cweagans/composer-patches</code> via Package Manager is not supported. You can install or remove it manually by running Composer commands in your site root.') . '</p>';

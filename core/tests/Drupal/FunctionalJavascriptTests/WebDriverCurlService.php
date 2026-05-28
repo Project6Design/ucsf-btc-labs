@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\FunctionalJavascriptTests;
 
-use WebDriver\Service\CurlService;
-use WebDriver\Exception\CurlExec;
 use WebDriver\Exception as WebDriverException;
+use WebDriver\Exception\CurlExec;
+use WebDriver\Service\CurlService;
 
 // cspell:ignore curle curlopt customrequest failonerror postfields
 // cspell:ignore returntransfer
@@ -38,7 +38,7 @@ class WebDriverCurlService extends CurlService {
    *
    * This is useful if the caller is implementing it's own waiting process.
    */
-  public static function enableRetry() {
+  public static function enableRetry(): void {
     static::$retry = TRUE;
   }
 
@@ -47,7 +47,7 @@ class WebDriverCurlService extends CurlService {
    *
    * This is useful if the caller is implementing it's own waiting process.
    */
-  public static function disableRetry() {
+  public static function disableRetry(): void {
     static::$retry = FALSE;
   }
 
@@ -137,12 +137,12 @@ class WebDriverCurlService extends CurlService {
         $info['request_method'] = $requestMethod;
 
         if (array_key_exists(CURLOPT_FAILONERROR, $extraOptions) && $extraOptions[CURLOPT_FAILONERROR] && CURLE_GOT_NOTHING !== curl_errno($curl) && $error = curl_error($curl)) {
-          curl_close($curl);
+          $curl = NULL;
 
           throw WebDriverException::factory(WebDriverException::CURL_EXEC, sprintf("Curl error thrown for http %s to %s%s\n\n%s", $requestMethod, $url, $parameters && is_array($parameters) ? ' with params: ' . json_encode($parameters) : '', $error));
         }
 
-        curl_close($curl);
+        $curl = NULL;
 
         $result = json_decode($rawResult, TRUE);
         if (isset($result['status']) && $result['status'] === WebDriverException::STALE_ELEMENT_REFERENCE) {

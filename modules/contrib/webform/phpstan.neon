@@ -14,3 +14,4 @@ parameters:
         - "#^Unsafe usage of new static#"
         # Remove once this is fixed https://www.drupal.org/project/webform/issues/3478049
         - '#\Drupal calls should be avoided in classes, use dependency injection instead#'
+        - '#^Class Drupal\\webform\\Commands\\WebformSanitizeSubmissionsCommands implements deprecated interface Drush\\Drupal\\Commands\\sql\\SanitizePluginInterface#'

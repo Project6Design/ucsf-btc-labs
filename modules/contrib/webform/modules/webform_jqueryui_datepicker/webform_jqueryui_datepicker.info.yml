@@ -8,3 +8,8 @@ lifecycle_link: 'https://www.drupal.org/docs/8/modules/webform/webform-frequentl
 dependencies:
   - 'webform:webform'
   - 'jquery_ui_datepicker:jquery_ui_datepicker'
+
+# Information added by Drupal.org packaging script on 2026-05-04
+version: '6.3.0-beta9'
+project: 'webform'
+datestamp: 1777906735
