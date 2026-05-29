@@ -3568,28 +3568,28 @@
         },
         {
             "name": "drupal/features",
-            "version": "3.14.0",
-            "version_normalized": "3.14.0.0",
+            "version": "3.16.0",
+            "version_normalized": "3.16.0.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/features.git",
-                "reference": "8.x-3.14"
+                "reference": "8.x-3.16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/features-8.x-3.14.zip",
-                "reference": "8.x-3.14",
-                "shasum": "fff0bb2d133c524ddb326422eba625c55585232c"
+                "url": "https://ftp.drupal.org/files/projects/features-8.x-3.16.zip",
+                "reference": "8.x-3.16",
+                "shasum": "5d2f3e71fbf0edfd956d2f08993acde3ce760cb8"
             },
             "require": {
-                "drupal/config_update": "^1.4 || ^2",
+                "drupal/config_update": "^2",
                 "drupal/core": "^8 || ^9 || ^10 || ^11 || ^12"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-3.14",
-                    "datestamp": "1702059191",
+                    "version": "8.x-3.16",
+                    "datestamp": "1758915521",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3599,9 +3599,6 @@
                     "services": {
                         "drush.services.yml": "^10 || ^11"
                     }
-                },
-                "patches_applied": {
-                    "Drupal 11 compatibility": "https://www.drupal.org/files/issues/2024-07-30/features-3447460.patch"
                 }
             },
             "installation-source": "dist",
@@ -3611,7 +3608,7 @@
             ],
             "authors": [
                 {
-                    "name": "Dave Reid",
+                    "name": "dave reid",
                     "homepage": "https://www.drupal.org/user/53892"
                 },
                 {
@@ -3641,6 +3638,10 @@
                 {
                     "name": "joseph.olstad",
                     "homepage": "https://www.drupal.org/user/1321830"
+                },
+                {
+                    "name": "mark_fullmer",
+                    "homepage": "https://www.drupal.org/user/2612816"
                 },
                 {
                     "name": "matthand",

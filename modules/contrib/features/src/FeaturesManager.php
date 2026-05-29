@@ -416,7 +416,7 @@ class FeaturesManager implements FeaturesManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function isFeatureModule(Extension $module, FeaturesBundleInterface $bundle = NULL) {
+  public function isFeatureModule(Extension $module, ?FeaturesBundleInterface $bundle = NULL) {
     if ($features_info = $this->getFeaturesInfo($module)) {
       // If no bundle was requested, it's enough that this is a feature.
       if (is_null($bundle)) {
@@ -438,7 +438,7 @@ class FeaturesManager implements FeaturesManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function listPackageDirectories(array $machine_names = [], FeaturesBundleInterface $bundle = NULL) {
+  public function listPackageDirectories(array $machine_names = [], ?FeaturesBundleInterface $bundle = NULL) {
     if (empty($machine_names)) {
       $machine_names = array_keys($this->getPackages());
     }
@@ -507,7 +507,7 @@ class FeaturesManager implements FeaturesManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getFeaturesModules(FeaturesBundleInterface $bundle = NULL, $installed = FALSE) {
+  public function getFeaturesModules(?FeaturesBundleInterface $bundle = NULL, $installed = FALSE) {
     $modules = $this->getAllModules();
 
     // Filter by bundle.
@@ -537,7 +537,7 @@ class FeaturesManager implements FeaturesManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function initPackage($machine_name, $name = NULL, $description = '', $type = 'module', FeaturesBundleInterface $bundle = NULL, Extension $extension = NULL) {
+  public function initPackage($machine_name, $name = NULL, $description = '', $type = 'module', ?FeaturesBundleInterface $bundle = NULL, ?Extension $extension = NULL) {
     if (isset($this->packages[$machine_name])) {
       return $this->packages[$machine_name];
     }
@@ -702,7 +702,7 @@ class FeaturesManager implements FeaturesManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function assignConfigDependents(array $item_names = NULL, $package = NULL) {
+  public function assignConfigDependents(?array $item_names = NULL, $package = NULL) {
     $config_collection = $this->getConfigCollection();
     if (empty($item_names)) {
       $item_names = array_keys($config_collection);
@@ -761,7 +761,7 @@ class FeaturesManager implements FeaturesManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function assignPackageDependencies(Package $package = NULL) {
+  public function assignPackageDependencies(?Package $package = NULL) {
     if (is_null($package)) {
       $packages = $this->getPackages();
     }
@@ -876,16 +876,17 @@ class FeaturesManager implements FeaturesManagerInterface {
    *   (optional) Description of the package.
    * @param string $type
    *   (optional) Type of project.
-   * @param \Drupal\features\FeaturesBundleInterface $bundle
-   *   (optional) Bundle to use to add profile directories to the scan.
-   * @param \Drupal\Core\Extension\Extension $extension
-   *   (optional) An Extension object.
+   * @param \Drupal\features\FeaturesBundleInterface|null $bundle
+   *   (optional) Bundle to use to add profile directories to the scan. Defaults
+   *   to NULL.
+   * @param \Drupal\Core\Extension\Extension|null $extension
+   *   (optional) An Extension object. Defaults to NULL.
    *
    * @return \Drupal\features\Package
    *   An array of package properties; see
    *   FeaturesManagerInterface::getPackages().
    */
-  protected function getPackageObject($machine_name, $name = NULL, $description = '', $type = 'module', FeaturesBundleInterface $bundle = NULL, Extension $extension = NULL) {
+  protected function getPackageObject($machine_name, $name = NULL, $description = '', $type = 'module', ?FeaturesBundleInterface $bundle = NULL, ?Extension $extension = NULL) {
     if (!isset($bundle)) {
       $bundle = $this->getAssigner()->getBundle();
     }
@@ -1140,7 +1141,7 @@ class FeaturesManager implements FeaturesManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function listExistingConfig($installed = FALSE, FeaturesBundleInterface $bundle = NULL) {
+  public function listExistingConfig($installed = FALSE, ?FeaturesBundleInterface $bundle = NULL) {
     $config = [];
     $existing = $this->getFeaturesModules($bundle, $installed);
     foreach ($existing as $extension) {
@@ -1267,7 +1268,7 @@ class FeaturesManager implements FeaturesManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function getExportInfo(Package $package, FeaturesBundleInterface $bundle = NULL) {
+  public function getExportInfo(Package $package, ?FeaturesBundleInterface $bundle = NULL) {
     $full_name = isset($bundle) ? $bundle->getFullName($package->getMachineName()) : $package->getMachineName();
 
     $path = '';

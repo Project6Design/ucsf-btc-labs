@@ -1,11 +1,12 @@
 <?php
 
-namespace Drupal\features\Commands;
+namespace Drupal\features\Drush\Commands;
 
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\Component\Diff\DiffFormatter;
 use Drupal\config_update\ConfigDiffInterface;
 use Drupal\Core\Config\StorageInterface;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\features\Exception\DomainException;
 use Drupal\features\Exception\InvalidArgumentException;
 use Drupal\features\FeaturesAssignerInterface;
@@ -16,11 +17,12 @@ use Drupal\features\Plugin\FeaturesGeneration\FeaturesGenerationWrite;
 use Drush\Commands\DrushCommands;
 use Drush\Exceptions\UserAbortException;
 use Drush\Utils\StringUtils;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Drush commands for Features.
  */
-class FeaturesCommands extends DrushCommands {
+class FeaturesCommands extends DrushCommands implements ContainerInjectionInterface {
 
   const OPTIONS = [
     'bundle' => NULL,
@@ -104,19 +106,26 @@ class FeaturesCommands extends DrushCommands {
    * @param \Drupal\Core\Config\StorageInterface $configStorage
    *   The config.storage service.
    */
-  public function __construct(
-    FeaturesAssignerInterface $assigner,
-    FeaturesManagerInterface $manager,
-    FeaturesGeneratorInterface $generator,
-    ConfigDiffInterface $configDiff,
-    StorageInterface $configStorage
-  ) {
+  public function __construct(FeaturesAssignerInterface $assigner, FeaturesManagerInterface $manager, FeaturesGeneratorInterface $generator, ConfigDiffInterface $configDiff, StorageInterface $configStorage) {
     parent::__construct();
     $this->assigner = $assigner;
     $this->configDiff = $configDiff;
     $this->configStorage = $configStorage;
     $this->generator = $generator;
     $this->manager = $manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('features_assigner'),
+      $container->get('features.manager'),
+      $container->get('features_generator'),
+      $container->get('config_update.config_diff'),
+      $container->get('config.storage')
+    );
   }
 
   /**
@@ -758,6 +767,11 @@ class FeaturesCommands extends DrushCommands {
 
       if ($feature->getStatus() != FeaturesManagerInterface::STATUS_INSTALLED) {
         throw new DomainException(dt('No such feature is installed: @module', $dt_args));
+      }
+
+      $is_feature_module = $this->manager->isFeatureModule($feature->getExtension());
+      if (!$is_feature_module) {
+        throw new DomainException(dt('@module is not a feature module.', $dt_args));
       }
 
       // Forcefully revert all components of a feature.

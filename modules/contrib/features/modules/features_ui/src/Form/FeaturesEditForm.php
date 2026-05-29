@@ -3,6 +3,7 @@
 namespace Drupal\features_ui\Form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\SortArray;
 use Drupal\Component\Utility\Xss;
 use Drupal\features\FeaturesAssignerInterface;
 use Drupal\features\FeaturesGeneratorInterface;
@@ -69,21 +70,21 @@ class FeaturesEditForm extends FormBase {
    *
    * @var array
    */
-  protected $excluded;
+  protected $excluded = [];
 
   /**
    * Config to be specifically required.
    *
    * @var array
    */
-  protected $required;
+  protected $required = [];
 
   /**
    * Config referenced by other packages.
    *
    * @var array
    */
-  protected $conflicts;
+  protected $conflicts = [];
 
   /**
    * Determine if conflicts are allowed to be added.
@@ -97,7 +98,7 @@ class FeaturesEditForm extends FormBase {
    *
    * @var array
    */
-  protected $missing;
+  protected $missing = [];
 
   /**
    * The config reverter.
@@ -107,38 +108,31 @@ class FeaturesEditForm extends FormBase {
   protected $configRevert;
 
   /**
-   * Constructs a FeaturesEditForm object.
+   * The module handler service.
    *
-   * @param \Drupal\features\FeaturesManagerInterface $features_manager
-   *   The features manager.
-   * @param \Drupal\features\FeaturesAssignerInterface $assigner
-   *   The feature assigner.
-   * @param \Drupal\features\FeaturesGeneratorInterface $generator
-   *   The features generator.
-   * @param \Drupal\config_update\ConfigRevertInterface $config_revert
-   *   The config revert.
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
    */
-  public function __construct(FeaturesManagerInterface $features_manager, FeaturesAssignerInterface $assigner, FeaturesGeneratorInterface $generator, ConfigRevertInterface $config_revert) {
-    $this->featuresManager = $features_manager;
-    $this->assigner = $assigner;
-    $this->generator = $generator;
-    $this->configRevert = $config_revert;
-    $this->excluded = [];
-    $this->required = [];
-    $this->conflicts = [];
-    $this->missing = [];
-  }
+  protected $moduleHandler;
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('features.manager'),
-      $container->get('features_assigner'),
-      $container->get('features_generator'),
-      $container->get('features.config_update')
-    );
+    $instance = parent::create($container);
+    $instance->featuresManager = $container->get('features.manager');
+    $instance->assigner = $container->get('features_assigner');
+    $instance->generator = $container->get('features_generator');
+    $instance->configRevert = $container->get('features.config_update');
+    $instance->moduleHandler = $container->get('module_handler');
+    $instance->currentUser = $container->get('current_user');
+    return $instance;
   }
 
   /**
@@ -315,11 +309,11 @@ class FeaturesEditForm extends FormBase {
     ];
 
     $generation_info = [];
-    if (\Drupal::currentUser()->hasPermission('export configuration')) {
+    if ($this->currentUser->hasPermission('export configuration')) {
       // Offer available generation methods.
       $generation_info = $this->generator->getGenerationMethods();
       // Sort generation methods by weight.
-      uasort($generation_info, '\Drupal\Component\Utility\SortArray::sortByWeightElement');
+      uasort($generation_info, [SortArray::class, 'sortByWeightElement']);
     }
 
     $form['actions'] = ['#type' => 'actions', '#tree' => TRUE];
@@ -420,7 +414,7 @@ class FeaturesEditForm extends FormBase {
     $value = $bundle->getFullName($value);
     $packages = $this->featuresManager->getPackages();
     // A package may conflict only if it's been exported.
-    return (isset($packages[$value]) && ($packages[$value]->getState() !== FeaturesManagerInterface::STATUS_NO_EXPORT)) || \Drupal::moduleHandler()->moduleExists($value);
+    return (isset($packages[$value]) && ($packages[$value]->getState() !== FeaturesManagerInterface::STATUS_NO_EXPORT)) || $this->moduleHandler->moduleExists($value);
   }
 
   /**
@@ -438,7 +432,7 @@ class FeaturesEditForm extends FormBase {
       '#weight' => 1,
     ];
 
-    // Filter field used in javascript, so javascript will unhide it.
+    // Filter field used in JavaScript, so JavaScript will unhide it.
     $element['features_filter_wrapper'] = [
       '#type' => 'fieldgroup',
       '#title' => $this->t('Filters'),

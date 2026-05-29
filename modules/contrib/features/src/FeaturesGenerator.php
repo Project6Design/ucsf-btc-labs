@@ -99,7 +99,7 @@ class FeaturesGenerator implements FeaturesGeneratorInterface {
   /**
    * {@inheritdoc}
    */
-  public function applyGenerationMethod($method_id, array $packages = [], FeaturesBundleInterface $bundle = NULL) {
+  public function applyGenerationMethod($method_id, array $packages = [], ?FeaturesBundleInterface $bundle = NULL) {
     $method = $this->getGenerationMethodInstance($method_id);
     $method->prepare($packages, $bundle);
     return $method->generate($packages, $bundle);

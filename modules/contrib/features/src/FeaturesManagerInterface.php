@@ -291,15 +291,16 @@ interface FeaturesManagerInterface {
    *   (optional) Description of the package.
    * @param string $type
    *   (optional) Type of project.
-   * @param \Drupal\features\FeaturesBundleInterface $bundle
-   *   (optional) Bundle to use to add profile directories to the scan.
-   * @param \Drupal\Core\Extension\Extension $extension
-   *   (optional) An Extension object.
+   * @param \Drupal\features\FeaturesBundleInterface|null $bundle
+   *   (optional) Bundle to use to add profile directories to the scan. Defaults
+   *    to NULL.
+   * @param \Drupal\Core\Extension\Extension|null $extension
+   *   (optional) An Extension object. Defaults to NULL.
    *
    * @return \Drupal\features\Package
    *   The created package array.
    */
-  public function initPackage($machine_name, $name = NULL, $description = '', $type = 'module', FeaturesBundleInterface $bundle = NULL, Extension $extension = NULL);
+  public function initPackage($machine_name, $name = NULL, $description = '', $type = 'module', ?FeaturesBundleInterface $bundle = NULL, ?Extension $extension = NULL);
 
   /**
    * Initializes a configuration package using module info data.
@@ -327,13 +328,14 @@ interface FeaturesManagerInterface {
    * @param string[] $machine_names
    *   Package machine names to return directories for. If omitted, return all
    *   directories.
-   * @param \Drupal\features\FeaturesBundleInterface $bundle
-   *   Optional bundle to use to add profile directories to the scan.
+   * @param \Drupal\features\FeaturesBundleInterface|null $bundle
+   *   (optional) Bundle to use to add profile directories to the scan. Defaults
+   *   to NULL.
    *
    * @return array
    *   Array of package directories keyed by package machine name.
    */
-  public function listPackageDirectories(array $machine_names = [], FeaturesBundleInterface $bundle = NULL);
+  public function listPackageDirectories(array $machine_names = [], ?FeaturesBundleInterface $bundle = NULL);
 
   /**
    * Assigns a set of configuration items to a given package or profile.
@@ -363,13 +365,13 @@ interface FeaturesManagerInterface {
    * For given configuration items, assigns any dependent configuration to the
    * same package.
    *
-   * @param string[] $item_names
-   *   Configuration item names.
+   * @param string[]|null $item_names
+   *   (optional) Configuration item names. Defaults to NULL.
    * @param string $package
    *   Short machine name of package to assign dependent config to. If NULL,
    *   use the current package of the parent config items.
    */
-  public function assignConfigDependents(array $item_names = NULL, $package = NULL);
+  public function assignConfigDependents(?array $item_names = NULL, $package = NULL);
 
   /**
    * Adds the optional bundle prefix to package machine names.
@@ -384,10 +386,10 @@ interface FeaturesManagerInterface {
   /**
    * Assigns dependencies from config items into the package.
    *
-   * @param \Drupal\features\Package[] $package
-   *   An array of packages. NULL for all packages.
+   * @param \Drupal\features\Package|null $package
+   *   (optional) The package. NULL for all packages. Defaults to NULL.
    */
-  public function assignPackageDependencies(Package $package = NULL);
+  public function assignPackageDependencies(?Package $package = NULL);
 
   /**
    * Assigns dependencies between packages based on configuration dependencies.
@@ -451,8 +453,8 @@ interface FeaturesManagerInterface {
   /**
    * Returns a list of Features modules regardless of if they are installed.
    *
-   * @param \Drupal\features\FeaturesBundleInterface $bundle
-   *   Optional bundle to filter module list.
+   * @param \Drupal\features\FeaturesBundleInterface|null $bundle
+   *   (optional) Bundle to filter module list. Defaults to NULL.
    *   If given, only modules matching the bundle namespace will be returned.
    *   If the bundle uses a profile, only modules in the profile will be
    *   returned.
@@ -462,7 +464,7 @@ interface FeaturesManagerInterface {
    * @return Drupal\Core\Extension\Extension[]
    *   An array of extension objects.
    */
-  public function getFeaturesModules(FeaturesBundleInterface $bundle = NULL, $installed = FALSE);
+  public function getFeaturesModules(?FeaturesBundleInterface $bundle = NULL, $installed = FALSE);
 
   /**
    * Lists names of configuration objects provided by a given extension.
@@ -480,13 +482,13 @@ interface FeaturesManagerInterface {
    *
    * @param bool $installed
    *   List only installed Features.
-   * @param \Drupal\features\FeaturesBundleInterface $bundle
-   *   (optional) Bundle to find existing configuration for.
+   * @param \Drupal\features\FeaturesBundleInterface|null $bundle
+   *   (optional) Bundle to find existing configuration for. Defaults to NULL.
    *
    * @return array
    *   An array with config names as keys and providing module names as values.
    */
-  public function listExistingConfig($installed = FALSE, FeaturesBundleInterface $bundle = NULL);
+  public function listExistingConfig($installed = FALSE, ?FeaturesBundleInterface $bundle = NULL);
 
   /**
    * Iterates through packages and prepares file names and contents.
@@ -526,14 +528,14 @@ interface FeaturesManagerInterface {
    *
    * @param \Drupal\features\Package $package
    *   The package.
-   * @param \Drupal\features\FeaturesBundleInterface $bundle
-   *   Optional bundle being used for export.
+   * @param \Drupal\features\FeaturesBundleInterface|null $bundle
+   *   (optional) Bundle being used for export. Defaults to NULL.
    *
    * @return array
    *   An array with the full name as the first item and directory as second
    *   item.
    */
-  public function getExportInfo(Package $package, FeaturesBundleInterface $bundle = NULL);
+  public function getExportInfo(Package $package, ?FeaturesBundleInterface $bundle = NULL);
 
   /**
    * Determines if the module is a Features package, optionally testing by
@@ -541,13 +543,13 @@ interface FeaturesManagerInterface {
    *
    * @param \Drupal\Core\Extension\Extension $module
    *   An extension object.
-   * @param \Drupal\features\FeaturesBundleInterface $bundle
-   *   (optional) Bundle to filter by.
+   * @param \Drupal\features\FeaturesBundleInterface|null $bundle
+   *   (optional) Bundle to filter by. Defaults to NULL.
    *
    * @return bool
    *   TRUE if the given module is a Features package of the given bundle (if any).
    */
-  public function isFeatureModule(Extension $module, FeaturesBundleInterface $bundle);
+  public function isFeatureModule(Extension $module, ?FeaturesBundleInterface $bundle = NULL);
 
   /**
    * Determines which config is overridden in a package.

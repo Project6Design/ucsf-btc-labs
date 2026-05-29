@@ -1,6 +1,6 @@
 services:
   features.commands:
-    class: \Drupal\features\Commands\FeaturesCommands
+    class: Drupal\features\Drush\Commands\FeaturesCommands
     arguments:
       - '@features_assigner'
       - '@features.manager'

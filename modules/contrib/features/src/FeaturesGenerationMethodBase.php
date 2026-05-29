@@ -74,7 +74,7 @@ abstract class FeaturesGenerationMethodBase implements FeaturesGenerationMethodI
   /**
    * {@inheritdoc}
    */
-  public function prepare(array &$packages = [], FeaturesBundleInterface $bundle = NULL) {
+  public function prepare(array &$packages = [], ?FeaturesBundleInterface $bundle = NULL) {
     // If no packages were specified, get all packages.
     if (empty($packages)) {
       $packages = $this->featuresManager->getPackages();
@@ -112,9 +112,9 @@ abstract class FeaturesGenerationMethodBase implements FeaturesGenerationMethodI
    * @param array $existing_packages
    *   An array of existing packages with machine names as keys and paths as
    *   values.
-   * @param \Drupal\features\FeaturesBundleInterface $bundle
-   *   Optional bundle used for export.
+   * @param \Drupal\features\FeaturesBundleInterface|null $bundle
+   *   (optional) Bundle used for export. Defaults to NULL.
    */
-  abstract protected function preparePackage(Package $package, array $existing_packages, FeaturesBundleInterface $bundle = NULL);
+  abstract protected function preparePackage(Package $package, array $existing_packages, ?FeaturesBundleInterface $bundle = NULL);
 
 }

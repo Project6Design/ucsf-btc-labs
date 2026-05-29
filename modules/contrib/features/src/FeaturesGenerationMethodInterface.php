@@ -31,21 +31,23 @@ interface FeaturesGenerationMethodInterface {
    *
    * @param array $packages
    *   Array of package data.
-   * @param \Drupal\features\FeaturesBundleInterface $bundle
-   *   The optional bundle used for the generation.  Used to generate profiles.
+   * @param \Drupal\features\FeaturesBundleInterface|null $bundle
+   *   (optional) The bundle used for the generation. Used to generate profiles.
+   *   Defaults to NULL.
    *
    * @return array
    *   An array of packages data.
    */
-  public function prepare(array &$packages = [], FeaturesBundleInterface $bundle = NULL);
+  public function prepare(array &$packages = [], ?FeaturesBundleInterface $bundle = NULL);
 
   /**
    * Performs package generation.
    *
    * @param array $packages
    *   Array of package data.
-   * @param \Drupal\features\FeaturesBundleInterface $bundle
-   *   The optional bundle used for the generation.  Used to generate profiles.
+   * @param \Drupal\features\FeaturesBundleInterface|null $bundle
+   *   (optional) The bundle used for the generation. Used to generate profiles.
+   *   Defaults to NULL.
    *
    * @return array
    *   Array of results for profile and/or packages, each result including the
@@ -56,7 +58,7 @@ interface FeaturesGenerationMethodInterface {
    *   - 'message': a message about the result of the operation.
    *   - 'variables': an array of substitutions to be used in the message.
    */
-  public function generate(array $packages = [], FeaturesBundleInterface $bundle = NULL);
+  public function generate(array $packages = [], ?FeaturesBundleInterface $bundle = NULL);
 
   /**
    * Responds to the submission of

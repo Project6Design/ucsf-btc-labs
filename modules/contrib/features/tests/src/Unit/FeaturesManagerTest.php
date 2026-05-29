@@ -42,6 +42,13 @@ class FeaturesManagerTest extends UnitTestCase {
   use ProphecyTrait;
 
   /**
+   * The core extension resolver.
+   *
+   * @var \Drupal\Core\Extension\ExtensionPathResolver
+   */
+  protected $extensionPathResolver;
+
+  /**
    * The feature manager interface.
    *
    * @var \Drupal\features\FeaturesManagerInterface
@@ -174,7 +181,7 @@ class FeaturesManagerTest extends UnitTestCase {
           'test_feature.info.yml' => <<<EOT
 name: Test feature
 type: module
-core_version_requirement: "^9.4 | ^10"
+core_version_requirement: "^10 || ^11"
 description: test description
 EOT
           ,
@@ -215,7 +222,7 @@ EOT
   /**
    * Data provider for ::testGetFullName().
    */
-  public function providerTestGetFullName() {
+  public static function providerTestGetFullName() {
     return [
       [NULL, 'name', 'name'],
       [FeaturesManagerInterface::SYSTEM_SIMPLE_CONFIG, 'name', 'name'],
@@ -811,7 +818,7 @@ EOT
   /**
    * {@inheritDoc}
    */
-  public function providerTestMergeInfoArray() {
+  public static function providerTestMergeInfoArray() {
     $data = [];
     $data['empty-info'] = [[], [], []];
     $data['override-info'] = [

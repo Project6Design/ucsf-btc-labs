@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fd4238d2ab0224fdcf91118ea60c3f47",
+    "content-hash": "cc3c243c657b880e89498bc2cd3b9101",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3419,27 +3419,27 @@
         },
         {
             "name": "drupal/features",
-            "version": "3.14.0",
+            "version": "3.16.0",
             "source": {
                 "type": "git",
                 "url": "https://git.drupalcode.org/project/features.git",
-                "reference": "8.x-3.14"
+                "reference": "8.x-3.16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://ftp.drupal.org/files/projects/features-8.x-3.14.zip",
-                "reference": "8.x-3.14",
-                "shasum": "fff0bb2d133c524ddb326422eba625c55585232c"
+                "url": "https://ftp.drupal.org/files/projects/features-8.x-3.16.zip",
+                "reference": "8.x-3.16",
+                "shasum": "5d2f3e71fbf0edfd956d2f08993acde3ce760cb8"
             },
             "require": {
-                "drupal/config_update": "^1.4 || ^2",
+                "drupal/config_update": "^2",
                 "drupal/core": "^8 || ^9 || ^10 || ^11 || ^12"
             },
             "type": "drupal-module",
             "extra": {
                 "drupal": {
-                    "version": "8.x-3.14",
-                    "datestamp": "1702059191",
+                    "version": "8.x-3.16",
+                    "datestamp": "1758915521",
                     "security-coverage": {
                         "status": "covered",
                         "message": "Covered by Drupal's security advisory policy"
@@ -3457,7 +3457,7 @@
             ],
             "authors": [
                 {
-                    "name": "Dave Reid",
+                    "name": "dave reid",
                     "homepage": "https://www.drupal.org/user/53892"
                 },
                 {
@@ -3487,6 +3487,10 @@
                 {
                     "name": "joseph.olstad",
                     "homepage": "https://www.drupal.org/user/1321830"
+                },
+                {
+                    "name": "mark_fullmer",
+                    "homepage": "https://www.drupal.org/user/2612816"
                 },
                 {
                     "name": "matthand",

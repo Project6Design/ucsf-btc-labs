@@ -3,13 +3,12 @@
 namespace Drupal\features_ui\Form;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\SortArray;
 use Drupal\Component\Utility\Xss;
-use Drupal\features\FeaturesAssignerInterface;
-use Drupal\features\FeaturesGeneratorInterface;
+use Drupal\Core\Link;
 use Drupal\features\FeaturesManagerInterface;
 use Drupal\features\FeaturesBundleInterface;
 use Drupal\features\Package;
-use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Security\TrustedCallbackInterface;
@@ -50,34 +49,31 @@ class FeaturesExportForm extends FormBase implements TrustedCallbackInterface {
   protected $moduleHandler;
 
   /**
-   * Constructs a FeaturesExportForm object.
+   * The module extension list.
    *
-   * @param \Drupal\features\FeaturesManagerInterface $features_manager
-   *   The features manager.
-   * @param \Drupal\features\FeaturesAssignerInterface $assigner
-   *   The features assigner.
-   * @param \Drupal\features\FeaturesGeneratorInterface $generator
-   *   The features generator.
-   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
-   *   The features generator.
+   * @var \Drupal\Core\Extension\ModuleExtensionList
    */
-  public function __construct(FeaturesManagerInterface $features_manager, FeaturesAssignerInterface $assigner, FeaturesGeneratorInterface $generator, ModuleHandlerInterface $module_handler) {
-    $this->featuresManager = $features_manager;
-    $this->assigner = $assigner;
-    $this->generator = $generator;
-    $this->moduleHandler = $module_handler;
-  }
+  protected $moduleList;
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('features.manager'),
-      $container->get('features_assigner'),
-      $container->get('features_generator'),
-      $container->get('module_handler')
-    );
+    $instance = parent::create($container);
+    $instance->featuresManager = $container->get('features.manager');
+    $instance->assigner = $container->get('features_assigner');
+    $instance->generator = $container->get('features_generator');
+    $instance->moduleHandler = $container->get('module_handler');
+    $instance->moduleList = $container->get('extension.list.module');
+    $instance->currentUser = $container->get('current_user');
+    return $instance;
   }
 
   /**
@@ -186,11 +182,11 @@ class FeaturesExportForm extends FormBase implements TrustedCallbackInterface {
       ],
     ];
 
-    if (\Drupal::currentUser()->hasPermission('export configuration')) {
+    if ($this->currentUser->hasPermission('export configuration')) {
       // Offer available generation methods.
       $generation_info = $this->generator->getGenerationMethods();
       // Sort generation methods by weight.
-      uasort($generation_info, '\Drupal\Component\Utility\SortArray::sortByWeightElement');
+      uasort($generation_info, [SortArray::class, 'sortByWeightElement']);
 
       $form['description'] = [
         '#markup' => '<p>' . $this->t('Use an export method button below to generate the selected features.') . '</p>',
@@ -299,7 +295,7 @@ class FeaturesExportForm extends FormBase implements TrustedCallbackInterface {
     $url = Url::fromRoute('features.edit', ['featurename' => $package->getMachineName()]);
 
     $element['name'] = [
-      'data' => \Drupal::service('link_generator')->generate($package->getName(), $url),
+      'data' => Link::fromTextAndUrl($package->getName(), $url)->toString(),
       'class' => ['feature-name'],
     ];
     $machine_name = $package->getMachineName();
@@ -376,11 +372,13 @@ class FeaturesExportForm extends FormBase implements TrustedCallbackInterface {
     // Add dependencies.
     $package_config['dependencies'] = [];
     foreach ($package->getDependencies() as $dependency) {
+      $dependency_label = $dependency;
+      if ($this->moduleHandler->moduleExists($dependency)) {
+        $dependency_label = $this->moduleList->getName($dependency);
+      }
       $package_config['dependencies'][] = [
         'name' => $dependency,
-        'label' => $this->moduleHandler->moduleExists($dependency) 
-                  ? $this->moduleList->getName($dependency) 
-                  : $dependency,
+        'label' => $dependency_label,
         'class' => '',
       ];
     }

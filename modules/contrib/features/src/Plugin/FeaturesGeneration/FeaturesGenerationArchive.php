@@ -87,7 +87,7 @@ class FeaturesGenerationArchive extends FeaturesGenerationMethodBase implements 
   /**
    * Reads and merges in existing files for a given package or profile.
    */
-  protected function preparePackage(Package $package, array $existing_packages, FeaturesBundleInterface $bundle = NULL) {
+  protected function preparePackage(Package $package, array $existing_packages, ?FeaturesBundleInterface $bundle = NULL) {
     if (isset($existing_packages[$package->getMachineName()])) {
       $existing_directory = $existing_packages[$package->getMachineName()];
     }
@@ -141,7 +141,7 @@ class FeaturesGenerationArchive extends FeaturesGenerationMethodBase implements 
   /**
    * {@inheritdoc}
    */
-  public function generate(array $packages = [], FeaturesBundleInterface $bundle = NULL) {
+  public function generate(array $packages = [], ?FeaturesBundleInterface $bundle = NULL) {
 
     // If no packages were specified, get all packages.
     if (empty($packages)) {
@@ -245,12 +245,12 @@ class FeaturesGenerationArchive extends FeaturesGenerationMethodBase implements 
    *   The return value, passed by reference.
    * @param \Drupal\features\Package $package
    *   The package or profile.
-   * @param \Exception $exception
-   *   The exception object.
+   * @param \Exception|null $exception
+   *   (optional) The exception object. Defaults to NULL.
    * @param string $message
    *   Error message when there isn't an Exception object.
    */
-  protected function failure(array &$return, Package $package, \Exception $exception = NULL, $message = '') {
+  protected function failure(array &$return, Package $package, ?\Exception $exception = NULL, $message = '') {
     $type = $package->getType() == 'module' ? $this->t('Package') : $this->t('Profile');
     $return[] = [
       'success' => FALSE,

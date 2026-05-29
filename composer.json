@@ -42,7 +42,7 @@
         "drupal/embed": "^1.10",
         "drupal/entity_reference_revisions": "^1.12",
         "drupal/fakeobjects": "^2.0",
-        "drupal/features": "^3.12",
+        "drupal/features": "^3.16",
         "drupal/field_group": "^4.0",
         "drupal/fitvids": "^2.1",
         "drupal/focal_point": "^2.1",
@@ -135,9 +135,6 @@
             ]
         },
         "patches": {
-            "drupal/features": {
-                "Drupal 11 compatibility": "https://www.drupal.org/files/issues/2024-07-30/features-3447460.patch"
-            },
             "drupal/sharemessage": {
                 "Drupal 11 compatibility": "https://www.drupal.org/files/issues/2025-05-31/sharemessage.1.x-dev.rector.patch"
             },
