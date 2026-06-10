@@ -1,0 +1,14 @@
+name: 'Webform Shortcuts'
+type: module
+description: 'Provides configurable keyboard shortcuts to create and save webform elements.'
+core_version_requirement: ^10.3 || ^11.0
+lifecycle: deprecated
+lifecycle_link: 'https://www.drupal.org/docs/8/modules/webform/webform-frequently-asked-questions/what-to-do-about-deprecated-external-libraries-in-webform-6x'
+dependencies:
+  - 'webform:webform'
+  - 'webform:webform_ui'
+
+# Information added by Drupal.org packaging script on 2025-09-03
+version: '6.3.0-beta4'
+project: 'webform_deprecated'
+datestamp: 1756923754

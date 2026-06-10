@@ -1,0 +1,98 @@
+{
+    "name": "drupal/webform",
+    "description": "Enables the creation of webforms and questionnaires.",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "minimum-stability": "dev",
+    "homepage": "https://drupal.org/project/webform",
+    "authors": [
+        {
+            "name": "Jacob Rockowitz (jrockowitz)",
+            "homepage": "https://www.drupal.org/u/jrockowitz",
+            "role": "Maintainer"
+        },
+        {
+            "name": "Contributors",
+            "homepage": "https://www.drupal.org/node/7404/committers",
+            "role": "Contributor"
+        }
+    ],
+    "support": {
+        "issues": "https://www.drupal.org/project/issues/webform_deprecated?version=8.x",
+        "source": "https://git.drupalcode.org/project/webform_deprecated",
+        "docs": "https://www.drupal.org/docs/8/modules/webform",
+        "forum": "https://drupal.stackexchange.com/questions/tagged/webform"
+    },
+    "require": {
+        "algolia/places": "*",
+        "jquery/geocomplete": "*",
+        "jquery/icheck": "*",
+        "jquery/toggles": "*"
+    },
+    "repositories": {
+        "algolia.places": {
+            "type": "package",
+            "package": {
+                "name": "algolia/places",
+                "version": "1.19.0",
+                "type": "drupal-library",
+                "extra": {
+                    "installer-name": "algolia.places"
+                },
+                "dist": {
+                    "url": "https://registry.npmjs.org/places.js/-/places.js-1.19.0.tgz",
+                    "type": "tar"
+                },
+                "license": "MIT"
+            }
+        },
+        "jquery.geocomplete": {
+            "type": "package",
+            "package": {
+                "name": "jquery/geocomplete",
+                "version": "1.7.0",
+                "type": "drupal-library",
+                "extra": {
+                    "installer-name": "jquery.geocomplete"
+                },
+                "dist": {
+                    "url": "https://github.com/ubilabs/geocomplete/archive/refs/tags/1.7.0.zip",
+                    "type": "zip"
+                },
+                "license": "MIT"
+            }
+        },
+        "jquery.icheck": {
+            "type": "package",
+            "package": {
+                "name": "jquery/icheck",
+                "version": "1.0.2",
+                "type": "drupal-library",
+                "extra": {
+                    "installer-name": "jquery.icheck"
+                },
+                "dist": {
+                    "url": "https://api.github.com/repos/drgullin/icheck/zipball/8a6eb37bd7dab1e843c1b630c91c6398ff409d05",
+                    "type": "zip"
+                },
+                "license": "MIT"
+            }
+        },
+        "jquery.toggles": {
+            "type": "package",
+            "package": {
+                "name": "jquery/toggles",
+                "version": "4.0.0",
+                "type": "drupal-library",
+                "extra": {
+                    "installer-name": "jquery.toggles"
+                },
+                "dist": {
+                    "url": "https://github.com/simontabor/jquery-toggles/archive/refs/tags/v4.0.0.zip",
+                    "type": "zip"
+                },
+                "license": "MIT"
+            }
+        }
+    }
+}

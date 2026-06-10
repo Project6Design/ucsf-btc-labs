@@ -1,0 +1,17 @@
+{%
+    set classes = [
+    'item-list',
+]
+%}
+{% if title is not empty -%}
+    <h3>{{ title }}</h3>
+{%- endif %}
+<div{{ attributes.addClass(classes) }}>
+    <ul{{ list.attributes.setAttribute('role', 'list') }}>
+        {% for row in rows %}
+            <li{{ row.attributes.setAttribute('role', 'listitem') }}>
+                {{- row.content -}}
+            </li>
+        {% endfor %}
+    </ul>
+</div>

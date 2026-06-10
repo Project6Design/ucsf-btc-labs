@@ -12,10 +12,35 @@
         {
             "type": "composer",
             "url": "https://packages.drupal.org/8"
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "bower-asset/photoswipe",
+                "type": "drupal-library",
+                "version": "5.4.2",
+                "dist": {
+                    "url": "https://github.com/dimsemenov/PhotoSwipe/archive/refs/tags/v5.4.2.zip",
+                    "type": "zip"
+                }
+            }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "photoswipe/photoswipe-dynamic-caption-plugin",
+                "type": "drupal-library",
+                "version": "1.2.7",
+                "dist": {
+                    "url": "https://github.com/dimsemenov/photoswipe-dynamic-caption-plugin/archive/refs/tags/1.2.7.zip",
+                    "type": "zip"
+                }
+            }
         }
     ],
     "require": {
         "php": "^8.3",
+        "bower-asset/photoswipe": "^5",
         "composer/installers": "^1.12",
         "cweagans/composer-patches": "^1.7",
         "drupal/address": "^2.0",
@@ -52,7 +77,9 @@
         "drupal/ik_constant_contact": "^4.2",
         "drupal/imce": "^3.1",
         "drupal/jquery_ui": "^1.7",
+        "drupal/jquery_ui_datepicker": "^2.1",
         "drupal/jquery_ui_slider": "^2.1",
+        "drupal/jquery_ui_touch_punch": "^1.1",
         "drupal/linkit": "^7.0",
         "drupal/mailsystem": "^4.5",
         "drupal/masquerade": "^2.0",
@@ -77,16 +104,18 @@
         "drupal/upgrade_status": "^4.3",
         "drupal/url_embed": "^3.0",
         "drupal/webform": "^6.3@beta",
+        "drupal/webform_deprecated": "^6.3@beta",
         "drupal/webform_views": "^5.5",
         "drush/drush": "13.3.3",
         "embed/embed": "^4.4",
         "mglaman/composer-drupal-lenient": "^1.0",
-        "pantheon-systems/drupal-integrations": "^11"
+        "pantheon-systems/drupal-integrations": "^11",
+        "photoswipe/photoswipe-dynamic-caption-plugin": "^1.2"
     },
     "conflict": {
         "drupal/drupal": "*"
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true,
     "config": {
         "sort-packages": true,

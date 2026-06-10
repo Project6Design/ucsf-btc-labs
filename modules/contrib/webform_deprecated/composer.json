@@ -1,0 +1,37 @@
+{
+  "name": "drupal/webform_deprecated",
+  "description": "Where old Webform sub-modules go to die.",
+  "type": "drupal-module",
+  "license": "GPL-2.0-or-later",
+  "minimum-stability": "dev",
+  "homepage": "https://drupal.org/project/webform_deprecated",
+  "authors": [
+    {
+      "name": "Jacob Rockowitz (jrockowitz)",
+      "homepage": "https://www.drupal.org/u/jrockowitz",
+      "role": "Maintainer"
+    },
+    {
+      "name": "Contributors",
+      "homepage": "https://www.drupal.org/node/7404/committers",
+      "role": "Contributor"
+    }
+  ],
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/webform_deprecated?version=8.x",
+    "source": "https://git.drupalcode.org/project/webform_deprecated",
+    "docs": "https://www.drupal.org/docs/8/modules/webform",
+    "forum": "https://drupal.stackexchange.com/questions/tagged/webform"
+  },
+  "extra": {
+    "drush": {
+      "services": {
+        "drush.services.yml": ">=11"
+      }
+    }
+  },
+  "require": {
+    "drupal/core": "^10.3 || ^11.0",
+    "drupal/webform": "^6.3"
+  }
+}

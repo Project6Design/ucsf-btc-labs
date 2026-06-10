@@ -203,6 +203,7 @@
       if ($.fn && typeof $.fn.slick === 'function') {
         $('.block-views-block-home-carousel-block-1 .item-list ul', context).each(function () {
           $(this).slick({
+            slide: 'li',
             adaptiveHeight: true,
             infinite: true,
             slidesToShow: 1,
@@ -228,6 +229,7 @@
       if ($.fn && typeof $.fn.slick === 'function') {
         $('.block-views-block-news-block-latest .item-list ul', context).each(function () {
           $(this).slick({
+            slide: 'li',
             adaptiveHeight: true,
             infinite: true,
             slidesToShow: 3,
