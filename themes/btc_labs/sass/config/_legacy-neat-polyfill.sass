@@ -1,0 +1,91 @@
+// Polyfill for old Bourbon Neat (1.x/2.x) API — replicates the original
+// fixed-column-width-to-fluid-percentage math, since Neat 3.0/4.0 dropped
+// this system entirely in favor of pure percentage grid maps.
+
+// Total width of the grid context (in same units as $column, e.g. px)
+@function grid-container-width($columns: $grid-columns)
+  @return ($column * $columns) + ($gutter * ($columns - 1))
+
+// Width of N columns, as a fluid percentage of the grid context
+@function flex-grid($n, $columns: $grid-columns)
+  @if $n == 0
+    @return 0
+  $width: percentage($n / $columns)
+  @return $width - flex-gutter($columns)
+
+// Gutter width as a fluid percentage of the grid context
+@function flex-gutter($columns: $grid-columns)
+  @return percentage($gutter / grid-container-width($columns))
+
+// span-columns(N) or span-columns(N of M)
+=span-columns($columns)
+  $n: if(type-of($columns) == list, nth($columns, 1), $columns)
+  $total: if(type-of($columns) == list, nth($columns, 3), $grid-columns)
+
+  float: left
+  display: block
+  margin-right: flex-gutter($total)
+  width: flex-grid($n, $total)
+
+  &:last-child
+    margin-right: 0
+
+// omega() or omega($nth)
+=omega($nth: null)
+  @if $nth
+    &:nth-child(#{$nth})
+      margin-right: 0
+    &:nth-child(#{$nth}+1)
+      clear: both
+  @else
+    &:last-child
+      margin-right: 0
+
+// omega-reset($nth) — undo omega() on a given nth-child
+=omega-reset($nth)
+  &:nth-child(#{$nth})
+    margin-right: flex-gutter()
+  &:nth-child(#{$nth}+1)
+    clear: none
+
+// new-breakpoint(min-width Xem N) or new-breakpoint(max-width Xpx N)
+// Parses old-style space-separated args, ignoring the trailing
+// column-count number, and returns a media feature query string.
+@function new-breakpoint($list)
+  $len: length($list)
+  $end: $len
+  $last: nth($list, $len)
+
+  @if type-of($last) == number and unitless($last)
+    $end: $len - 1
+
+  $query: ''
+  $i: 1
+  @while $i < $end
+    $feature: nth($list, $i)
+    $value: nth($list, $i + 1)
+    @if $query != ''
+      $query: $query + ' and '
+    $query: $query + '(' + $feature + ': ' + $value + ')'
+    $i: $i + 2
+
+  @return $query
+
+// shift(N) or shift(N of M) — moves an element left/right by N columns
+=shift($columns)
+  $n: if(type-of($columns) == list, nth($columns, 1), $columns)
+  $total: if(type-of($columns) == list, nth($columns, 3), $grid-columns)
+
+  margin-left: flex-grid($n, $total) + flex-gutter($total)
+
+// outer-container([$local-max-width]) — the grid's outermost wrapping container
+=outer-container($local-max-width: $max-width)
+  max-width: $local-max-width
+  margin-left: auto
+  margin-right: auto
+  @include clearfix
+
+// media($breakpoint) { ... }
+=media($query)
+  @media screen and #{$query}
+    @content

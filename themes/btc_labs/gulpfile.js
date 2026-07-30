@@ -1,7 +1,7 @@
 // Initialize modules
 var gulp = require('gulp');
 var cssnano = require('gulp-cssnano');
-var sass = require('gulp-sass');
+var sass = require('gulp-sass')(require('sass'));
 var uglify = require('gulp-uglify');
 // var svgstore = require('gulp-svgstore');
 // var svgmin = require('gulp-svgmin');
@@ -32,10 +32,12 @@ gulp.task('svgstore', function () {
 
 // Sass task: compiles the style.scss file into style.css
 gulp.task('sass', function () {
-  return gulp.src('sass/**/*.sass')
-    .pipe(sass().on('error', sass.logError)) // compile SCSS to CSS
-    .pipe(cssnano()) // minify CSS
-    .pipe(gulp.dest('./css')); // put final CSS in dist folder
+    return gulp.src('sass/**/*.sass')
+        .pipe(sass({
+            loadPaths: ['node_modules/bourbon/app/assets/stylesheets']
+        }).on('error', sass.logError))
+        .pipe(cssnano())
+        .pipe(gulp.dest('./css'));
 });
 
 // JS task: sourcemap, uglify
