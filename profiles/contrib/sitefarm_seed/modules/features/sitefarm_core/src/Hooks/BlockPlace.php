@@ -2,7 +2,7 @@
 
 namespace Drupal\sitefarm_core\Hooks;
 
-use Drupal\Core\Path\PathMatcher;
+use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\Core\Url;
 
 /**
@@ -26,7 +26,7 @@ class BlockPlace {
    *
    * @param \Drupal\Core\Path\PathMatcher $pathMatcher
    */
-  public function __construct(PathMatcher $pathMatcher) {
+  public function __construct(PathMatcherInterface $pathMatcher) {
     $this->pathMatcher = $pathMatcher;
   }
 
