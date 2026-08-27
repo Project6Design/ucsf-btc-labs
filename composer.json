@@ -165,6 +165,9 @@
             ]
         },
         "patches": {
+            "drupal/core": {
+                "Table cells have no more (min-)height": "https://git.drupalcode.org/project/drupal/-/merge_requests/16202.diff"
+            },
             "drupal/sharemessage": {
                 "Drupal 11 compatibility": "https://www.drupal.org/files/issues/2025-05-31/sharemessage.1.x-dev.rector.patch"
             },
