@@ -60,7 +60,7 @@ class AutocompleteController implements ContainerInjectionInterface {
     // The erroneous variable name $linkit_profile_id is to avoid BC breaks.
     $string = $request->query->get('q');
 
-    $suggestionCollection = $this->suggestionManager->getSuggestions($linkit_profile_id, mb_strtolower($string));
+    $suggestionCollection = $this->suggestionManager->getSuggestions($linkit_profile_id, $string);
 
     /*
      * If there are no suggestions from the matcher plugins, we have to add a

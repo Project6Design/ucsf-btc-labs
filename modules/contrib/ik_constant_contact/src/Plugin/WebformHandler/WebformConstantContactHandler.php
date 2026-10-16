@@ -4,7 +4,7 @@ namespace Drupal\ik_constant_contact\Plugin\WebformHandler;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Serialization\Yaml;
+use Drupal\Component\Serialization\Yaml;
 use Drupal\webform\Plugin\WebformHandlerBase;
 use Drupal\webform\WebformSubmissionInterface;
 use Drupal\webform\WebformTokenManagerInterface;
@@ -26,7 +26,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
  */
 class WebformConstantContactHandler extends WebformHandlerBase {
 
-    /**
+  /**
    * Drupal\Core\Cache\CacheBackendInterface.
    *
    * @var \Drupal\Core\Cache\CacheBackendInterface
@@ -34,7 +34,7 @@ class WebformConstantContactHandler extends WebformHandlerBase {
    */
   protected $cache;
 
-    /**
+  /**
    * Drupal\ik_constant_contact\Service\ConstantContact.
    *
    * @var \Drupal\ik_constant_contact\Service\ConstantContact
@@ -66,20 +66,21 @@ class WebformConstantContactHandler extends WebformHandlerBase {
   }
 
   /**
-   * Set Cache dependency
+   * Set Cache dependency.
    */
   protected function setCacheManager(CacheBackendInterface $cache) {
     $this->cache = $cache;
   }
+
   /**
-   * Set Token Manager dependency
+   * Set Token Manager dependency.
    */
   protected function setTokenManager(WebformTokenManagerInterface $token_manager) {
     $this->tokenManager = $token_manager;
   }
 
   /**
-   * Set Constant Contact dependency
+   * Set Constant Contact dependency.
    */
   protected function setConstantContact(ConstantContact $constantContact) {
     $this->constantContact = $constantContact;
@@ -97,7 +98,6 @@ class WebformConstantContactHandler extends WebformHandlerBase {
       $email_summary = $fields[$this->configuration['email']]['#title'];
     }
     $email_summary = '<strong>' . $this->t('Email') . ': </strong>' . $email_summary;
-
 
     $list_summary = $this->configuration['list'];
     if (!empty($lists[$this->configuration['list']])) {
@@ -184,7 +184,7 @@ class WebformConstantContactHandler extends WebformHandlerBase {
       '#required' => TRUE,
       '#default_value' => $default_value,
       '#options' => $options,
-      '#empty_option'=> $this->t('- Select an option -'),
+      '#empty_option' => $this->t('- Select an option -'),
       '#description' => $this->t('Select the email element you want to use for subscribing to the Constant Contact list specified above. Alternatively, you can also use the Other field for token replacement.'),
     ];
 
@@ -207,7 +207,6 @@ class WebformConstantContactHandler extends WebformHandlerBase {
   public static function ajaxConstantContactListHandler(array $form, FormStateInterface $form_state) {
     return $form['settings']['constant_contact'];
   }
-
 
   /**
    * Submit callback for the refresh button.
@@ -236,7 +235,7 @@ class WebformConstantContactHandler extends WebformHandlerBase {
    * {@inheritdoc}
    */
   public function postSave(WebformSubmissionInterface $webform_submission, $update = TRUE) {
-    // If update, do nothing
+    // If update, do nothing.
     if ($update) {
       return;
     }
@@ -246,15 +245,15 @@ class WebformConstantContactHandler extends WebformHandlerBase {
     $configuration = $this->tokenManager->replace($this->configuration, $webform_submission);
 
     // Check if we are using a token for the list field & replace value.
-    if (isset($this->configuration['list']) && strpos($this->configuration['list'], '[webform_submission:values:') !== false) {
-      $configuration['list'] = null;
+    if (isset($this->configuration['list']) && strpos($this->configuration['list'], '[webform_submission:values:') !== FALSE) {
+      $configuration['list'] = NULL;
       $fieldToken = str_replace(['[webform_submission:values:', ']'], '', $this->configuration['list']);
 
       if (isset($fields['data'][$fieldToken])) {
         if (is_string($fields['data'][$fieldToken])) {
           $configuration['list'] = [$fields['data'][$fieldToken]];
         }
-        else if (is_array($fields['data'][$fieldToken])) {
+        elseif (is_array($fields['data'][$fieldToken])) {
           $configuration['list'] = $fields['data'][$fieldToken];
         }
       }
@@ -298,11 +297,12 @@ class WebformConstantContactHandler extends WebformHandlerBase {
 
       if (is_string($configuration['list'])) {
         $lists = [$configuration['list']];
-      } else {
+      }
+      else {
         $lists = $configuration['list'];
       }
 
-      $this->constantContact->submitContactForm($data , $lists);
+      $this->constantContact->submitContactForm($data, $lists);
     }
     else {
       if (empty($configuration['list'])) {

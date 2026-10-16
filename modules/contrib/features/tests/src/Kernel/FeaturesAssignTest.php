@@ -2,16 +2,18 @@
 
 namespace Drupal\Tests\features\Kernel;
 
-use Drupal\KernelTests\KernelTestBase;
+use Drupal\Core\Config\InstallStorage;
 use Drupal\features\ConfigurationItem;
 use Drupal\features\FeaturesManagerInterface;
-use Drupal\Core\Config\InstallStorage;
+use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * The Feature Assign test.
- *
- * @group features
  */
+#[RunTestsInSeparateProcesses]
+#[Group('features')]
 class FeaturesAssignTest extends KernelTestBase {
 
   const PACKAGE_NAME = 'my_test_package';
@@ -47,17 +49,10 @@ class FeaturesAssignTest extends KernelTestBase {
   protected $bundle;
 
   /**
-   * The variable.
-   *
-   * @var mixed
-   * @todo Remove the disabled strict config schema checking.
-   */
-  protected $strictConfigSchema = FALSE;
-
-  /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->strictConfigSchema = FALSE;
     parent::setUp();
 
     $this->installConfig('features');

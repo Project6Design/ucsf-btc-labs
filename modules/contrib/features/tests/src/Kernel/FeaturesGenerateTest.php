@@ -8,10 +8,14 @@ use Drupal\features\Entity\FeaturesBundle;
 use Drupal\features\FeaturesBundleInterface;
 use Drupal\KernelTests\KernelTestBase;
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @group features
+ * Test Generation of Features.
  */
+#[RunTestsInSeparateProcesses]
+#[Group('features')]
 class FeaturesGenerateTest extends KernelTestBase {
 
   const PACKAGE_NAME = 'my_test_package';
@@ -30,23 +34,29 @@ class FeaturesGenerateTest extends KernelTestBase {
   ];
 
   /**
+   * The Features Manager interface.
+   *
    * @var \Drupal\features\FeaturesManagerInterface
    */
   protected $featuresManager;
 
   /**
+   * The Generator interface.
+   *
    * @var \Drupal\features\FeaturesGeneratorInterface
    */
   protected $generator;
 
   /**
+   * The File System.
+   *
    * @var \Drupal\Core\File\FileSystem
    */
   protected $fileSystem;
 
-  protected $strictConfigSchema = FALSE;
-
   /**
+   * The Assigner interface.
+   *
    * @var \Drupal\features\FeaturesAssignerInterface
    */
   protected $assigner;
@@ -55,6 +65,7 @@ class FeaturesGenerateTest extends KernelTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->strictConfigSchema = FALSE;
     parent::setUp();
 
     $this->installConfig('features');
@@ -102,7 +113,7 @@ class FeaturesGenerateTest extends KernelTestBase {
   }
 
   /**
-   *
+   * Test Generator with Bundle.
    */
   public function testGeneratorWithBundle() {
     $filename = $this->fileSystem->getTempDirectory() . '/' . self::BUNDLE_NAME . '_' . self::PACKAGE_NAME . '.tar.gz';

@@ -3,18 +3,19 @@
 namespace Drupal\linkit\Plugin\Linkit\Matcher;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\linkit\Attribute\Matcher;
 use Drupal\linkit\MatcherBase;
 use Drupal\linkit\Suggestion\DescriptionSuggestion;
 use Drupal\linkit\Suggestion\SuggestionCollection;
 
 /**
  * Provides specific linkit matchers for emails.
- *
- * @Matcher(
- *   id = "email",
- *   label = @Translation("Email"),
- * )
  */
+#[Matcher(
+  id: "email",
+  label: new TranslatableMarkup('Email'),
+)]
 class EmailMatcher extends MatcherBase {
 
   /**

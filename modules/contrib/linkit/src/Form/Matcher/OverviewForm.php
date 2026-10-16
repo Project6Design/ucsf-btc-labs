@@ -20,7 +20,7 @@ class OverviewForm extends FormBase {
    *
    * @var \Drupal\linkit\ProfileInterface
    */
-  private $linkitProfile;
+  protected $linkitProfile;
 
   /**
    * The matcher manager.

@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\linkit\Functional;
 
 use Drupal\linkit\Tests\ProfileCreationTrait;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests creating, loading and deleting profiles.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class ProfileAdminTest extends LinkitBrowserTestBase {
 
   use ProfileCreationTrait;

@@ -28,12 +28,7 @@
     }
   },
   "require": {
-    "drupal/core": "^9 || ^10 || ^11",
-    "vardot/ckeditor5-anchor-drupal": "~2.0"
-  },
-  "extra": {
-    "branch-alias": {
-      "dev-3.0.x": "3.0.x-dev"
-    }
+    "drupal/core": "^10 || ^11 || ^12",
+    "vardot/ckeditor5-anchor-drupal": "^1.0.3 || ^2.0.5"
   }
 }

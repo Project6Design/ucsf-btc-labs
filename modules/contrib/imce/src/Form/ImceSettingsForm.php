@@ -145,7 +145,7 @@ class ImceSettingsForm extends ConfigFormBase {
    * @return array
    *   Array of headers items.
    */
-  public function buildHeaderProfilesTable(array $wrappers = NULL): array {
+  public function buildHeaderProfilesTable(?array $wrappers = NULL): array {
     $wrappers = $wrappers ?? $this->streamWrapperManager->getNames(StreamWrapperInterface::WRITE_VISIBLE);
     $imce_url = Url::fromRoute('imce.page')->toString();
     $rp_table = ['#header' => [$this->t('Role')]];

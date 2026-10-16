@@ -5,6 +5,7 @@
  * Install, uninstall and update hooks for Photoswipe module.
  */
 
+use Drupal\Core\Hook\Attribute\LegacyRequirementsHook;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
@@ -12,6 +13,7 @@ use Drupal\layout_builder\Entity\LayoutBuilderEntityViewDisplay;
 /**
  * Implements hook_requirements().
  */
+#[LegacyRequirementsHook]
 function photoswipe_requirements($phase) {
   $requirements = [];
   // If we are not in runtime phase, there is nothing to do. So bail out early.
@@ -461,4 +463,20 @@ function photoswipe_update_9011() {
   \Drupal::configFactory()->getEditable('photoswipe.settings')
     ->set('options.showHideAnimationType', 'zoom')
     ->save();
+}
+
+/**
+ * Add download button tooltip setting.
+ */
+function photoswipe_update_9012() {
+  \Drupal::configFactory()->getEditable('photoswipe.settings')
+    ->set('options.downloadTitle', 'Download')
+    ->save();
+}
+
+/**
+ * New dependencies. Rebuilding the container.
+ */
+function photoswipe_update_9013() {
+  \Drupal::service('kernel')->rebuildContainer();
 }

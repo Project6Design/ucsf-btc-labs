@@ -1,23 +1,27 @@
-import {Command} from 'ckeditor5/src/core';
-import {findAttributeRange} from 'ckeditor5/src/typing';
-import {first} from 'ckeditor5/src/utils';
+import { Command } from 'ckeditor5/src/core';
+import { findAttributeRange } from 'ckeditor5/src/typing';
+import { first } from 'ckeditor5/src/utils';
 
 class FileUploadCommand extends Command {
-
   /**
    * @inheritDoc
    */
   refresh() {
-    const model = this.editor.model;
-    const selection = model.document.selection;
-    const selectedElement = selection.getSelectedElement() || first(selection.getSelectedBlocks());
+    const { model } = this.editor;
+    const { selection } = model.document;
+    const selectedElement =
+      selection.getSelectedElement() || first(selection.getSelectedBlocks());
 
-    if (this.isLinkableElement(selectedElement, model.schema)) {
-      this.value = selectedElement.getAttribute('fileDataEntityType') === 'file';
+    if (this.constructor.isLinkableElement(selectedElement, model.schema)) {
+      this.value =
+        selectedElement.getAttribute('fileDataEntityType') === 'file';
       this.isEnabled = model.schema.checkAttribute(selectedElement, 'linkHref');
     } else {
       this.value = selection.getAttribute('fileDataEntityType') === 'file';
-      this.isEnabled = model.schema.checkAttributeInSelection(selection, 'linkHref');
+      this.isEnabled = model.schema.checkAttributeInSelection(
+        selection,
+        'linkHref',
+      );
     }
   }
 
@@ -25,11 +29,11 @@ class FileUploadCommand extends Command {
    * Handles command to create/update file link.
    */
   execute(attributes) {
-    const editor = this.editor;
-    const model = editor.model;
+    const { editor } = this;
+    const { model } = editor;
 
-    model.change(writer => {
-      this.updateFileLink(writer, model, attributes);
+    model.change((writer) => {
+      this.constructor.updateFileLink(writer, model, attributes);
     });
   }
 
@@ -40,8 +44,8 @@ class FileUploadCommand extends Command {
    * @param model
    * @param attributes
    */
-  updateFileLink(writer, model, attributes = {}) {
-    const selection = model.document.selection;
+  static updateFileLink(writer, model, attributes = {}) {
+    const { selection } = model.document;
 
     const attrMaps = {
       linkHref: 'href',
@@ -55,8 +59,12 @@ class FileUploadCommand extends Command {
       const position = selection.getFirstPosition();
 
       Object.entries(attrMaps).forEach(([attr, key]) => {
-        const linkRange = findAttributeRange(position, attr, selection.getAttribute(attr), model);
-        console.log(linkRange);
+        const linkRange = findAttributeRange(
+          position,
+          attr,
+          selection.getAttribute(attr),
+          model,
+        );
         writer.setAttribute(attr, attributes[key], linkRange);
       });
     } else {
@@ -87,22 +95,22 @@ class FileUploadCommand extends Command {
   }
 
   /**
-   * Returns `true` if the specified `element` can be linked (the element allows the `linkHref` attribute).
+   * Returns `true` if the specified `element` can be linked (the element
+   * allows the `linkHref` attribute).
    *
    * This function is adopted from the LinkUi plugin.
    *
    * @params {module:engine/model/element~Element|null} element
    * @params {module:engine/model/schema~Schema} schema
-   * @returns {Boolean}
+   * @return {Boolean}
    */
-  isLinkableElement(element, schema) {
+  static isLinkableElement(element, schema) {
     if (!element) {
       return false;
     }
 
     return schema.checkAttribute(element.name, 'linkHref');
   }
-
 }
 
 export default FileUploadCommand;

@@ -4,7 +4,7 @@ description: 'Support module for testing Photoswipe Twig extensions.'
 package: Testing
 core_version_requirement: ^9.3 || ^10 || ^11
 
-# Information added by Drupal.org packaging script on 2025-05-07
-version: '5.0.5'
+# Information added by Drupal.org packaging script on 2026-10-14
+version: '5.0.12'
 project: 'photoswipe'
-datestamp: 1746623731
+datestamp: 1791998154

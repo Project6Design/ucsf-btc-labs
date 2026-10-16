@@ -1,5 +1,6 @@
 import { Plugin } from 'ckeditor5/src/core';
 import { findAttributeRange } from 'ckeditor5/src/typing';
+import { getCurrentLinkRange, getMajorVersion, extractTextFromLinkRange } from './utils.js';
 
 export default class LinkitEditing extends Plugin {
   init() {
@@ -71,37 +72,108 @@ export default class LinkitEditing extends Plugin {
       linkCommandExecuting = true;
       // Any decorators should be an object provided as the second element to
       // the execute params.
-      const extraAttributeValues = args[1];
+      // If no linkit_attributes passed in event arguments (eg decorator updated), then get values from state.
+      let linkitAttributes = [];
+      const decoratorsArgIndex = 1;
+      if (args && args[decoratorsArgIndex] && !args[decoratorsArgIndex]['linkit_attributes']) {
+        this.attrs.forEach((attribute) => {
+          linkitAttributes[attribute] = evt.source[attribute];
+        });
+        args[decoratorsArgIndex]['linkit_attributes'] = linkitAttributes;
+      }
+      else {
+        linkitAttributes = args[decoratorsArgIndex]['linkit_attributes'];
+      }
+      args[decoratorsArgIndex]['linkit_attributes'] = linkitAttributes;
+      const extraAttributeValues = linkitAttributes;
       const model = this.editor.model;
       const selection = model.document.selection;
+      const displayedText = args[args.length - 1] || args[1]['linkit_attributes']['displayedText'];
+      // Linkit can update the Href value, so we need to know what the updated
+      // value is to properly target ranges when the selection is collapsed. See
+      // ...if (selection.isCollapsed)... below.
+      const currentHref = args[0];
+
+      // Remove linkit_attributes from the decorators object before passing
+      // to the link command. The CKEditor5 link command iterates over ALL
+      // keys in the decorators and calls writer.setAttribute() for each.
+      // Passing linkit_attributes (an object) as a decorator causes a bogus
+      // model attribute to be set, which corrupts the Document Differ when
+      // combined with text replacement at paragraph boundaries.
+      // The entity attribute values are already captured in extraAttributeValues.
+      delete args[decoratorsArgIndex]['linkit_attributes'];
 
       // Wrapping the original command execution in a model.change() block to
       // make sure there's a single undo step when the extra attribute is added.
       model.change((writer) => {
+        const batch = writer.batch;
+
+        // Execute the link command. In CKEditor5 v45+, this handles
+        // text replacement and sets linkHref.
         editor.execute('link', ...args);
 
-        const firstPosition = selection.getFirstPosition();
+        // Enqueue extra attribute changes in a SEPARATE change block
+        // using the same batch (single undo step). This separation
+        // lets post-fixers (including GHS) process the text replacement
+        // before we add extra attributes, preventing the Differ crash.
+        model.enqueueChange(batch, (attrWriter) => {
 
-        this.attrs.forEach((attribute) => {
-          if (selection.isCollapsed) {
-            const node = firstPosition.textNode || firstPosition.nodeBefore;
-
-            if (extraAttributeValues[attribute]) {
-              writer.setAttribute(attribute, extraAttributeValues[attribute], writer.createRangeOn(node));
-            } else {
-              writer.removeAttribute(attribute, writer.createRangeOn(node));
-            }
-
-            writer.removeSelectionAttribute(attribute);
-          } else {
-            const ranges = model.schema.getValidRanges(selection.getRanges(), attribute);
-
-            for (const range of ranges) {
+          const updateAttributes = (range, removeSelection) => {
+            this.attrs.forEach((attribute) => {
               if (extraAttributeValues[attribute]) {
-                writer.setAttribute(attribute, extraAttributeValues[attribute], range);
+                attrWriter.setAttribute(attribute, extraAttributeValues[attribute], range);
               } else {
-                writer.removeAttribute(attribute, range);
+                attrWriter.removeAttribute(attribute, range);
               }
+              if (removeSelection) {
+                attrWriter.setSelection(range.end);
+                const { plugins } = this.editor;
+                if (plugins.has('TwoStepCaretMovement') && getMajorVersion(CKEDITOR_VERSION) >= 45) {
+                  // After replacing the text of the link, we need to move the caret to the end of the link,
+                  // override it's gravity to forward to prevent keeping e.g. bold attribute on the caret
+                  // which was previously inside the link.
+                  //
+                  // If the plugin is not available, the caret will be placed at the end of the link and the
+                  // bold attribute will be kept even if command moved caret outside the link.
+                  plugins.get('TwoStepCaretMovement')._handleForwardMovement();
+                } else {
+                  // Remove any attributes to prevent link splitting.
+                  attrWriter.removeSelectionAttribute(attribute);
+                }
+              }
+            });
+          };
+
+          const updateLinkTextIfNeeded = (range, displayedText) => {
+            const linkText = extractTextFromLinkRange(range);
+            if (!linkText) {
+              return range;
+            }
+            // In case target attributes are updated or
+            // Legacy check for CKEditor < v45 storage; Once Drupal < 10.3/11.2
+            // are unsupported, this can be removed.
+            if (getMajorVersion(CKEDITOR_VERSION) < 45 && typeof displayedText == "object") {
+              displayedText = linkText;
+            }
+            // In a scenario where the displayedText is blank, fall back on the
+            // linkText, and if that is empty, use the href from args[0].
+            let newText = displayedText || linkText || args[0];
+            let newRange = attrWriter.createRange(range.start, range.start.getShiftedBy(linkText.length));
+            return newRange;
+          };
+
+          if (selection.isCollapsed) {
+            let range = getCurrentLinkRange(model, selection, currentHref);
+            if (!range) {
+              console.info('No link range found');
+              return;
+            }
+            range = updateLinkTextIfNeeded(range, displayedText);
+            updateAttributes(range, typeof displayedText !== 'object');
+          } else {
+            const ranges = model.schema.getValidRanges(selection.getRanges(), 'linkDataEntityType');
+            for (const range of ranges) {
+              updateAttributes(range);
             }
           }
         });

@@ -6,6 +6,7 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\FuncCall;
 use PHPStan\Analyser\Scope;
 use PHPStan\Rules\Rule;
+use PHPStan\Rules\RuleErrorBuilder;
 use function in_array;
 use function sprintf;
 use function strtolower;
@@ -15,8 +16,32 @@ use function strtolower;
  *
  * @implements Rule<FuncCall>
  */
-class DiscouragedFunctionsRule implements Rule
+final class DiscouragedFunctionsRule implements Rule
 {
+    private const DISCOURAGED_FUNCTIONS = [
+        // Devel module debugging functions.
+        'dargs',
+        'dcp',
+        'dd',
+        'dfb',
+        'dfbt',
+        'dpm',
+        'dpq',
+        'dpr',
+        'dprint_r',
+        'drupal_debug',
+        'dsm',
+        'dvm',
+        'dvr',
+        'kdevel_print_object',
+        'kpr',
+        'kprint_r',
+        'sdpm',
+        // Functions which are not available on all
+        // PHP builds.
+        'fnmatch',
+    ];
+
     public function getNodeType(): string
     {
         return FuncCall::class;
@@ -29,34 +54,14 @@ class DiscouragedFunctionsRule implements Rule
         }
         $name = strtolower((string)$node->name);
 
-        $discouragedFunctions = [
-            // Devel module debugging functions.
-            'dargs',
-            'dcp',
-            'dd',
-            'dfb',
-            'dfbt',
-            'dpm',
-            'dpq',
-            'dpr',
-            'dprint_r',
-            'drupal_debug',
-            'dsm',
-            'dvm',
-            'dvr',
-            'kdevel_print_object',
-            'kpr',
-            'kprint_r',
-            'sdpm',
-            // Functions which are not available on all
-            // PHP builds.
-            'fnmatch',
-            // Functions which are a security risk.
-            'eval',
-        ];
-
-        if (in_array($name, $discouragedFunctions, true)) {
-            return [sprintf('Calls to function %s should not exist.', $name)];
+        if (in_array($name, self::DISCOURAGED_FUNCTIONS, true)) {
+            return [
+                RuleErrorBuilder::message(
+                    sprintf('Calls to function %s should not exist.', $name)
+                )
+                ->identifier('discouragedFunctions.discouragedFunctionCalled')
+                ->build()
+            ];
         }
         return [];
     }

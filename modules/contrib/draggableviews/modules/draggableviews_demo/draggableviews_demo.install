@@ -4,3 +4,56 @@
  * @file
  * Install, update and uninstall functions for the draggableviews demo module.
  */
+
+use Drupal\node\Entity\Node;
+
+/**
+ * Implements hook_install().
+ *
+ * Creates sample content for the draggableviews demo.
+ */
+function draggableviews_demo_install() {
+  // Create sample content nodes.
+  $sample_items = [
+    'First draggable item',
+    'Second draggable item',
+    'Third draggable item',
+    'Fourth draggable item',
+    'Fifth draggable item',
+  ];
+
+  foreach ($sample_items as $title) {
+    $node = Node::create([
+      'type' => 'draggableviews_demo',
+      'title' => $title,
+      'uid' => 1,
+      'status' => 1,
+    ]);
+    $node->save();
+  }
+
+  \Drupal::messenger()->addStatus(t('Draggableviews Demo has been installed with sample content. Visit <a href="@display">the display page</a> to see the content or <a href="@order">the order page</a> to reorder it.', [
+    '@display' => '/draggableviews-demo',
+    '@order' => '/draggableviews-demo/order',
+  ]));
+}
+
+/**
+ * Implements hook_uninstall().
+ *
+ * Removes sample content created by the module.
+ */
+function draggableviews_demo_uninstall() {
+  // Delete all nodes of type draggableviews_demo.
+  $storage_handler = \Drupal::entityTypeManager()->getStorage('node');
+  $query = \Drupal::entityQuery('node')
+    ->condition('type', 'draggableviews_demo')
+    ->accessCheck(FALSE);
+  $nids = $query->execute();
+
+  if (!empty($nids)) {
+    $entities = $storage_handler->loadMultiple($nids);
+    $storage_handler->delete($entities);
+    \Drupal::messenger()->addStatus(t('Draggableviews Demo sample content has been removed.'));
+  }
+}

@@ -3,6 +3,7 @@ algolia
 analyse
 Acquia
 abap
+cleantalk
 PARAVALU
 Lastname
 Firstname
@@ -66,6 +67,7 @@ Mailchimp
 maillog
 mailboxlayer
 mailsystem
+mglaman
 mimemail
 myemma
 nouser

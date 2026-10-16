@@ -2,10 +2,10 @@
 
 namespace Drupal\sitemap_book\Plugin\Derivative;
 
-use Drupal\book\BookManagerInterface;
 use Drupal\Component\Plugin\Derivative\DeriverBase;
 use Drupal\Core\Plugin\Discovery\ContainerDeriverInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\book\BookManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**

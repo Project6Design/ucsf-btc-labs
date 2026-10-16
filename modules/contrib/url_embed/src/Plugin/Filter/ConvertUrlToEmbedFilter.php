@@ -70,6 +70,8 @@ class ConvertUrlToEmbedFilter extends FilterBase {
    *   Processed text.
    */
   public static function convertUrls($text, $url_prefix = '') {
+    // Store the current text in case any of the preg_* functions fail.
+    $saved_text = $text;
     // Tags to skip and not recurse into.
     $ignore_tags = 'a|script|style|code|pre';
 
@@ -126,11 +128,11 @@ class ConvertUrlToEmbedFilter extends FilterBase {
     // HTML comments need to be handled separately, as they may contain HTML
     // markup, especially a '>'. Therefore, remove all comment contents and add
     // them back later.
-    _filter_url_escape_comments('', TRUE);
-    $text = preg_replace_callback('`<!--(.*?)-->`s', '_filter_url_escape_comments', $text);
+    self::escapeComments('', TRUE);
+    $text = preg_replace_callback('`<!--(.*?)-->`s', [ConvertUrlToEmbedFilter::class, 'escapeComments'], $text);
 
     // Split at all tags; ensures that no tags or attributes are processed.
-    $chunks = preg_split('/(<.+?>)/is', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $chunks = is_null($text) ? [''] : preg_split('/(<.+?>)/is', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
     // PHP ensures that the array consists of alternating delimiters and
     // literals, and begins and ends with a literal (inserting NULL as
     // required). Therefore, the first chunk is always text:
@@ -140,52 +142,64 @@ class ConvertUrlToEmbedFilter extends FilterBase {
     // no replacements are made.
     $open_tag = '';
 
-    for ($i = 0; $i < count($chunks); $i++) {
-      if ($chunk_type == 'text') {
-        // Only process this text if there are no unclosed $ignore_tags.
-        if ($open_tag == '') {
-          // If there is a match, inject a link into this chunk via the callback
-          // function contained in $task.
-          $chunks[$i] = preg_replace_callback(
-            $pattern,
-            function ($match) {
-                $info = \Drupal::service('url_embed')->getEmbed(Html::decodeEntities($match[1]));
-                if ($info && !empty($info->code->html)) {
-                    return '<drupal-url data-embed-url="' . $match[1] . '"></drupal-url>';
+    if ($chunks !== FALSE) {
+      for ($i = 0; $i < count($chunks); $i++) {
+        if ($chunk_type == 'text') {
+          // Only process this text if there are no unclosed $ignore_tags.
+          if ($open_tag == '') {
+            // If there is a match, inject a link into this chunk via the callback
+            // function contained in $task.
+            $chunks[$i] = preg_replace_callback(
+              $pattern,
+              function($match) {
+                try {
+                  $info = \Drupal::service('url_embed')->getEmbed(Html::decodeEntities($match[1]));
                 }
-              else {
-                return $match[1];
-              }
-            },
-            $chunks[$i]
-          );
-        }
-        // Text chunk is done, so next chunk must be a tag.
-        $chunk_type = 'tag';
-      }
-      else {
-        // Only process this tag if there are no unclosed $ignore_tags.
-        if ($open_tag == '') {
-          // Check whether this tag is contained in $ignore_tags.
-          if (preg_match("`<($ignore_tags)(?:\s|>)`i", $chunks[$i], $matches)) {
-            $open_tag = $matches[1];
+                catch (\Exception $e) {
+                  \Drupal::logger('url_embed')->error('URL: @url — @message', ['@url' => Html::decodeEntities($match[1]), '@message' => $e->getMessage()]);
+                  return $match[1];
+                }
+                if ($info && !empty($info->code->html)) {
+                  return '<drupal-url data-embed-url="' . $match[1] . '"></drupal-url>';
+                }
+                else {
+                  return $match[1];
+                }
+              },
+              $chunks[$i]
+            );
           }
+          // Text chunk is done, so next chunk must be a tag.
+          $chunk_type = 'tag';
         }
-        // Otherwise, check whether this is the closing tag for $open_tag.
         else {
-          if (preg_match("`<\/$open_tag>`i", $chunks[$i], $matches)) {
-            $open_tag = '';
+          // Only process this tag if there are no unclosed $ignore_tags.
+          if ($open_tag == '') {
+            // Check whether this tag is contained in $ignore_tags.
+            if (preg_match("`<($ignore_tags)(?:\s|>)`i", $chunks[$i], $matches)) {
+              $open_tag = $matches[1];
+            }
           }
+          // Otherwise, check whether this is the closing tag for $open_tag.
+          else {
+            if (preg_match("`<\/$open_tag>`i", $chunks[$i], $matches)) {
+              $open_tag = '';
+            }
+          }
+          // Tag chunk is done, so next chunk must be text.
+          $chunk_type = 'text';
         }
-        // Tag chunk is done, so next chunk must be text.
-        $chunk_type = 'text';
       }
+
+      $text = implode($chunks);
     }
 
-    $text = implode($chunks);
     // Revert to the original comment contents.
-    _filter_url_escape_comments('', FALSE);
-    return preg_replace_callback('`<!--(.*?)-->`', '_filter_url_escape_comments', $text);
+    self::escapeComments('', FALSE);
+    $text = preg_replace_callback('`<!--(.*?)-->`', [ConvertUrlToEmbedFilter::class, 'escapeComments'], $text);
+    // If there is no text at this point revert to the previous text.
+    return strlen((string) $text) > 0 ? $text : $saved_text;
+
   }
 
   /**
@@ -197,6 +211,46 @@ class ConvertUrlToEmbedFilter extends FilterBase {
     }
     else {
       return $this->t('You can convert plain URLs to embed elements.');
+    }
+  }
+
+  /**
+   * Escapes the contents of HTML comments.
+   *
+   * Callback for preg_replace_callback() within _filter_url().
+   *
+   * @param array $match
+   *   An array containing matches to replace from preg_replace_callback(),
+   *   whereas $match[1] is expected to contain the content to be filtered.
+   * @param bool|null $escape
+   *   (optional) A Boolean indicating whether to escape (TRUE) or unescape
+   *   comments (FALSE). Defaults to NULL, indicating neither. If TRUE,
+   *   statically cached $comments are reset.
+   */
+  protected static function escapeComments($match, $escape = NULL) {
+    static $mode, $comments = [];
+
+    if (isset($escape)) {
+      $mode = $escape;
+      if ($escape) {
+        $comments = [];
+      }
+      return;
+    }
+
+    // Replace all HTML comments with a '<!-- [hash] -->' placeholder.
+    if ($mode) {
+      $content = $match[1];
+      $hash = hash('sha256', $content);
+      $comments[$hash] = $content;
+      return "<!-- $hash -->";
+    }
+    // Or replace placeholders with actual comment contents.
+    else {
+      $hash = $match[1];
+      $hash = trim($hash);
+      $content = $comments[$hash];
+      return "<!--$content-->";
     }
   }
 

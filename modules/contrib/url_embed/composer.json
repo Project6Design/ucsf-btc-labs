@@ -9,7 +9,7 @@
   },
   "license": "GPL-2.0-or-later",
   "require": {
-    "drupal/core": "^10.1 || ^11",
+    "drupal/core": "^10.1 || ^11 || ^12",
     "embed/embed": "^4.4",
     "drupal/embed": "^1.4"
   }

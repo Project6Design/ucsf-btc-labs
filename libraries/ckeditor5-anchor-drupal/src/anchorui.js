@@ -9,16 +9,19 @@
 
 import { Plugin } from 'ckeditor5/src/core';
 import { ClickObserver } from 'ckeditor5/src/engine';
-import { addAnchorProtocolIfApplicable, isAnchorElement, LINK_KEYSTROKE } from './utils';
-
-import { ContextualBalloon } from 'ckeditor5/src/ui';
-
-import { clickOutsideHandler } from 'ckeditor5/src/ui';
-
-import { ButtonView } from 'ckeditor5/src/ui';
+import {
+	addAnchorProtocolIfApplicable,
+	isAnchorElement,
+	LINK_KEYSTROKE
+} from './utils';
+import {
+	ButtonView,
+	clickOutsideHandler,
+	ContextualBalloon,
+	CssTransitionDisablerMixin
+} from 'ckeditor5/src/ui';
 import AnchorFormView from './ui/anchorformview';
 import AnchorActionsView from './ui/anchoractionsview';
-
 import anchorIcon from '../theme/icons/anchor.svg';
 
 const VISUAL_SELECTION_MARKER_NAME = 'anchor-ui';
@@ -36,7 +39,7 @@ export default class AnchorUI extends Plugin {
 	 * @inheritDoc
 	 */
 	static get requires() {
-		return [ ContextualBalloon ];
+		return [ ContextualBalloon, 'LinkEditing', 'LinkUI' ];
 	}
 
 	/**
@@ -75,6 +78,13 @@ export default class AnchorUI extends Plugin {
 		 * @member {module:ui/panel/balloon/contextualballoon~ContextualBalloon}
 		 */
 		this._balloon = editor.plugins.get( ContextualBalloon );
+
+		/**
+		 * The LinkUI plugin instance.
+		 *
+		 * @private
+		 */
+		this.linkPlugin = editor.plugins.get( 'LinkUI' );
 
 		// Create toolbar buttons.
 		this._createToolbarAnchorButton();
@@ -137,6 +147,12 @@ export default class AnchorUI extends Plugin {
 			this._hideUI();
 		} );
 
+		// Show the LinkUI actions view when the "Link" button is clicked.
+		this.listenTo( actionsView, 'editanchorlink', () => {
+			this.linkPlugin._addActionsView();
+			this._hideUI();
+		} );
+
 		// Close the panel on esc key press when the **actions have focus**.
 		actionsView.keystrokes.set( 'Esc', ( data, cancel ) => {
 			this._hideUI();
@@ -163,7 +179,7 @@ export default class AnchorUI extends Plugin {
 		const anchorCommand = editor.commands.get( 'anchor' );
 		const defaultProtocol = editor.config.get( 'anchor.defaultProtocol' );
 
-		const formView = new AnchorFormView( editor.locale, anchorCommand );
+		const formView = new ( CssTransitionDisablerMixin( AnchorFormView ) )( editor.locale, anchorCommand );
 
 		formView.urlInputView.fieldView.bind( 'value' ).to( anchorCommand, 'value' );
 
@@ -293,6 +309,13 @@ export default class AnchorUI extends Plugin {
 	_addActionsView() {
 		if ( this._areActionsInPanel ) {
 			return;
+		}
+
+		// The Link button should only be visible when the anchor is on a link.
+		if ( this._isSelectedLinkedAnchor() ) {
+			this.actionsView.linkButtonView.isVisible = true;
+		} else {
+			this.actionsView.linkButtonView.isVisible = false;
 		}
 
 		this._balloon.add( {
@@ -645,6 +668,19 @@ export default class AnchorUI extends Plugin {
 				return null;
 			}
 		}
+	}
+
+	/**
+	 * Detects whether the current selection is a linked anchor.
+	 *
+	 * @private
+	 */
+	_isSelectedLinkedAnchor() {
+		const selection = this.editor.model.document.selection;
+		return (
+			selection.hasAttribute( 'anchorId' ) &&
+			selection.hasAttribute( 'linkHref' )
+		);
 	}
 
 	/**

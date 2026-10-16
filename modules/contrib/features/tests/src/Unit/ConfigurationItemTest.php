@@ -4,12 +4,13 @@ namespace Drupal\Tests\features\Unit;
 
 use Drupal\features\ConfigurationItem;
 use Drupal\features\FeaturesManagerInterface;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Drupal\features\ConfigurationItem
- * @group features
  */
+#[Group('features')]
 class ConfigurationItemTest extends TestCase {
 
   /**

@@ -13,7 +13,6 @@ photoswipe.cdn:
     //cdnjs.cloudflare.com/ajax/libs/photoswipe/5.4.4/umd/photoswipe.umd.min.js: { external: true }
 
 photoswipe.local:
-  version: VERSION
   license:
     name: MIT
     url: https://github.com/dimsemenov/PhotoSwipe/blob/master/LICENSE

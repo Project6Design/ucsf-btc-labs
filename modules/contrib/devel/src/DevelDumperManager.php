@@ -29,33 +29,13 @@ class DevelDumperManager implements DevelDumperManagerInterface {
   protected ImmutableConfig $config;
 
   /**
-   * The current account.
-   */
-  protected AccountProxyInterface $account;
-
-  /**
-   * The devel dumper plugin manager.
-   */
-  protected DevelDumperPluginManagerInterface $dumperManager;
-
-  /**
-   * The entity type manager.
-   */
-  protected EntityTypeManagerInterface $entityTypeManager;
-
-  /**
-   * The messenger.
-   */
-  protected MessengerInterface $messenger;
-
-  /**
    * Constructs a DevelDumperPluginManager object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The config factory service.
    * @param \Drupal\Core\Session\AccountProxyInterface $account
    *   The current account.
-   * @param \Drupal\devel\DevelDumperPluginManagerInterface $dumper_manager
+   * @param \Drupal\devel\DevelDumperPluginManagerInterface $dumperManager
    *   The devel dumper plugin manager.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager service.
@@ -66,30 +46,26 @@ class DevelDumperManager implements DevelDumperManagerInterface {
    */
   public function __construct(
     ConfigFactoryInterface $config_factory,
-    AccountProxyInterface $account,
-    DevelDumperPluginManagerInterface $dumper_manager,
-    EntityTypeManagerInterface $entityTypeManager,
-    MessengerInterface $messenger,
+    protected AccountProxyInterface $account,
+    protected DevelDumperPluginManagerInterface $dumperManager,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected MessengerInterface $messenger,
     TranslationInterface $string_translation,
   ) {
     $this->config = $config_factory->get('devel.settings');
-    $this->account = $account;
-    $this->dumperManager = $dumper_manager;
-    $this->entityTypeManager = $entityTypeManager;
-    $this->messenger = $messenger;
     $this->stringTranslation = $string_translation;
   }
 
   /**
    * Instances a new dumper plugin.
    *
-   * @param string $plugin_id
+   * @param string|null $plugin_id
    *   (optional) The plugin ID, defaults to NULL.
    *
    * @return \Drupal\devel\DevelDumperInterface
    *   Returns the devel dumper plugin instance.
    */
-  protected function createInstance($plugin_id = NULL) {
+  protected function createInstance(?string $plugin_id = NULL) {
     if (!$plugin_id || !$this->dumperManager->isPluginSupported($plugin_id)) {
       $plugin_id = $this->config->get('devel_dumper');
     }
@@ -100,7 +76,7 @@ class DevelDumperManager implements DevelDumperManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function dump($input, $name = NULL, $plugin_id = NULL): void {
+  public function dump($input, ?string $name = NULL, $plugin_id = NULL): void {
     if ($this->hasAccessToDevelInformation()) {
       $this->createInstance($plugin_id)->dump($input, $name);
     }
@@ -124,7 +100,7 @@ class DevelDumperManager implements DevelDumperManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function message($input, $name = NULL, $type = MessengerInterface::TYPE_STATUS, $plugin_id = NULL, $load_references = FALSE): void {
+  public function message($input, ?string $name = NULL, $type = MessengerInterface::TYPE_STATUS, ?string $plugin_id = NULL, $load_references = FALSE): void {
     if ($this->hasAccessToDevelInformation()) {
       $output = $this->export($input, $name, $plugin_id, $load_references);
       $this->messenger->addMessage($output, $type, TRUE);
@@ -134,7 +110,7 @@ class DevelDumperManager implements DevelDumperManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function debug($input, $name = NULL, $plugin_id = NULL) {
+  public function debug($input, ?string $name = NULL, ?string $plugin_id = NULL) {
     $output = $this->createInstance($plugin_id)->export($input, $name) . "\n";
     // The temp directory does vary across multiple simpletest instances.
     $file = $this->config->get('debug_logfile');
@@ -151,7 +127,7 @@ class DevelDumperManager implements DevelDumperManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function dumpOrExport($input, $name = NULL, $export = TRUE, $plugin_id = NULL) {
+  public function dumpOrExport($input, ?string $name = NULL, $export = TRUE, ?string $plugin_id = NULL) {
     if ($this->hasAccessToDevelInformation()) {
       $dumper = $this->createInstance($plugin_id);
       if ($export) {
@@ -167,7 +143,7 @@ class DevelDumperManager implements DevelDumperManagerInterface {
   /**
    * {@inheritdoc}
    */
-  public function exportAsRenderable($input, $name = NULL, $plugin_id = NULL, $load_references = FALSE): array {
+  public function exportAsRenderable($input, ?string $name = NULL, $plugin_id = NULL, $load_references = FALSE): array {
     if ($this->hasAccessToDevelInformation()) {
       if ($load_references && $input instanceof EntityInterface) {
         $input = $this->entityToArrayWithReferences($input);

@@ -7,6 +7,8 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\linkit\Annotation\Substitution as SubstitutionAnnotation;
+use Drupal\linkit\Attribute\Substitution as SubstitutionAttribute;
 
 /**
  * A plugin manager for the substitution plugins.
@@ -34,7 +36,14 @@ class SubstitutionManager extends DefaultPluginManager implements SubstitutionMa
    *   The entity type manager.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler, EntityTypeManagerInterface $entity_type_manager) {
-    parent::__construct('Plugin/Linkit/Substitution', $namespaces, $module_handler, 'Drupal\linkit\SubstitutionInterface', 'Drupal\linkit\Annotation\Substitution');
+    parent::__construct(
+      'Plugin/Linkit/Substitution',
+      $namespaces,
+      $module_handler,
+      SubstitutionInterface::class,
+      SubstitutionAttribute::class,
+      SubstitutionAnnotation::class
+    );
     $this->alterInfo('linkit_substitution');
     $this->setCacheBackend($cache_backend, 'linkit_substitution');
 

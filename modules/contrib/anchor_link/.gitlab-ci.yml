@@ -1,0 +1,129 @@
+################################################################################
+# GitLab CI for the CKEditor Anchor Link (anchor_link) module.
+#
+# Two halves:
+#   1. The standard Drupal CI validation jobs (composer, cspell, eslint, phpcs,
+#      phpstan, phpunit) provided by the drupalci templates. Every job is
+#      blocking (allow_failure: false).
+#   2. A functional-tests browser-test job, run by @vardot/varbase-e2e
+#      (Playwright + Cucumber-js): Drupal Core (Standard profile); the
+#      tests/features/drupal/** suite against a freshly installed site with
+#      the module enabled and the Anchor Test recipe applied.
+#
+# The varbase-e2e suite drives the site entirely through the browser. The first
+# feature (01-01-01-users-login) logs in as the Webmaster and provisions the
+# per-role testing users, so the before_script only has to build the site,
+# enable the module, provision the format and install Node + Playwright.
+################################################################################
+
+include:
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - "/includes/include.drupalci.main.yml"
+      - "/includes/include.drupalci.variables.yml"
+      - "/includes/include.drupalci.workflows.yml"
+
+variables:
+  COMPOSER_FLAGS: "--no-strict-lock"
+  COMPOSER_MEMORY_LIMIT: "-1"
+  # No yarn.lock is committed; Yarn 4 defaults to immutable installs and would
+  # refuse to create one. Allow lockfile creation in CI for every job.
+  YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
+
+# Temporary (#3625831): Twig 3.30.0 compiles Drupal core's drupal_escape filter
+# into a direct EscaperRuntime::escape() call, so every page render is a fatal
+# TypeError. Keep the CI build below 3.30 until a fixed Twig release is out.
+.composer-base:
+  before_script:
+    - composer require --dev --no-update "twig/twig:<3.30"
+
+# = Validate stage (all blocking) =
+composer-lint:
+  allow_failure: false
+cspell:
+  allow_failure: false
+eslint:
+  allow_failure: false
+phpcs:
+  allow_failure: false
+phpstan:
+  allow_failure: false
+phpunit:
+  allow_failure: false
+
+# = Reusable before_script fragments (via !reference) =
+.fragments:
+  web_db: &web_db
+    - mkdir -pv $CI_PROJECT_DIR/$_WEB_ROOT/sites/default/files
+    - mkdir -pv $CI_PROJECT_DIR/$_WEB_ROOT/sites/simpletest
+    - chmod -R 777 $CI_PROJECT_DIR/$_WEB_ROOT/sites/default/files
+    - chmod -R 777 $CI_PROJECT_DIR/$_WEB_ROOT/sites/simpletest
+    - rm -rf /var/www/html && ln -s $CI_PROJECT_DIR/$_WEB_ROOT /var/www/html
+    - chown -R www-data:www-data $CI_PROJECT_DIR
+    - service apache2 start
+    - export SIMPLETEST_DB=mysql://$MYSQL_USER:$MYSQL_PASSWORD@database/$MYSQL_DATABASE
+  node_playwright: &node_playwright
+
+    - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    - apt-get install -y nodejs
+    - node --version && npm --version
+    - 'test -f .yarnrc.yml || echo "nodeLinker: node-modules" > .yarnrc.yml'
+    # Back up cucumber.js - varbase-e2e's postinstall can clobber it under yarn 4.
+    - cp cucumber.js .cucumber.js.bak
+    - corepack enable
+    - yarn install
+    - cp .cucumber.js.bak cucumber.js && rm .cucumber.js.bak
+    - ./node_modules/.bin/playwright install --with-deps chromium
+
+# = Functional tests - Drupal Core (Standard profile) =
+functional-tests:
+  extends: .testing-job-base
+  needs: [composer]
+  # Override the parent's services - we only need the database. Playwright
+  # bundles its own Chromium, so Selenium and chromedriver are not needed.
+  services:
+    - name: $_CONFIG_DOCKERHUB_ROOT/$_TARGET_DB_TYPE-$_TARGET_DB_VERSION:$_TARGET_DB_IMAGE_TAG
+      alias: database
+  variables:
+    DRUPAL_ADMIN_USERNAME: "webmaster"
+    DRUPAL_ADMIN_PASSWORD: "dD.123123ddd"
+    DRUPAL_TEST_BASE_URL: "http://localhost"
+    LAUNCH_URL: "http://localhost"
+    FORCE_COLOR: "1"
+  artifacts:
+    when: always
+    paths:
+      - tests/reports/
+      - tests/screenshots/
+      - tests/videos/
+    expire_in: 7 days
+    reports:
+      junit: tests/reports/junit.xml
+  before_script:
+    - !reference [.fragments, web_db]
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT site:install standard
+        --db-url=$SIMPLETEST_DB --account-name=webmaster --account-pass=dD.123123ddd
+        --site-name="CKEditor Anchor Link Test" -y
+    # Enable the module and editor stack, then apply the test recipe which
+    # creates the "Anchor Test" CKEditor 5 format with the Anchor button. The
+    # recipe's own install list also enables anchor_link, but we enable it
+    # explicitly first so a recipe failure is easy to diagnose.
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT en -y
+        ckeditor5 editor filter anchor_link
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT recipe
+        $CI_PROJECT_DIR/tests/recipes/anchor_link_test -y
+    - $CI_PROJECT_DIR/vendor/bin/drush --root=$CI_PROJECT_DIR/$_WEB_ROOT cache:rebuild
+    - !reference [.fragments, node_playwright]
+  script:
+    # cucumber.js loads only `tests/features/drupal/**`. Disable varbase-e2e's
+    # auto HTML hook (it cannot await PDF generation from `process.on('exit')`)
+    # and run `generate-reports` explicitly after cucumber-js so both HTML and
+    # PDF land next to the JSON in `tests/reports/`.
+    - VARBASE_E2E_REPORT_DISABLE=1 ./node_modules/.bin/cucumber-js --config cucumber.js --tags "not @wip"
+    - node ./node_modules/@vardot/varbase-e2e/bin/generate-reports.js
+        --json tests/reports/cucumber_report.json
+        --out  tests/reports/cucumber_report.html
+        --format all
+        --pdf-out tests/reports/cucumber_report.pdf
+  allow_failure: false

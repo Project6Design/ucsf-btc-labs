@@ -2,8 +2,8 @@
 
 namespace Drupal\anchor_link\Plugin\CKEditorPlugin;
 
-use Drupal\editor\Entity\Editor;
 use Drupal\ckeditor\CKEditorPluginBase;
+use Drupal\editor\Entity\Editor;
 
 /**
  * Defines the "unlink" plugin.

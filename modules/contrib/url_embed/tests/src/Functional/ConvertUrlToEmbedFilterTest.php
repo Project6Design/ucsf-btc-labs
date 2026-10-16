@@ -2,14 +2,18 @@
 
 namespace Drupal\Tests\url_embed\Functional;
 
-use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\filter\Entity\FilterFormat;
+use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the url_embed_convert_links filter.
  *
  * @group url_embed
  */
+#[RunTestsInSeparateProcesses]
+#[Group('url_embed')]
 class ConvertUrlToEmbedFilterTest extends BrowserTestBase {
 
   /**

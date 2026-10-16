@@ -1,16 +1,11 @@
 ### Problem/Motivation
 
 #### Steps to reproduce
-```
-  Given 
-   When 
-   Then 
-```
 
 ### Proposed resolution
 
 
-### Remaining tasks
+### Remaining tasks:
 - [x] File an issue
 - [ ] Addition/Change/Update/Fix
 - [ ] Testing to ensure no regression

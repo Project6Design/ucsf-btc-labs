@@ -6,12 +6,14 @@ namespace Drupal\Tests\linkit\Kernel\Matchers;
 
 use Drupal\Tests\linkit\Kernel\LinkitKernelTestBase;
 use Drupal\user\Entity\Role;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests user matcher.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class UserMatcherTest extends LinkitKernelTestBase {
 
   /**

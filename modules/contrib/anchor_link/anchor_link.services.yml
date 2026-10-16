@@ -1,0 +1,5 @@
+
+services:
+  Drupal\anchor_link\Hook\AnchorLinkHooks:
+    class: Drupal\anchor_link\Hook\AnchorLinkHooks
+    autowire: true

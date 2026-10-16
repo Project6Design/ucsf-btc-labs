@@ -14,12 +14,14 @@ use Drupal\linkit\Plugin\Linkit\Substitution\Media as MediaSubstitutionPlugin;
 use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the substitution plugins.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class SubstitutionPluginTest extends LinkitKernelTestBase {
 
   /**
@@ -75,7 +77,7 @@ class SubstitutionPluginTest extends LinkitKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function register(ContainerBuilder $container) {
+  public function register(ContainerBuilder $container): void {
     parent::register($container);
 
     $container->register('stream_wrapper.public', 'Drupal\Core\StreamWrapper\PublicStream')
@@ -85,7 +87,7 @@ class SubstitutionPluginTest extends LinkitKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUpFilesystem() {
+  protected function setUpFilesystem(): void {
     $public_file_directory = $this->siteDirectory . '/files';
 
     mkdir($this->siteDirectory, 0775);

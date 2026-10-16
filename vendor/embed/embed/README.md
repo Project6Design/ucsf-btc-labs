@@ -1,8 +1,11 @@
-# Searching MAINTAINER
+> [!IMPORTANT]
+>
+> # Searching for maintainer
+> After several years working on Embed, I don't have the time or motivation to continue maintaining this project. I rarely write PHP code and am not aware of the latest features of PHP. If anyone wants to continue maintaining and evolving this library, please open an issue or contact me.
+> 
+> Meanwhile, I'll continue accepting PR from the community (I don't want this project to die), but won't be actively working on improving it.
+> Thanks!
 
-After 11 years since the first version of Embed was released, I don't have the time or motivation to continue maintaining this project. I rarely write PHP code and am not aware of the latest features of PHP. If anyone wants to continue maintaining and evolving this library, please open an issue or contact me.
-
-Meanwhile, I'll continue accepting PR from the community (I don't want this project to die), but won't be actively working on improving it. Thanks!
 
 # Embed
 
@@ -355,6 +358,74 @@ $info = $embed->get($url);
 ```
 
 Note: The built-in detectors does not require settings. This feature is only for convenience if you create a specific detector that requires settings.
+
+---
+
+## Testing
+
+### Running tests
+
+```bash
+composer test
+# or
+./vendor/bin/phpunit
+```
+
+### Snapshot modes
+
+The test suite uses cached HTTP responses and fixtures to avoid network requests during testing. You can control this behavior using environment variables:
+
+| Environment Variable | Description |
+|---------------------|-------------|
+| `UPDATE_EMBED_SNAPSHOTS=1` | Fetch from network and update both cache and fixtures |
+| `EMBED_STRICT_CACHE=1` | Fail if cache or fixture doesn't exist (useful for CI) |
+
+By default (no environment variables set), tests read from cache and generate missing files automatically.
+
+**Note:** If both `UPDATE_EMBED_SNAPSHOTS` and `EMBED_STRICT_CACHE` are set, `UPDATE_EMBED_SNAPSHOTS` takes precedence.
+
+### Cache structure
+
+The test framework uses two types of cached data:
+
+- **Response cache** (`tests/cache/`): Cached HTTP responses from external sites
+- **Fixtures** (`tests/fixtures/`): Expected test results (metadata extracted from cached responses)
+
+### How to update cache
+
+#### When a website changes its HTML structure
+
+If a website updates its HTML and you need to update the cached response and fixture:
+
+```bash
+# Update cache and fixture for a specific test
+UPDATE_EMBED_SNAPSHOTS=1 ./vendor/bin/phpunit --filter testYoutube
+```
+
+#### When adding a new test
+
+After adding a new URL to test:
+
+```bash
+# This will fetch the response and create both cache and fixture
+UPDATE_EMBED_SNAPSHOTS=1 ./vendor/bin/phpunit --filter testNewSite
+```
+
+#### Update all caches at once
+
+To refresh all cached responses and fixtures from the network:
+
+```bash
+UPDATE_EMBED_SNAPSHOTS=1 ./vendor/bin/phpunit
+```
+
+#### For CI environments
+
+Ensure all tests run strictly from cache (fail if any cache is missing):
+
+```bash
+EMBED_STRICT_CACHE=1 ./vendor/bin/phpunit
+```
 
 ---
 

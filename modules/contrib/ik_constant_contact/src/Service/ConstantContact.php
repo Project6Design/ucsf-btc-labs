@@ -7,7 +7,6 @@ use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Session\AccountProxy;
@@ -84,7 +83,7 @@ class ConstantContact {
   protected $httpClient;
 
   /**
-   * \Drupal\Core\Extension\ModuleHandlerInterface
+   * \Drupal\Core\Extension\ModuleHandlerInterface.
    *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    *   Module handler interface
@@ -92,7 +91,7 @@ class ConstantContact {
   protected $moduleHandler;
 
   /**
-   * \Drupal\Core\Database\Connection
+   * \Drupal\Core\Database\Connection.
    *
    * @var \Drupal\Core\Database\Connection
    *    Database connection
@@ -138,7 +137,7 @@ class ConstantContact {
    * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
    *   The module handler service.
    * @param \Drupal\Core\Database\Connection $database
-   *   The database connection
+   *   The database connection.
    */
   public function __construct(CacheBackendInterface $cache, ConfigFactory $config, AccountProxy $currentUser, LoggerChannelFactoryInterface $loggerFactory, MessengerInterface $messenger, Settings $settings, Client $httpClient, ModuleHandlerInterface $moduleHandler, Connection $database) {
     $this->cache = $cache;
@@ -161,9 +160,9 @@ class ConstantContact {
   public function getConfig() {
     // Get our settings from settings.php.
     $settings = $this->settings::get('ik_constant_contact');
-    $clientId = isset($settings['client_id']) ? $settings['client_id'] : NULL;
-    $secret = isset($settings['client_secret']) ? $settings['client_secret'] : NULL;
-    $authType = isset($settings['auth_type']) ? $settings['auth_type'] : NULL;
+    $clientId = $settings['client_id'] ?? NULL;
+    $secret = $settings['client_secret'] ?? NULL;
+    $authType = $settings['auth_type'] ?? NULL;
     $configType = 'settings.php';
     $tokens = $this->getTokens();
 
@@ -181,12 +180,13 @@ class ConstantContact {
       'client_id' => $clientId,
       'client_secret' => $secret,
       'auth_type' => $authType,
-      'config_type' => $configType, // Application client_id and other info found in settings.php or via config
-      'access_token' => isset($tokens['access_token']) ? $tokens['access_token'] : null,
-      'refresh_token' => isset($tokens['refresh_token']) ? $tokens['refresh_token'] : null,
-      'token_timestamp' => isset($tokens['timestamp']) ? $tokens['timestamp'] : null,
-      'token_expires' => isset($tokens['expires_in']) && isset($tokens['timestamp']) ? ($tokens['timestamp'] + $tokens['expires_in']) : null,
-      'token_source' => isset($tokens['source']) ? $tokens['source'] : 'config',
+      // Application client_id and other info found in settings.php or via config.
+      'config_type' => $configType,
+      'access_token' => $tokens['access_token'] ?? NULL,
+      'refresh_token' => $tokens['refresh_token'] ?? NULL,
+      'token_timestamp' => $tokens['timestamp'] ?? NULL,
+      'token_expires' => isset($tokens['expires_in']) && isset($tokens['timestamp']) ? ($tokens['timestamp'] + $tokens['expires_in']) : NULL,
+      'token_source' => $tokens['source'] ?? 'database',
       'code_verifier' => $code_verifier,
       'authentication_url' => $this->authUrl,
       'token_url' => $this->tokenUrl,
@@ -195,7 +195,7 @@ class ConstantContact {
       'campaigns_url' => $this->apiUrl . '/emails',
       'campaign_activity_url' => $this->apiUrl . '/emails/activities',
 
-      // Add fields to configuration for signup form block configuration
+      // Add fields to configuration for signup form block configuration.
       // @see https://v3.developer.constantcontact.com/api_guide/contacts_create_or_update.html#method-request-body
       'fields' => [
         'first_name' => 'First Name',
@@ -217,6 +217,9 @@ class ConstantContact {
     ];
   }
 
+  /**
+   *
+   */
   public function base64UrlEncode($string) {
     $base64 = base64_encode($string);
     $base64 = trim($base64, '=');
@@ -228,8 +231,8 @@ class ConstantContact {
   /**
    * Generates a random PKCE Code Verifier.
    *
-   * https://datatracker.ietf.org/doc/html/rfc7636#section-4.1
-   * https://v3.developer.constantcontact.com/api_guide/pkce_flow.html#generate-the-code-verifier
+   * @see https://datatracker.ietf.org/doc/html/rfc7636#section-4.1
+   * @see https://v3.developer.constantcontact.com/api_guide/pkce_flow.html#generate-the-code-verifier
    *
    * @return string
    */
@@ -243,9 +246,10 @@ class ConstantContact {
   /**
    * Return the encoded code challenge for the PKCE Code Verifier to send to API Authorization Endpoint.
    *
-   * https://v3.developer.constantcontact.com/api_guide/pkce_flow.html#generate-the-code-challenge
+   * @see https://v3.developer.constantcontact.com/api_guide/pkce_flow.html#generate-the-code-challenge
    *
    * @param string $codeVerifier
+   *
    * @return string
    */
   public function getCodeChallenge($codeVerifier) {
@@ -254,20 +258,21 @@ class ConstantContact {
 
   /**
    * Get token data.
-   * 
-   * Checks to see if ik_constant_contact_tokens table exists and pulls from there. 
-   * Otherwise pull from config. 
+   *
+   * Checks to see if ik_constant_contact_tokens table exists and pulls from there.
+   * Otherwise pull from config.
+   *
    * @see https://www.drupal.org/project/ik_constant_contact/issues/3215168
    *
    * @return array
    */
   protected function getTokens() {
     $schema = $this->database->schema();
-    $tokens = null;
+    $tokens = NULL;
 
     if ($schema->tableExists('ik_constant_contact_tokens')) {
-      $tokens = $this->database->select('ik_constant_contact_tokens', 'cct')->fields('cct')->range(0,1)->orderBy('timestamp', 'DESC')->execute()->fetchAssoc();
-      
+      $tokens = $this->database->select('ik_constant_contact_tokens', 'cct')->fields('cct')->range(0, 1)->orderBy('timestamp', 'DESC')->execute()->fetchAssoc();
+
       if ($tokens) {
         $tokens['source'] = 'database';
       }
@@ -280,9 +285,10 @@ class ConstantContact {
       $tokens = [
         'access_token' => $config->get('access_token'),
         'refresh_token' => $config->get('refresh_token'),
-        'expires_in' => $config->get('expires', 86400) - $config->get('timestamp'), // Remove timestamp since we used to add the timestamp. Instead we'll add to getConfig
+        // Remove timestamp since we used to add the timestamp. Instead we'll add to getConfig.
+        'expires_in' => $config->get('expires', 86400) - $config->get('timestamp'),
         'timestamp' => $config->get('timestamp'),
-        'source' => 'config'
+        'source' => 'config',
       ];
     }
 
@@ -291,14 +297,17 @@ class ConstantContact {
 
   /**
    * Shared method to generate the rest of the request body.
-   * 
+   *
    * @NOTE that email_address, permission_to_send are not added hear since the fields are
-   * different per api call type. For example, the list_memberships, the email_address field. 
-   * 
+   * different per api call type. For example, the list_memberships, the email_address field.
+   *
    * @see https://v3.developer.constantcontact.com/api_guide/contacts_create_or_update.html#method-request-body
    *
-   * @param array $data - posted data from our form
-   * @param object $body - An object already generated.
+   * @param array $data
+   *   Posted data from our form.
+   * @param object $body
+   *   An object already generated.
+   *
    * @return object $body
    */
   protected function buildResponseBody(array $data, object $body) {
@@ -308,12 +317,14 @@ class ConstantContact {
       if (isset($data[$field]) && $data[$field]) {
         if ($field === 'birthday') {
           if (isset($data[$field]['month']) && $data[$field]['month'] && isset($data[$field]['day']) && $data[$field]['day']) {
-            $body->birthday_month = (int)$data[$field]['month'];
-            $body->birthday_day = (int)$data[$field]['day'];
+            $body->birthday_month = (int) $data[$field]['month'];
+            $body->birthday_day = (int) $data[$field]['day'];
           }
-        } else if ($field === 'street_address') {
-          $body->{$field} = (object)$data[$field];
-        } else {
+        }
+        elseif ($field === 'street_address') {
+          $body->{$field} = (object) $data[$field];
+        }
+        else {
           $body->{$field} = $data[$field];
         }
       }
@@ -336,7 +347,7 @@ class ConstantContact {
    *    Requires 'email_address' key.
    *    Can also accept 'first_name' and 'last_name'.
    * @param array $listIDs
-   *   An array of list UUIDs where we want to add this contact.
+   *   An array of list UUIDs where we want to add this contact or an error.
    *
    * @see https://v3.developer.constantcontact.com/api_reference/index.html#!/Contacts/createContact
    */
@@ -381,22 +392,22 @@ class ConstantContact {
       $this->handleResponse($response, 'createContact');
     }
     catch (RequestException $e) {
-      // Return the error to show an error on form submission
+      // Return the error to show an error on form submission.
       return $this->handleRequestException($e);
     }
     catch (ClientException $e) {
-      $this->handleRequestException($e);
+      return $this->handleRequestException($e);
     }
     catch (\Exception $e) {
       $this->loggerFactory->error($e);
 
-      // Return the error to show an error on form submission
+      // Return the error to show an error on form submission.
       return ['error' => $e];
     }
   }
 
   /**
-   * Deletes old tokens out of our database so it doesn't get too unruley
+   * Deletes old tokens out of our database so it doesn't get too unruley.
    *
    * @return void
    */
@@ -404,13 +415,14 @@ class ConstantContact {
     $schema = $this->database->schema();
     $tokens = $this->getTokens();
 
-    // Temporarily check if database exists before trying to delete things from it
+    // Temporarily check if database exists before trying to delete things from it.
     if ($schema->tableExists('ik_constant_contact_tokens')) {
       if (isset($tokens['access_token']) && isset($tokens['refresh_token']) && $tokens['source'] === 'database') {
         $this->database->delete('ik_constant_contact_tokens')
           ->condition('access_token', $tokens['access_token'], '!=')
           ->condition('refresh_token', $tokens['refresh_token'], '!=')
-          ->condition('timestamp', strtotime('now') - 86400, '<') // Make sure the expiration has past
+          // Make sure the expiration has past.
+          ->condition('timestamp', strtotime('now') - 86400, '<')
           ->execute();
       }
     }
@@ -424,8 +436,9 @@ class ConstantContact {
    *
    * @return mixed
    *   An stdClass of the campaign.
+   *
    * @throws \GuzzleHttp\Exception\GuzzleException
-   * 
+   *
    * @see https://v3.developer.constantcontact.com/api_guide/email_campaign_id.html
    */
   public function getCampaign(string $id) {
@@ -462,8 +475,9 @@ class ConstantContact {
    *
    * @return mixed
    *   A stdClass of the activity.
+   *
    * @throws \GuzzleHttp\Exception\GuzzleException
-   * 
+   *
    * @see https://v3.developer.constantcontact.com/api_guide/email_campaigns_activity_id.html
    */
   public function getCampaignActivity(string $id) {
@@ -502,8 +516,9 @@ class ConstantContact {
    *
    * @return array
    *   An array of campaigns.
+   *
    * @throws \GuzzleHttp\Exception\GuzzleException
-   * 
+   *
    * @see https://v3.developer.constantcontact.com/api_guide/email_campaigns_collection.html
    */
   public function getCampaigns($status = []) {
@@ -525,7 +540,7 @@ class ConstantContact {
         if (!empty($status) && in_array($campaign->current_status, $status)) {
           $list[] = $campaign;
         }
-        else if (empty($status)) {
+        elseif (empty($status)) {
           $list[] = $campaign;
         }
 
@@ -541,6 +556,8 @@ class ConstantContact {
     catch (\Exception $e) {
       $this->loggerFactory->error($e);
     }
+
+    return [];
   }
 
   /**
@@ -551,7 +568,7 @@ class ConstantContact {
    *
    * @return array
    *   Returns a json response that determines if a contact
-   *   already exists or was deleted from the list.
+   *   already exists or was deleted from the list. Or return error array.
    *
    * @see https://v3.developer.constantcontact.com/api_reference/index.html#!/Contacts/getContact
    */
@@ -578,44 +595,44 @@ class ConstantContact {
       }
     }
     catch (RequestException $e) {
-      // Return the error to show an error on form submission
+      // Return the error to show an error on form submission.
       return $this->handleRequestException($e);
     }
     catch (ClientException $e) {
-      $this->handleRequestException($e);
+      return $this->handleRequestException($e);
     }
     catch (\Exception $e) {
       $this->loggerFactory->error($e);
 
-      // Return the error to show an error on form submission
+      // Return the error to show an error on form submission.
       return ['error' => $e];
     }
   }
 
   /**
    * Gets contact lists from Constant Contact API.
-   * 
-   * @param $cached 
-   *  Whether to return a cached response or not. 
-   *  @see https://www.drupal.org/project/ik_constant_contact/issues/3282088 and https://v3.developer.constantcontact.com/api_guide/faqs_manage_applications.html
-   *  Cron run perhaps was calling Drupal cached version which may have allowed refresh tokens to expire.
+   *
+   * @param $cached
+   *   Whether to return a cached response or not. Cron run perhaps was calling
+   *   Drupal cached version which may have allowed refresh tokens to expire.
+   *   @see https://www.drupal.org/project/ik_constant_contact/issues/3282088
+   *   @sse https://v3.developer.constantcontact.com/api_guide/faqs_manage_applications.html
    *
    * @return array
    *   Returns an array of lists that the account has access to.
    *
    * @see https://v3.developer.constantcontact.com/api_reference/index.html#!/Contact_Lists/getLists
-   * 
    */
-  public function getContactLists($cached = true) {
+  public function getContactLists($cached = TRUE) {
     $cid = 'ik_constant_contact.lists';
-    $cache = ($cached === true ? $this->cache->get($cid) : null);
+    $cache = ($cached === TRUE ? $this->cache->get($cid) : NULL);
 
     if ($cache && $cache->data && count($cache->data) > 0) {
       return $cache->data;
     }
     else {
       // Update access tokens.
-      $this->refreshToken(false);
+      $this->refreshToken(FALSE);
 
       // Waiting to pull the configuration until now in case the refreshToken()
       // call changes the active tokens.
@@ -669,26 +686,26 @@ class ConstantContact {
   }
 
   /**
-   * Returns custom fields available
-   * 
-   * @param $cached 
-   *  Whether to return a cached response or not. 
-   * 
+   * Returns custom fields available.
+   *
+   * @param $cached
+   *   Whether to return a cached response or not.
+   *
    * @return mixed
    *   A stdClass of custom fields.
-   * 
+   *
    * @see https://v3.developer.constantcontact.com/api_guide/get_custom_fields.html
    */
-  public function getCustomFields($cached = true) {
+  public function getCustomFields($cached = TRUE) {
     $config = $this->getConfig();
     $cid = 'ik_constant_contact.custom_fields';
-    $cache = ($cached === true ? $this->cache->get($cid) : null);
+    $cache = ($cached === TRUE ? $this->cache->get($cid) : NULL);
 
     if ($cache && !is_null($cache) && $cache->data && property_exists($cache->data, 'custom_fields')) {
       return $cache->data;
     }
     else {
-    
+
       $url = $this->apiUrl . '/contact_custom_fields';
 
       try {
@@ -766,14 +783,15 @@ class ConstantContact {
   }
 
   /**
-   * Get Enabled Contact Lists 
+   * Get Enabled Contact Lists.
    *
-   * @param boolean $cached
+   * @param bool $cached
+   *
    * @return array $lists of enabled lists
-   * 
+   *
    * @see /Drupal/Form/ConstantContactLists.php
    */
-  public function getEnabledContactLists($cached = true) {
+  public function getEnabledContactLists($cached = TRUE) {
     $lists = $this->getContactLists($cached);
     $enabled = $this->config->get('ik_constant_contact.enabled_lists')->getRawData();
 
@@ -794,6 +812,7 @@ class ConstantContact {
    *
    * @return null|string
    *   The URL of the campaign's permanent link.
+   *
    * @throws \GuzzleHttp\Exception\GuzzleException
    */
   public function getPermaLinkFromCampaign(string $id) {
@@ -801,7 +820,7 @@ class ConstantContact {
     if (!$id) {
       return NULL;
     }
-    $campaign = $this->getCampain($id);
+    $campaign = $this->getCampaign($id);
     foreach ($campaign->campaign_activities as $activity) {
       if ($activity->role != 'permalink') {
         continue;
@@ -815,9 +834,10 @@ class ConstantContact {
   }
 
   /**
-   * Handles an error
+   * Handles an error.
    *
    * @param [object] $error
+   *
    * @return [array] $return
    */
   protected function handleRequestException(object $e) {
@@ -836,15 +856,15 @@ class ConstantContact {
       if (property_exists($error, 'message')) {
         $errorInfo[] = $error->message;
       }
-  
+
       if (property_exists($error, 'error_description')) {
         $errorInfo[] = $error->error_description;
       }
-  
+
       if (property_exists($error, 'errorCode')) {
         $errorInfo[] = $error->errorSummary;
       }
-  
+
       if (property_exists($error, 'errorCode')) {
         $errorInfo[] = $error->errorCode;
       }
@@ -854,7 +874,7 @@ class ConstantContact {
 
     $this->loggerFactory->error($message);
 
-    // Return the error to show an error on form submission
+    // Return the error to show an error on form submission.
     return ['error' => $message];
   }
 
@@ -872,7 +892,10 @@ class ConstantContact {
    *   Then it returns an array of the contact that matches.
    */
   private function handleResponse($response, $method) {
-    if (($response->getStatusCode() === 200) || ($response->getStatusCode() === 201 && $method === 'createContact')) {
+    if (
+      ($response->getStatusCode() === 200) ||
+      ($response->getStatusCode() === 201 && in_array($method, ['createContact', 'submitContactForm']))
+    ) {
       $json = json_decode($response->getBody()->getContents());
 
       $this->loggerFactory->info('@method has been executed successfully.', ['@method' => $method]);
@@ -903,7 +926,7 @@ class ConstantContact {
   }
 
   /**
-   * Submits a contact to the API. 
+   * Submits a contact to the API.
    * Used to be used on CostantContactBlockForm but using $this->submitContactForm instead.
    * Determine if contact needs to be updated or created.
    *
@@ -914,7 +937,7 @@ class ConstantContact {
    * @param array $listIDs
    *   An array of list UUIDs to post the contact to.
    *
-   * @return array
+   * @return array|null
    *   Returns an error if there is an error.
    *   Otherwise it sends the info to other methods.
    *
@@ -949,9 +972,9 @@ class ConstantContact {
     foreach ($listIDs as $listID) {
       if (!isset($enabled[$listID]) || $enabled[$listID] !== 1) {
         $msg = 'The listID provided does not exist or is not enabled.';
-  
+
         $this->loggerFactory->error($msg);
-  
+
         return [
           'error' => $msg,
         ];
@@ -986,6 +1009,8 @@ class ConstantContact {
     else {
       $this->createContact($data, $listIDs);
     }
+
+    return NULL;
   }
 
   /**
@@ -1001,7 +1026,7 @@ class ConstantContact {
    * @see https://v3.developer.constantcontact.com/api_reference/index.html#!/Contacts/putContact
    * @see $this->getDeleted
    *
-   * @TODO perhaps combine this with updateContact. The difference is that $contact is
+   * @todo perhaps combine this with updateContact. The difference is that $contact is
    * an array here and an object in updateContact.
    */
   private function putContact(array $contact, array $data, $listIDs) {
@@ -1010,7 +1035,7 @@ class ConstantContact {
     $body = $this->buildResponseBody($data, $body);
 
     $body->email_address->permission_to_send = 'implicit';
-    // To resubscribe a contact after an unsubscribe update_source must equal Contact. 
+    // To resubscribe a contact after an unsubscribe update_source must equal Contact.
     // @see https://v3.developer.constantcontact.com/api_guide/contacts_re-subscribe.html#re-subscribing-contacts
     $body->update_source = 'Contact';
     $body->list_memberships = $listIDs;
@@ -1037,7 +1062,7 @@ class ConstantContact {
 
     }
     catch (RequestException $e) {
-      // Return the error to show an error on form submission
+      // Return the error to show an error on form submission.
       return $this->handleRequestException($e);
     }
     catch (ClientException $e) {
@@ -1046,7 +1071,7 @@ class ConstantContact {
     catch (\Exception $e) {
       $this->loggerFactory->error($e);
 
-      // Return the error to show an error on form submission
+      // Return the error to show an error on form submission.
       return ['error' => $e];
     }
   }
@@ -1056,14 +1081,14 @@ class ConstantContact {
    *
    * @see https://v3.developer.constantcontact.com/api_guide/server_flow.html#refreshing-an-access-token
    */
-  public function refreshToken($updateLists = true) {
+  public function refreshToken($updateLists = TRUE) {
     $config = $this->getConfig();
 
     if (!$config['client_id'] || (!$config['client_secret'] && $config['auth_type'] === 'auth_flow') || !$config['refresh_token']) {
       return FALSE;
     }
 
-    // @TODO - Fix for pkce flow. 
+    // @todo Fix for pkce flow.
     // @see https://www.drupal.org/project/ik_constant_contact/issues/3285446
     // @see https://v3.developer.constantcontact.com/api_guide/pkce_flow.html
     try {
@@ -1081,8 +1106,8 @@ class ConstantContact {
 
       $this->saveTokens($json);
 
-      if ($updateLists === true) {
-        $this->getContactLists(false);
+      if ($updateLists === TRUE) {
+        $this->getContactLists(FALSE);
       }
     }
     catch (RequestException $e) {
@@ -1091,7 +1116,7 @@ class ConstantContact {
     catch (\Exception $e) {
       $this->loggerFactory->error($e);
 
-      // Return the error to show an error on form submission
+      // Return the error to show an error on form submission.
       return ['error' => $e];
     }
   }
@@ -1105,11 +1130,11 @@ class ConstantContact {
   public function saveContactLists(array $data) {
     $cid = 'ik_constant_contact.lists';
     $enabled = $this->config->get('ik_constant_contact.enabled_lists')->getRawData();
-    
+
     // Add an enabled flag to the list data.
     foreach ($data as $key => $value) {
       $data[$key]->enabled = (isset($enabled[$key]) && $enabled[$key] === 1);
-      $data[$key]->cached_on = strtotime('now'); 
+      $data[$key]->cached_on = strtotime('now');
     }
 
     $this->cache->set($cid, $data);
@@ -1139,14 +1164,15 @@ class ConstantContact {
         }
 
         $tokens->save();
-      } else {
+      }
+      else {
         $this->database->merge('ik_constant_contact_tokens')->fields([
           'access_token' => $data->access_token,
           'refresh_token' => $data->refresh_token,
           'expires_in' => $data->expires_in,
-          'timestamp' => strtotime('now')
+          'timestamp' => strtotime('now'),
         ])
-        ->key('refresh_token', $data->refresh_token)->execute();
+          ->key('refresh_token', $data->refresh_token)->execute();
       }
 
       $this->loggerFactory->info('New tokens saved at ' . date('Y-m-d h:ia', strtotime('now')));
@@ -1167,7 +1193,7 @@ class ConstantContact {
    * @param array $listIDs
    *   An array of list UUIDs to post the contact to.
    *
-   * @return array
+   * @return array|null
    *   Returns an error if there is an error.
    *   Otherwise it sends the info to other methods.
    *
@@ -1200,9 +1226,9 @@ class ConstantContact {
     foreach ($listIDs as $listID) {
       if (!isset($enabled[$listID]) || $enabled[$listID] !== 1) {
         $msg = 'The listID provided does not exist or is not enabled.';
-  
+
         $this->loggerFactory->error($msg);
-  
+
         return [
           'error' => $msg,
         ];
@@ -1222,7 +1248,7 @@ class ConstantContact {
     // Refresh our tokens before every request.
     $this->refreshToken();
 
-    $body = (object)[];
+    $body = (object) [];
 
     $body = $this->buildResponseBody($data, $body);
 
@@ -1252,36 +1278,36 @@ class ConstantContact {
 
     }
     catch (RequestException $e) {
-      // Return the error to show an error on form submission
+      // Return the error to show an error on form submission.
       return $this->handleRequestException($e);
     }
     catch (ClientException $e) {
-      $this->handleRequestException($e);
+      return $this->handleRequestException($e);
     }
     catch (\Exception $e) {
       $this->loggerFactory->error($e);
 
-      // Return the error to show an error on form submission
+      // Return the error to show an error on form submission.
       return ['error' => $e];
     }
+
+    return NULL;
   }
 
-
   /**
-   *  Unsubscribes a contact from all lists.
+   * Unsubscribes a contact from all lists.
    *
    * @param array $contact
    *   The response from $this->getDeleted.
    * @param array $data
-   *   The $data provided
+   *   The $data provided.
    *
    * @see https://v3.developer.constantcontact.com/api_reference/index.html#!/Contacts/putContact
-   *
    */
   public function unsubscribeContact(array $data) {
     // Check if contact already exists.
     $exists = (array) $this->getContact($data);
-    $body = null;
+    $body = NULL;
 
     if (isset($exists['contacts']) && count($exists['contacts']) > 0) {
       $body = (object) $exists['contacts'][0];
@@ -1295,7 +1321,7 @@ class ConstantContact {
       $body = $this->buildResponseBody($data, $body);
 
       $body->email_address->permission_to_send = 'unsubscribed';
-      // To resubscribe a contact after an unsubscribe update_source must equal Contact. 
+      // To resubscribe a contact after an unsubscribe update_source must equal Contact.
       // @see https://v3.developer.constantcontact.com/api_guide/contacts_re-subscribe.html#re-subscribing-contacts
       $body->update_source = 'Contact';
 
@@ -1321,7 +1347,7 @@ class ConstantContact {
 
       }
       catch (RequestException $e) {
-        // Return the error to show an error on form submission
+        // Return the error to show an error on form submission.
         return $this->handleRequestException($e);
       }
       catch (ClientException $e) {
@@ -1330,7 +1356,7 @@ class ConstantContact {
       catch (\Exception $e) {
         $this->loggerFactory->error($e);
 
-        // Return the error to show an error on form submission
+        // Return the error to show an error on form submission.
         return ['error' => $e];
       }
     }
@@ -1351,11 +1377,11 @@ class ConstantContact {
    */
   private function updateContact(array $data, $contact, $listIDs) {
     if ($contact && property_exists($contact, 'contact_id')) {
-      
+
       $body = $contact;
       $body = $this->buildResponseBody($data, $body);
 
-      // Add required fields
+      // Add required fields.
       $body->email_address->address = $data['email_address'];
       $body->email_address->permission_to_send = 'implicit';
       $body->update_source = 'Contact';
@@ -1383,16 +1409,16 @@ class ConstantContact {
 
       }
       catch (RequestException $e) {
-        // Return the error to show an error on form submission
+        // Return the error to show an error on form submission.
         return $this->handleRequestException($e);
       }
       catch (ClientException $e) {
-        $this->handleRequestException($e);
+        return $this->handleRequestException($e);
       }
       catch (\Exception $e) {
         $this->loggerFactory->error($e);
-  
-        // Return the error to show an error on form submission
+
+        // Return the error to show an error on form submission.
         return ['error' => $e];
       }
     }
@@ -1401,4 +1427,5 @@ class ConstantContact {
       return ['error: No contact id provided'];
     }
   }
+
 }

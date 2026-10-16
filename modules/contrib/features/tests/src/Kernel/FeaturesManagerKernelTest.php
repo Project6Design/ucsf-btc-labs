@@ -2,22 +2,22 @@
 
 namespace Drupal\Tests\features\Kernel;
 
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\features\ConfigurationItem;
 use Drupal\features\Package;
+use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * The Feature Manager Kernel Test.
- *
- * @group features
  */
+#[RunTestsInSeparateProcesses]
+#[Group('features')]
 class FeaturesManagerKernelTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
   protected static $modules = ['system', 'config', 'features'];
-
-  protected $strictConfigSchema = FALSE;
 
   /**
    * The Feature Manager Interface.
@@ -37,6 +37,7 @@ class FeaturesManagerKernelTest extends KernelTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->strictConfigSchema = FALSE;
     parent::setUp();
 
     $this->installConfig('features');
@@ -89,10 +90,15 @@ class FeaturesManagerKernelTest extends KernelTestBase {
 
     // Create all three configuration items.
     $config_item = new ConfigurationItem('system_simple.example', ['value' => 'example'], ['package' => 'package']);
+    // phpcs:ignore
     $config_item2 = new ConfigurationItem('system_simple.example2', ['value' => 'example2'], ['package' => 'package2']);
     $config_item3 = new ConfigurationItem('system_simple.example3', ['value' => 'example3'], ['package' => 'package3']);
-    // Only save example and example3 as currently active config (so example2 will be new).
-    $this->featuresManager->setConfigCollection(['system_simple.example' => $config_item, 'system_simple.example3' => $config_item3]);
+    // Only save example and example3 as currently active config
+    // (so example2 will be new).
+    $this->featuresManager->setConfigCollection([
+      'system_simple.example' => $config_item,
+      'system_simple.example3' => $config_item3,
+    ]);
 
     // Only import example and example2, so example3 is unchanged.
     $result = $this->featuresManager->import(['package', 'package2']);

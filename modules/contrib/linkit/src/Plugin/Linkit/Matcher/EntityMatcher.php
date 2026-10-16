@@ -3,13 +3,17 @@
 namespace Drupal\linkit\Plugin\Linkit\Matcher;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\Entity\ConfigEntityTypeInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\linkit\Attribute\Matcher;
 use Drupal\linkit\ConfigurableMatcherBase;
 use Drupal\linkit\MatcherTokensTrait;
+use Drupal\linkit\Plugin\Derivative\EntityMatcherDeriver;
 use Drupal\linkit\SubstitutionManagerInterface;
 use Drupal\linkit\Suggestion\EntitySuggestion;
 use Drupal\linkit\Suggestion\SuggestionCollection;
@@ -18,13 +22,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides default linkit matchers for all entity types.
- *
- * @Matcher(
- *   id = "entity",
- *   label = @Translation("Entity"),
- *   deriver = "\Drupal\linkit\Plugin\Derivative\EntityMatcherDeriver"
- * )
  */
+#[Matcher(
+  id: "entity",
+  label: new TranslatableMarkup("Entity"),
+  deriver: EntityMatcherDeriver::class,
+)]
 class EntityMatcher extends ConfigurableMatcherBase {
 
   use MatcherTokensTrait;
@@ -105,6 +108,13 @@ class EntityMatcher extends ConfigurableMatcherBase {
   protected $configFactory;
 
   /**
+   * The request context.
+   *
+   * @var \Drupal\Core\Routing\RequestContext
+   */
+  protected $requestContext;
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
@@ -123,6 +133,7 @@ class EntityMatcher extends ConfigurableMatcherBase {
     $instance->substitutionManager = $container->get('plugin.manager.linkit.substitution');
     $instance->token = $container->get('token');
     $instance->configFactory = $container->get('config.factory');
+    $instance->requestContext = $container->get('router.request_context');
     return $instance;
   }
 
@@ -315,9 +326,7 @@ class EntityMatcher extends ConfigurableMatcherBase {
     $suggestions = new SuggestionCollection();
     $query = $this->buildEntityQuery($string);
     $query->accessCheck(TRUE);
-    $query_result = $query->execute();
-    $url_results = $this->findEntityIdByUrl($string);
-    $result = array_merge($query_result, $url_results);
+    $result = $query->execute();
 
     // If no results, return an empty suggestion collection.
     if (empty($result)) {
@@ -337,6 +346,12 @@ class EntityMatcher extends ConfigurableMatcherBase {
 
       $entity = $this->entityRepository->getTranslationFromContext($entity);
       $suggestion = $this->createSuggestion($entity);
+      if ($query = parse_url($string, PHP_URL_QUERY)) {
+        $suggestion->setPath($suggestion->getPath() . '?' . $query);
+      }
+      if ($fragment = parse_url($string, PHP_URL_FRAGMENT)) {
+        $suggestion->setPath($suggestion->getPath() . '#' . $fragment);
+      }
       $suggestions->addSuggestion($suggestion);
     }
 
@@ -359,9 +374,11 @@ class EntityMatcher extends ConfigurableMatcherBase {
     $entity_type = $this->entityTypeManager->getDefinition($this->targetType);
     $query = $this->entityTypeManager->getStorage($this->targetType)->getQuery();
     $query->accessCheck(TRUE);
-    $label_key = $entity_type->getKey('label');
 
-    if ($label_key) {
+    if ($ids = $this->findEntityIdByUrl($search_string)) {
+      $query->condition($entity_type->getKey('id'), reset($ids));
+    }
+    elseif ($label_key = $entity_type->getKey('label')) {
       // For configuration entities, the condition needs to be CONTAINS as
       // the matcher does not support LIKE.
       if ($entity_type instanceof ConfigEntityTypeInterface) {
@@ -371,7 +388,7 @@ class EntityMatcher extends ConfigurableMatcherBase {
         $query->condition($label_key, '%' . $search_string . '%', 'LIKE');
       }
 
-      $query->sort($label_key, 'ASC');
+      $query->sort($label_key);
     }
 
     // Bundle check.
@@ -401,6 +418,9 @@ class EntityMatcher extends ConfigurableMatcherBase {
     // Add access tag for the query.
     $query->addTag('entity_access');
     $query->addTag($this->targetType . '_access');
+
+    // Add metadata to the query for this plugin instance.
+    $query->addMetadata('linkit_matcher', $this);
   }
 
   /**
@@ -510,9 +530,7 @@ class EntityMatcher extends ConfigurableMatcherBase {
    *   The status for this entity.
    */
   protected function buildStatus(EntityInterface $entity) {
-    $entity_type = $entity->getEntityTypeId();
     if ($entity->getEntityType()->hasKey('status')) {
-      $entity = $this->entityTypeManager->getStorage($entity_type)->load($entity->id());
       return $entity->isPublished() ? 'published' : 'unpublished';
     }
     return '';
@@ -523,18 +541,31 @@ class EntityMatcher extends ConfigurableMatcherBase {
    *
    * @param string $user_input
    *   The string to url parse.
+   * @param string $base_url
+   *   The site base url. Typically this is only used for testing.
    *
    * @return array
    *   An array with an entity id if the input can be parsed as an internal url
    *   and a match is found, otherwise an empty array.
    */
-  protected function findEntityIdByUrl($user_input) {
-    $result = [];
+  public function findEntityIdByUrl($user_input, $base_url = '') {
+    if (empty($base_url)) {
+      $base_url = $this->requestContext->getCompleteBaseUrl();
+    }
+    $is_absolute_local_url = UrlHelper::isExternal($user_input)
+      && UrlHelper::isValid($user_input, TRUE)
+      && UrlHelper::externalIsLocal($user_input, $base_url);
 
+    if ($is_absolute_local_url) {
+      // The link points to this domain. Make it relative so it can be
+      // matched in Url::fromUserInput().
+      $user_input = substr($user_input, strlen($base_url));
+    }
+    $result = [];
     try {
       $params = Url::fromUserInput($user_input)->getRouteParameters();
-      if (key($params) === $this->targetType) {
-        $result = [end($params)];
+      if (!empty($params[$this->targetType])) {
+        $result = [$params[$this->targetType]];
       }
     }
     catch (\Exception $e) {

@@ -119,10 +119,61 @@ class SitemapMenuTest extends SitemapMenuTestBase {
     $this->assertSession()->linkExists($node_1_title);
     $this->assertSession()->linkExists($node_2_title);
 
+    // Configure module to show tools menu.
+    $this->saveSitemapForm([
+      'plugins[menu:tools][enabled]' => TRUE,
+    ]);
+    $this->drupalGet('/sitemap');
+
+    // Check leaf and expanded CSS class.
+    $this->assertEquals('leaf', $this->getSession()->getPage()->findLink('Example title')->getParent()->getAttribute('class'));
+    $this->assertEquals('expanded', $this->getSession()->getPage()->findLink('Menu test root')->getParent()->getAttribute('class'));
+
     // Check anon user doesn't see "Inaccessible" text for the admin link.
     $this->drupalLogin($this->anonUser);
     $this->drupalGet('/sitemap');
     $this->assertSession()->linkNotExists('Inaccessible');
+  }
+
+  /**
+   * Tests menu depth settings.
+   */
+  public function testMenuDepth() {
+    // Install menu_test module.
+    $this->container->get('module_installer')->install(['menu_test']);
+
+    // Configure module to show tools menu shallower than or equal to 2nd level.
+    $edit = [
+      'plugins[menu:tools][enabled]' => TRUE,
+      'plugins[menu:tools][settings][menu_depth]' => '2',
+    ];
+    $this->saveSitemapForm($edit);
+
+    $this->drupalGet('admin/config/search/sitemap');
+    // Check that menu depth option output is correctly.
+    $this->assertSession()->elementTextEquals('css', '.form-item-plugins-menutools-settings-menu-depth > label', 'Number of levels to display');
+    $this->assertSession()->optionNotExists('edit-plugins-menutools-settings-menu-depth', '0');
+    $this->assertSession()->optionExists('edit-plugins-menutools-settings-menu-depth', 'Unlimited');
+
+    // Assert that configured level value is selected.
+    $this->assertSession()->optionExists('edit-plugins-menutools-settings-menu-depth', '2')->isSelected();
+
+    // Check that 2nd level menu is shown and 3rd level menu is hidden.
+    $this->drupalGet('/sitemap');
+    $this->assertSession()->linkExists('Child menu router');
+    $this->assertSession()->linkNotExists('Unattached subchild router');
+
+    /** @var \Drupal\Core\Menu\MenuLinkTreeInterface */
+    $menu_tree = $this->container->get('sitemap.menu.link_tree');
+    // Configure module to show all tools menu.
+    $edit = [
+      'plugins[menu:tools][settings][menu_depth]' => $menu_tree->maxDepth(),
+    ];
+    $this->saveSitemapForm($edit);
+
+    // Check that 3rd level menu is shown.
+    $this->drupalGet('/sitemap');
+    $this->assertSession()->linkExists('Unattached subchild router');
   }
 
   // @todo test menu crud

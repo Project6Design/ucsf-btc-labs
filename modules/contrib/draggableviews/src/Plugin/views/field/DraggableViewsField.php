@@ -4,10 +4,10 @@ namespace Drupal\draggableviews\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Markup;
-use Drupal\Core\Session\AccountInterface;
 use Drupal\draggableviews\DraggableViews;
 use Drupal\views\Plugin\views\field\BulkForm;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Session\AccountProxyInterface;
 
 /**
  * Defines a draggableviews form element.
@@ -36,34 +36,41 @@ class DraggableViewsField extends BulkForm {
    * @var \Drupal\Core\Language\LanguageManagerInterface
    */
   protected $languageManager;
+
   /**
-   * The Current user.
+   * The current user.
    *
-   * @var \Drupal\Core\Session\AccountInterface
+   * @var \Drupal\Core\Session\AccountProxyInterface
    */
   protected $currentUser;
 
   /**
-   * Sets the current_user service.
-   *
-   * @param \Drupal\Core\Session\AccountInterface $current_user
-   *   Current user.
-   *
-   * @return $this
+   * Constructs a DraggableViewsField object.
    */
-  public function setCurrentUser(AccountInterface $current_user) {
-    $this->currentUser = $current_user;
-    return $this;
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, $entity_type_manager, $language_manager, $messenger, $entity_repository, $route_match, AccountProxyInterface $currentUser) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $entity_type_manager, $language_manager, $messenger, $entity_repository, $route_match);
+    $this->currentUser = $currentUser;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    /** @var static $datasource */
-    $bulk_form = parent::create($container, $configuration, $plugin_id, $plugin_definition);
-    $bulk_form->setCurrentUser($container->get('current_user'));
-    return $bulk_form;
+    $current_user = $container->get('current_user');
+    if (!$current_user instanceof AccountProxyInterface) {
+      $current_user = \Drupal::currentUser();
+    }
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('entity_type.manager'),
+      $container->get('language_manager'),
+      $container->get('messenger'),
+      $container->get('entity.repository'),
+      $container->get('current_route_match'),
+      $current_user
+    );
   }
 
   /**
@@ -127,32 +134,29 @@ class DraggableViewsField extends BulkForm {
     ];
 
     $draggableviews = new DraggableViews($this->view);
-
     foreach ($this->view->result as $row_index => $row) {
-      if (empty($this->getEntity($row))) {
+      $entity = $this->getEntity($row);
+      if (empty($entity) || !is_object($entity)) {
         continue;
       }
-
       $form[$this->options['id']][$row_index] = [
         '#tree' => TRUE,
       ];
-
-      // Add weight.
+      // Native handler: get weight from draggableviews structure table.
+      $weight = property_exists($row, 'draggableviews_structure_weight') ? $row->draggableviews_structure_weight : '';
       $form[$this->options['id']][$row_index]['weight'] = [
         '#type' => 'textfield',
         '#size' => '5',
         '#maxlength' => '5',
-        '#value' => $row->draggableviews_structure_weight,
+        '#value' => $weight,
         '#attributes' => ['class' => ['draggableviews-weight']],
       ];
-
       // Item to keep id of the entity.
       $form[$this->options['id']][$row_index]['id'] = [
         '#type' => 'hidden',
-        '#value' => $this->getEntity($row)->id(),
+        '#value' => $entity->id(),
         '#attributes' => ['class' => ['draggableviews-id']],
       ];
-
       // Add parent.
       $form[$this->options['id']][$row_index]['parent'] = [
         '#type' => 'hidden',
@@ -176,6 +180,19 @@ class DraggableViewsField extends BulkForm {
         drupal_attach_tabledrag($form, $options);
       }
     }
+  }
+
+  /**
+   * Sets the current_user service.
+   *
+   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
+   *   Current user.
+   *
+   * @return $this
+   */
+  public function setCurrentUser(AccountProxyInterface $current_user) {
+    $this->currentUser = $current_user;
+    return $this;
   }
 
 }

@@ -1,0 +1,29 @@
+{
+  "css": {
+    "drupal page heading": "h1",
+    "drupal status messages": ".messages--status",
+    "drupal error messages": ".messages--error",
+    "drupal access denied heading": "h1:has-text('Access denied')",
+
+    "text formats page": "#filter-admin-overview, table#filter-order",
+    "format anchor test row": "tr:has-text('Anchor Test')",
+    "format full html row": "tr:has-text('Full HTML')",
+
+    "format edit form": "form#filter-format-edit-form, form.filter-format-edit-form",
+    "available anchor button": ".ckeditor5-toolbar-available__buttons [data-id='anchor'], li[data-id='anchor']",
+    "ckeditor toolbar": ".ck-editor__top .ck-toolbar",
+    "ckeditor editable": ".ck-editor__editable",
+    "anchor toolbar button": ".ck-toolbar button.ck-button[data-cke-tooltip-text*='Anchor']",
+    "anchor balloon": ".ck-balloon-panel",
+    "anchor balloon input": ".ck-balloon-panel input[type='text']",
+
+    "node body": "article .field--name-body, .node__content .text-formatted, .node__content",
+    "anchor in output": "main a[id]:not([href])",
+    "node add article form": "form.node-article-form, form[data-drupal-selector='node-article-form']",
+
+    "body format select": "select[name='body[0][format]']"
+  },
+  "xpath": {
+    "anchor in output": "//main//a[@id and not(@href)]"
+  }
+}

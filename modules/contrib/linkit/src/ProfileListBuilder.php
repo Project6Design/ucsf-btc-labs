@@ -2,6 +2,7 @@
 
 namespace Drupal\linkit;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\Entity\ConfigEntityListBuilder;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
@@ -39,8 +40,8 @@ class ProfileListBuilder extends ConfigEntityListBuilder {
   /**
    * {@inheritdoc}
    */
-  public function getDefaultOperations(EntityInterface $entity) {
-    $operations = parent::getDefaultOperations($entity);
+  public function getDefaultOperations(EntityInterface $entity, ?CacheableMetadata $cacheability = NULL) {
+    $operations = parent::getDefaultOperations($entity, $cacheability);
 
     if (isset($operations['edit'])) {
       $operations['edit']['title'] = $this->t('Edit profile');

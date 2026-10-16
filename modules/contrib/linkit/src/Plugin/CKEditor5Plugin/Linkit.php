@@ -7,7 +7,7 @@ namespace Drupal\linkit\Plugin\CKEditor5Plugin;
 use Drupal\ckeditor5\Plugin\CKEditor5PluginConfigurableTrait;
 use Drupal\ckeditor5\Plugin\CKEditor5PluginDefault;
 use Drupal\ckeditor5\Plugin\CKEditor5PluginElementsSubsetInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Url;
@@ -23,18 +23,18 @@ class Linkit extends CKEditor5PluginDefault implements CKEditor5PluginElementsSu
   use CKEditor5PluginConfigurableTrait;
 
   /**
-   * The Linkit profile storage.
+   * The entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityStorageInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $linkitProfileStorage;
+  protected $entityTypeManager;
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityStorageInterface $linkit_profile_storage) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->linkitProfileStorage = $linkit_profile_storage;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -45,7 +45,7 @@ class Linkit extends CKEditor5PluginDefault implements CKEditor5PluginElementsSu
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('entity_type.manager')->getStorage('linkit_profile')
+      $container->get('entity_type.manager')
     );
   }
 
@@ -61,7 +61,7 @@ class Linkit extends CKEditor5PluginDefault implements CKEditor5PluginElementsSu
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
-    $all_profiles = $this->linkitProfileStorage->loadMultiple();
+    $all_profiles = $this->entityTypeManager->getStorage('linkit_profile')->loadMultiple();
 
     $options = [];
     foreach ($all_profiles as $profile) {
@@ -112,8 +112,7 @@ class Linkit extends CKEditor5PluginDefault implements CKEditor5PluginElementsSu
    *   All valid choices.
    */
   public static function validChoices(): array {
-    $linkit_profile_storage = \Drupal::service('entity_type.manager')->getStorage('linkit_profile');
-    assert($linkit_profile_storage instanceof EntityStorageInterface);
+    $linkit_profile_storage = \Drupal::entityTypeManager()->getStorage('linkit_profile');
     return array_keys($linkit_profile_storage->loadMultiple());
   }
 

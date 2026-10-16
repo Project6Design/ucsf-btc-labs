@@ -32,7 +32,7 @@ class WebformElementFormatCustomTest extends WebformElementBrowserTestBase {
   /**
    * Tests element custom format.
    */
-  public function testFormatCustom() {
+  public function testFormatCustom(): void {
     $assert_session = $this->assertSession();
 
     $this->drupalLogin($this->rootUser);
@@ -86,6 +86,11 @@ class WebformElementFormatCustomTest extends WebformElementBrowserTestBase {
     $assert_session->responseContains('<tr style="background-color: #ffc"><td><em>Four</em></td></tr>');
     $assert_session->responseContains('<tr ><td><em>Five</em></td></tr>');
     $assert_session->responseContains('</table>');
+
+    // Check that multiple custom item format tokens are rendered as values.
+    $assert_session->responseContains('<label>textfield_custom_items_token</label>');
+    $assert_session->responseContains('TOKEN {{ 37 * 41 }}');
+    $assert_session->responseNotContains('TOKEN 1517');
 
     // Check image custom HTML format.
     $assert_session->responseContains('<label>image_custom</label>');
@@ -147,6 +152,10 @@ textfield_custom_value_multiple:
 ⦿ /Four/
 ⦿ /Five/
 
+
+TOKEN {{ 37 * 41 }}
+textfield_custom_items_token:
+TOKEN {{ 37 * 41 }}
 
 image_custom:
 value: 1

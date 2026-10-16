@@ -71,7 +71,7 @@ class UrlEmbedCke5Dialog extends FormBase {
     $values = $form_state->getValues();
     $input = $form_state->getUserInput();
     // Populate value from existing CKEditor attribute.
-    $url = $this->getRequest()->get('url_element');
+    $url = $this->getRequest()->request->get('url_element');
     // Set URL button element in form state, so that it can be used later in
     // validateForm() function.
     $form_state->set('editor', $editor);

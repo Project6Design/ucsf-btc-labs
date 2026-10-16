@@ -4,12 +4,13 @@ namespace Drupal\Tests\features\Unit;
 
 use Drupal\features\Entity\FeaturesBundle;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * @coversDefaultClass Drupal\features\Entity\FeaturesBundle
- * @group features
  */
+#[Group('features')]
 class FeaturesBundleTest extends UnitTestCase {
 
   use ProphecyTrait;

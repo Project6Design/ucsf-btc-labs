@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\editor_file\Plugin\CKEditor5Plugin;
 
-use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Utility\Environment;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -185,7 +184,7 @@ class File extends CKEditor5PluginDefault implements CKEditor5PluginConfigurable
       '#states' => $show_if_file_uploads_enabled,
     ];
 
-    $default_max_size = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.2.0', fn() => ByteSizeMarkup::create(Environment::getUploadMaxSize()), fn() => format_size(Environment::getUploadMaxSize()));
+    $default_max_size = ByteSizeMarkup::create(Environment::getUploadMaxSize());
     $form['max_size'] = [
       '#type' => 'textfield',
       '#default_value' => $this->configuration['max_size'],

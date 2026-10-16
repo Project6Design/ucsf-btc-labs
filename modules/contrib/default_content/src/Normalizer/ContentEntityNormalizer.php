@@ -9,6 +9,8 @@ use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Plugin\DataType\EntityReference;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Installer\InstallerKernel;
 use Drupal\Core\Language\LanguageManagerInterface;
@@ -271,24 +273,29 @@ class ContentEntityNormalizer implements ContentEntityNormalizerInterface {
    *   The content entity.
    *
    * @return string[]
-   *   TThe list of fields to normalize.
+   *   The list of fields to normalize.
    */
   protected function getFieldsToNormalize(ContentEntityInterface $entity): array {
-    $fields = TypedDataInternalPropertiesHelper::getNonInternalProperties($entity->getTypedData());
+    $fields = $entity->getFieldDefinitions();
 
-    // Unset identifiers.
+    // Ignore internal and read-only field definitions.
+    $fields = array_filter($fields, static function (FieldDefinitionInterface $field_definition): bool {
+      $definition = $field_definition->getFieldStorageDefinition();
+      if ($definition instanceof BaseFieldDefinition) {
+        // We do not want to remove all computed fields (e.g: path).
+        // \Drupal\Core\TypedData\DataDefinition::isReadOnly() checks if it is
+        // computed so we can't rely on it. Get the definition array instead.
+        $definition_array = $definition->toArray();
+        if (!empty($definition_array['internal']) || !empty($definition_array['read-only'])) {
+          return FALSE;
+        }
+      }
+      return TRUE;
+    });
+
+    // Ignore langcode and default_langcode.
     /** @var \Drupal\Core\Entity\ContentEntityTypeInterface $entity_type */
     $entity_type = $entity->getEntityType();
-    unset($fields[$entity_type->getKey('id')]);
-    unset($fields[$entity_type->getKey('uuid')]);
-    if ($revision_key = $entity_type->getKey('revision')) {
-      unset($fields[$revision_key]);
-    }
-
-    // Unset the bundle ang language code.
-    if ($bundle_key = $entity_type->getKey('bundle')) {
-      unset($fields[$bundle_key]);
-    }
     if ($langcode_key = $entity_type->getKey('langcode')) {
       unset($fields[$langcode_key]);
       unset($fields[$entity_type->getKey('default_langcode')]);
@@ -297,12 +304,6 @@ class ContentEntityNormalizer implements ContentEntityNormalizerInterface {
     // Ignore the revision created timestamp, it is set on save.
     if ($revision_created_key = $entity_type->getRevisionMetadataKey('revision_created')) {
       unset($fields[$revision_created_key]);
-    }
-
-    // Ignore the media thumbnail field, it is force regenerated for new
-    // media entities. See \Drupal\media\Entity\Media::shouldUpdateThumbnail().
-    if ($entity_type->id() == 'media') {
-      unset($fields['thumbnail']);
     }
 
     // Ignore parent reference fields of composite entities.

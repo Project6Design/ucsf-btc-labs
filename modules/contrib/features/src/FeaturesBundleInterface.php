@@ -7,7 +7,7 @@ namespace Drupal\features;
  */
 interface FeaturesBundleInterface {
 
-  const CORE_VERSION_REQUIREMENT = '^10 || ^11';
+  const CORE_VERSION_REQUIREMENT = '^10 || ^11 || ^12';
 
   const DEFAULT_BUNDLE = 'default';
 

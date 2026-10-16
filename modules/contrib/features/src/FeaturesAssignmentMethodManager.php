@@ -5,6 +5,7 @@ namespace Drupal\features;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
+use Drupal\features\Attribute\Assignment;
 
 /**
  * Manages configuration packaging methods.
@@ -23,8 +24,13 @@ class FeaturesAssignmentMethodManager extends DefaultPluginManager {
    *   An object that implements ModuleHandlerInterface.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/FeaturesAssignment', $namespaces, $module_handler,
-      'Drupal\features\FeaturesAssignmentMethodInterface');
+    parent::__construct(
+      'Plugin/FeaturesAssignment',
+      $namespaces,
+      $module_handler,
+      '\Drupal\features\FeaturesAssignmentMethodInterface',
+      Assignment::class,
+    );
     $this->alterInfo('features_assignment_info');
     $this->setCacheBackend($cache_backend, 'features_assignment_methods');
   }

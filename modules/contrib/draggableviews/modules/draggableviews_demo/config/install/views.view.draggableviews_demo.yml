@@ -11,7 +11,7 @@ dependencies:
 id: draggableviews_demo
 label: 'Draggableviews Demo'
 module: views
-description: ''
+description: 'Demonstrates how to use draggableviews to create sortable content lists. This view has two pages: one to display the sorted content and another to allow drag-and-drop reordering.'
 tag: ''
 base_table: node_field_data
 base_field: nid
@@ -231,7 +231,7 @@ display:
           exposed: false
           draggable_views_reference: 'draggableviews_demo:draggableviews_demo_order'
           draggable_views_null_order: after
-          draggable_views_pass_arguments: 0
+          draggable_views_pass_arguments: false
         created:
           id: created
           table: node_field_data
@@ -318,7 +318,20 @@ display:
           replica: false
           query_tags: {  }
       relationships: {  }
-      header: {  }
+      header:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: text
+          empty: false
+          content:
+            value: '<p>This page displays content in the order specified on the <a href="/draggableviews-demo/order">Order Page</a>. The content is sorted using the DraggableViews weight field.</p>'
+            format: basic_html
+          tokenize: false
       footer: {  }
       display_extenders: {  }
     cache_metadata:
@@ -500,6 +513,20 @@ display:
         row: false
       display_extenders: {  }
       path: draggableviews-demo/order
+      header:
+        area:
+          id: area
+          table: views
+          field: area
+          relationship: none
+          group_type: group
+          admin_label: ''
+          plugin_id: text
+          empty: false
+          content:
+            value: '<p><strong>Drag-and-Drop Ordering Instructions:</strong></p><ol><li>Click and hold on an item</li><li>Drag it to the desired position in the list</li><li>Release to drop it in place</li><li>The new order will be automatically saved</li><li>Visit the <a href="/draggableviews-demo">Display Page</a> to see the content in the new order</li></ol>'
+            format: basic_html
+          tokenize: false
       menu:
         type: tab
         title: 'Order Draggableviews Demo'

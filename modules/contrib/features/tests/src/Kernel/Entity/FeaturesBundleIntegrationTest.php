@@ -5,11 +5,14 @@ namespace Drupal\Tests\features\Kernel\Entity;
 use Drupal\features\Entity\FeaturesBundle;
 use Drupal\features\FeaturesBundleInterface;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * @coversDefaultClass \Drupal\features\Entity\FeaturesBundle
- * @group features
  */
+#[RunTestsInSeparateProcesses]
+#[Group('features')]
 class FeaturesBundleIntegrationTest extends KernelTestBase {
 
   /**

@@ -2,16 +2,18 @@
 
 namespace Drupal\linkit\Plugin\Linkit\Matcher;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\linkit\Attribute\Matcher;
+
 /**
  * Provides specific linkit matchers for contact forms.
- *
- * @Matcher(
- *   id = "entity:contact_form",
- *   label = @Translation("Contact form"),
- *   target_entity = "contact_form",
- *   provider = "contact"
- * )
  */
+#[Matcher(
+  id: "entity:contact_form",
+  label: new TranslatableMarkup("Contact form"),
+  target_entity: "contact_form",
+  provider: "contact",
+)]
 class ContactFormMatcher extends EntityMatcher {
 
   /**

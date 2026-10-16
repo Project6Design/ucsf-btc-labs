@@ -2,6 +2,8 @@
 
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 
 /**
@@ -14,6 +16,12 @@ use Drupal\features\FeaturesAssignmentMethodBase;
  *   description = @Translation("Detect and add existing package modules."),
  * )
  */
+#[Assignment(
+  id: 'packages',
+  weight: -20,
+  name: new TranslatableMarkup('Packages'),
+  description: new TranslatableMarkup('Detect and add existing package modules.')
+)]
 class FeaturesAssignmentPackages extends FeaturesAssignmentMethodBase {
 
   /**

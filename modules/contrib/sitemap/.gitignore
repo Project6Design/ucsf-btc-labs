@@ -1,0 +1,11 @@
+# Added when using ddev/ddev-drupal-contrib add-on.
+/.ddev/
+/.editorconfig
+/.gitattributes
+/.phpunit.result.cache
+/.prettierignore
+/.prettierrc.json
+/phpcs.xml.dist
+/recipes/
+/vendor/
+/web/

@@ -2,6 +2,8 @@
 
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 
 /**
@@ -15,6 +17,12 @@ use Drupal\features\FeaturesAssignmentMethodBase;
  *   description = @Translation("Add to packages configuration dependent on items already in that package."),
  * )
  */
+#[Assignment(
+  id: 'dependency',
+  weight: 15,
+  name: new TranslatableMarkup('Dependency'),
+  description: new TranslatableMarkup('Add to packages configuration dependent on items already in that package.')
+)]
 class FeaturesAssignmentDependency extends FeaturesAssignmentMethodBase {
 
   /**

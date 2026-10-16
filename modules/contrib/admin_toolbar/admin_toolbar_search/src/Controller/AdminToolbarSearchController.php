@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\admin_toolbar_search\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
@@ -9,7 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 /**
  * Class AdminToolbarSearchController to the search functionality.
  *
- * @package Drupal\admin_toolbar_tools\Controller
+ * @package Drupal\admin_toolbar_search\Controller
  */
 class AdminToolbarSearchController extends ControllerBase {
 

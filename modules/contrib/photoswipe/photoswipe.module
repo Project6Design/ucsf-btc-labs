@@ -58,6 +58,9 @@ function photoswipe_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_page_attachments().
  */
 function photoswipe_page_attachments(array &$attachments) {
+  // Vary / invalidate when photoswipe.settings changes (e.g. always-load).
+  $attachments['#cache']['tags'][] = 'config:photoswipe.settings';
+
   // Conditionally load on non-admin pages.
   $is_admin = \Drupal::service('router.admin_context')->isAdminRoute();
 

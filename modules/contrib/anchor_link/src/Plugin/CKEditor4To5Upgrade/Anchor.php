@@ -24,9 +24,10 @@ class Anchor extends PluginBase implements CKEditor4To5UpgradePluginInterface {
   /**
    * {@inheritdoc}
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
   public function mapCKEditor4ToolbarButtonToCKEditor5ToolbarItem(
     string $cke4_button,
-    HTMLRestrictions $text_format_html_restrictions
+    HTMLRestrictions $text_format_html_restrictions,
   ): ?array {
     if ($cke4_button === 'Anchor') {
       return ['anchor'];
@@ -39,6 +40,7 @@ class Anchor extends PluginBase implements CKEditor4To5UpgradePluginInterface {
   /**
    * {@inheritdoc}
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
   public function mapCKEditor4SettingsToCKEditor5Configuration(string $cke4_plugin_id, array $cke4_plugin_settings): ?array {
     throw new \OutOfBoundsException();
   }
@@ -46,6 +48,7 @@ class Anchor extends PluginBase implements CKEditor4To5UpgradePluginInterface {
   /**
    * {@inheritdoc}
    */
+  // phpcs:ignore Drupal.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
   public function computeCKEditor5PluginSubsetConfiguration(string $cke5_plugin_id, FilterFormatInterface $text_format): ?array {
     throw new \OutOfBoundsException();
   }

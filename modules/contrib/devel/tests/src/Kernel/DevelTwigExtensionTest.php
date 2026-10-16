@@ -8,12 +8,12 @@ use Drupal\devel\Twig\Extension\Debug;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests Twig extensions.
- *
- * @group devel
  */
+#[Group('devel')]
 class DevelTwigExtensionTest extends KernelTestBase {
 
   use DevelDumperTestTrait;
@@ -84,7 +84,7 @@ class DevelTwigExtensionTest extends KernelTestBase {
     $environment = $this->container->get('twig');
     $functions = $environment->getFunctions();
 
-    $dump_functions = ['devel_dump', 'kpr'];
+    $dump_functions = ['devel_dump'];
     $message_functions = ['devel_message', 'dpm', 'dsm'];
     $registered_functions = $dump_functions + $message_functions;
     foreach ($registered_functions as $name) {

@@ -2,6 +2,8 @@
 
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 
 /**
@@ -20,6 +22,18 @@ use Drupal\features\FeaturesAssignmentMethodBase;
  *   }
  * )
  */
+#[Assignment(
+  id: 'core',
+  weight: 5,
+  name: new TranslatableMarkup('Core type'),
+  description: new TranslatableMarkup('Assign designated types of configuration to a core configuration package module. For example, if image styles are selected as a core type, a core package will be generated and image styles will be assigned to it.'),
+  config_route_name: 'features.assignment_core',
+  default_settings: [
+    'types' => [
+      'config' => [],
+    ],
+  ]
+)]
 class FeaturesAssignmentCoreType extends FeaturesAssignmentMethodBase {
 
   /**

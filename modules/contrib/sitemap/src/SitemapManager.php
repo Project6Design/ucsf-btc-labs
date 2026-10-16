@@ -7,7 +7,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 
 /**
- * Provides an Sitemap plugin manager.
+ * Provides a Sitemap plugin manager.
  *
  * @see \Drupal\sitemap\Annotation\Sitemap
  * @see \Drupal\sitemap\SitemapInterface
@@ -32,6 +32,7 @@ class SitemapManager extends DefaultPluginManager {
       $namespaces,
       $module_handler,
       'Drupal\sitemap\SitemapInterface',
+      'Drupal\sitemap\Attribute\Sitemap',
       'Drupal\sitemap\Annotation\Sitemap'
     );
     $this->alterInfo('sitemap_info');

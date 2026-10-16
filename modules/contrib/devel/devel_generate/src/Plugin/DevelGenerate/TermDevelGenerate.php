@@ -66,7 +66,7 @@ class TermDevelGenerate extends DevelGenerateBase implements ContainerFactoryPlu
   /**
    * The content translation manager.
    */
-  protected ?ContentTranslationManagerInterface $contentTranslationManager;
+  protected ?ContentTranslationManagerInterface $contentTranslationManager = NULL;
 
   /**
    * {@inheritdoc}
@@ -421,7 +421,7 @@ class TermDevelGenerate extends DevelGenerateBase implements ContainerFactoryPlu
       }
     }
 
-    $number = array_shift($args) ?: $defaultSettings['num'];
+    $number = $args['num'] ?: $defaultSettings['num'];
     if (!$this->isNumber($number)) {
       throw new \Exception(dt('Invalid number of terms: @num', ['@num' => $number]));
     }

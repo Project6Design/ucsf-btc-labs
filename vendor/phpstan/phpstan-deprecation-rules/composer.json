@@ -5,14 +5,16 @@
 	"license": [
 		"MIT"
 	],
+	"keywords": ["static analysis"],
 	"require": {
-		"php": "^7.2 || ^8.0",
-		"phpstan/phpstan": "^1.12"
+		"php": "^7.4 || ^8.0",
+		"phpstan/phpstan": "^2.1.39"
 	},
 	"require-dev": {
 		"php-parallel-lint/php-parallel-lint": "^1.2",
-		"phpstan/phpstan-phpunit": "^1.0",
-		"phpunit/phpunit": "^9.5"
+		"phpstan/phpstan-phpunit": "^2.0",
+		"phpunit/phpunit": "^9.6",
+		"shipmonk/name-collision-detector": "^2.1"
 	},
 	"config": {
 		"platform": {

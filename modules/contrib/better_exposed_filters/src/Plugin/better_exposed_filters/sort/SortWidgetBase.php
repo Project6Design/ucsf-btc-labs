@@ -62,6 +62,7 @@ abstract class SortWidgetBase extends BetterExposedFiltersWidgetBase implements 
         'is_secondary' => FALSE,
         'reset' => FALSE,
         'reset_label' => '',
+        'no_reset' => FALSE,
       ],
     ];
   }
@@ -146,6 +147,17 @@ Title Desc|Z -> A</pre> Leave the replacement text blank to remove an option alt
           ':input[name="exposed_form_options[bef][sort][configuration][advanced][reset]"]' => ['checked' => TRUE],
         ],
       ],
+    ];
+
+    // Keep the exposed sort value when the form's reset button is clicked.
+    // This is distinct from the "Reset sort" option above, which adds a link
+    // that returns the sort to its default; here the exposed sort is simply
+    // left untouched by the global reset button.
+    $form['advanced']['no_reset'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Do not reset the exposed sort'),
+      '#default_value' => !empty($this->configuration['advanced']['no_reset']),
+      '#description' => $this->t('When the user clicks the reset button, the exposed sort keeps its current value instead of being cleared.'),
     ];
 
     $form['advanced']['collapsible'] = [

@@ -4,27 +4,29 @@ namespace Drupal\sitemap_custom_plugin_test\Plugin\Sitemap;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\sitemap\Attribute\Sitemap;
 use Drupal\sitemap\SitemapBase;
+use Drupal\sitemap_custom_plugin_test\Plugin\Derivative\DerivativeSitemapPluginDeriver;
 
 /**
  * A derived plugin, for adding 1...N sections (i.e.: based on content/config).
  *
  * See https://www.drupal.org/docs/drupal-apis/plugin-api/plugin-derivatives for
  * more information on plugin derivers.
- *
- * @Sitemap(
- *   id = "sitemap_custom_plugin_test_derivative",
- *   title = @Translation("Test derived plugin"),
- *   description = @Translation("A derived, test sitemap plugin."),
- *   settings = {
- *     "title" = NULL,
- *     "bizz" = NULL,
- *   },
- *   deriver = "Drupal\sitemap_custom_plugin_test\Plugin\Derivative\DerivativeSitemapPluginDeriver",
- *   enabled = TRUE,
- * )
  */
+#[Sitemap(
+  id: 'sitemap_custom_plugin_test_derivative',
+  title: new TranslatableMarkup('Test derived plugin'),
+  description: new TranslatableMarkup('A derived, test sitemap plugin.'),
+  enabled: TRUE,
+  settings: [
+    'title' => NULL,
+    'bizz' => NULL,
+  ],
+  deriver: DerivativeSitemapPluginDeriver::class,
+)]
 class DerivativeSitemapPlugin extends SitemapBase {
 
   /**

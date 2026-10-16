@@ -273,17 +273,12 @@ class ExporterIntegrationTest extends KernelTestBase {
         ],
         'promote' => [
           0 => [
-            'value' => TRUE,
+            'value' => $node->isPromoted(),
           ],
         ],
         'sticky' => [
           0 => [
             'value' => FALSE,
-          ],
-        ],
-        'revision_translation_affected' => [
-          0 => [
-            'value' => TRUE,
           ],
         ],
       ],

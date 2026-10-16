@@ -1,3 +1,25 @@
+block.settings.ik_constant_contact:
+  type: block_settings
+  label: 'Constant Contact Signup Form'
+  mapping:
+    body:
+      type: text_format
+      label: 'Body'
+    success_message:
+      type: text
+      label: 'Custom Success Message'
+
+block.settings.ik_constant_contact_multi:
+  type: block_settings
+  label: 'Constant Contact Multiple Lists Signup Form'
+  mapping:
+    body:
+      type: text_format
+      label: 'Body'
+    success_message:
+      type: text
+      label: 'Custom Success Message'
+
 webform.handler.ik_constant_contact:
   type: mapping
   label: 'Constant Contact'

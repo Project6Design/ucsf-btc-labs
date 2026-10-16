@@ -2,6 +2,8 @@
 
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 
 /**
@@ -20,6 +22,18 @@ use Drupal\features\FeaturesAssignmentMethodBase;
  *   }
  * )
  */
+#[Assignment(
+  id: 'site',
+  weight: 7,
+  name: new TranslatableMarkup('Site type'),
+  description: new TranslatableMarkup('Assign designated types of configuration to a site configuration package module. For example, if image styles are selected as a site type, a site package will be generated and image styles will be assigned to it.'),
+  config_route_name: 'features.assignment_site',
+  default_settings: [
+    'types' => [
+      'config' => [],
+    ],
+  ],
+)]
 class FeaturesAssignmentSiteType extends FeaturesAssignmentMethodBase {
 
   /**

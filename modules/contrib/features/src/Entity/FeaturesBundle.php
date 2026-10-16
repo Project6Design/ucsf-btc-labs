@@ -3,8 +3,10 @@
 namespace Drupal\features\Entity;
 
 use Drupal\Core\Config\Entity\ConfigEntityBase;
-use Drupal\features\FeaturesBundleInterface;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Site\Settings;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\FeaturesBundleInterface;
 
 /**
  * Defines a features bundle.
@@ -34,6 +36,26 @@ use Drupal\Core\Site\Settings;
  *   }
  * )
  */
+#[ConfigEntityType(
+  id: 'features_bundle',
+  label: new TranslatableMarkup('Features bundle'),
+  handlers: [],
+  admin_permission: 'administer site configuration',
+  config_prefix: 'bundle',
+  entity_keys: [
+    'id' => 'machine_name',
+    'label' => 'name',
+  ],
+  links: [],
+  config_export: [
+    'name',
+    'machine_name',
+    'description',
+    'assignments',
+    'profile_name',
+    'is_profile',
+  ]
+)]
 class FeaturesBundle extends ConfigEntityBase implements FeaturesBundleInterface {
 
   /**

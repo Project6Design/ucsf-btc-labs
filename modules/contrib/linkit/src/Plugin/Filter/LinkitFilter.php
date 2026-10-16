@@ -4,28 +4,32 @@ namespace Drupal\linkit\Plugin\Filter;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityRepositoryInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Utility\Error;
+use Drupal\filter\Attribute\Filter;
 use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
+use Drupal\filter\Plugin\FilterInterface;
 use Drupal\linkit\SubstitutionManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a Linkit filter.
- *
- * @Filter(
- *   id = "linkit",
- *   title = @Translation("Linkit URL converter"),
- *   description = @Translation("Updates links inserted by Linkit to point to entity URL aliases."),
- *   settings = {
- *     "title" = TRUE,
- *   },
- *   type = Drupal\filter\Plugin\FilterInterface::TYPE_TRANSFORM_REVERSIBLE
- * )
  */
+#[Filter(
+  id: 'linkit',
+  title: new TranslatableMarkup('Linkit URL converter'),
+  description: new TranslatableMarkup('Updates links inserted by Linkit to point to entity URL aliases.'),
+  settings: [
+    'title' => TRUE,
+    'media_substitution' => 'metadata',
+  ],
+  type: FilterInterface::TYPE_TRANSFORM_REVERSIBLE
+)]
 class LinkitFilter extends FilterBase implements ContainerFactoryPluginInterface {
 
   /**
@@ -50,6 +54,13 @@ class LinkitFilter extends FilterBase implements ContainerFactoryPluginInterface
   protected $logger;
 
   /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * Constructs a LinkitFilter object.
    *
    * @param array $configuration
@@ -64,13 +75,16 @@ class LinkitFilter extends FilterBase implements ContainerFactoryPluginInterface
    *   The substitution manager.
    * @param \Psr\Log\LoggerInterface $logger
    *   The logger.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityRepositoryInterface $entity_repository, SubstitutionManagerInterface $substitution_manager, LoggerInterface $logger) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityRepositoryInterface $entity_repository, SubstitutionManagerInterface $substitution_manager, LoggerInterface $logger, ModuleHandlerInterface $module_handler) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
 
     $this->entityRepository = $entity_repository;
     $this->substitutionManager = $substitution_manager;
     $this->logger = $logger;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -83,7 +97,8 @@ class LinkitFilter extends FilterBase implements ContainerFactoryPluginInterface
       $plugin_definition,
       $container->get('entity.repository'),
       $container->get('plugin.manager.linkit.substitution'),
-      $container->get('logger.factory')->get('linkit')
+      $container->get('logger.factory')->get('linkit'),
+      $container->get('module_handler')
     );
   }
 
@@ -115,6 +130,12 @@ class LinkitFilter extends FilterBase implements ContainerFactoryPluginInterface
           // for content created before the substitution feature.
           if (!$substitution_type = $element->getAttribute('data-entity-substitution')) {
             $substitution_type = $entity_type === 'file' ? 'file' : SubstitutionManagerInterface::DEFAULT_SUBSTITUTION;
+          }
+          if ($entity_type === 'media') {
+            $substitution_options = $this->substitutionManager->getApplicablePluginsOptionList('media');
+            if (in_array($this->settings['media_substitution'], array_keys($substitution_options))) {
+              $substitution_type = $this->settings['media_substitution'];
+            }
           }
 
           $entity = $this->entityRepository->loadEntityByUuid($entity_type, $uuid);
@@ -188,6 +209,17 @@ class LinkitFilter extends FilterBase implements ContainerFactoryPluginInterface
       '#title' => $this->t('Automatically set the <code>title</code> attribute to that of the (translated) referenced content'),
       '#default_value' => $this->settings['title'],
     ];
+    if ($this->moduleHandler->moduleExists('media')) {
+      $substitution_options = $this->substitutionManager->getApplicablePluginsOptionList('media');
+      $form['media_substitution'] = [
+        '#type' => 'select',
+        '#title' => $this->t('Media entity URL substitution'),
+        '#options' => [
+          'metadata' => $this->t('Use metadata from when the link was created'),
+        ] + $substitution_options,
+        '#default_value' => $this->settings['media_substitution'] ?? 'metadata',
+      ];
+    }
     return $form;
   }
 

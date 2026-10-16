@@ -5,12 +5,12 @@ namespace Drupal\Tests\devel\Kernel;
 use Drupal\block\Entity\Block;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\system\Entity\Menu;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests Devel enforced dependencies.
- *
- * @group devel
  */
+#[Group('devel')]
 class DevelEnforcedDependenciesTest extends KernelTestBase {
 
   /**

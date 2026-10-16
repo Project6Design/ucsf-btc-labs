@@ -3,7 +3,6 @@
 namespace Drupal\draggableviews;
 
 use Drupal\Component\Utility\Html;
-use Drupal\media\Entity\Media;
 use Drupal\views\ViewExecutable;
 
 /**
@@ -19,6 +18,13 @@ class DraggableViews {
   public $view;
 
   /**
+   * The Views base entity identifier.
+   *
+   * @var string
+   */
+  protected $baseViewEntityId;
+
+  /**
    * Constructs DraggableViewsRows object.
    *
    * @param \Drupal\views\ViewExecutable $view
@@ -26,22 +32,21 @@ class DraggableViews {
    */
   public function __construct(ViewExecutable $view) {
     $this->view = $view;
+    $this->baseViewEntityId = $view->getBaseEntityType()->getKey('id');
   }
 
   /**
-   * Get index by id.
+   * Get the index id.
+   *
+   * @param string $id
+   *   The entity identifier.
+   *
+   * @return false|int
+   *   The index value or false.
    */
   public function getIndex($id) {
     foreach ($this->view->result as $item) {
-      if ($item->_entity instanceof Media) {
-        // Media index name.
-        $name = 'mid';
-      }
-      else {
-        // Node index name. The default one.
-        $name = 'nid';
-      }
-      if ($item->$name == $id) {
+      if ($item->{$this->baseViewEntityId} == $id) {
         return $item->index;
       }
     }
@@ -57,7 +62,7 @@ class DraggableViews {
     }
     $row = $this->view->result[$index];
 
-    if (!property_exists($row, 'draggableviews_structure_parent') || !$row->draggableviews_structure_parent) {
+    if (!property_exists($row, 'draggableviews_structure_parent') || empty($row->draggableviews_structure_parent)) {
       return 0;
     }
 

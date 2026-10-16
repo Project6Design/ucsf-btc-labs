@@ -13,6 +13,7 @@ use Drupal\Core\Render\ElementInfoManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Core\Url;
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Drupal\better_exposed_filters\Plugin\BetterExposedFiltersWidgetManager;
 use Drupal\views\Attribute\ViewsExposedForm;
 use Drupal\views\Plugin\views\exposed_form\InputRequired;
@@ -56,6 +57,9 @@ class BetterExposedFilters extends InputRequired {
    *   The Request object.
    * @param \Drupal\breakpoint\BreakpointManagerInterface|null $breakpointManager
    *   The breakpoint manager.
+   * @param \Drupal\filter\FilterFormatRepositoryInterface|null $formatRepository
+   *   The filter format repository (Drupal 11.4+), required by the parent
+   *   InputRequired plugin as of Drupal 12.
    */
   public function __construct(
     array $configuration,
@@ -69,8 +73,15 @@ class BetterExposedFilters extends InputRequired {
     protected ElementInfoManagerInterface $elementInfo,
     protected Request $request,
     protected ?BreakpointManagerInterface $breakpointManager,
+    $formatRepository = NULL,
   ) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    // The format repository only exists in Drupal 11.4+.
+    if ($formatRepository) {
+      parent::__construct($configuration, $plugin_id, $plugin_definition, $formatRepository);
+    }
+    else {
+      parent::__construct($configuration, $plugin_id, $plugin_definition);
+    }
   }
 
   /**
@@ -89,6 +100,7 @@ class BetterExposedFilters extends InputRequired {
       $container->get('element_info'),
       $container->get('request_stack')->getCurrentRequest(),
       $container->has('breakpoint.manager') ? $container->get('breakpoint.manager') : NULL,
+      $container->has(FilterFormatRepositoryInterface::class) ? $container->get(FilterFormatRepositoryInterface::class) : NULL,
     );
   }
 
@@ -937,6 +949,13 @@ class BetterExposedFilters extends InputRequired {
     if ($bef_options['general']['reset_button_always_show']) {
       $form['actions']['reset']['#access'] = TRUE;
     }
+    // Mirror core's "hide the reset button when there is no exposed input"
+    // behavior, but ignore input belonging to elements flagged "Do not reset".
+    // That input is never cleared, so on its own it must not surface the reset
+    // button.
+    elseif (isset($form['actions']['reset']) && !$this->hasResettableInput()) {
+      $form['actions']['reset']['#access'] = FALSE;
+    }
 
     if (isset($form['actions']['reset'])) {
       // Never enable a reset button that has already been disabled.
@@ -1004,13 +1023,21 @@ class BetterExposedFilters extends InputRequired {
       $session->remove('views');
     }
 
+    // Exposed filters whose value must survive the reset, either because they
+    // are individually flagged "Do not reset" or because "Reset secondary
+    // only" is enabled and the filter is not a secondary option.
+    // Keyed by exposed identifier, holding the value to preserve.
+    $kept_values = $this->getPreservedFilterValues($form_state);
+
     // Set the form to allow redirect.
     if (empty($this->view->live_preview) && !$this->request->isXmlHttpRequest()) {
       $form_state->disableRedirect(FALSE);
     }
     else {
       $form_state->setRebuild();
-      $this->view->setExposedInput([]);
+      // Keep preserved filter values in the exposed input so that the rebuilt
+      // (AJAX / live preview) form still reflects them.
+      $this->view->setExposedInput($kept_values);
 
       // Go through each handler and let it generate its exposed widget.
       // See ViewsExposedForm::buildForm() for more details.
@@ -1018,15 +1045,23 @@ class BetterExposedFilters extends InputRequired {
         /** @var \Drupal\views\Plugin\views\ViewsHandlerInterface $handler */
         foreach ($this->view->$type as $id => $handler) {
           if ($handler->canExpose() && $handler->isExposed()) {
-            // Reset exposed sorts filter elements if they exist.
+            // Reset exposed sorts filter elements if they exist, unless the
+            // exposed sort is flagged "Do not reset".
             if ($type === 'sort') {
-              foreach (['sort_bef_combine', 'sort_by', 'sort_order'] as $sort_el) {
-                if (isset($this->view->exposed_data[$sort_el]) && isset($form[$sort_el])) {
-                  $this->request->query->remove($sort_el);
-                  $form_state->setValue($sort_el, $form[$sort_el]['#default_value']);
+              if ($this->sortShouldReset()) {
+                foreach (['sort_bef_combine', 'sort_by', 'sort_order'] as $sort_el) {
+                  if (isset($this->view->exposed_data[$sort_el]) && isset($form[$sort_el])) {
+                    $this->request->query->remove($sort_el);
+                    $form_state->setValue($sort_el, $form[$sort_el]['#default_value']);
+                  }
                 }
               }
               continue 2;
+            }
+
+            // Leave preserved filters untouched.
+            if ($type === 'filter' && !$this->filterShouldReset($id)) {
+              continue;
             }
 
             $handler->value = $handler->options['value'];
@@ -1067,12 +1102,128 @@ class BetterExposedFilters extends InputRequired {
     }
 
     if ($this->view->hasUrl()) {
-      $form_state->setRedirectUrl($this->view->getUrl());
+      $url = $this->view->getUrl();
+      // Re-add the preserved filter values as query parameters so the view
+      // keeps applying them after the redirect.
+      if (!empty($kept_values)) {
+        $url->setOption('query', $kept_values + (array) $url->getOption('query'));
+      }
+      $form_state->setRedirectUrl($url);
     }
     else {
       // Fallback if the view does not have a URL (embedded or block views?)
-      $form_state->setRedirect('<current>');
+      $form_state->setRedirect('<current>', [], ['query' => $kept_values]);
     }
+  }
+
+  /**
+   * Determines whether an exposed filter should be reset.
+   *
+   * A filter keeps its value when it is individually flagged "Do not reset".
+   *
+   * @param string $filter_id
+   *   The filter handler id (the key used in the BEF filter options).
+   *
+   * @return bool
+   *   TRUE if the filter should be reset, FALSE if its value is preserved.
+   */
+  protected function filterShouldReset(string $filter_id): bool {
+    return empty($this->options['bef']['filter'][$filter_id]['advanced']['no_reset']);
+  }
+
+  /**
+   * Determines whether the exposed sort should be reset.
+   *
+   * The exposed sort keeps its value when it is flagged "Do not reset". This
+   * setting is global to the sort widget (it applies to all exposed sorts).
+   *
+   * @return bool
+   *   TRUE if the exposed sort should be reset, FALSE if it is preserved.
+   */
+  protected function sortShouldReset(): bool {
+    return empty($this->options['bef']['sort']['advanced']['no_reset']);
+  }
+
+  /**
+   * Determines whether the exposed input contains anything resettable.
+   *
+   * Like core's reset-button visibility check (which hides the button when
+   * there is no exposed input), but input belonging to filters or the sort
+   * flagged "Do not reset" is ignored: that input is never cleared, so it must
+   * not, by itself, keep the reset button visible.
+   *
+   * @return bool
+   *   TRUE if at least one resettable exposed element currently has input.
+   */
+  protected function hasResettableInput(): bool {
+    $input = $this->view->getExposedInput();
+
+    // Exposed filters that are not flagged "Do not reset".
+    foreach ($this->view->filter as $id => $handler) {
+      $identifier = $handler->options['expose']['identifier'] ?? '';
+      if ($identifier && $handler->canExpose() && $handler->isExposed()
+        && $this->filterShouldReset($id) && array_key_exists($identifier, $input)) {
+        return TRUE;
+      }
+    }
+
+    // Exposed sort input, unless the sort is flagged "Do not reset".
+    if ($this->sortShouldReset()) {
+      foreach (['sort_by', 'sort_order', 'sort_bef_combine'] as $sort_el) {
+        if (array_key_exists($sort_el, $input)) {
+          return TRUE;
+        }
+      }
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Collects the current values of exposed filters that must not be reset.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state holding the submitted values.
+   *
+   * @return array
+   *   An array of preserved values keyed by exposed identifier. Empty values
+   *   are omitted so they do not pollute the redirect query string.
+   */
+  protected function getPreservedFilterValues(FormStateInterface $form_state): array {
+    // The reset button sets "#limit_validation_errors" to an empty array, so
+    // processed form values for the non-triggering elements are discarded.
+    // Read the raw user input instead, which always retains them.
+    $input = $form_state->getUserInput();
+
+    $kept = [];
+    $filters = $this->view->display_handler->handlers['filter'] ?? [];
+    /** @var \Drupal\views\Plugin\views\filter\FilterPluginBase $handler */
+    foreach ($filters as $id => $handler) {
+      if (!$handler->isExposed() || $this->filterShouldReset($id)) {
+        continue;
+      }
+
+      $identifier = $handler->isAGroup()
+        ? $handler->options['group_info']['identifier']
+        : $handler->options['expose']['identifier'];
+
+      $value = $input[$identifier] ?? NULL;
+      if ($value !== NULL && $value !== '' && $value !== []) {
+        $kept[$identifier] = $value;
+      }
+    }
+
+    // Preserve the exposed sort value when flagged "Do not reset".
+    if (!$this->sortShouldReset()) {
+      foreach (['sort_bef_combine', 'sort_by', 'sort_order'] as $sort_el) {
+        $value = $input[$sort_el] ?? NULL;
+        if ($value !== NULL && $value !== '' && $value !== []) {
+          $kept[$sort_el] = $value;
+        }
+      }
+    }
+
+    return $kept;
   }
 
   /**

@@ -23,7 +23,7 @@ class Imce extends BUEditorPluginBase {
    * {@inheritdoc}
    */
   // @codingStandardsIgnoreLine
-  public function alterEditorJS(array &$js, BUEditorEditor $bueditor_editor, Editor $editor = NULL) {
+  public function alterEditorJS(array &$js, BUEditorEditor $bueditor_editor, ?Editor $editor = NULL) {
     // Check selected file browser.
     if (isset($js['settings']['fileBrowser']) && $js['settings']['fileBrowser'] === 'imce') {
       // Check access.

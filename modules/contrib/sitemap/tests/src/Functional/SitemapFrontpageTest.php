@@ -50,6 +50,22 @@ class SitemapFrontpageTest extends SitemapBrowserTestBase {
   }
 
   /**
+   * Tests the override text setting.
+   */
+  public function testTextOverride() {
+    // Assert default frontpage link text.
+    $this->drupalGet('/sitemap');
+    $this->assertSession()->linkExists('Front page of Drupal');
+
+    // Assert overridden frontpage link text.
+    $override_text = $this->randomString();
+    $this->saveSitemapForm(['plugins[frontpage][settings][front_text_override]' => $override_text]);
+    $this->drupalGet('/sitemap');
+    $this->assertSession()->linkExists($override_text);
+    $this->assertSession()->linkNotExists('Front page of Drupal');
+  }
+
+  /**
    * Tests RSS feed for front page.
    */
   public function testRssFeed() {

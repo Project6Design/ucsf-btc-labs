@@ -25,7 +25,6 @@ class MediaReferenceTest extends PhotoswipeJsTestBase {
   protected static $modules = [
     'media',
     'media_test_source',
-    'field_ui',
   ];
 
   /**
@@ -85,40 +84,28 @@ class MediaReferenceTest extends PhotoswipeJsTestBase {
   }
 
   /**
-   * Tests if the Photoswipe field formatter settings exist.
+   * Tests the Photoswipe field formatter can be applied and settings persist.
    */
   public function testPhotoswipeFieldFormatterSettingsExist() {
-    $session = $this->assertSession();
-    $page = $this->getSession()->getPage();
-
+    // Attach a media reference field using the Photoswipe formatter.
     $this->setupMediaFieldOnNodeBundle();
-    $this->createMedia();
 
-    // Go to manage display page.
-    $this->drupalGet('admin/structure/types/manage/article/display');
-    $session->pageTextContains('Photoswipe');
-    // Check if the photoswipe field formatter is selected:
-    $session->elementAttributeContains('css', '#edit-fields-field-media-image-type > option[value="photoswipe_field_formatter"]', 'selected', 'selected');
-    // Check if all formatter settings exist, and have the correct default
-    // selected setting:
-    $page->pressButton('edit-fields-field-media-image-settings-edit');
-    $this->assertNotNull($session->waitForElementVisible('css', 'select[id*=edit-fields-field-media-image-settings-edit-form-settings-photoswipe-thumbnail-style-first]'));
-    $session->elementExists('css', 'select[id*="edit-fields-field-media-image-settings-edit-form-settings-photoswipe-thumbnail-style-first"]');
-    $session->elementExists('css', 'select[id*="edit-fields-field-media-image-settings-edit-form-settings-photoswipe-thumbnail-style"]:not([id*=first])');
-    $session->elementExists('css', 'select[id*="edit-fields-field-media-image-settings-edit-form-settings-photoswipe-image-style"]');
-    $session->elementTextEquals('css', 'select[id*="edit-fields-field-media-image-settings-edit-form-settings-photoswipe-thumbnail-style-first"] > option[selected="selected"]', 'No override (use default thumbnail image style)');
-    $session->elementTextEquals('css', 'select[id*="edit-fields-field-media-image-settings-edit-form-settings-photoswipe-thumbnail-style"]:not([id*=first]) > option[selected="selected"]', 'None (Original image)');
-    $session->elementTextEquals('css', 'select[id*="edit-fields-field-media-image-settings-edit-form-settings-photoswipe-image-style"] > option[selected="selected"]', 'None (Original image)');
-    // @codingStandardsIgnoreStart
-    // @todo Why does the following select not have a selected field?:
-    // $session->elementTextEquals('css', 'select[id*=edit-fields-field-media-image-settings-edit-form-settings-photoswipe-caption] > option[selected="selected"]', 'Image title tag');
-    // Check if changing a setting and submitting the display,
-    // won't break anything:
-    // @codingStandardsIgnoreEnd
-    $page->selectFieldOption('fields[field_media_image][settings_edit_form][settings][photoswipe_thumbnail_style_first]', 'large');
-    $page->pressButton('Update');
-    $page->pressButton('edit-submit');
-    $session->pageTextContains('Your settings have been saved.');
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $displayRepository */
+    $displayRepository = \Drupal::service('entity_display.repository');
+    $display = $displayRepository->getViewDisplay('node', 'article');
+    $component = $display->getComponent('field_media_image');
+
+    // Confirm the field is using the Photoswipe formatter.
+    $this->assertSame('photoswipe_field_formatter', $component['type']);
+
+    // Change a formatter setting and save the display config.
+    $component['settings']['photoswipe_thumbnail_style_first'] = 'large';
+    $display->setComponent('field_media_image', $component)->save();
+
+    // Reload the display and verify the setting was stored.
+    $component = $displayRepository->getViewDisplay('node', 'article')
+      ->getComponent('field_media_image');
+    $this->assertSame('large', $component['settings']['photoswipe_thumbnail_style_first']);
   }
 
   /**

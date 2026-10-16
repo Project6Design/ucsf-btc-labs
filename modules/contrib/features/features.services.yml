@@ -49,3 +49,7 @@ services:
   logger.channel.features:
     parent: logger.channel_base
     arguments: ['features']
+
+  Drupal\features\Hook\FeaturesHooks:
+    class: Drupal\features\Hook\FeaturesHooks
+    autowire: true

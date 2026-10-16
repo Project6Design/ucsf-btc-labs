@@ -20,6 +20,9 @@ getDirectories('./js/ckeditor5_plugins').forEach((dir) => {
       minimizer: [
         new TerserPlugin({
           terserOptions: {
+            compress: {
+              drop_console: true,
+            },
             format: {
               comments: false,
             },

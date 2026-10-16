@@ -6,3 +6,7 @@ services:
     class: Drupal\url_embed\Access\UrlEmbedAccessCheck
     tags:
       - { name: access_check, applies_to: _url_embed_editor_access }
+
+  Drupal\url_embed\Hook\UrlEmbedHooks:
+    class: Drupal\url_embed\Hook\UrlEmbedHooks
+    autowire: true

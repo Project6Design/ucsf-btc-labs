@@ -1,0 +1,31 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.anchor_test
+  module:
+    - ckeditor5
+format: anchor_test
+editor: ckeditor5
+settings:
+  toolbar:
+    items:
+      - bold
+      - italic
+      - '|'
+      - link
+      - anchor
+      - '|'
+      - heading
+      - '|'
+      - sourceEditing
+  plugins:
+    ckeditor5_heading:
+      enabled_headings:
+        - heading2
+        - heading3
+        - heading4
+    ckeditor5_sourceEditing:
+      allowed_tags: {  }
+image_upload:
+  status: false

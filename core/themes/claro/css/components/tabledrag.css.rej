@@ -1,0 +1,11 @@
+--- themes/claro/css/components/tabledrag.css
++++ themes/claro/css/components/tabledrag.css
+@@ -235,7 +235,7 @@ body.drag-y {
+ .tabledrag-cell-content {
+   display: flex;
+   align-items: center;
+-  height: 100%;
++  min-height: 100%;
+ 
+   & > * {
+     display: table-cell;

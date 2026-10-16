@@ -2,6 +2,7 @@
 
 namespace Drupal\photoswipe;
 
+use Drupal\Core\Cache\Cache;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Theme\ThemeManager;
@@ -69,10 +70,14 @@ class PhotoswipeAssetsManager implements PhotoswipeAssetsManagerInterface {
       $options = array_merge($options, $optionsOverride);
     }
     // Allow other modules to alter / extend the options to pass to photoswipe
-    // JavaScript:
-    $this->moduleHandler->alter('photoswipe_js_options', $options);
-    $this->themeManager->alter('photoswipe_js_options', $options);
+    // JavaScript.
+    // Alter implementations may append cache tags when they read additional
+    // config that affects the options.
+    $cacheTags = ['config:photoswipe.settings'];
+    $this->moduleHandler->alter('photoswipe_js_options', $options, $cacheTags);
+    $this->themeManager->alter('photoswipe_js_options', $options, $cacheTags);
     $element['#attached']['drupalSettings']['photoswipe']['options'] = $options;
+    $element['#cache']['tags'] = Cache::mergeTags($element['#cache']['tags'] ?? [], $cacheTags);
 
   }
 

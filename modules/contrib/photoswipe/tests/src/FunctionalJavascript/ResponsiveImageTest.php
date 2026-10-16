@@ -4,6 +4,8 @@ namespace Drupal\Tests\photoswipe\FunctionalJavascript;
 
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\file\Entity\File;
+use Drupal\image\Entity\ImageStyle;
+use Drupal\responsive_image\Entity\ResponsiveImageStyle;
 use Drupal\Tests\TestFileCreationTrait;
 
 /**
@@ -73,6 +75,60 @@ class ResponsiveImageTest extends PhotoswipeJsTestBase {
       'field_responsive_image' => $fileFieldEntries,
     ]);
     $node->save();
+  }
+
+  /**
+   * Creates an image style and a responsive image style using it.
+   *
+   * @param string $id
+   *   The ID used for both the image style and the responsive image style.
+   */
+  protected function createResponsiveImageStyle(string $id): void {
+    ImageStyle::create(['name' => $id, 'label' => $id])->save();
+    ResponsiveImageStyle::create([
+      'id' => $id,
+      'label' => $id,
+      'breakpoint_group' => 'responsive_image',
+      'fallback_image_style' => $id,
+      'image_style_mappings' => [
+        [
+          'image_mapping_type' => 'sizes',
+          'image_mapping' => [
+            'sizes' => '100vw',
+            'sizes_image_styles' => [$id],
+          ],
+          'breakpoint_id' => 'responsive_image.viewport_sizing',
+          'multiplier' => '1x',
+        ],
+      ],
+    ])->save();
+  }
+
+  /**
+   * Tests the responsive image formatter's first image style override.
+   *
+   * @see https://www.drupal.org/project/photoswipe/issues/3400251
+   */
+  public function testPhotoswipeResponsiveFirstOverride() {
+    $session = $this->assertSession();
+    $this->createResponsiveImageStyle('ps_thumbnail');
+    $this->createResponsiveImageStyle('ps_first');
+    $this->container->get('config.factory')
+      ->getEditable('core.entity_view_display.node.article.default')
+      ->set('content.field_responsive_image.settings.photoswipe_thumbnail_style', 'ps_thumbnail')
+      ->set('content.field_responsive_image.settings.photoswipe_thumbnail_style_first', 'ps_first')
+      ->save();
+
+    $this->setupNodeDisplayingImage();
+
+    $this->drupalGet('/node/1');
+    $this->assertNotNull($session->waitForElement('css', '.photoswipe-gallery'));
+    $session->elementsCount('css', 'div.photoswipe-gallery a.photoswipe', 3);
+    // Only the first image should use the override, the others the default:
+    $session->elementExists('css', 'div.photoswipe-gallery a.photoswipe img[alt="count-0"][src*="/styles/ps_first/"]');
+    $session->elementNotExists('css', 'div.photoswipe-gallery a.photoswipe img[alt="count-0"][src*="/styles/ps_thumbnail/"]');
+    $session->elementExists('css', 'div.photoswipe-gallery a.photoswipe img[alt="count-1"][src*="/styles/ps_thumbnail/"]');
+    $session->elementExists('css', 'div.photoswipe-gallery a.photoswipe img[alt="count-2"][src*="/styles/ps_thumbnail/"]');
   }
 
   /**

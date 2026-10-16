@@ -15,6 +15,11 @@ class SitemapUpdateSettingsTest extends UpdatePathTestBase {
   /**
    * {@inheritdoc}
    */
+  protected static $modules = ['block', 'sitemap'];
+
+  /**
+   * {@inheritdoc}
+   */
   protected $defaultTheme = 'stark';
 
   /**
@@ -28,9 +33,7 @@ class SitemapUpdateSettingsTest extends UpdatePathTestBase {
   }
 
   /**
-   * @covers \sitemap_update_8201()
-   * @covers \sitemap_update_8203()
-   * @covers \sitemap_update_8204()
+   * Test update hooks 8201 through 8205.
    */
   public function testUpdateHookN(): void {
     $old_settings = \Drupal::config('sitemap.settings');
@@ -39,9 +42,9 @@ class SitemapUpdateSettingsTest extends UpdatePathTestBase {
     }
 
     $this->runUpdates();
+    $new_settings = \Drupal::config('sitemap.settings');
 
     // Test sitemap_update_8203().
-    $new_settings = \Drupal::config('sitemap.settings');
     $this->assertSame('frontpage', $new_settings->get('plugins.frontpage.base_plugin'));
     $this->assertSame('menu', $new_settings->get('plugins.menu:main.base_plugin'));
     $this->assertSame('vocabulary', $new_settings->get('plugins.vocabulary:tags.base_plugin'));
@@ -58,6 +61,13 @@ class SitemapUpdateSettingsTest extends UpdatePathTestBase {
     $this->assertSession()->statusCodeEquals(200);
     $this->assertSession()->fieldValueEquals('path', 'sitemap');
     $this->drupalLogout();
+
+    // Test sitemap_update_8205().
+    $this->assertEquals(9, $new_settings->get('plugins.menu:main.settings.menu_depth'));
+
+    // Test sitemap_post_update_sitemap_syndicate_block().
+    $this->assertEmpty($new_settings->get('rss_front'));
+    $this->assertEquals('/dolor.sit', \Drupal::config('block.block.sitemap_syndicate_stark')->get('settings.rss_feed_path'));
   }
 
 }

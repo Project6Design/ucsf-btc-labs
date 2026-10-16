@@ -1,7 +1,7 @@
 name: Draggableviews Demo
 type: module
-description: 'Demo module for Draggableviews.'
-core_version_requirement: ^9 || ^10 || ^11
+description: 'Demo module for Draggableviews. Provides a content type, sample content, and configured views to demonstrate drag-and-drop content ordering functionality.'
+core_version_requirement: ^9 || ^10 || ^11 || ^12
 dependencies:
   - drupal:block
   - drupal:draggableviews
@@ -15,7 +15,7 @@ dependencies:
 hidden: false
 package: Views
 
-# Information added by Drupal.org packaging script on 2024-06-01
-version: '2.1.4'
+# Information added by Drupal.org packaging script on 2026-10-09
+version: '2.1.5'
 project: 'draggableviews'
-datestamp: 1717236721
+datestamp: 1791536206

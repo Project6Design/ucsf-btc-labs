@@ -3,12 +3,14 @@
 namespace Drupal\Tests\features\Unit;
 
 use Drupal\features\Package;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Drupal\features\Package
- * @group features
  */
+#[Group('features')]
 class PackageTest extends TestCase {
 
   /**
@@ -25,7 +27,7 @@ class PackageTest extends TestCase {
       'test_feature',
     ]);
     // Test that duplicates are removed, results sorted, and the package cannot
-    /// require itself.
+    // require itself.
     $expected = [
       'my_module',
       'some_module',
@@ -50,7 +52,7 @@ class PackageTest extends TestCase {
       $package->appendDependency($dependency);
     }
     // Test that duplicates are removed, results sorted, and the package cannot
-    /// require itself.
+    // require itself.
     $expected = [
       'my_module',
       'some_module',
@@ -82,9 +84,9 @@ class PackageTest extends TestCase {
   /**
    * The test append config.
    *
-   * @depends testGetConfig
    * @covers ::appendConfig
    */
+  #[Depends('testGetConfig')]
   public function testAppendConfig(Package $package) {
     $package->appendConfig('test_config_a');
     $package->appendConfig('test_config_c');
@@ -96,9 +98,9 @@ class PackageTest extends TestCase {
   /**
    * The test remove config.
    *
-   * @depends testAppendConfig
    * @covers ::removeConfig
    */
+  #[Depends('testAppendConfig')]
   public function testRemoveConfig(Package $package) {
     $package->removeConfig('test_config_a');
 

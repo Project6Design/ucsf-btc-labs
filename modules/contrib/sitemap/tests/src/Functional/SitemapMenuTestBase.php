@@ -14,7 +14,7 @@ abstract class SitemapMenuTestBase extends SitemapBrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['sitemap', 'node', 'menu_ui'];
+  protected static $modules = ['sitemap', 'node', 'menu_ui', 'menu_test'];
 
   /**
    * Admin user.

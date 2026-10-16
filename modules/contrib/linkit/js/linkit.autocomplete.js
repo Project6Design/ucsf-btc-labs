@@ -63,33 +63,30 @@
    *   False to prevent further handlers.
    */
   function selectHandler(event, ui) {
-    var linkSelector = event.target.getAttribute('data-drupal-selector');
-    var $context = $(event.target).closest('form,fieldset,tr');
-
     // Set hidden inputs for "href_dirty_check" and the "options" field.
-    setMetadata(ui.item, $context);
-
-    if (ui.item.label) {
-      // Automatically set the link title.
-      var $linkTitle = $('*[data-linkit-widget-title-autofill-enabled]', $context);
-      if ($linkTitle.length > 0) {
-        var titleSelector = $linkTitle.attr('data-drupal-selector');
-        if (titleSelector === undefined || linkSelector === undefined) {
-          return false;
-        }
-        if (titleSelector.replace('-title', '') !== linkSelector.replace('-uri', '')) {
-          return false;
-        }
-        if (!$linkTitle.val() || $linkTitle.hasClass('link-widget-title--auto')) {
-          // Set value to the label.
-          $linkTitle.val($('<span>').html(ui.item.label).text());
-          // Flag title as being automatically set.
-          $linkTitle.addClass('link-widget-title--auto');
-        }
-      }
-    }
+    const $context = $(event.target).closest('form,fieldset,tr,.linkit-widget-container,.field--widget-linkit');
+    setMetadata(ui.item, $context, event.target);
 
     event.target.value = ui.item.path;
+    // Keep the stored focusin value in sync so the focusout check
+    // does not treat the autocomplete selection as a manual edit.
+    $(event.target).data('linkit-uri-on-focusin', ui.item.path);
+
+    // Auto populate the title field if configured to do so for this link field.
+    if (ui.item.label) {
+      // The title field for the link field should have the same drupal selector
+      // except instead of ending in -uri, it will end in -title.
+      const titleSelector = $getWidgetSelector(event.target) + '-title';
+      const $linkTitle = $(`[data-linkit-widget-title-autofill-enabled][data-drupal-selector="${titleSelector}"]`, $context);
+      // Don't overwrite an existing label unless we already replaced it
+      // before.
+      if ($linkTitle.length && (!$linkTitle.val() || $linkTitle.hasClass('link-widget-title--auto'))) {
+        // Set value to the label.
+        $linkTitle.val($('<span>').html(ui.item.label).text());
+        // Flag title as being automatically set.
+        $linkTitle.addClass('link-widget-title--auto');
+      }
+    }
 
     return false;
   }
@@ -101,8 +98,10 @@
    *   Values for path and other metadata.
    * @param {jQuery} $context
    *   The element search context.
+   * @param {HTMLElement} target
+   *   The URI autocomplete input element.
    */
-  function setMetadata(metadata, $context) {
+  function setMetadata(metadata, $context, target) {
     const { path, entity_type_id, entity_uuid, substitution_id } = metadata;
 
     if (!path) {
@@ -117,10 +116,28 @@
           + JSON.stringify(metadata);
       }
     }
-    $getAttributesInput('href', $context).val(path);
-    $getAttributesInput('data-entity-type', $context).val(entity_type_id);
-    $getAttributesInput('data-entity-uuid', $context).val(entity_uuid);
-    $getAttributesInput('data-entity-substitution', $context).val(substitution_id);
+
+    $getAttributesInput('href', $context, target).val(path);
+    $getAttributesInput('data-entity-type', $context, target).val(entity_type_id);
+    $getAttributesInput('data-entity-uuid', $context, target).val(entity_uuid);
+    $getAttributesInput('data-entity-substitution', $context, target).val(substitution_id);
+  }
+
+  /**
+   * Helper function for getting the base selector for an autocomplete element.
+   *
+   * @param {HTMLElement} element
+   *   The URI autocomplete input element.
+   *
+   * @returns string
+   *   The base widget selector.
+   */
+  function $getWidgetSelector(element) {
+    const linkSelector = element.getAttribute('data-drupal-selector');
+    if (!linkSelector || !linkSelector.endsWith('-uri')) {
+      throw 'Target element must have a data-drupal-selector attribute ending in "-uri". ' + element.outerHTML;
+    }
+    return linkSelector.slice(0, -4);
   }
 
   /**
@@ -130,12 +147,15 @@
    *   The name of the input within the attributes group.
    * @param {jQuery} $context
    *   The element search context.
+   * @param {HTMLElement} element
+   *   The URI autocomplete input element.
    *
    * @returns {jQuery}
    *   The selected element.
    */
-  function $getAttributesInput(name, $context) {
-    return $(`input[name="attributes[${name}]"], input[name$="[attributes][${name}]"]`, $context);
+  function $getAttributesInput(name, $context, element) {
+    const selector = $getWidgetSelector(element);
+    return $context.find(`input[data-drupal-selector="${selector}-attributes-${name}"]`);
   }
 
   /**
@@ -235,11 +255,24 @@
           // In case the user makes an edit and does not click on the
           // autocomplete dropdown (so selectHandler() does not run), add a
           // listener to update the hidden form inputs.
+          $uri.focusin(event => {
+            $(event.target).data('linkit-uri-on-focusin', event.target.value);
+          });
           $uri.focusout(event => {
-            const $context = $(event.target).closest('form,fieldset,tr');
-            let $href = $getAttributesInput('href', $context),
+            const $context = $(event.target).closest('form,fieldset,tr,.linkit-widget-container,.field--widget-linkit');
+            let $href = $getAttributesInput('href', $context, event.target),
                  href = new URL($href.val(), document.baseURI),
                   uri = new URL($uri.val(), document.baseURI);
+            const valueOnFocusIn = $(event.target).data('linkit-uri-on-focusin');
+            // If the field value changed since focusin, the user typed a raw
+            // URL rather than selecting from autocomplete — clear entity metadata.
+            // selectHandler keeps linkit-uri-on-focusin in sync, so an
+            // autocomplete selection is never treated as a manual edit.
+            if (valueOnFocusIn !== undefined && $uri.val() === valueOnFocusIn) {
+               // The value is not changed between focusin and focusout, do nothing.
+               $(event.target).removeData('linkit-uri-on-focusin');
+              return;
+            }
             // If any of the these properties differ between the two URLs, the
             // hidden inputs storing options field data will be cleared.
             // Essentially, we leave out any of the props that contain URL
@@ -258,7 +291,7 @@
             // "href" hidden input, recalculate all the hidden inputs.
             URLpropsToCheck.some(prop => {
               if (href[prop] !== uri[prop]) {
-                setMetadata({ path: $uri.val() }, $context);
+                setMetadata({ path: $uri.val() }, $context, event.target);
                 return true;
               }
             });
@@ -282,7 +315,8 @@
             autocomplete.options.isComposing = false;
           });
 
-          $uri.closest('.form-item').siblings('.form-type-textfield').find('.linkit-widget-title')
+          const titleSelector = $getWidgetSelector(this) + '-title';
+          $(`input[data-drupal-selector="${titleSelector}"]`)
             .each(function() {
               // Set automatic title flag if title is the same as uri text.
               var $title  = $(this);

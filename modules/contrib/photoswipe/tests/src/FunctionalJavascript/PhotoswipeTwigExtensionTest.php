@@ -44,6 +44,7 @@ class PhotoswipeTwigExtensionTest extends PhotoswipeJsTestBase {
   public function testTwigFunctionAttachPhotoswipeOverrideOptions() {
     // Set the opacity to 0.8:
     $this->config('photoswipe.settings')->set('options.bgOpacity', 0.8)->save();
+    $driver = $this->getSession()->getDriver();
     $session = $this->assertSession();
     $this->drupalGet('/photoswipe-twig-extension-test/function-test-options-overridden');
 
@@ -61,7 +62,7 @@ class PhotoswipeTwigExtensionTest extends PhotoswipeJsTestBase {
     $session->elementTextEquals('css', '.pswp .pswp__scroll-wrap .pswp__counter', '1 / 2');
     $session->elementExists('css', '#pswp__items img.pswp__img');
     // See if our theme function overrides the opacity value:
-    $session->elementAttributeContains('css', 'div.pswp.pswp--open > div.pswp__bg', 'style', 'opacity: 0.2;');
+    $this->assertEquals(0.2, $driver->evaluateScript('pswp.options.bgOpacity'));
   }
 
 }

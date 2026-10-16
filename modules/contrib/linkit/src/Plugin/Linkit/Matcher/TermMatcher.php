@@ -4,18 +4,19 @@ namespace Drupal\linkit\Plugin\Linkit\Matcher;
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\linkit\Attribute\Matcher;
 use Drupal\linkit\Utility\LinkitXss;
 
 /**
  * Provides specific linkit matchers for the taxonomy_term entity type.
- *
- * @Matcher(
- *   id = "entity:taxonomy_term",
- *   label = @Translation("Taxonomy term"),
- *   target_entity = "taxonomy_term",
- *   provider = "taxonomy"
- * )
  */
+#[Matcher(
+  id: "entity:taxonomy_term",
+  label: new TranslatableMarkup('Taxonomy term'),
+  target_entity: "taxonomy_term",
+  provider: "taxonomy",
+)]
 class TermMatcher extends EntityMatcher {
 
   /**
@@ -40,7 +41,7 @@ class TermMatcher extends EntityMatcher {
    * {@inheritdoc}
    */
   protected function buildDescription(EntityInterface $entity) {
-    $description = $this->token->replace($this->configuration['metadata'], ['term' => $entity], []);
+    $description = $this->token->replace($this->configuration['metadata'], ['term' => $entity], ['clear' => TRUE]);
     return LinkitXss::descriptionFilter($description);
   }
 

@@ -28,7 +28,7 @@ class WebformBlockTest extends WebformBrowserTestBase {
   /**
    * Tests webform block.
    */
-  public function testBlock() {
+  public function testBlock(): void {
     $assert_session = $this->assertSession();
 
     // Place block.
@@ -38,6 +38,11 @@ class WebformBlockTest extends WebformBrowserTestBase {
 
     // Check contact webform.
     $this->drupalGet('<front>');
+    $assert_session->responseContains('webform-submission-contact-add-form');
+
+    // Check that a token array query parameter does not break block rendering.
+    $this->drupalGet('<front>', ['query' => ['token' => ['whatever']]]);
+    $assert_session->statusCodeEquals(200);
     $assert_session->responseContains('webform-submission-contact-add-form');
 
     // Check contact webform with default data.

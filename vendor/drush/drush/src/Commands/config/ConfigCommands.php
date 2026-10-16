@@ -16,7 +16,6 @@ use Drupal\Core\Config\ConfigDirectoryNotDefinedException;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\FileStorage;
 use Drupal\Core\Config\ImportStorageTransformer;
-use Drupal\Core\Config\StorageCacheInterface;
 use Drupal\Core\Config\StorageComparer;
 use Drupal\Core\Config\StorageInterface;
 use Drupal\Core\Config\StorageManagerInterface;
@@ -29,10 +28,12 @@ use Drush\Exec\ExecTrait;
 use Drush\Utils\FsUtils;
 use Drush\Utils\StringUtils;
 use JetBrains\PhpStorm\Deprecated;
+use RuntimeException;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Completion\CompletionSuggestions;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Yaml\Parser;
 
@@ -57,7 +58,8 @@ final class ConfigCommands extends DrushCommands implements StdinAwareInterface
 
     public function __construct(
         protected ConfigFactoryInterface $configFactory,
-        protected StorageCacheInterface $configStorage,
+        #[Autowire(service: 'config.storage')]
+        protected StorageInterface $configStorage,
         protected SiteAliasManagerInterface $siteAliasManager,
         protected StorageManagerInterface $configStorageExport,
         protected ImportStorageTransformer $importStorageTransformer,
@@ -65,17 +67,9 @@ final class ConfigCommands extends DrushCommands implements StdinAwareInterface
         parent::__construct();
     }
 
-    public function getConfigStorageExport(): StorageManagerInterface|StorageCacheInterface
-    {
-        if (isset($this->configStorageExport)) {
-            return $this->configStorageExport;
-        }
-        return $this->configStorage;
-    }
-
     public function hasImportTransformer(): bool
     {
-        return isset($this->importStorageTransformer);
+        return true;
     }
 
     public function getImportTransformer(): ImportStorageTransformer
@@ -530,7 +524,7 @@ final class ConfigCommands extends DrushCommands implements StdinAwareInterface
 
         $prefix = ['diff'];
         if (self::programExists('git')) {
-            $prefix = ['git', 'diff'];
+            $prefix = ['git', 'diff', '--no-index', '--exit-code'];
             if ($output->isDecorated()) {
                 $prefix[] = '--color=always';
             }
@@ -538,6 +532,10 @@ final class ConfigCommands extends DrushCommands implements StdinAwareInterface
         $args = array_merge($prefix, ['-u', $temp_destination_dir, $temp_source_dir]);
         $process = Drush::process($args);
         $process->run();
+        // An exit code of 1 merely indicates that there is a diff.
+        if ($process->getExitCode() >= 2) {
+            throw new RuntimeException($process->getExitCodeText());
+        }
         return $process->getOutput();
     }
 }

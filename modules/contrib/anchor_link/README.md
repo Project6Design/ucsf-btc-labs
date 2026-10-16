@@ -1,86 +1,76 @@
 # CKEditor Anchor Link
 
 This plugin module adds the better link dialog and anchor related features
-to CKEditor in Drupal:
+to CKEditor 5 in Drupal:
 
 - Dialog to insert links and anchors with some properties.
 - Context menu option to edit or remove links and anchors.
 - Ability to insert a link with the URL using multiple protocols, including an
   external file if a file manager is integrated.
 
-Most text formats limit HTML tags. If this is the case, it will
- be necessary to whitelist the "name" attribute on the "a" element.
+For a full description of the module, visit the
+[project page](https://www.drupal.org/project/anchor_link).
 
-E.g. `<a name href hreflang>`
+Submit bug reports and feature suggestions, or track changes in the
+[issue queue](https://www.drupal.org/project/issues/anchor_link).
+
 
 ## Table of contents
 
 - Requirements
 - Installation
+- Configuration
+- Documentation
 - Maintainers
 
+
 ## Requirements
-* Core CKEditor 5
-* Include the [ckeditor5-anchor-drupal](https://www.npmjs.com/package/@northernco/ckeditor5-anchor-drupal) plugin library via your site's composer file as a drupal-library. See the details in composer.libraries.json; you should be able to copy/paste most of that into your composer.json.
+
+This module requires the CKEditor 5 and Text Editor modules of Drupal core, and
+the [vardot/ckeditor5-anchor-drupal](https://github.com/Vardot/ckeditor5-anchor-drupal)
+plugin library.
+
+Composer brings the library in as a `drupal-library`. See
+`composer.libraries.json`; you should be able to copy and paste most of that
+into your own `composer.json`.
 
 
 ## Installation
 
-### OPTION #1
+Install as you would normally install a contributed Drupal module. For further
+information, see
+[Installing Drupal Modules](https://www.drupal.org/docs/extending-drupal/installing-drupal-modules).
 
 
-This plugin uses an external CKEditor5 library: Anchor Link CKEditor plugin
+## Configuration
 
-The library can be managed via composer, but you must require `wikimedia/composer-merge-plugin`:
-```
-composer require wikimedia/composer-merge-plugin
-```
+1. Go to Configuration > Content Authoring > Text Formats and Editors.
+2. Choose the text format used for content creation where CKEditor 5 will be
+   enabled.
+3. Locate the CKEditor 5 editor settings within the selected text format.
+4. Drag the Anchor Link button into the active toolbar.
 
-and expand the extra section of your composer.json like so (you may need to adjust the `"include"` directory, e.g. your web files may start with docroot instead of web in which case it would start with docroot/modules):
-```
-    "extra": {
-        "merge-plugin": {
-            "include": [
-                "web/modules/contrib/anchor_link/composer.libraries.json"
-            ]
-        }
-    }
-```
-
-then, you can require the library like:
-```
-composer require drupal/anchor_link:^3.0
-```
-
-In some cases you may need to run the above command twice so that the merge plugin picks up the library after the library information from the module is added.
+An anchor is written as an `id` on the `<a>` element. The `name` attribute is
+also read, for content authored before the `id` attribute took over.
 
 
-### OPTION #2
+## Documentation
 
-Install with Composer (recommended) or manually, by following these steps.
+Full documentation lives in [docs/index.md](docs/index.md):
 
-[Downloading third-party libraries using Composer](https://www.drupal.org/docs/develop/using-composer/manage-dependencies#third-party-libraries)
+- [For editors](docs/1-users/0-installation.md) - installing, inserting anchors,
+  linking to them and worked examples.
+- [For administrators](docs/2-admins/0-configuration.md) - text formats and
+  allowed HTML, Linkit integration and upgrading.
+- [For developers](docs/3-developers/0-architecture.md) - architecture, hooks
+  and plugins, and the Linkit matcher.
+- [Testing](docs/4-testing/0-overview.md) - the varbase-e2e browser suite,
+  PHPUnit and the GitLab CI pipeline.
+- [FAQ](docs/faq.md)
 
-
-Define npm-asset repository in the `composer.json` file, to allow downloading the CKEditor Anchor Link JavaScript library to the correct folder:
-
-```
-composer config repositories.assets composer https://asset-packagist.org
-composer config --json extra.installer-types '["npm-asset", "bower-asset"]'
-composer config --json extra.installer-paths.web\/libraries\/ckeditor5-anchor-drupal '["npm-asset/northernco--ckeditor5-anchor-drupal"]'
-composer config --unset extra.installer-paths.web\/libraries\/\{\$name\}
-composer config --json extra.installer-paths.web\/libraries\/\{\$name\} '["type:drupal-library", "type:bower-asset", "type:npm-asset"]'
-```
-
-Download the CKEditor Anchor Link module and install it:
-
-```
-composer require npm-asset/northernco--ckeditor5-anchor-drupal
-composer require drupal/anchor_link:~3.0
-drush en anchor_link
-```
 
 ## Maintainers
-- Mohammed Razem - [mohammed-j-razem](https://www.drupal.org/u/mohammed-j-razem)
-- Dylan Donkersgoed - [dylan-donkersgoed](https://www.drupal.org/u/dylan-donkersgoed)
-- Rajab Natshah - [rajab-natshah](https://www.drupal.org/u/rajab-natshah)
+
+- [Rajab Natshah](https://www.drupal.org/u/rajab-natshah)
+- Mohammed Razem - [Mohammed J. Razem](https://www.drupal.org/u/mohammed-j-razem)
+- [Dylan Donkersgoed](https://www.drupal.org/u/dylan-donkersgoed)

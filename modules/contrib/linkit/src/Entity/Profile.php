@@ -2,8 +2,11 @@
 
 namespace Drupal\linkit\Entity;
 
+use Drupal\Core\Config\Action\Attribute\ActionMethod;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\linkit\MatcherCollection;
 use Drupal\linkit\MatcherInterface;
 use Drupal\linkit\Plugin\Linkit\Matcher\EntityMatcher;
@@ -42,6 +45,35 @@ use Drupal\linkit\ProfileInterface;
  *   }
  * )
  */
+#[ConfigEntityType(
+  id: 'linkit_profile',
+  label: new TranslatableMarkup('Linkit Profile'),
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+  ],
+  admin_permission: "administer linkit profiles",
+  config_prefix: "linkit_profile",
+  config_export: [
+    "label",
+    "id",
+    "description",
+    "matchers",
+  ],
+  links: [
+    "collection" => "/admin/config/content/linkit",
+    "edit-form" => "/admin/config/content/linkit/manage/{linkit_profile}",
+    "delete-form" => "/admin/config/content/linkit/manage/{linkit_profile}/delete",
+  ],
+  handlers: [
+    "list_builder" => "Drupal\linkit\ProfileListBuilder",
+    "form" => [
+      "add" => "Drupal\linkit\Form\Profile\AddForm",
+      "edit" => "Drupal\linkit\Form\Profile\EditForm",
+      "delete" => "Drupal\Core\Entity\EntityDeleteForm",
+    ],
+  ],
+)]
 class Profile extends ConfigEntityBase implements ProfileInterface, EntityWithPluginCollectionInterface {
 
   /**
@@ -136,6 +168,7 @@ class Profile extends ConfigEntityBase implements ProfileInterface, EntityWithPl
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Add matcher to profile'))]
   public function addMatcher(array $configuration) {
     $configuration['uuid'] = $this->uuidGenerator()->generate();
     $this->getMatchers()->addInstanceId($configuration['uuid'], $configuration);
@@ -154,6 +187,7 @@ class Profile extends ConfigEntityBase implements ProfileInterface, EntityWithPl
   /**
    * {@inheritdoc}
    */
+  #[ActionMethod(adminLabel: new TranslatableMarkup('Set matcher configuration'))]
   public function setMatcherConfig($instance_id, array $configuration) {
     $this->matchers[$instance_id] = $configuration;
     $this->getMatchers()->setInstanceConfiguration($instance_id, $configuration);

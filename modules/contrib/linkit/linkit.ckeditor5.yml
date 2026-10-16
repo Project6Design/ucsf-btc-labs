@@ -9,6 +9,7 @@ linkit_extension:
     elements:
       - <a data-entity-type data-entity-uuid data-entity-substitution>
     conditions:
+      filter: linkit
       requiresConfiguration:
         linkit_enabled: true
       plugins:

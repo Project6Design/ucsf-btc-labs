@@ -7,37 +7,39 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteProviderInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\sitemap\Attribute\Sitemap;
+use Drupal\sitemap\Plugin\Derivative\VocabularySitemapDeriver;
 use Drupal\sitemap\SitemapBase;
 use Drupal\taxonomy\VocabularyInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Provides a sitemap for an taxonomy vocabulary.
- *
- * @Sitemap(
- *   id = "vocabulary",
- *   title = @Translation("Vocabulary"),
- *   description = @Translation("Vocabulary description"),
- *   settings = {
- *     "title" = NULL,
- *     "show_description" = FALSE,
- *     "show_count" = FALSE,
- *     "display_unpublished" = FALSE,
- *     "term_depth" = 9,
- *     "term_count_threshold" = 0,
- *     "customize_link" = FALSE,
- *     "term_link" = "entity.taxonomy_term.canonical|taxonomy_term",
- *     "always_link" = FALSE,
- *     "enable_rss" = FALSE,
- *     "rss_link" = "view.taxonomy_term.feed_1|arg_0",
- *     "rss_depth" = 9,
- *   },
- *   deriver = "Drupal\sitemap\Plugin\Derivative\VocabularySitemapDeriver",
- *   enabled = FALSE,
- *   vocabulary = "",
- * )
+ * Provides a sitemap for taxonomy vocabulary.
  */
+#[Sitemap(
+  id: 'vocabulary',
+  title: new TranslatableMarkup("Vocabulary"),
+  description: new TranslatableMarkup("Vocabulary description"),
+  enabled: FALSE,
+  settings: [
+    "title" => NULL,
+    "show_description" => FALSE,
+    "show_count" => FALSE,
+    "display_unpublished" => FALSE,
+    "term_depth" => 9,
+    "term_count_threshold" => 0,
+    "customize_link" => FALSE,
+    "term_link" => "entity.taxonomy_term.canonical|taxonomy_term",
+    "always_link" => FALSE,
+    "enable_rss" => FALSE,
+    "rss_link" => "view.taxonomy_term.feed_1|arg_0",
+    "rss_depth" => 9,
+  ],
+  deriver: VocabularySitemapDeriver::class,
+  vocabulary: "",
+)]
 class Vocabulary extends SitemapBase {
 
   /**
@@ -297,7 +299,6 @@ class Vocabulary extends SitemapBase {
       }
     }
 
-    // @todo Test & Document
     // Add an alter hook for modules to manipulate the taxonomy term output.
     $this->moduleHandler->alter([
       'sitemap_vocabulary', 'sitemap_vocabulary_' . $vid,
@@ -401,7 +402,7 @@ class Vocabulary extends SitemapBase {
    *   The term object returned by TermStorage::loadTree()
    *
    * @return string|void
-   *   Returns the link builded.
+   *   Returns the built link.
    */
   protected function buildFeedLink($term) {
     $rssDepth = $this->settings['rss_depth'];
@@ -471,6 +472,7 @@ class Vocabulary extends SitemapBase {
         }
         $this->buildList($object_children, $child, $vid, $currentDepth, $maxDepth, $display_unpublished);
       }
+      $currentDepth--;
     }
   }
 
@@ -528,7 +530,7 @@ class Vocabulary extends SitemapBase {
    *   The term id.
    *
    * @return string
-   *   Returns the url builded.
+   *   Returns the built url.
    */
   protected function buildLink($string, $tid) {
     $parts = $this->splitRouteArg($string);

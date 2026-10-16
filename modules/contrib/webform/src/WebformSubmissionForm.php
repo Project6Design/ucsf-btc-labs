@@ -342,7 +342,7 @@ class WebformSubmissionForm extends ContentEntityForm {
     // Load entity from token or saved draft when not editing or testing
     // submission form.
     if (!in_array($this->operation, ['edit', 'edit_all', 'test'])) {
-      $token = $this->getRequest()->query->get('token');
+      $token = $this->getRequest()->query->all()['token'] ?? '';
       $webform_submission_token = $this->getStorage()->loadFromToken($token, $webform, $source_entity);
       if ($webform_submission_token) {
         $entity = $webform_submission_token;
@@ -1899,7 +1899,7 @@ class WebformSubmissionForm extends ContentEntityForm {
     /** @var \Drupal\webform\WebformSubmissionInterface $webform_submission */
     $webform_submission = $this->getEntity();
     if ($webform_submission->id() && !WebformSubmission::load($webform_submission->id())) {
-      $form_state->setErrorByName(NULL, $this->t('An error occurred while trying to validate the submission. Please save your work and reload this page.'));
+      $form_state->setErrorByName('', $this->t('An error occurred while trying to validate the submission. Please save your work and reload this page.'));
       return;
     }
 
@@ -2156,7 +2156,7 @@ class WebformSubmissionForm extends ContentEntityForm {
         '#theme' => 'item_list',
         '#items' => $file_names,
       ];
-      $form_state->setErrorByName(NULL, $this->renderer->renderInIsolation($message));
+      $form_state->setErrorByName('', $this->renderer->renderInIsolation($message));
     }
   }
 

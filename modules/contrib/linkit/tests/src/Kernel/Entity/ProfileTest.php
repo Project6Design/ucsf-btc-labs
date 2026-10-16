@@ -6,6 +6,7 @@ namespace Drupal\Tests\linkit\Kernel\Entity;
 
 use Drupal\linkit\Tests\ProfileCreationTrait;
 use Drupal\Tests\linkit\Kernel\LinkitKernelTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the Profile entity.
@@ -14,6 +15,7 @@ use Drupal\Tests\linkit\Kernel\LinkitKernelTestBase;
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class ProfileTest extends LinkitKernelTestBase {
 
   use ProfileCreationTrait;

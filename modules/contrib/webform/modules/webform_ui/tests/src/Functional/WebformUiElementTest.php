@@ -39,7 +39,7 @@ class WebformUiElementTest extends WebformBrowserTestBase {
   /**
    * Tests element.
    */
-  public function testElements() {
+  public function testElements(): void {
     global $base_path;
 
     $assert_session = $this->assertSession();
@@ -310,10 +310,20 @@ class WebformUiElementTest extends WebformBrowserTestBase {
   /**
    * Tests permissions.
    */
-  public function testPermissions() {
+  public function testPermissions(): void {
     $assert_session = $this->assertSession();
 
     $webform = Webform::load('contact');
+
+    // Check build page access is visible to user with edit access and without
+    // 'edit webform source' permission.
+    $account = $this->drupalCreateUser(['edit any webform']);
+    $this->drupalLogin($account);
+    $this->drupalGet('/admin/structure/webform/manage/' . $webform->id());
+    $assert_session->statusCodeEquals(200);
+    $this->drupalGet('/admin/structure/webform/manage/' . $webform->id() . '/source');
+    $assert_session->statusCodeEquals(403);
+    $this->drupalLogout();
 
     // Check source page access not visible to user with 'administer webform'
     // permission.

@@ -4,24 +4,26 @@ namespace Drupal\sitemap\Plugin\Sitemap;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\sitemap\Attribute\Sitemap;
 use Drupal\sitemap\SitemapBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a link to the front page for the sitemap.
- *
- * @Sitemap(
- *   id = "frontpage",
- *   title = @Translation("Site front page"),
- *   description = @Translation("Displays a sitemap link for the site front page."),
- *   settings = {
- *     "title" = @Translation("Front page"),
- *     "rss" = "/rss.xml",
- *   },
- *   enabled = TRUE,
- * )
  */
+#[Sitemap(
+  id: 'frontpage',
+  title: new TranslatableMarkup('Site front page'),
+  description: new TranslatableMarkup('Displays a sitemap link for the site front page.'),
+  enabled: TRUE,
+  settings: [
+    'title' => new TranslatableMarkup('Front page'),
+    'rss' => '/rss.xml',
+    'front_text_override' => '',
+  ],
+)]
 class Frontpage extends SitemapBase {
 
   /**
@@ -55,6 +57,13 @@ class Frontpage extends SitemapBase {
       '#access' => $this->currentUser->hasPermission('set front page rss link on sitemap'),
     ];
 
+    $form['front_text_override'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Text override'),
+      '#default_value' => $this->settings['front_text_override'],
+      '#description' => $this->t('Override the link text for the homepage. Leave this blank for default.'),
+    ];
+
     return $form;
   }
 
@@ -66,9 +75,9 @@ class Frontpage extends SitemapBase {
 
     $content[] = [
       '#theme' => 'sitemap_frontpage_item',
-      '#text' => $this->t('Front page of %sn', [
+      '#text' => empty($this->settings['front_text_override']) ? $this->t('Front page of %sn', [
         '%sn' => $this->configFactory->get('system.site')->get('name'),
-      ]),
+      ]) : $this->settings['front_text_override'],
       '#url' => Url::fromRoute('<front>', [], ['html' => TRUE])->toString(),
       '#feed' => $this->settings['rss'],
     ];

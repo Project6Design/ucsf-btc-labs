@@ -4,3 +4,4 @@ datasource
 withargs
 sortability
 authuser
+mymodule

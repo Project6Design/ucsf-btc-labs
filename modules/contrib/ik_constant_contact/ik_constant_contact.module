@@ -6,12 +6,9 @@
  */
 
 use Drupal\Core\Entity\ContentEntityFormInterface;
-use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\ContentEntityType;
 use Drupal\Core\Entity\EntityInterface;
-use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Form\FormState;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -20,7 +17,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 function ik_constant_contact_cron() {
   $cc = \Drupal::service('ik_constant_contact');
 
-  $cc->getContactLists(false);
+  $cc->getContactLists(FALSE);
   $cc->deleteExpiredTokens();
 }
 
@@ -86,11 +83,11 @@ function ik_constant_contact_entity_update(EntityInterface $entity) {
  */
 function ik_constant_contact_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
   if (
-    $form_state->getFormObject() instanceof ContentEntityFormInterface && 
-    // Skip delete forms
+    $form_state->getFormObject() instanceof ContentEntityFormInterface &&
+    // Skip delete forms.
     (
-      strpos($form_id, '_cancel_form') === false &&
-      strpos($form_id, '_delete_form') === false
+      strpos($form_id, '_cancel_form') === FALSE &&
+      strpos($form_id, '_delete_form') === FALSE
     )
    ) {
     /** @var \Drupal\Core\Entity\EntityForm $entity_form */
@@ -101,7 +98,7 @@ function ik_constant_contact_form_alter(array &$form, FormStateInterface $form_s
     foreach ($entity->getFields() as $field_name => $field) {
       $fieldDefinition = $field->getFieldDefinition();
 
-      if ( $fieldDefinition->getType() === 'constant_contact_lists') {
+      if ($fieldDefinition->getType() === 'constant_contact_lists') {
         $fieldDefinition = $field->getFieldDefinition();
         $cc = \Drupal::service('ik_constant_contact');
 
@@ -111,7 +108,7 @@ function ik_constant_contact_form_alter(array &$form, FormStateInterface $form_s
           $form['#validate'][] = '_ik_constant_contact_subscribe_on_save_validate';
         }
 
-        $lists = $cc->getEnabledContactLists(false);
+        $lists = $cc->getEnabledContactLists(FALSE);
 
         foreach ($lists as $id => $list) {
           $form[$field_name]['widget']['#options'][$id] = $list->name;
@@ -140,10 +137,11 @@ function ik_constant_contact_webform_options_constant_contact_lists_alter(array 
 /**
  * Validate entity forms that have constant_contact_list field type with subscribe_on_save setting checked.
  *
- * Make sure we have the required fields if a list value is popuplated
+ * Make sure we have the required fields if a list value is popuplated.
  *
  * @param [type] $form
  * @param [type] $form_state
+ *
  * @return void
  */
 function _ik_constant_contact_subscribe_on_save_validate($form, &$form_state) {
@@ -154,7 +152,7 @@ function _ik_constant_contact_subscribe_on_save_validate($form, &$form_state) {
 
   foreach ($entityFields as $field_name => $field) {
     $fieldDefinition = $field->getFieldDefinition();
-      
+
     if ($fieldDefinition->getType() === 'constant_contact_lists') {
       $listValues = $form_state->getValue($field_name);
 
@@ -164,31 +162,31 @@ function _ik_constant_contact_subscribe_on_save_validate($form, &$form_state) {
         foreach ($fieldMapping as $ccFieldName => $entityFieldName) {
           if ($ccFieldName === 'email_address') {
             $value = $form_state->getValue($entityFieldName);
-            $isEmpty = false;
+            $isEmpty = FALSE;
 
             if (empty($value) && !is_array($value)) {
-              $isEmpty = true;
-            } else if (is_array($value) && (!isset($value[0]) || !isset($value[0]['value']) || empty($value[0]['value']) || $value[0]['value'] === '')) {
-              $isEmpty = true;
+              $isEmpty = TRUE;
+            }
+            elseif (is_array($value) && (!isset($value[0]) || !isset($value[0]['value']) || empty($value[0]['value']) || $value[0]['value'] === '')) {
+              $isEmpty = TRUE;
             }
 
             if ($isEmpty) {
               $form_state->setErrorByName($entityFieldName, t('The %field field is required to subscribe to lists in field %source', [
-                '%field' => $entityFields[$entityFieldName]->getFieldDefinition()->getLabel(), 
-                '%source' => $fieldDefinition->getLabel()
+                '%field' => $entityFields[$entityFieldName]->getFieldDefinition()->getLabel(),
+                '%source' => $fieldDefinition->getLabel(),
               ]));
             }
           }
-        } 
+        }
       }
     }
   }
-  
+
 }
 
-
 /**
- * Subscribe on save of entity
+ * Subscribe on save of entity.
  */
 function _ik_constant_contact_entity_subscribe_on_save($entity, $op = 'update') {
   $entityFields = $entity->getFields();
@@ -198,22 +196,22 @@ function _ik_constant_contact_entity_subscribe_on_save($entity, $op = 'update') 
 
   foreach ($entityFields as $field_name => $field) {
     $fieldDefinition = $field->getFieldDefinition();
-      
+
     if ($fieldDefinition->getType() === 'constant_contact_lists' && $fieldDefinition->getSetting('subscribe_on_save') === 1) {
       $cc = \Drupal::service('ik_constant_contact');
-      $hasChanged = false;
+      $hasChanged = FALSE;
 
       if (
-        // If it is new and we need to subscribe
+        // If it is new and we need to subscribe.
         ($op === 'insert' && $entity->{$field_name}->count() > 0) ||
-         // If it is delete and we need to unsubscribe
+         // If it is delete and we need to unsubscribe.
         ($op === 'delete' && $entity->{$field_name}->count() > 0 && $fieldDefinition->getSetting('unsubscribe_on_delete') === 1) ||
-         // If it is update and counts don't match
+         // If it is update and counts don't match.
         ($op === 'update')
       ) {
-        $hasChanged = true;
+        $hasChanged = TRUE;
       }
-     
+
       if ($hasChanged) {
         foreach ($entity->{$field_name}->getValue() as $delta => $value) {
           if (isset($value['value']) && !empty($value['value'])) {
@@ -227,7 +225,7 @@ function _ik_constant_contact_entity_subscribe_on_save($entity, $op = 'update') 
           if (!empty($entityFieldName)) {
             $value = $entity->{$entityFieldName}->getValue();
 
-            // String and Datetime types
+            // String and Datetime types.
             if (is_array($value) && isset($value[0]['value'])) {
               $value = $value[0]['value'];
 
@@ -238,12 +236,13 @@ function _ik_constant_contact_entity_subscribe_on_save($entity, $op = 'update') 
                 ];
               }
 
-              else if (!empty($value) && ($ccFieldName === 'anniversary')) {
+              elseif (!empty($value) && ($ccFieldName === 'anniversary')) {
                 $value = date('Y-m-d', strtotime($value));
               }
-            
-            // Address
-            } else if (is_array($value) && isset($value[0]['address_line1'])) {
+
+              // Address.
+            }
+            elseif (is_array($value) && isset($value[0]['address_line1'])) {
               $addressValue = [];
 
               foreach ($ccAddressFields as $key => $fieldKey) {
@@ -256,7 +255,6 @@ function _ik_constant_contact_entity_subscribe_on_save($entity, $op = 'update') 
             $data[$ccFieldName] = $value;
           }
         }
-
 
         if (count($lists) > 0) {
           if ($op === 'delete') {

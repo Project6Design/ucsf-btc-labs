@@ -13,19 +13,12 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class ErrorHandlerSubscriber implements EventSubscriberInterface {
 
   /**
-   * The current user.
-   */
-  protected AccountProxyInterface $account;
-
-  /**
    * ErrorHandlerSubscriber constructor.
    *
    * @param \Drupal\Core\Session\AccountProxyInterface $account
    *   The current user.
    */
-  public function __construct(AccountProxyInterface $account) {
-    $this->account = $account;
-  }
+  public function __construct(protected AccountProxyInterface $account) {}
 
   /**
    * Register devel error handler.
@@ -33,7 +26,7 @@ class ErrorHandlerSubscriber implements EventSubscriberInterface {
    * @param \Symfony\Component\HttpKernel\Event\RequestEvent|null $event
    *   The event to process.
    */
-  public function registerErrorHandler(RequestEvent $event = NULL): void {
+  public function registerErrorHandler(?RequestEvent $event = NULL): void {
     if (!$this->account->hasPermission('access devel information')) {
       return;
     }

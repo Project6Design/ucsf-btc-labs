@@ -3,19 +3,20 @@
 namespace Drupal\linkit\Plugin\Linkit\Matcher;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\linkit\Attribute\Matcher;
 use Drupal\user\Entity\Role;
 use Drupal\user\RoleInterface;
 
 /**
  * Provides specific linkit matchers for the user entity type.
- *
- * @Matcher(
- *   id = "entity:user",
- *   label = @Translation("User"),
- *   target_entity = "user",
- *   provider = "user"
- * )
  */
+#[Matcher(
+  id: "entity:user",
+  label: new TranslatableMarkup("User"),
+  target_entity: "user",
+  provider: "user",
+)]
 class UserMatcher extends EntityMatcher {
 
   /**

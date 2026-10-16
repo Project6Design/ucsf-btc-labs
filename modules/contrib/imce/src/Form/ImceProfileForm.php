@@ -232,7 +232,7 @@ class ImceProfileForm extends EntityForm {
     $conf['advanced']['image_extensions'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Image extensions'),
-      '#default_value' => $imce_profile->getConf('image_extensions', 'jpg jpeg png gif webp'),
+      '#default_value' => $imce_profile->getConf('image_extensions', 'jpg jpeg png gif webp avif'),
       '#maxlength' => 255,
       '#description' => $this->t('Provide file extensions that support previewing and other image operations.'),
     ];

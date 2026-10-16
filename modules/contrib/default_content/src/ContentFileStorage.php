@@ -64,7 +64,7 @@ class ContentFileStorage implements ContentFileStorageInterface {
   /**
    * {@inheritdoc}
    */
-  public function writeEntity(string $folder, string $encoded, ContentEntityInterface $entity, string $filename = NULL) {
+  public function writeEntity(string $folder, string $encoded, ContentEntityInterface $entity, ?string $filename = NULL) {
     // Ensure that the folder per entity type exists.
     $entity_type_folder = "$folder/" . $entity->getEntityTypeId();
     $this->fileSystem->prepareDirectory($entity_type_folder, FileSystemInterface::CREATE_DIRECTORY);

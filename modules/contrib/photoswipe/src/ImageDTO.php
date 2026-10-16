@@ -104,13 +104,18 @@ class ImageDTO {
   public function __construct(array $variables) {
     $this->settings = $variables['display_settings'];
     $this->thirdPartySettings = $variables['third_party_settings'];
+    // @phpstan-ignore-next-line
+    $entity_repository = \Drupal::service('entity.repository');
 
     // Retrieve the entity with the current translation context:
-    $this->entity = isset($variables['entity']) ? \Drupal::service('entity.repository')->getTranslationFromContext($variables['entity']) : NULL;
+    $this->entity = isset($variables['entity']) ? $entity_repository->getTranslationFromContext($variables['entity']) : NULL;
     $this->item = $variables['item'];
 
     // If item is instance of Media.
     if ($this->item->entity instanceof MediaInterface && $media = $this->item->entity) {
+      // Get the media entity with the current translation context:
+      $media = $entity_repository->getTranslationFromContext($media);
+
       // If the photoswipe_reference_image_field setting is not configured,
       // we get the source field.
       $photoswipe_reference_image_field = $this->settings['photoswipe_reference_image_field'] ?: $this->getMediaSourceField($media);

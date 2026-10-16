@@ -4,7 +4,3 @@ parameters:
 			checkDeprecatedHooksInApiFiles: false
 			checkCoreDeprecatedHooksInApiFiles: true
 			checkContribDeprecatedHooksInApiFiles: true
-		rules:
-			testClassSuffixNameRule: true
-			dependencySerializationTraitPropertyRule: true
-			accessResultConditionRule: true

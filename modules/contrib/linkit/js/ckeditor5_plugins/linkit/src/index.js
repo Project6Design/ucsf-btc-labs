@@ -67,12 +67,27 @@ class Linkit extends Plugin {
               this.set('entitySubstitution', item.substitution_id);
             }
             else {
-              this.set('entityType', null);
-              this.set('entityUuid', null);
-              this.set('entitySubstitution', null);
+              this.set('entityType', '');
+              this.set('entityUuid', '');
+              this.set('entitySubstitution', '');
             }
 
-            linkFormView.urlInputView.fieldView.set('value', item.path);
+            // If the displayed text is empty and not read only (paragraph is selected)
+            // use the entity label as the default value.
+            if (
+              linkFormView.hasOwnProperty('displayedTextInputView') &&
+              linkFormView.displayedTextInputView.fieldView.element.value === '' &&
+              item.label &&
+              !linkFormView.displayedTextInputView.fieldView.element.readOnly
+            ) {
+              // The item label has been sanitized for display as HTML. We want this back in the original format so that
+              // characters are not double encoded (e.g. we want "foo &amp; bar" to be "foo & bar").
+              const label = document.createElement('span');
+              label.innerHTML = item.label;
+              linkFormView.displayedTextInputView.fieldView.value = label.textContent
+            }
+
+            event.target.value = item.path ?? '';
             selected = true;
             return false;
           },
@@ -98,37 +113,39 @@ class Linkit extends Plugin {
 
     // Only selections from autocomplete set converter attributes.
     const linkit = editor.plugins.get('Linkit');
-    linkFormView.urlInputView.fieldView.element.addEventListener('input', function (evt) {
-      linkit.set('entityType', null);
-      linkit.set('entityUuid', null);
-      linkit.set('entitySubstitution', null);
-    });
-
     this.listenTo(linkFormView, 'submit', () => {
-      const values = {
-        'linkDataEntityType': this.entityType,
-        'linkDataEntityUuid': this.entityUuid,
-        'linkDataEntitySubstitution': this.entitySubstitution,
-      }
-      const decoratorsArgIndex = 1;
       // Stop the execution of the link command caused by closing the form.
-      // Inject the extra attribute value. The highest priority listener here
-      // injects the argument (here below 👇).
-      // - The high priority listener in
-      //   _addExtraAttributeOnLinkCommandExecute() gets that argument and sets
-      //   the extra attribute.
-      // - The normal (default) priority listener in ckeditor5-link sets
-      //   (creates) the actual link.
+      // Inject the extra attribute value.
       linkCommand.once('execute', (evt, args) => {
-        // Assume decorators is the second argument provided to the
-        // linkCommand.execute() call.
-        if (!(typeof args[decoratorsArgIndex] === 'object')) {
-          // This is either an object or null because decorators are optional.
-          args[decoratorsArgIndex] = values;
-          return;
+        // CKEditor v45 includes a 'displayed text' input value. If present,
+        // send this information along so we can properly update the selection.
+        let displayedText = '';
+        if (typeof linkFormView.displayedTextInputView != 'undefined') {
+          displayedText = linkFormView.displayedTextInputView.fieldView.element.value;
         }
-        // An object exists, so we need to merge the values.
-        Object.assign(args[decoratorsArgIndex], values);
+        // Clear out linkit attributes for external URLs but leave attributes
+        // to prevent issues (see #3535098).
+        if (this._isValidHttpUrl(args[0])) {
+          args[1]['linkit_attributes'] = {
+            'displayedText': displayedText,
+          }
+        }
+        else {
+          // In CKEditor v45+ decorators go in the second argument (args[1]).
+          args[1]['linkit_attributes'] = {
+            'linkDataEntityType': this.entityType,
+            'linkDataEntityUuid': this.entityUuid,
+            'linkDataEntitySubstitution': this.entitySubstitution,
+            'displayedText': displayedText,
+          }
+        }
+        // - The highest priority listener here
+        //   injects the argument.
+        // - The high priority listener in
+        //   _addExtraAttributeOnLinkCommandExecute() gets that argument and sets
+        //   the extra attribute.
+        // - The normal (default) priority listener in ckeditor5-link sets
+        //   (creates) the actual link.
       }, { priority: 'highest' });
     }, { priority: 'high' });
   }
@@ -139,6 +156,17 @@ class Linkit extends Plugin {
     this.bind('entityType').to(linkCommand, 'linkDataEntityType');
     this.bind('entityUuid').to(linkCommand, 'linkDataEntityUuid');
     this.bind('entitySubstitution').to(linkCommand, 'linkDataEntitySubstitution');
+  }
+
+  _isValidHttpUrl(string) {
+    let url;
+    try {
+      url = new URL(string);
+    }
+    catch (_) {
+      return false;
+    }
+    return url.protocol === "https:";
   }
 
   /**

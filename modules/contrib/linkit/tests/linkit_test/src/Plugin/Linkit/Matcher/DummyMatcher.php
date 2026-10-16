@@ -2,18 +2,19 @@
 
 namespace Drupal\linkit_test\Plugin\Linkit\Matcher;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\linkit\Attribute\Matcher;
 use Drupal\linkit\MatcherBase;
 use Drupal\linkit\Suggestion\SimpleSuggestion;
 use Drupal\linkit\Suggestion\SuggestionCollection;
 
 /**
  * Provides test linkit matchers for the dummy_matcher entity type.
- *
- * @Matcher(
- *   id = "dummy_matcher",
- *   label = @Translation("Dummy Matcher"),
- * )
  */
+#[Matcher(
+  id: "dummy_matcher",
+  label: new TranslatableMarkup("Dummy Matcher"),
+)]
 class DummyMatcher extends MatcherBase {
 
   /**

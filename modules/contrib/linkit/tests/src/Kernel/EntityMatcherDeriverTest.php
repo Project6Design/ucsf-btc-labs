@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\linkit\Kernel;
 
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests the entity matcher deriver.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class EntityMatcherDeriverTest extends LinkitKernelTestBase {
 
   /**

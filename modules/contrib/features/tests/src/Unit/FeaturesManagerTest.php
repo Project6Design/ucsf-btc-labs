@@ -24,13 +24,15 @@ use Drupal\features\FeaturesManagerInterface;
 use Drupal\features\Package;
 use Drupal\Tests\UnitTestCase;
 use org\bovigo\vfs\vfsStream;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 
 /**
  * @coversDefaultClass Drupal\features\FeaturesManager
- * @group features
  */
+#[Group('features')]
 class FeaturesManagerTest extends UnitTestCase {
   /**
    * The name of the install profile.
@@ -172,6 +174,9 @@ class FeaturesManagerTest extends UnitTestCase {
     $this->featuresManager = new FeaturesManager($this->root, $this->entityTypeManager, $this->configFactory, $this->configStorage, $this->configManager, $this->moduleHandler, $this->configReverter, $this->moduleExtensionList, $this->extensionPathResolver);
   }
 
+  /**
+   * Filesystem setup.
+   */
   protected function setupVfsWithTestFeature() {
     vfsStream::setup('drupal');
     \Drupal::getContainer()->setParameter('app.root', 'vfs://drupal');
@@ -213,8 +218,8 @@ EOT
 
   /**
    * @covers ::getFullName
-   * @dataProvider providerTestGetFullName
    */
+  #[DataProvider('providerTestGetFullName')]
   public function testGetFullName($type, $name, $expected) {
     $this->assertEquals($this->featuresManager->getFullName($type, $name), $expected);
   }
@@ -808,9 +813,8 @@ EOT
    * @todo This could have of course much more test coverage.
    *
    * @covers ::mergeInfoArray
-   *
-   * @dataProvider providerTestMergeInfoArray
    */
+  #[DataProvider('providerTestMergeInfoArray')]
   public function testMergeInfoArray($expected, $info1, $info2, $keys = []) {
     $this->assertSame($expected, $this->featuresManager->mergeInfoArray($info1, $info2, $keys));
   }
@@ -1000,6 +1004,11 @@ EOT
  */
 class TestFeaturesManager extends FeaturesManager {
 
+  /**
+   * What modules to test.
+   *
+   * @var mixed allModules
+   */
   protected $allModules;
 
   /**
@@ -1026,6 +1035,7 @@ class TestFeaturesManager extends FeaturesManager {
    * Set all modules.
    *
    * @param mixed $all_modules
+   *   What modules to test.
    */
   public function setAllModules($all_modules) {
     $this->allModules = $all_modules;

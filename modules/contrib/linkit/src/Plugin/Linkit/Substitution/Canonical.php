@@ -5,16 +5,17 @@ namespace Drupal\linkit\Plugin\Linkit\Substitution;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\linkit\Attribute\Substitution;
 use Drupal\linkit\SubstitutionInterface;
 
 /**
  * A substitution plugin for the canonical URL of an entity.
- *
- * @Substitution(
- *   id = "canonical",
- *   label = @Translation("Canonical URL"),
- * )
  */
+#[Substitution(
+  id: "canonical",
+  label: new TranslatableMarkup("Canonical URL"),
+)]
 class Canonical extends PluginBase implements SubstitutionInterface {
 
   /**

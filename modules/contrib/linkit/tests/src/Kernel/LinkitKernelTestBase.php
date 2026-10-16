@@ -7,10 +7,12 @@ namespace Drupal\Tests\linkit\Kernel;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\user\Entity\Role;
 use Drupal\user\Entity\User;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Defines an abstract test base for entity kernel tests.
  */
+#[RunTestsInSeparateProcesses]
 abstract class LinkitKernelTestBase extends KernelTestBase {
 
   /**

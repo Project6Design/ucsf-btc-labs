@@ -20,6 +20,7 @@ class SitemapMenuLinkTree extends MenuLinkTree {
     $items = [];
 
     foreach ($tree as $data) {
+      $class = [];
       /** @var \Drupal\Core\Menu\MenuLinkInterface $link */
       $link = $data->link;
 
@@ -55,22 +56,31 @@ class SitemapMenuLinkTree extends MenuLinkTree {
       // link also has visible children within the current tree.
       $element['is_expanded'] = FALSE;
       $element['is_collapsed'] = FALSE;
+
       if ($data->hasChildren && !empty($data->subtree)) {
         $element['is_expanded'] = TRUE;
+        $class[] = 'expanded';
       }
       elseif ($data->hasChildren) {
         $element['is_collapsed'] = TRUE;
+        $class[] = 'collapsed';
       }
+      else {
+        $class[] = 'leaf';
+      }
+
       // Set a helper variable to indicate whether the link is in the active
       // trail.
       $element['in_active_trail'] = FALSE;
       if ($data->inActiveTrail) {
         $element['in_active_trail'] = TRUE;
+        $class[] = 'active-trail';
       }
 
       // Note: links are rendered in the menu.html.twig template; and they
       // automatically bubble their associated cacheability metadata.
       $element['attributes'] = new Attribute();
+      $element['attributes']['class'] = $class;
       $element['title'] = $link->getTitle();
       $element['url'] = $link->getUrlObject();
       $element['url']->setOption('set_active_class', TRUE);

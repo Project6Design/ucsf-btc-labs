@@ -15,12 +15,12 @@ use Drupal\Core\Entity\EntityPublishedInterface;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\Query\QueryInterface;
-use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drush\Attributes as CLI;
 use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
+use Drush\Exceptions\UserAbortException;
 use Drush\Utils\StringUtils;
 
 final class EntityCommands extends DrushCommands implements StdinAwareInterface
@@ -71,8 +71,14 @@ final class EntityCommands extends DrushCommands implements StdinAwareInterface
         if (empty($result)) {
             $this->logger()->success(dt('No matching entities found.'));
         } else {
+            if (empty($options['limit']) && empty($ids)) {
+                if (!$this->io()->confirm(dt('You are about to delete !count entities. Do you wish to continue?', ['!count' => count($result)]), false)) {
+                    throw new UserAbortException();
+                }
+            }
+
             $chunks = array_chunk($result, (int)$options['chunks'], true);
-            $progress = $this->io()->progress('Deleting entitites', count($chunks));
+            $progress = $this->io()->progress('Deleting entities', count($chunks));
             $progress->start();
             foreach ($chunks as $chunk) {
                 drush_op([$this, 'doDelete'], $entity_type, $chunk);
@@ -109,6 +115,7 @@ final class EntityCommands extends DrushCommands implements StdinAwareInterface
     #[CLI\Option(name: 'bundle', description: 'Restrict to the specified bundle. Ignored when ids is specified.')]
     #[CLI\Option(name: 'exclude', description: 'Exclude certain entities. Ignored when ids is specified.')]
     #[CLI\Option(name: 'chunks', description: 'Define how many entities will be loaded in the same step.')]
+    #[CLI\Option(name: 'limit', description: 'Limit on the number of entities to save.')]
     #[CLI\Option(name: 'publish', description: 'Publish entities as they are saved. ')]
     #[CLI\Option(name: 'unpublish', description: 'Unpublish entities as they are saved.')]
     #[CLI\Option(name: 'state', description: 'Transition entities to the specified Content Moderation state. Do not pass --publish or --unpublish since the transition state determines handles publishing.')]
@@ -120,7 +127,7 @@ final class EntityCommands extends DrushCommands implements StdinAwareInterface
     #[CLI\Usage(name: 'drush entity:save user', description: 'Re-save all users.')]
     #[CLI\Usage(name: 'drush entity:save node --chunks=5', description: 'Re-save all node entities in steps of 5.')]
     #[CLI\Version(version: '11.0')]
-    public function loadSave(string $entity_type, $ids = null, array $options = ['bundle' => self::REQ, 'exclude' => self::REQ, 'chunks' => 50, 'publish' => false, 'unpublish' => false, 'state' => self::REQ]): void
+    public function loadSave(string $entity_type, $ids = null, array $options = ['bundle' => self::REQ, 'exclude' => self::REQ, 'chunks' => 50, 'publish' => false, 'unpublish' => false, 'state' => self::REQ, 'limit' => null]): void
     {
         if ($options['publish'] && $options['unpublish']) {
             throw new \InvalidArgumentException(dt('You may not specify both --publish and --unpublish.'));
@@ -178,11 +185,12 @@ final class EntityCommands extends DrushCommands implements StdinAwareInterface
      */
     public function doSave(string $entity_type, array $ids, ?string $action, ?string $state): void
     {
-        $message = [];
+        $message = '';
         $storage = $this->entityTypeManager->getStorage($entity_type);
         $entities = $storage->loadMultiple($ids);
+        $is_revisionable = $this->entityTypeManager->getDefinition($entity_type)->isRevisionable();
         foreach ($entities as $entity) {
-            if (is_a($entity, RevisionableInterface::class)) {
+            if ($is_revisionable) {
                 /** @var \Drupal\Core\Entity\ContentEntityStorageInterface $storage */
                 $storage = \Drupal::entityTypeManager()->getStorage($entity->getEntityTypeId());
                 $entity = $storage->createRevision($entity, true);
@@ -211,7 +219,9 @@ final class EntityCommands extends DrushCommands implements StdinAwareInterface
                     $message = 'Unpublished.';
                 }
             }
-            if (is_a($entity, RevisionLogInterface::class)) {
+            if ($is_revisionable) {
+                // This line satisfies the bully that is phpstan.
+                assert($entity instanceof RevisionLogInterface);
                 $entity->setRevisionLogMessage('Re-saved by Drush entity:save. ' . $message);
                 $entity->setRevisionCreationTime($this->time->getRequestTime());
                 $entity->setRevisionUserId($this->currentUser->id());
@@ -231,7 +241,7 @@ final class EntityCommands extends DrushCommands implements StdinAwareInterface
     protected function getQuery(string $entity_type, ?string $ids, array $options): QueryInterface
     {
         $storage = $this->entityTypeManager->getStorage($entity_type);
-        $query = $storage->getQuery()->accessCheck(false);
+        $query = $storage->getQuery();
         if ($ids = StringUtils::csvToArray((string) $ids)) {
             $idKey = $this->entityTypeManager->getDefinition($entity_type)->getKey('id');
             $query = $query->condition($idKey, $ids, 'IN');
@@ -248,6 +258,6 @@ final class EntityCommands extends DrushCommands implements StdinAwareInterface
                 $query->range(0, $limit);
             }
         }
-        return $query;
+        return $query->accessCheck(false);
     }
 }

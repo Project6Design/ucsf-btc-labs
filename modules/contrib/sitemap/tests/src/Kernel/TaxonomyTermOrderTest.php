@@ -3,8 +3,8 @@
 namespace Drupal\Tests\sitemap\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\sitemap\SitemapManager;
 use Drupal\Tests\taxonomy\Traits\TaxonomyTestTrait;
+use Drupal\sitemap\SitemapManager;
 
 /**
  * Tests that terms are ordered according to their weight.

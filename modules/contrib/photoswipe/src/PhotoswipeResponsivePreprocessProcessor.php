@@ -18,7 +18,16 @@ class PhotoswipeResponsivePreprocessProcessor extends PhotoswipePreprocessProces
     $settings = $this->imageDTO->getSettings();
     $image_style_store = $this->entityTypeManager->getStorage('image_style');
     $resp_image_store = $this->entityTypeManager->getStorage('responsive_image_style');
-    $responsive_image_style = $resp_image_store->load($settings['photoswipe_thumbnail_style']);
+
+    // Resolve the effective thumbnail style up front, so that the style lookup,
+    // caching, etc. respect the first image override:
+    $thumbnail_style = $settings['photoswipe_thumbnail_style'];
+    // For the first item, use "photoswipe_thumbnail_style_first" for the
+    // thumbnail style:
+    if (isset($variables['delta']) && $variables['delta'] === 0 && !empty($settings['photoswipe_thumbnail_style_first'])) {
+      $thumbnail_style = $settings['photoswipe_thumbnail_style_first'];
+    }
+    $responsive_image_style = $resp_image_store->load($thumbnail_style);
 
     $cache_tags = [];
     $image_styles_to_load = [];
@@ -49,16 +58,12 @@ class PhotoswipeResponsivePreprocessProcessor extends PhotoswipePreprocessProces
       '#cache' => [
         'tags' => $cache_tags,
       ],
-      '#style_name' => $settings['photoswipe_thumbnail_style'],
+      '#style_name' => $thumbnail_style,
     ];
 
     $meta_a = CacheableMetadata::createFromRenderArray($image);
     $meta_b = CacheableMetadata::createFromObject($item->getEntity());
     $meta_a->merge($meta_b)->applyTo($image);
-
-    if (isset($variables['delta']) && $variables['delta'] === 0 && !empty($settings['photoswipe_thumbnail_style_first'])) {
-      $image['#style_name'] = $settings['photoswipe_thumbnail_style_first'];
-    }
 
     // Render as a standard image if an image style is not given or "hide".
     if ($image['#style_name'] === 'hide') {

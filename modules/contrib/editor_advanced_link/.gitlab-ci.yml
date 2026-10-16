@@ -8,7 +8,8 @@ include:
 variables:
   OPT_IN_TEST_NEXT_MINOR: 1
   OPT_IN_TEST_NEXT_MAJOR: 1
-  RUN_JOB_UPGRADE_STATUS: 1
+  _CSPELL_WORDS: 'drupalling, editoradvancedlinkediting, editoradvancedlinkui, focusables, foobarbaz, grumphp, linkit, linktargetrel, switchbutton'
+  _CSPELL_IGNORE_PATHS: 'grumphp.yml'
 cspell:
   allow_failure: true
 phpcs:
@@ -25,3 +26,6 @@ phpunit (next major):
   allow_failure: true
 upgrade status:
   allow_failure: false
+composer:
+  after_script:
+    - npm ci

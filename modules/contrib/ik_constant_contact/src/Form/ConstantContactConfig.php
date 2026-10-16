@@ -4,6 +4,7 @@ namespace Drupal\ik_constant_contact\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\TypedConfigManagerInterface;
+use Drupal\Core\Database\Connection;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -46,7 +47,7 @@ class ConstantContactConfig extends ConfigFormBase {
   protected $constantContact;
 
   /**
-   * \Drupal\Core\Extension\ModuleHandlerInterface
+   * \Drupal\Core\Extension\ModuleHandlerInterface.
    *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    *   Module handler interface
@@ -60,6 +61,15 @@ class ConstantContactConfig extends ConfigFormBase {
    *   Drupal current user.
    */
   protected $currentUser;
+
+
+  /**
+   * Drupal\Core\Database\Connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   *   Drupal database.
+   */
+  protected $database;
 
   /**
    * ConstantContactConfig constructor.
@@ -76,14 +86,17 @@ class ConstantContactConfig extends ConfigFormBase {
    *   The module handler service.
    * @param \Drupal\Core\Session\AccountProxy
    *   The current logged in user
+   * @param Drupal\Core\Database\Connection
+   *   The database connection
    */
-  public function __construct(ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typed_config_manager, MessengerInterface $messenger, RequestStack $request_stack, ConstantContact $constantContact, ModuleHandlerInterface $moduleHandler, AccountProxy $currentUser) {
+  public function __construct(ConfigFactoryInterface $config_factory, TypedConfigManagerInterface $typed_config_manager, MessengerInterface $messenger, RequestStack $request_stack, ConstantContact $constantContact, ModuleHandlerInterface $moduleHandler, AccountProxy $currentUser, Connection $database) {
     parent::__construct($config_factory, $typed_config_manager);
     $this->constantContact = $constantContact;
     $this->currentUser = $currentUser;
     $this->messenger = $messenger;
     $this->moduleHandler = $moduleHandler;
     $this->requestStack = $request_stack;
+    $this->database = $database;
   }
 
   /**
@@ -97,7 +110,8 @@ class ConstantContactConfig extends ConfigFormBase {
       $container->get('request_stack'),
       $container->get('ik_constant_contact'),
       $container->get('module_handler'),
-      $container->get('current_user')
+      $container->get('current_user'),
+      $container->get('database')
     );
   }
 
@@ -123,26 +137,27 @@ class ConstantContactConfig extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $settings = $this->constantContact->getConfig();
-    $clientId = isset($settings['client_id']) ? $settings['client_id'] : NULL;
-    $authType = isset($settings['auth_type']) ? $settings['auth_type'] : NULL;
-    $configType = isset($settings['config_type']) ? $settings['config_type'] : 'config';
-    $secret = isset($settings['client_secret']) ? $settings['client_secret'] : NULL;
-    $accessToken = isset($settings['access_token']) ? $settings['access_token'] : NULL;
-    $refreshToken = isset($settings['refresh_token']) ? $settings['refresh_token'] : NULL;
-    $authUrl = isset($settings['authentication_url']) ? $settings['authentication_url'] : NULL;
-    $codeVerifier = isset($settings['code_verifier']) ? $settings['code_verifier'] : NULL;
-    $codeChallenge = null;
+    $clientId = $settings['client_id'] ?? NULL;
+    $authType = $settings['auth_type'] ?? NULL;
+    $configType = $settings['config_type'] ?? 'config';
+    $secret = $settings['client_secret'] ?? NULL;
+    $accessToken = $settings['access_token'] ?? NULL;
+    $refreshToken = $settings['refresh_token'] ?? NULL;
+    $authUrl = $settings['authentication_url'] ?? NULL;
+    $codeVerifier = $settings['code_verifier'] ?? NULL;
+    $codeChallenge = NULL;
+    $schema = $this->database->schema();
 
     if (
-      (!$this->moduleHandler->moduleExists('automated_cron') && !$this->moduleHandler->moduleExists('ultimate_cron')) && 
-      (int)$this->currentUser->id() !== 0 && 
+      (!$this->moduleHandler->moduleExists('automated_cron') && !$this->moduleHandler->moduleExists('ultimate_cron')) &&
+      (int) $this->currentUser->id() !== 0 &&
       $this->currentUser->hasPermission('administer constant contact configuration') &&
       $this->currentUser->hasPermission('administer modules')
     ) {
       $this->messenger->addMessage($this->t('It is recommended to install automated_cron or make sure that cron is run regularly to refresh access tokens from Constant Contact API.'), 'warning');
     }
 
-    if (!isset($settings['token_source']) || $settings['token_source'] === 'config') {
+    if (!$schema->tableExists('ik_constant_contact_tokens')) {
       $this->messenger->addMessage($this->t('There are database updates for the Constant Contact module. Please run these updates.'), 'warning');
     }
 
@@ -166,7 +181,7 @@ class ConstantContactConfig extends ConfigFormBase {
       '#title' => $this->t('API Key'),
       '#default_value' => $clientId ? $clientId : NULL,
       '#required' => TRUE,
-      '#disabled' => $configType === 'settings.php' ? TRUE : FALSE
+      '#disabled' => $configType === 'settings.php' ? TRUE : FALSE,
     ];
 
     $form['auth']['auth_type'] = [
@@ -179,14 +194,14 @@ class ConstantContactConfig extends ConfigFormBase {
       '#default_value' => $authType ? $authType : 'auth_code',
       '#required' => TRUE,
       '#disabled' => $configType === 'settings.php' ? TRUE : FALSE,
-      '#description' => $this->t('Select your applications authentication settings. See <a href="https://v3.developer.constantcontact.com/api_guide/auth_overview.html#select-the-oauth2-flow-to-use" target="_blank" rel="nofollow noreferrer">OAuth2 Flow Types</a> for more details. Note that PKCE Flow is not supported at this time. <a href="https://www.drupal.org/project/ik_constant_contact/issues/3285446" target="_blank">See Issue #3285446 for details.</a>')
+      '#description' => $this->t('Select your applications authentication settings. See <a href="https://v3.developer.constantcontact.com/api_guide/auth_overview.html#select-the-oauth2-flow-to-use" target="_blank" rel="nofollow noreferrer">OAuth2 Flow Types</a> for more details. Note that PKCE Flow is not supported at this time. <a href="https://www.drupal.org/project/ik_constant_contact/issues/3285446" target="_blank">See Issue #3285446 for details.</a>'),
     ];
 
     $form['auth']['client_secret'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Secret'),
       '#default_value' => $secret ? '*******************' : NULL,
-      '#description' => $secret ? $this->t('Client Secret is hidden for security purposes.') .  ($configType !== 'settings.php' ? $this->t('  Please re-enter the secret to update this value.') : '' ) : '',
+      '#description' => $secret ? $this->t('Client Secret is hidden for security purposes.') . ($configType !== 'settings.php' ? $this->t('  Please re-enter the secret to update this value.') : '') : '',
       '#disabled' => $configType === 'settings.php' ? TRUE : FALSE,
       '#states' => [
         'required' => [
@@ -195,17 +210,17 @@ class ConstantContactConfig extends ConfigFormBase {
         'invisible' => [
           'select[name="auth_type"]' => ['value' => 'pkce'],
         ],
-      ]
+      ],
     ];
 
-    if ($accessToken && $refreshToken) {      
+    if ($accessToken && $refreshToken) {
       $form['tokens'] = [
         '#markup' => '<p>' . $this->t(
-          'Your account is successfully set up. Thank you!<br/>Last token was generated at <strong>@date</strong> and expires on <strong>@expires</strong>.', 
+          'Your account is successfully set up. Thank you!<br/>Last token was generated at <strong>@date</strong> and expires on <strong>@expires</strong>.',
           [
-            '@date' => date('m/d/Y h:i a', $settings['token_timestamp']), 
-            '@expires' => date('m/d/Y h:i a', $settings['token_expires'])
-         ]) . '</p>',
+            '@date' => date('m/d/Y h:i a', $settings['token_timestamp']),
+            '@expires' => date('m/d/Y h:i a', $settings['token_expires']),
+          ]) . '</p>',
       ];
     }
 
@@ -215,26 +230,28 @@ class ConstantContactConfig extends ConfigFormBase {
       $codeVerifier = $this->constantContact->generateCodeVerifier();
       $this->config('ik_constant_contact.pkce')->set('code_verifier', $codeVerifier)->save();
     }
-   
+
     // Show Authentication Button.
     // @see https://v3.developer.constantcontact.com/api_guide/server_flow.html#step-1-create-an-authorization-request
     if ($clientId && $authType === 'pkce' && (!$accessToken || !$refreshToken) && !isset($_GET['code'])) {
       $buttonLabel = $this->t('Authorize Your Account');
       $additionalMarkup = '<p>' . $this->t('You will need to make sure the following URL is listed in your Constant Contact App before proceeding:') . '<br/><strong>' . $this->requestStack->getCurrentRequest()->getSchemeAndHttpHost() . '/admin/config/services/ik-constant-contact/callback</strong></p>';
-    } else if ($clientId && $secret && (!$accessToken || !$refreshToken) && !isset($_GET['code'])) {
+    }
+    elseif ($clientId && $secret && (!$accessToken || !$refreshToken) && !isset($_GET['code'])) {
       $buttonLabel = $this->t('Authorize Your Account');
       $additionalMarkup = '<p>' . $this->t('You will need to make sure the following URL is listed in your Constant Contact App before proceeding:') . '<br/><strong>' . $this->requestStack->getCurrentRequest()->getSchemeAndHttpHost() . '/admin/config/services/ik-constant-contact/callback</strong></p>';
-    } else {
+    }
+    else {
       $buttonLabel = $this->t('Refresh Tokens Manually');
       $additionalMarkup = '';
     }
-      
+
     $queryParams = [
       'client_id' => $clientId,
       'redirect_uri' => $this->requestStack->getCurrentRequest()->getSchemeAndHttpHost() . '/admin/config/services/ik-constant-contact/callback',
       'response_type' => 'code',
       'state' => \Drupal::config('system.site')->get('uuid'),
-      'scope' => 'offline_access'
+      'scope' => 'offline_access',
     ];
 
     if ($authType === 'pkce') {
@@ -245,8 +262,8 @@ class ConstantContactConfig extends ConfigFormBase {
     $authenticationUrl = Url::fromUri($authUrl, [
       'query' => $queryParams,
       'attributes' => [
-        'class' => 'button'
-      ]
+        'class' => 'button',
+      ],
     ]);
 
     $authenticationLink = Link::fromTextAndUrl(
@@ -254,7 +271,7 @@ class ConstantContactConfig extends ConfigFormBase {
       $authenticationUrl
     );
 
-    // Weird bug that CC doesn't like encoded "+" sign
+    // Weird bug that CC doesn't like encoded "+" sign.
     $link = $authenticationLink->toString();
     $link = str_replace('scope=offline_access', 'scope=offline_access+contact_data+campaign_data', $link);
 
@@ -267,7 +284,7 @@ class ConstantContactConfig extends ConfigFormBase {
     if ($configType === 'settings.php') {
       unset($form['actions']['submit']);
     }
-    
+
     return $form;
   }
 

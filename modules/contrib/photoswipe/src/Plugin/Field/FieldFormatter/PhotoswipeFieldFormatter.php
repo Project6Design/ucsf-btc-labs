@@ -3,15 +3,17 @@
 namespace Drupal\photoswipe\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Entity\EntityFieldManagerInterface;
+use Drupal\Core\Entity\EntityTypeBundleInfoInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
-use Drupal\Core\Entity\EntityStorageInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Field\FieldConfigInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Template\Attribute;
+use Drupal\image\ImageDerivativeUtilities;
 use Drupal\photoswipe\PhotoswipeAssetsManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -58,11 +60,20 @@ class PhotoswipeFieldFormatter extends FormatterBase {
   protected $includeHidden = TRUE;
 
   /**
-   * The image style entity storage.
+   * The entity type manager.
    *
-   * @var \Drupal\image\ImageStyleStorageInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $imageStyleStorage;
+  protected $entityTypeManager;
+
+  /**
+   * The image derivative utilities.
+   *
+   * Only available in Drupal 11.4 and later, NULL otherwise.
+   *
+   * @var \Drupal\image\ImageDerivativeUtilities|null
+   */
+  protected $imageDerivativeUtilities;
 
   /**
    * {@inheritdoc}
@@ -74,6 +85,8 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       'photoswipe_image_style' => '',
       'photoswipe_reference_image_field' => '',
       'photoswipe_view_mode' => '',
+      'photoswipe_remove_gallery_wrapper_class' => FALSE,
+      'photoswipe_show_download_button' => FALSE,
       'image_loading' => [
         'attribute' => 'lazy',
       ],
@@ -103,8 +116,12 @@ class PhotoswipeFieldFormatter extends FormatterBase {
    *   The entity repository.
    * @param \Drupal\photoswipe\PhotoswipeAssetsManagerInterface $assets_manager
    *   The assets manager.
-   * @param \Drupal\Core\Entity\EntityStorageInterface $image_style_storage
-   *   The module handler.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Entity\EntityTypeBundleInfoInterface $entityTypeBundleInfo
+   *   The entity type bundle info.
+   * @param \Drupal\image\ImageDerivativeUtilities|null $image_derivative_utilities
+   *   The image derivative utilities. Only exists in Drupal 11.4 and later.
    */
   public function __construct(
     $plugin_id,
@@ -117,7 +134,9 @@ class PhotoswipeFieldFormatter extends FormatterBase {
     EntityFieldManagerInterface $entity_field_manager,
     EntityRepositoryInterface $entity_repository,
     PhotoswipeAssetsManagerInterface $assets_manager,
-    EntityStorageInterface $image_style_storage,
+    EntityTypeManagerInterface $entity_type_manager,
+    protected EntityTypeBundleInfoInterface $entityTypeBundleInfo,
+    ?ImageDerivativeUtilities $image_derivative_utilities = NULL,
   ) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
     $this->fieldDefinition = $field_definition;
@@ -128,7 +147,8 @@ class PhotoswipeFieldFormatter extends FormatterBase {
     $this->entityFieldManager = $entity_field_manager;
     $this->entityRepository = $entity_repository;
     $this->photoswipeAssetManager = $assets_manager;
-    $this->imageStyleStorage = $image_style_storage;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->imageDerivativeUtilities = $image_derivative_utilities;
   }
 
   /**
@@ -146,7 +166,10 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       $container->get('entity_field.manager'),
       $container->get('entity.repository'),
       $container->get('photoswipe.assets_manager'),
-      $container->get('entity_type.manager')->getStorage('image_style'),
+      $container->get('entity_type.manager'),
+      $container->get('entity_type.bundle.info'),
+      // The service does not exist in Drupal 10 and lower.
+      $container->has(ImageDerivativeUtilities::class) ? $container->get(ImageDerivativeUtilities::class) : NULL,
     );
   }
 
@@ -182,7 +205,7 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       '#description' => $this->t('Select the image style to display the image in the Photoswipe modal.'),
     ];
 
-    // This class originally never extended the ImgaeFormatter class, as we
+    // This class originally never extended the ImageFormatter class, as we
     // don't want to extend it now, simply copy the "image_loading" code from
     // there:
     $image_loading = $this->getSetting('image_loading');
@@ -219,6 +242,24 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       }
     }
 
+    $element['photoswipe_remove_gallery_wrapper_class'] = [
+      '#title' => $this->t('Remove photoswipe-gallery wrapper class'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->getSetting('photoswipe_remove_gallery_wrapper_class'),
+      '#description' => $this->t('Advanced: Removes the default "photoswipe-gallery" wrapper class. This is useful to combine multiple fields into a single gallery by wrapping them in a custom parent container with the "photoswipe-gallery" class, e.g. through Views or Fences.'),
+    ];
+    $element['photoswipe_show_download_button'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Show download button'),
+      '#default_value' => $this->getSetting('photoswipe_show_download_button'),
+      '#description' => $this->t('Display a download button in the PhotoSwipe toolbar.'),
+      '#states' => [
+        'visible' => [
+          ':input[name$="[settings][photoswipe_remove_gallery_wrapper_class]"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
+
     // Add the current view mode so we can control view mode for entity fields.
     $element['photoswipe_view_mode'] = [
       '#type' => 'hidden',
@@ -235,7 +276,7 @@ class PhotoswipeFieldFormatter extends FormatterBase {
    *   Image styles.
    */
   protected function getImageStyles() {
-    return image_style_options(FALSE);
+    return $this->getImageStyleOptions();
   }
 
   /**
@@ -245,7 +286,22 @@ class PhotoswipeFieldFormatter extends FormatterBase {
    *   Image styles.
    */
   protected function getPhotoSwipeStyles() {
-    return image_style_options(FALSE);
+    return $this->getImageStyleOptions();
+  }
+
+  /**
+   * Gets the image styles as select list options.
+   *
+   * @return array
+   *   Image styles.
+   */
+  protected function getImageStyleOptions() {
+    // image_style_options() is deprecated since Drupal 11.4 in favor of the
+    // ImageDerivativeUtilities service, which doesn't exist in Drupal 10:
+    return $this->imageDerivativeUtilities
+      ? $this->imageDerivativeUtilities->styleOptions(FALSE)
+      // @phpstan-ignore-next-line
+      : image_style_options(FALSE);
   }
 
   /**
@@ -263,7 +319,8 @@ class PhotoswipeFieldFormatter extends FormatterBase {
     }
 
     $target_type = $this->fieldDefinition->getSetting('target_type');
-    $target_bundles = $this->fieldDefinition->getSetting('handler_settings')['target_bundles'];
+    $fieldDefinitionHandlerSettings = $this->fieldDefinition->getSetting('handler_settings');
+    $target_bundles = empty($fieldDefinitionHandlerSettings['target_bundles']) ? array_keys($this->entityTypeBundleInfo->getBundleInfo($target_type)) : $fieldDefinitionHandlerSettings['target_bundles'];
 
     /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $fields */
     $fields = [];
@@ -275,8 +332,8 @@ class PhotoswipeFieldFormatter extends FormatterBase {
     });
 
     $field_options = [];
-    foreach ($fields as $name => $field) {
-      $field_options[$name] = $field->getName();
+    foreach ($fields as $name => $fieldDefinition) {
+      $field_options[$name] = $fieldDefinition->getName() . ' (' . $fieldDefinition->getLabel() . ')';
     }
 
     $element['photoswipe_reference_image_field'] = [
@@ -338,6 +395,12 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       '@attribute' => $image_loading['attribute'],
     ]);
 
+    $removeWrapperClassStatus = $this->getSetting('photoswipe_remove_gallery_wrapper_class') ? $this->t('Yes') : $this->t('No');
+    $summary[] = $this->t('Remove photoswipe-gallery wrapper class: %status', ['%status' => $removeWrapperClassStatus]);
+
+    $showDownloadButton = $this->getSetting('photoswipe_show_download_button') ? $this->t('Yes') : $this->t('No');
+    $summary[] = $this->t('Show download button:: %status', ['%status' => $showDownloadButton]);
+
     return $summary;
   }
 
@@ -351,7 +414,14 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       $elements['#attributes'] = new Attribute();
     }
     // Add the gallery wrapper class to the field:
-    $elements['#attributes']->addClass('photoswipe-gallery');
+    if (!$this->getSetting('photoswipe_remove_gallery_wrapper_class')) {
+      $elements['#attributes']->addClass('photoswipe-gallery');
+
+      // This can only be set when the gallery wrapper exists:
+      if ($this->getSetting('photoswipe_show_download_button')) {
+        $elements['#attributes']->setAttribute('data-show-download-button', 'true');
+      }
+    }
     return $elements;
   }
 
@@ -430,9 +500,10 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       $style_ids[] = $this->getSetting('photoswipe_thumbnail_style_first');
     }
     $style_ids[] = $this->getSetting('photoswipe_image_style');
+    $imageStyleStorage = $this->entityTypeManager->getStorage('image_style');
     foreach ($style_ids as $style_id) {
       /** @var \Drupal\image\ImageStyleInterface $style */
-      if ($style_id && $style = $this->imageStyleStorage->load($style_id)) {
+      if ($style_id && $style = $imageStyleStorage->load($style_id)) {
         // If this formatter uses a valid image style to display the image, add
         // the image style configuration entity as dependency of this formatter.
         $dependencies[$style->getConfigDependencyKey()][] = $style->getConfigDependencyName();
@@ -452,15 +523,16 @@ class PhotoswipeFieldFormatter extends FormatterBase {
       $style_ids['photoswipe_thumbnail_style_first'] = $this->getSetting('photoswipe_thumbnail_style_first');
     }
     $style_ids['photoswipe_image_style'] = $this->getSetting('photoswipe_image_style');
+    $imageStyleStorage = $this->entityTypeManager->getStorage('image_style');
     foreach ($style_ids as $name => $style_id) {
       /** @var \Drupal\image\ImageStyleInterface $style */
-      if (!empty($style_id) && $style = $this->imageStyleStorage->load($style_id)) {
+      if (!empty($style_id) && $style = $imageStyleStorage->load($style_id)) {
         if (!empty($dependencies[$style->getConfigDependencyKey()][$style->getConfigDependencyName()])) {
-          $replacement_id = $this->imageStyleStorage->getReplacementId($style_id);
+          $replacement_id = $imageStyleStorage->getReplacementId($style_id);
           // If a valid replacement has been provided in the storage, replace
           // the image style with the replacement and signal that the formatter
           // plugin settings were updated.
-          if ($replacement_id && $this->imageStyleStorage->load($replacement_id)) {
+          if ($replacement_id && $imageStyleStorage->load($replacement_id)) {
             $this->setSetting($name, $replacement_id);
             $changed = TRUE;
           }

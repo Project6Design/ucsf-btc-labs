@@ -5,19 +5,32 @@
  * Contains install and update functions for URL Embed.
  */
 
+use Drupal\Component\Utility\DeprecationHelper;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
+
 /**
  * Implements hook_requirements().
  *
  * Checks that the necessary libraries have been installed.
  */
 function url_embed_requirements($phase) {
+  // @todo This hook can be completed removed once this module drops support
+  // for Drupal < 11.2. The check has already been replicated in
+  // UrlEmbedInstallRequirements.
   $requirements = [];
+
+  $severity = DeprecationHelper::backwardsCompatibleCall(
+    currentVersion: \Drupal::VERSION,
+    deprecatedVersion: '11.2',
+    currentCallable: fn() => RequirementSeverity::Error,
+    deprecatedCallable: fn() => REQUIREMENT_ERROR,
+  );
 
   if ($phase === 'install') {
     if (!class_exists('\Embed\Embed')) {
       $requirements['url_embed_library'] = [
         'description' => t("URL Embed requires the Embed/Embed library."),
-        'severity' => REQUIREMENT_ERROR,
+        'severity' => $severity,
       ];
     }
   }

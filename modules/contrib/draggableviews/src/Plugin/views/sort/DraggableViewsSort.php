@@ -6,7 +6,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Entity\View;
 use Drupal\views\Plugin\views\sort\SortPluginBase;
-use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -31,6 +30,13 @@ class DraggableViewsSort extends SortPluginBase {
   protected $entityTypeManager;
 
   /**
+   * The views join plugin manager.
+   *
+   * @var \Drupal\views\Plugin\ViewsPluginManager
+   */
+  protected $joinPluginManager;
+
+  /**
    * Constructs a SortPluginBase object, along with a ModuleHandler object.
    *
    * @param array $configuration
@@ -41,17 +47,20 @@ class DraggableViewsSort extends SortPluginBase {
    *   The plugin implementation definition.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   The EntityTypeManager utility class.
+   * @param \Drupal\views\Plugin\ViewsPluginManager $join_plugin_manager
+   *   The views join plugin manager.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, EntityTypeManagerInterface $entity_type_manager, $join_plugin_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->entityTypeManager = $entity_type_manager;
+    $this->joinPluginManager = $join_plugin_manager;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity_type.manager'));
+    return new static($configuration, $plugin_id, $plugin_definition, $container->get('entity_type.manager'), $container->get('plugin.manager.views.join'));
   }
 
   /**
@@ -61,7 +70,7 @@ class DraggableViewsSort extends SortPluginBase {
     $options = parent::defineOptions();
     $options['draggable_views_reference'] = ['default' => ''];
     $options['draggable_views_null_order'] = ['default' => 'after'];
-    $options['draggable_views_pass_arguments'] = ['default' => 0];
+    $options['draggable_views_pass_arguments'] = ['default' => FALSE];
     return $options;
   }
 
@@ -86,8 +95,8 @@ class DraggableViewsSort extends SortPluginBase {
       '#type' => 'radios',
       '#title' => $this->t('Position of new/unsorted items'),
       '#options' => [
-        'before' => 'Above',
-        'after' => 'Below',
+        'before' => $this->t('Above'),
+        'after' => $this->t('Below'),
       ],
       '#description' => $this->t('New items means elements (for example nodes) that do not have a saved weight (newly created). You can choose to either display them above or below the items that have been sorted.'),
       '#default_value' => $this->options['draggable_views_null_order'],
@@ -141,7 +150,7 @@ class DraggableViewsSort extends SortPluginBase {
     else {
       $id = 'draggableviews_with_args';
     }
-    $join = Views::pluginManager('join')->createInstance($id, $def);
+    $join = $this->joinPluginManager->createInstance($id, $def);
 
     // Use a short alias for this:
     $alias = $def['table'];

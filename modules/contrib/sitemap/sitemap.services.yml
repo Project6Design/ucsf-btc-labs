@@ -1,5 +1,4 @@
 services:
-
   # Provides a Sitemap plugin manager.
   plugin.manager.sitemap:
     class: Drupal\sitemap\SitemapManager

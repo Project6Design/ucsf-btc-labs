@@ -5,12 +5,12 @@ namespace Drupal\Tests\devel\Kernel;
 use Drupal\Core\Mail\Plugin\Mail\TestMailCollector;
 use Drupal\devel\Plugin\Mail\DevelMailLog;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests sending mails with debug interface.
- *
- * @group devel
  */
+#[Group('devel')]
 class DevelMailLogTest extends KernelTestBase {
 
   /**

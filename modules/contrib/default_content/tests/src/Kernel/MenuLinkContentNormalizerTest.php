@@ -157,11 +157,6 @@ class MenuLinkContentNormalizerTest extends KernelTestBase {
             'value' => FALSE,
           ],
         ],
-        'revision_translation_affected' => [
-          0 => [
-            'value' => TRUE,
-          ],
-        ],
       ],
     ];
 
@@ -230,11 +225,6 @@ class MenuLinkContentNormalizerTest extends KernelTestBase {
         'parent' => [
           0 => [
             'value' => $child_link->getParentId(),
-          ],
-        ],
-        'revision_translation_affected' => [
-          0 => [
-            'value' => TRUE,
           ],
         ],
       ],

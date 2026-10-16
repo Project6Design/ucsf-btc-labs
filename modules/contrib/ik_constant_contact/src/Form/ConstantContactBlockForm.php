@@ -38,7 +38,7 @@ class ConstantContactBlockForm extends FormBase {
   protected $constantContact;
 
   /**
-   * \Drupal\Core\Extension\ModuleHandlerInterface
+   * \Drupal\Core\Extension\ModuleHandlerInterface.
    *
    * @var \Drupal\Core\Extension\ModuleHandlerInterface
    *   Module handler interface
@@ -141,7 +141,8 @@ class ConstantContactBlockForm extends FormBase {
             '#required' => isset($listConfig[$fieldName . '_required']) && $listConfig[$fieldName . '_required'] === 1,
           ];
         }
-      } else if ($fieldName === 'street_address') {
+      }
+      elseif ($fieldName === 'street_address') {
         $addressFields = $this->constantContact->getConfig()['address_subfields'];
         $addressElements = [];
 
@@ -150,7 +151,7 @@ class ConstantContactBlockForm extends FormBase {
             $addressElements[$subfield] = [
               '#type' => 'textfield',
               '#title' => $this->t($subLabel),
-              '#required' => isset($listConfig[$fieldName . '_' . $subfield . '_required']) && $listConfig[$fieldName . '_' . $subfield . '_required'] === 1
+              '#required' => isset($listConfig[$fieldName . '_' . $subfield . '_required']) && $listConfig[$fieldName . '_' . $subfield . '_required'] === 1,
             ];
           }
         }
@@ -159,15 +160,16 @@ class ConstantContactBlockForm extends FormBase {
           $form['street_address'] = $addressElements;
           $form['street_address']['#type'] = 'fieldset';
           $form['street_address']['#title'] = $this->t($fieldLabel);
-          $form['#tree'] = true;
+          $form['#tree'] = TRUE;
         }
-      
-      } else if ($fieldName === 'birthday') {
+
+      }
+      elseif ($fieldName === 'birthday') {
         if (isset($listConfig[$fieldName]) && $listConfig[$fieldName] === 1) {
           $form[$fieldName] = [
             '#type' => 'fieldset',
             '#title' => $this->t($fieldLabel),
-            '#tree' => true,
+            '#tree' => TRUE,
             'month' => [
               '#type' => 'select',
               '#title' => $this->t('Month'),
@@ -182,7 +184,8 @@ class ConstantContactBlockForm extends FormBase {
             ],
           ];
         }
-      } else if ($fieldName === 'anniversary' && $this->moduleHandler->moduleExists('datetime')) {
+      }
+      elseif ($fieldName === 'anniversary' && $this->moduleHandler->moduleExists('datetime')) {
         if (isset($listConfig[$fieldName]) && $listConfig[$fieldName] === 1) {
           $form[$fieldName] = [
             '#type' => 'date',
@@ -193,7 +196,7 @@ class ConstantContactBlockForm extends FormBase {
       }
     }
 
-    // Custom Fields
+    // Custom Fields.
     if (isset($listConfig['custom_fields']) && count($listConfig['custom_fields']) > 0) {
       foreach ($listConfig['custom_fields'] as $id => $values) {
         if ($values['display'] === 1) {
@@ -203,7 +206,8 @@ class ConstantContactBlockForm extends FormBase {
               '#title' => $this->t($values['label']),
               '#required' => $values['required'] === 1,
             ];
-          } else if ($values['type'] === 'string') {
+          }
+          elseif ($values['type'] === 'string') {
             $form['custom_field__' . $id] = [
               '#type' => 'textfield',
               '#title' => $this->t($values['label']),
@@ -219,9 +223,9 @@ class ConstantContactBlockForm extends FormBase {
       $list_ids = array_filter(array_values($listConfig['lists']));
       $options = [];
 
-      // Need at least one list_id
+      // Need at least one list_id.
       if (count($list_ids) === 0) {
-        return null;
+        return NULL;
       }
 
       foreach ($list_ids as $id) {
@@ -232,20 +236,21 @@ class ConstantContactBlockForm extends FormBase {
 
       if ($listConfig['lists_user_select'] === 1) {
         $form['list_id'] = [
-          '#type' =>  'checkboxes',
-          '#title' => isset($listConfig['lists_select_label']) ? $listConfig['lists_select_label'] : $this->t('Sign me up for:'),
-          '#required' => true,
-          '#options' => $options
+          '#type' => 'checkboxes',
+          '#title' => $listConfig['lists_select_label'] ?? $this->t('Sign me up for:'),
+          '#required' => TRUE,
+          '#options' => $options,
         ];
-      } else {
+      }
+      else {
         $form['list_id'] = [
           '#type' => 'value',
           '#value' => $list_ids,
         ];
       }
 
-      
-    } else {
+    }
+    else {
       $form['list_id'] = [
         '#type' => 'value',
         '#value' => $listConfig['list_id'],
@@ -279,12 +284,11 @@ class ConstantContactBlockForm extends FormBase {
       }
     }
 
-
     // Add custom field values.
     // Skip adding it if there's no value.
     $fieldKeys = array_keys($values);
     foreach ($fieldKeys as $field) {
-      if (strpos($field, 'custom_field__') !== false && isset($values[$field]) && $values[$field]) {
+      if (strpos($field, 'custom_field__') !== FALSE && isset($values[$field]) && $values[$field]) {
         $data['custom_fields'][str_replace('custom_field__', '', $field)] = $values[$field];
       }
     }
@@ -293,7 +297,8 @@ class ConstantContactBlockForm extends FormBase {
 
     if (is_string($values['list_id'])) {
       $lists = [$values['list_id']];
-    } else {
+    }
+    else {
       $lists = array_filter(array_values($values['list_id']));
     }
 

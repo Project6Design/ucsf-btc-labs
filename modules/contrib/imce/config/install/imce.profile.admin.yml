@@ -14,7 +14,7 @@ conf:
   thumbnail_grid_style: false
   ignore_usage: false
   url_alter: false
-  image_extensions: 'jpg jpeg png gif webp'
+  image_extensions: 'jpg jpeg png gif webp avif'
   lazy_dimensions: false
   folders:
     -

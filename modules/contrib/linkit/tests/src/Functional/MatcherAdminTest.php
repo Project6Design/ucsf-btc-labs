@@ -7,12 +7,14 @@ namespace Drupal\Tests\linkit\Functional;
 use Drupal\linkit\Entity\Profile;
 use Drupal\linkit\Tests\ProfileCreationTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests adding, listing, updating and deleting matchers on a profile.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class MatcherAdminTest extends LinkitBrowserTestBase {
 
   use ProfileCreationTrait;

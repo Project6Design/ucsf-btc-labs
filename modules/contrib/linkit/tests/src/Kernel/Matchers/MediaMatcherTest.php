@@ -9,12 +9,14 @@ use Drupal\file\FileInterface;
 use Drupal\media\Entity\Media;
 use Drupal\media\Entity\MediaType;
 use Drupal\Tests\linkit\Kernel\LinkitKernelTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests media matcher.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class MediaMatcherTest extends LinkitKernelTestBase {
 
   /**

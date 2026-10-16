@@ -11,7 +11,7 @@ use Drupal\sitemap\Plugin\Sitemap\Vocabulary;
  * Change sitemap configuration page permission to administer sitemap.
  */
 function sitemap_update_8101() {
-  $roles = \Drupal::entityTypeManager()->getStorage('user_role')->loadMultiple('administer site configuration');
+  $roles = \Drupal::entityTypeManager()->getStorage('user_role')->loadMultiple(['administer site configuration']);
   if (!empty($roles)) {
     foreach ($roles as $rid => $role) {
       user_role_grant_permissions($rid, ['administer sitemap']);
@@ -44,7 +44,7 @@ function sitemap_update_8200(&$sandbox) {
   $config->clear('css');
 
   // Remove the config for the RSS position option.
-  $show_rss = (boolean) $config->get('show_rss_links');
+  $show_rss = (bool) $config->get('show_rss_links');
   $config->clear('show_rss_links');
 
   $plugins = [];
@@ -211,7 +211,7 @@ function sitemap_update_8204(&$sandbox) {
     $settings->set('path', 'sitemap');
     $settings->save(TRUE);
   }
-  \Drupal::service('cache.config')->invalidateAll();
+  \Drupal::service('cache.config')->deleteAll();
   \Drupal::service('router.builder')->rebuild();
 
   // Safely re-run 8202: if the book module is installed, but sitemap_book is
@@ -234,6 +234,30 @@ function sitemap_update_8204(&$sandbox) {
       }
     }
   }
+}
+
+/**
+ * Update sitemap menu configurations to include a menu_depth key.
+ */
+function sitemap_update_8205(&$sandbox) {
+  $settings = \Drupal::configFactory()->getEditable('sitemap.settings');
+  $pluginData = $settings->get('plugins');
+
+  // Loop through existing plugin configurations. If we find configuration for a
+  // menu plugin that is missing a 'menu_depth' setting, then set menu_depth to
+  // '9', i.e.: unlimited depth, to mirror the behavior before [#3032084].
+  foreach ($pluginData as &$pluginConfig) {
+    if (isset($pluginConfig['base_plugin'])
+      && $pluginConfig['base_plugin'] === 'menu'
+      && !isset($pluginConfig['settings']['menu_depth'])
+    ) {
+      $pluginConfig['settings']['menu_depth'] = 9;
+    }
+  }
+  unset($pluginConfig);
+
+  $settings->set('plugins', $pluginData);
+  $settings->save();
 }
 
 /**

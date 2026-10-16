@@ -6,19 +6,20 @@ use Drupal\Component\Plugin\PluginBase;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\file\FileInterface;
+use Drupal\linkit\Attribute\Substitution;
 use Drupal\linkit\SubstitutionInterface;
 use Drupal\media\MediaInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * A substitution plugin for the URL to a file.
- *
- * @Substitution(
- *   id = "media",
- *   label = @Translation("Direct URL to media file entity"),
- * )
  */
+#[Substitution(
+  id: "media",
+  label: new TranslatableMarkup("Direct URL to media file entity"),
+)]
 class Media extends PluginBase implements SubstitutionInterface, ContainerFactoryPluginInterface {
 
   /**

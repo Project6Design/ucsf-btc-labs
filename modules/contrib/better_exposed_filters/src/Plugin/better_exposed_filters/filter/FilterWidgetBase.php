@@ -78,6 +78,7 @@ abstract class FilterWidgetBase extends BetterExposedFiltersWidgetBase implement
         'collapsible_disable_automatic_open' => FALSE,
         'open_by_default' => FALSE,
         'is_secondary' => FALSE,
+        'no_reset' => FALSE,
         'placeholder_text' => '',
         'rewrite' => [
           'filter_rewrite_values' => '',
@@ -255,6 +256,14 @@ abstract class FilterWidgetBase extends BetterExposedFiltersWidgetBase implement
         ],
       ],
       '#description' => $this->t('Places this element in the secondary options portion of the exposed form.'),
+    ];
+
+    // Allow this filter to keep its value when the form is reset.
+    $form['advanced']['no_reset'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Do not reset this filter'),
+      '#default_value' => !empty($this->configuration['advanced']['no_reset']),
+      '#description' => $this->t('When the user clicks the reset button, the value of this filter is preserved instead of being cleared.'),
     ];
 
     $form['advanced']['field_classes'] = [
@@ -507,7 +516,7 @@ abstract class FilterWidgetBase extends BetterExposedFiltersWidgetBase implement
     if (empty($element['#required'])) {
       // Look for common "any" option patterns.
       foreach ($options as $key => $value) {
-        $value_string = is_object($value) ? (string) $value : $value;
+        $value_string = $value instanceof \Stringable ? (string) $value : (is_object($value) ? '' : (string) $value);
         // Check for common "any" patterns.
         if ($key === '' || $key === 'All' ||
             strpos($value_string, '- Any') === 0 ||

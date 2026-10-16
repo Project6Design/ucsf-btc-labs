@@ -2,9 +2,11 @@
 
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
-use Drupal\features\FeaturesAssignmentMethodBase;
 use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\Config\InstallStorage;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
+use Drupal\features\FeaturesAssignmentMethodBase;
 
 /**
  * Class for adding configuration for the optional install profile.
@@ -25,6 +27,23 @@ use Drupal\Core\Config\InstallStorage;
  *   }
  * )
  */
+#[Assignment(
+  id: 'profile',
+  weight: 10,
+  name: new TranslatableMarkup('Profile'),
+  description: new TranslatableMarkup('Add configuration and other files to the optional install profile from the Drupal core Standard install profile. Without these additions, a generated install profile will be missing some important initial setup.'),
+  config_route_name: 'features.assignment_profile',
+  default_settings: [
+    'curated' => FALSE,
+    'standard' => [
+      'files' => FALSE,
+      'dependencies' => FALSE,
+    ],
+    'types' => [
+      'config' => [],
+    ],
+  ]
+)]
 class FeaturesAssignmentProfile extends FeaturesAssignmentMethodBase {
 
   /**
@@ -86,7 +105,7 @@ class FeaturesAssignmentProfile extends FeaturesAssignmentMethodBase {
             // If the configuration is present on the site, assign it.
             if (isset($config_collection[$item_name])) {
               // Only assign it if it's not already assigned to a package.
-              // @todo: if it's provided by a module, add a dependency.
+              // @todo if it's provided by a module, add a dependency.
               if (!$config_collection[$item_name]->getPackage()) {
                 $this->featuresManager->assignConfigPackage($profile_name, [$item_name], $force);
                 // Reload the profile to refresh the config array after the
@@ -172,7 +191,6 @@ class FeaturesAssignmentProfile extends FeaturesAssignmentMethodBase {
    */
   protected function listRequiredStandardConfig() {
     return [
-      'contact.form.feedback',
       'user.role.administrator',
     ];
   }

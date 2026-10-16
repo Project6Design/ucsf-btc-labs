@@ -98,6 +98,9 @@ filter_settings.linkit:
     title:
       type: boolean
       label: 'Automatically set the "title" attribute'
+    media_substitution:
+      type: string
+      label: 'Media entity URL substitution'
 
 # Plugin \Drupal\ckeditor\Plugin\CKEditorPlugin\DrupalLink
 # Linkit alters the plugin to save Linkit specific information used by the
@@ -138,7 +141,8 @@ ckeditor5.plugin.linkit_extension:
   type: mapping
   label: Linkit
   constraints:
-    Callback: [\Drupal\linkit\Plugin\CKEditor5Plugin\Linkit, requireProfileIfEnabled]
+    Callback:
+      callback: [\Drupal\linkit\Plugin\CKEditor5Plugin\Linkit, requireProfileIfEnabled]
   mapping:
     linkit_enabled:
       type: boolean

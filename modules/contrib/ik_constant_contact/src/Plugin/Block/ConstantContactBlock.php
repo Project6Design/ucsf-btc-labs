@@ -87,35 +87,36 @@ class ConstantContactBlock extends BlockBase implements ContainerFactoryPluginIn
           $form['cc_fields']['field_' . $fieldName][$fieldName . '_' . $subname] = [
             '#type' => 'checkbox',
             '#title' => $this->t('Display ' . $fieldLabel . ' ' . $sublabel . '?'),
-            '#default_value' => isset($config[$fieldName . '_' . $subname]) ? $config[$fieldName . '_' . $subname] : 0,
+            '#default_value' => $config[$fieldName . '_' . $subname] ?? 0,
           ];
           $form['cc_fields']['field_' . $fieldName][$fieldName . '_' . $subname . '_required'] = [
             '#type' => 'checkbox',
             '#title' => $this->t('Require ' . $fieldLabel . ' ' . $sublabel . ' ?'),
-            '#default_value' => isset($config[$fieldName . '_' . $subname . '_required']) ? $config[$fieldName . '_' . $subname . '_required'] : 0,
+            '#default_value' => $config[$fieldName . '_' . $subname . '_required'] ?? 0,
           ];
         }
-      } else {
+      }
+      else {
         $form['cc_fields']['field_' . $fieldName][$fieldName] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Display ' . $fieldLabel . ' field?'),
-          '#default_value' => isset($config[$fieldName]) ? $config[$fieldName] : 0,
+          '#default_value' => $config[$fieldName] ?? 0,
         ];
         $form['cc_fields']['field_' . $fieldName][$fieldName . '_required'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Require ' . $fieldLabel . ' field?'),
-          '#default_value' => isset($config[$fieldName . '_required']) ? $config[$fieldName . '_required'] : 0,
+          '#default_value' => $config[$fieldName . '_required'] ?? 0,
         ];
       }
     }
 
-    // Custom Fields
+    // Custom Fields.
     if ($customFields && $customFields->custom_fields && count($customFields->custom_fields) > 0) {
       $form['custom_fields'] = [
         '#type' => 'fieldset',
         '#title' => $this->t('Custom Fields'),
         '#description' => $this->t('Select any <a href="https://knowledgebase.constantcontact.com/articles/KnowledgeBase/33120-Create-and-Manage-Custom-Contact-Fields?lang=en_US" target="_blank" rel="nofollow noreferrer">custom fields from your Constant Contact account</a> to add to the signup form.'),
-        '#tree' => true
+        '#tree' => TRUE,
       ];
 
       foreach ($customFields->custom_fields as $field) {
@@ -126,12 +127,12 @@ class ConstantContactBlock extends BlockBase implements ContainerFactoryPluginIn
         $form['custom_fields'][$field->custom_field_id]['display'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Display ' . $field->label . ' field'),
-          '#default_value' => isset($config['custom_fields'][$field->custom_field_id]['display']) ? $config['custom_fields'][$field->custom_field_id]['display'] : NULL,
+          '#default_value' => $config['custom_fields'][$field->custom_field_id]['display'] ?? NULL,
         ];
         $form['custom_fields'][$field->custom_field_id]['required'] = [
           '#type' => 'checkbox',
           '#title' => $this->t('Require ' . $field->label . ' field'),
-          '#default_value' => isset($config['custom_fields'][$field->custom_field_id]['required']) ? $config['custom_fields'][$field->custom_field_id]['required'] : NULL,
+          '#default_value' => $config['custom_fields'][$field->custom_field_id]['required'] ?? NULL,
         ];
         $form['custom_fields'][$field->custom_field_id]['name'] = [
           '#type' => 'hidden',
@@ -161,7 +162,7 @@ class ConstantContactBlock extends BlockBase implements ContainerFactoryPluginIn
     $form['success_message'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Custom Success Message'),
-      '#default_value' => isset($config['success_message']) ? $config['success_message'] : NULL,
+      '#default_value' => $config['success_message'] ?? NULL,
     ];
 
     return $form;
@@ -183,18 +184,19 @@ class ConstantContactBlock extends BlockBase implements ContainerFactoryPluginIn
           $this->configuration[$fieldName . '_' . $subname] = $values['cc_fields']['field_' . $fieldName][$fieldName . '_' . $subname];
           $this->configuration[$fieldName . '_' . $subname . '_required'] = $values['cc_fields']['field_' . $fieldName][$fieldName . '_' . $subname . '_required'];
         }
-      } else {
+      }
+      else {
         if (isset($values['cc_fields']['field_' . $fieldName][$fieldName])) {
           $this->configuration[$fieldName] = $values['cc_fields']['field_' . $fieldName][$fieldName];
         }
-  
+
         if (isset($values['cc_fields']['field_' . $fieldName][$fieldName . '_required'])) {
           $this->configuration[$fieldName . '_required'] = $values['cc_fields']['field_' . $fieldName][$fieldName . '_required'];
         }
       }
     }
 
-    $this->configuration['custom_fields'] = $values['custom_fields'];
+    $this->configuration['custom_fields'] = $values['custom_fields'] ?? [];
     $this->configuration['body'] = $values['body'];
     $this->configuration['success_message'] = $values['success_message'];
   }

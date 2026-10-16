@@ -7,6 +7,8 @@ use Drupal\Core\Archiver\ArchiveTar;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Generation;
 use Drupal\features\FeaturesBundleInterface;
 use Drupal\features\FeaturesGenerationMethodBase;
 use Drupal\features\Package;
@@ -22,6 +24,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   description = @Translation("Generate packages and optional profile as a compressed archive for download."),
  * )
  */
+#[Generation(
+  id: FeaturesGenerationArchive::METHOD_ID,
+  weight: -2,
+  name: new TranslatableMarkup('Download Archive'),
+  description: new TranslatableMarkup('Generate packages and optional profile as a compressed archive for download.')
+)]
 class FeaturesGenerationArchive extends FeaturesGenerationMethodBase implements ContainerFactoryPluginInterface {
 
   /**

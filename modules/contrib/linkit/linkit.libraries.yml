@@ -3,6 +3,11 @@ linkit.admin:
     theme:
       css/linkit.admin.theme.css: {}
 
+linkit.widget:
+  css:
+    theme:
+      css/linkit.widget.theme.css: {}
+
 linkit.base:
   js:
     js/linkit.js: {}
@@ -12,10 +17,11 @@ linkit.base:
     - core/drupalSettings
 
 linkit.autocomplete:
+  version: 1.0.0
   js:
     js/linkit.autocomplete.js: {}
   css:
-    component:
+    theme:
       css/linkit.autocomplete.css: {}
   dependencies:
     - linkit/linkit.base

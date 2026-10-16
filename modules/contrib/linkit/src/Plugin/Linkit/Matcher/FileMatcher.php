@@ -5,21 +5,23 @@ namespace Drupal\linkit\Plugin\Linkit\Matcher;
 use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\file\FileInterface;
 use Drupal\image\Entity\ImageStyle;
+use Drupal\image\ImageDerivativeUtilities;
+use Drupal\linkit\Attribute\Matcher;
 use Drupal\linkit\Utility\LinkitXss;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides specific linkit matchers for the file entity type.
- *
- * @Matcher(
- *   id = "entity:file",
- *   label = @Translation("File"),
- *   target_entity = "file",
- *   provider = "file"
- * )
  */
+#[Matcher(
+  id: "entity:file",
+  label: new TranslatableMarkup('File'),
+  target_entity: "file",
+  provider: "file",
+)]
 class FileMatcher extends EntityMatcher {
 
   /**
@@ -174,7 +176,17 @@ class FileMatcher extends EntityMatcher {
         '#title' => $this->t('Thumbnail image style'),
         '#type' => 'select',
         '#default_value' => $this->configuration['images']['thumbnail_image_style'],
-        '#options' => image_style_options(FALSE),
+        '#options' => DeprecationHelper::backwardsCompatibleCall(
+          \Drupal::VERSION,
+          '11.4',
+          static function () {
+            return \Drupal::service(ImageDerivativeUtilities::class)->styleOptions(FALSE);
+          },
+          static function () {
+            // @phpstan-ignore-next-line
+            return image_style_options(FALSE);
+          }
+        ),
         '#states' => [
           'visible' => [
             ':input[name="images[show_thumbnail]"]' => ['checked' => TRUE],

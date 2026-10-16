@@ -23,5 +23,5 @@ views.sort.draggable_views_sort_default:
       type: string
       label: 'NULL stacking order'
     draggable_views_pass_arguments:
-      type: integer
+      type: boolean
       label: 'Pass Contextual Filters'

@@ -3,8 +3,12 @@ declare(strict_types = 1);
 
 namespace Embed\Adapters\Twitter\Detectors;
 
+use Embed\Adapters\Twitter\Extractor;
 use Embed\Detectors\Title as Detector;
 
+/**
+ * @extends Detector<\Embed\Adapters\Twitter\Extractor>
+ */
 class Title extends Detector
 {
     public function detect(): ?string
@@ -12,7 +16,7 @@ class Title extends Detector
         $api = $this->extractor->getApi();
         $name = $api->str('includes', 'users', '0', 'name');
 
-        if ($name) {
+        if ($name !== null) {
             return "Tweet by $name";
         }
 

@@ -8,12 +8,6 @@ use Drupal\Core\Render\Element\FormElementBase;
 use Drupal\Core\Render\Element\Textfield;
 use Drupal\Core\Url;
 
-// Workaround to support both Drupal 10.1 and Drupal 11.0.
-// @todo Remove once we depend on Drupal 10.2.
-if (!class_exists(FormElementBase::class)) {
-  class_alias('\Drupal\Core\Render\Element\FormElement', FormElementBase::class);
-}
-
 /**
  * Provides a form element for linkit.
  *
@@ -57,7 +51,7 @@ class Linkit extends FormElementBase {
    *
    * {@inheritdoc}
    *
-   * @see \Drupal\Core\Render\Element\FormElement::processAutocomplete
+   * @see \Drupal\Core\Render\Element\FormElementBase::processAutocomplete
    */
   public static function processLinkitAutocomplete(&$element, FormStateInterface $form_state, &$complete_form) {
     $url = NULL;

@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\linkit\Kernel\Matchers;
 
+use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\linkit\Kernel\LinkitKernelTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests node matcher.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class NodeMatcherTest extends LinkitKernelTestBase {
 
   /**
@@ -20,7 +23,15 @@ class NodeMatcherTest extends LinkitKernelTestBase {
    *
    * @var array
    */
-  protected static $modules = ['field', 'node', 'content_moderation', 'workflows'];
+  protected static $modules = [
+    'field',
+    'node',
+    'content_moderation',
+    'workflows',
+    'language',
+    'path',
+    'path_alias',
+  ];
 
   /**
    * The matcher manager.
@@ -37,7 +48,7 @@ class NodeMatcherTest extends LinkitKernelTestBase {
 
     $this->installEntitySchema('node');
     $this->installSchema('node', ['node_access']);
-    $this->installConfig(['field', 'node']);
+    $this->installConfig(['field', 'node', 'language']);
 
     $this->manager = $this->container->get('plugin.manager.linkit.matcher');
 
@@ -180,6 +191,117 @@ class NodeMatcherTest extends LinkitKernelTestBase {
       $this->assertStringNotContainsString('[node:nid]', $suggestion->getDescription(), 'Raw token "[node:nid]" is not present in the description');
       $this->assertStringNotContainsString('[node:field_with_no_value]', $suggestion->getDescription(), 'Raw token "[node:field_with_no_value]" is not present in the description');
     }
+  }
+
+  /**
+   * Test node matches generated from an absolute URL input.
+   */
+  public function testNodeMatcherFromAbsoluteUrl() {
+    /** @var \Drupal\linkit\MatcherInterface $plugin */
+    $plugin = $this->manager->createInstance('entity:node');
+
+    /** @var \Drupal\node\NodeInterface[] $nodes */
+    $nodes = $this->container->get('entity_type.manager')->getStorage('node')->loadByProperties(['title' => 'Lorem Ipsum 1']);
+    $node = reset($nodes);
+
+    $suggestions = $plugin->execute($node->toUrl()->setAbsolute()->toString());
+    $this->assertEquals(1, count($suggestions->getSuggestions()));
+
+    // Check that URLs that don't match the drupal base URL do not get matched.
+    $external_domain_url = $node->toUrl(NULL, ['base_url' => 'https://example.com'])->setAbsolute()->toString();
+    $this->assertEquals(0, count($plugin->execute($external_domain_url)->getSuggestions()));
+    $base_url = $this->container->get('router.request_context')->getCompleteBaseUrl();
+    $non_drupal_base_path = $node->toUrl(NULL, ['base_url' => $base_url . '/some-other-sub-path'])->setAbsolute()->toString();
+    $this->assertEquals(0, count($plugin->execute($non_drupal_base_path)->getSuggestions()));
+  }
+
+  /**
+   * Test node matches generated from an absolute URL input.
+   */
+  public function testNodeMatcherFromAbsoluteUrlWithLanguagePrefix() {
+    /** @var \Drupal\linkit\MatcherInterface $plugin */
+    $plugin = $this->manager->createInstance('entity:node');
+
+    $langcode = 'nl';
+    ConfigurableLanguage::createFromLangcode($langcode)->save();
+    \Drupal::configFactory()->getEditable('language.negotiation')
+      ->set('url.prefixes.nl', $langcode)
+      ->save();
+
+    // In order to reflect the changes for a multilingual site in the container
+    // we have to rebuild it.
+    \Drupal::service('kernel')->rebuildContainer();
+
+    /** @var \Drupal\node\NodeInterface[] $nodes */
+    $nodes = $this->container->get('entity_type.manager')->getStorage('node')->loadByProperties(['title' => 'Lorem Ipsum 1']);
+    $node = reset($nodes);
+    $translation = $node->addTranslation($langcode, $node->toArray());
+    $translation->save();
+
+    $translated_url = $translation->toUrl()->setAbsolute()->toString();
+    // Make sure the translated URL contains our prefix.
+    $this->assertStringContainsString('/' . $langcode . '/', (string) $translated_url);
+    $suggestions = $plugin->execute($translated_url);
+    $this->assertEquals(1, count($suggestions->getSuggestions()));
+
+    $base_urls = [
+      'https://domainname/',
+      'https://domainname/prefix-a/',
+    ];
+    foreach ($base_urls as $base_url) {
+      // Test that <domainname>/<internal-path> returns a positive match.
+      $url = $node->toUrl(NULL, ['base_url' => $base_url])->setAbsolute()->toString();
+      $matches = $plugin->findEntityIdByUrl($url, $base_url);
+      $this->assertEquals(1, count($matches));
+      // Test that <domainname>/<langcode>/<internal-path> returns a positive
+      // match.
+      $translated_url = $translation->toUrl(NULL, ['base_url' => $base_url])->setAbsolute()->toString();
+      $matches = $plugin->findEntityIdByUrl($translated_url, $base_url);
+      $this->assertEquals(1, count($matches));
+    }
+    $node->set('path', '/test-path');
+    $node->save();
+    $translation->set('path', '/test-pad');
+    $translation->save();
+    foreach ($base_urls as $base_url) {
+      // Test that <domainname>/<alias> returns a positive match.
+      $url = $node->toUrl(NULL, ['base_url' => $base_url])->setAbsolute()->toString();
+      $matches = $plugin->findEntityIdByUrl($url, $base_url);
+      $this->assertEquals(1, count($matches));
+      // Test that <domainname>/<langcode>/<alias> returns a positive match.
+      $translated_url = $translation->toUrl(NULL, ['base_url' => $base_url])->setAbsolute()->toString();
+      $matches = $plugin->findEntityIdByUrl($translated_url, $base_url);
+      $this->assertEquals([], $matches);
+    }
+  }
+
+  /**
+   * Tests node matcher when searching on the node path.
+   */
+  public function testNodeMatcherPathSearch() {
+    /** @var \Drupal\linkit\MatcherInterface $plugin */
+    $plugin = $this->manager->createInstance('entity:node', []);
+
+    // Test that a search on node path works.
+    $suggestions = $plugin->execute('/node/1');
+    $this->assertCount(1, $suggestions->getSuggestions());
+    $this->assertEquals('/node/1', $suggestions->getSuggestions()[0]->getPath());
+
+    // Test that query parameters are preserved in the suggested path.
+    $suggestions = $plugin->execute('/node/1?test=true');
+    $this->assertCount(1, $suggestions->getSuggestions());
+    $this->assertEquals('/node/1?test=true', $suggestions->getSuggestions()[0]->getPath());
+
+    // Test that a fragment is preserved in the suggested path.
+    $suggestions = $plugin->execute('/node/1#test');
+    $this->assertCount(1, $suggestions->getSuggestions());
+    $this->assertEquals('/node/1#test', $suggestions->getSuggestions()[0]->getPath());
+
+    // Test that query parameters and a fragment are both preserved in the
+    // suggested path.
+    $suggestions = $plugin->execute('/node/1?test=true#test');
+    $this->assertCount(1, $suggestions->getSuggestions());
+    $this->assertEquals('/node/1?test=true#test', $suggestions->getSuggestions()[0]->getPath());
   }
 
 }

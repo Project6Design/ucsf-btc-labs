@@ -13,12 +13,14 @@ use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\linkit\Controller\AutocompleteController;
 use Drupal\linkit\Entity\Profile;
 use Symfony\Component\HttpFoundation\Request;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the linkit autocomplete functionality.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class LinkitAutocompleteTest extends LinkitKernelTestBase {
 
   /**

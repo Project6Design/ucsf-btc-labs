@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\admin_toolbar\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
@@ -133,7 +135,7 @@ class AdminToolbarSettingsForm extends ConfigFormBase {
     $form['hoverintent_behavior']['timeout'] = [
       '#type' => 'select',
       '#title' => $this->t('hoverIntent timeout (ms)'),
-      '#field_suffix' => 'milliseconds',
+      '#field_suffix' => $this->t('milliseconds'),
       '#description' => $this->t('Sets the hoverIntent trigger timeout (steps of 250).<br>The higher the value, the longer the menu dropdown stays visible, after the mouse moves out (default: 500ms).'),
       '#options' => array_combine($timeout_range_values, $timeout_range_values),
       '#default_value' => $config->get('hoverintent_behavior')['timeout'],

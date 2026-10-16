@@ -8,8 +8,7 @@ depencencies:
   - drupal:block
   - drupal:rest
 
-
-# Information added by Drupal.org packaging script on 2025-04-11
-version: '4.2.2'
+# Information added by Drupal.org packaging script on 2025-07-21
+version: '4.2.4'
 project: 'ik_constant_contact'
-datestamp: 1744370671
+datestamp: 1753109290

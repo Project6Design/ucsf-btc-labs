@@ -356,4 +356,69 @@ class ImageFileTest extends PhotoswipeJsTestBase {
   public function todoTestResponsivePhotoswipeFieldFormatterOnNodeDisplay() {
   }
 
+  /**
+   * Tests the "Remove photoswipe gallery wrapper class" setting.
+   */
+  public function testPhotoswipeFieldFormatterRemoveWrapperClass() {
+    $session = $this->assertSession();
+    $page = $this->getSession()->getPage();
+
+    $field_settings = ['alt_field_required' => 1];
+    $this->createImageField(
+      name: 'field_test',
+      storage_settings: [
+        'uri_scheme' => 'public',
+        'required' => 'true',
+      ],
+      field_settings: $field_settings,
+      formatter_settings: [
+        'photoswipe_remove_gallery_wrapper_class' => TRUE,
+      ],
+    );
+
+    // Create the node with a test file uploaded:
+    $this->drupalGet('node/add/article');
+    $title = 'My test content';
+    $page->fillField('title[0][value]', $title);
+    $this->assertNotEmpty($image_upload_field = $page->find('css', '#edit-field-test-0-upload'));
+    $image = $this->getTestFiles('image')[0];
+    $image_upload_field->attachFile($this->container->get('file_system')->realpath($image->uri));
+    $this->assertNotNull($session->waitForElementVisible('css', '.image-widget > img'));
+    $session->pageTextContains('Alternative text');
+    $page->fillField('Alternative text', 'Alt text');
+    $page->pressButton('edit-submit');
+    $session->pageTextContains("Article {$title} has been created.");
+
+    $this->drupalGet('/node/1');
+    $this->validateCdnLibraries($session);
+
+    // Verify that the fallback wrapper is set by prepare-galleries.js:
+    $this->assertNotNull($session->waitForElement('css', '.photoswipe-gallery--fallback-wrapper'));
+    $session->elementExists('css', 'span.photoswipe-gallery--fallback-wrapper a[href*="image-test.png"].photoswipe');
+
+    // Now, let's change the setting back to FALSE (do not remove wrapper class)
+    // and verify that the fallback wrapper is NOT used, and the standard
+    // photoswipe-gallery is used.
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
+    $display_repository = \Drupal::service('entity_display.repository');
+    $display_repository->getViewDisplay('node', 'article')
+      ->setComponent('field_test', [
+        'type' => 'photoswipe_field_formatter',
+        'settings' => [
+          'photoswipe_remove_gallery_wrapper_class' => FALSE,
+        ],
+        'third_party_settings' => [],
+      ])
+      ->save();
+
+    $this->drupalGet('/node/1');
+    $this->validateCdnLibraries($session);
+
+    // The standard photoswipe-gallery wrapper should be present on the field
+    // wrapper:
+    $this->assertNotNull($session->waitForElement('css', '.photoswipe-gallery'));
+    // The fallback wrapper should NOT be present:
+    $session->elementNotExists('css', '.photoswipe-gallery--fallback-wrapper');
+  }
+
 }

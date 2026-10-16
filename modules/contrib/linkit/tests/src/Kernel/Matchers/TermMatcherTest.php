@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\linkit\Kernel\Matchers;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Language\LanguageInterface;
+use Drupal\filter\FilterFormatRepositoryInterface;
 use Drupal\taxonomy\VocabularyInterface;
 use Drupal\Tests\linkit\Kernel\LinkitKernelTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests term matcher.
@@ -15,6 +18,7 @@ use Drupal\Tests\linkit\Kernel\LinkitKernelTestBase;
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class TermMatcherTest extends LinkitKernelTestBase {
 
   /**
@@ -139,7 +143,12 @@ class TermMatcherTest extends LinkitKernelTestBase {
    *   The new taxonomy term object.
    */
   private function createTerm(VocabularyInterface $vocabulary, array $values = []) {
-    $filter_formats = filter_formats();
+    $filter_formats = DeprecationHelper::backwardsCompatibleCall(
+      currentVersion: \Drupal::VERSION,
+      deprecatedVersion: '11.4',
+      currentCallable: fn() => \Drupal::service(FilterFormatRepositoryInterface::class)->getAllFormats(),
+      deprecatedCallable: fn() => filter_formats(),
+    );
     $format = array_pop($filter_formats);
 
     $termStorage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');

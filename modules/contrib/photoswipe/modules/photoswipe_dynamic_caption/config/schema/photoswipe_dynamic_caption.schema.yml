@@ -21,6 +21,9 @@ photoswipe_dynamic_caption.settings:
         verticallyCenterImage:
           type: boolean
           label: 'Vertically center image'
+    allowHtmlCaptions:
+      type: boolean
+      label: 'Allow HTML captions using DOMpurify'
 
 field.formatter.third_party.photoswipe_dynamic_caption:
   type: mapping

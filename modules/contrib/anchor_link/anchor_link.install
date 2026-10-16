@@ -1,0 +1,27 @@
+<?php
+
+/**
+ * @file
+ * Install and requirements hooks for CKEditor Anchor Link.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function anchor_link_requirements($phase) {
+  $requirements = [];
+  if ($phase === 'runtime') {
+    $library = \Drupal::service('library.discovery')->getLibraryByName('anchor_link', 'cke5_anchor_link');
+    $file = $library['js'][0]['data'] ?? '';
+    $exists = $file !== '' && file_exists(DRUPAL_ROOT . '/' . ltrim($file, '/'));
+    $requirements['anchor_link_library'] = [
+      'title' => t('CKEditor Anchor Link library'),
+      'value' => $exists ? t('Installed') : t('Not found'),
+    ];
+    if (!$exists) {
+      $requirements['anchor_link_library']['severity'] = REQUIREMENT_WARNING;
+      $requirements['anchor_link_library']['description'] = t('The vardot/ckeditor5-anchor-drupal library was not found at %file, so the editor cannot attach where the Anchor button is enabled. Install it with Composer as described in the README.', ['%file' => $file]);
+    }
+  }
+  return $requirements;
+}

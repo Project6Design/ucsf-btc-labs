@@ -3,24 +3,25 @@
 namespace Drupal\Tests\features\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * The Feature assigner test.
- *
- * @group features
  */
+#[RunTestsInSeparateProcesses]
+#[Group('features')]
 class FeaturesAssignerTest extends KernelTestBase {
   /**
    * {@inheritdoc}
    */
   protected static $modules = ['system', 'config'];
 
-  protected $strictConfigSchema = FALSE;
-
   /**
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->strictConfigSchema = FALSE;
     parent::setUp();
     // We need system.site in order to run $this->configImporter->import().
     $this->installConfig('system');

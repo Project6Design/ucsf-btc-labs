@@ -183,6 +183,10 @@ abstract class BetterExposedFiltersWidgetBase extends PluginBase implements Bett
         // Check if one or more values are set for our current element.
         $default_value = $form[$element]['#default_value'] ?? key($form[$element]['#options'] ?? []);
         $has_values_selected = array_reduce($user_input, function (bool $carry, mixed $value) use ($default_value, $form, $element) {
+          // Values from the raw request may be arrays.
+          if (!is_scalar($value)) {
+            return $carry;
+          }
           return $carry ||
             ($form[$element]['#multiple'] ?? FALSE ? ($value === $default_value || isset($form[$element]['#options'][$value])) : !($value === $default_value) && ($value || $default_value === 0));
         }, FALSE);

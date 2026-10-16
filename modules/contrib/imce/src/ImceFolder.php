@@ -52,10 +52,10 @@ class ImceFolder extends ImceItem {
    *
    * @param string $name
    *   Folder name.
-   * @param array $conf
+   * @param array|null $conf
    *   Folder configuration.
    */
-  public function __construct($name, array $conf = NULL) {
+  public function __construct($name, ?array $conf = NULL) {
     parent::__construct($name);
     $this->setConf($conf);
   }
@@ -78,7 +78,7 @@ class ImceFolder extends ImceItem {
   /**
    * Sets folder configuration.
    */
-  public function setConf(array $conf = NULL) {
+  public function setConf(?array $conf = NULL) {
     $this->conf = $conf;
   }
 

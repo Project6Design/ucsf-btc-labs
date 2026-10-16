@@ -1,0 +1,19 @@
+name: 'CKEditor Anchor Link Test'
+description: 'Creates an "Anchor Test" CKEditor 5 text format with the Anchor button enabled, a "No Anchor Test" format without it that the regression scenario writes in, and the Article content type with a Body field, for the Anchor Link automated test suite.'
+type: 'Testing'
+# Only the recipe's own format and editor are compared strictly; the field
+# and node-type config may already exist with core's values.
+config:
+  strict:
+    - filter.format.anchor_test
+    - editor.editor.anchor_test
+    - filter.format.no_anchor_test
+    - editor.editor.no_anchor_test
+install:
+  - node
+  - text
+  - field
+  - ckeditor5
+  - editor
+  - filter
+  - anchor_link

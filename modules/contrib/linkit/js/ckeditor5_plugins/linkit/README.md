@@ -7,3 +7,14 @@ become a CKEditor 5 plugin in `/build`. Technically, everything in these files
 could be in a single `index.js` - the only file the MUST be present is
 `/src/index.js`. However, splitting the plugin into concern-specific files has
 maintainability benefits.
+
+## Development
+From the root directory of the module...
+
+```
+nvm use 20
+npm install
+npm install --global yarn
+yarn install
+npm run build
+```

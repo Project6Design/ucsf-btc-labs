@@ -2,7 +2,8 @@
 
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
-use Drupal\Component\Utility\Unicode;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 
 /**
@@ -22,6 +23,19 @@ use Drupal\features\FeaturesAssignmentMethodBase;
  *   }
  * )
  */
+#[Assignment(
+  id: 'base',
+  weight: -2,
+  name: new TranslatableMarkup('Base type'),
+  description: new TranslatableMarkup('Use designated types of configuration as the base for configuration package modules. For example, if content types are selected as a base type, a package will be generated for each content type and will include all configuration dependent on that content type.'),
+  config_route_name: 'features.assignment_base',
+  default_settings: [
+    'types' => [
+      'config' => [],
+      'content' => [],
+    ],
+  ]
+)]
 class FeaturesAssignmentBaseType extends FeaturesAssignmentMethodBase {
 
   /**

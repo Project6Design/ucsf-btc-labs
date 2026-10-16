@@ -56,6 +56,7 @@ class EntityMatcherDeriver extends DeriverBase implements ContainerDeriverInterf
         $this->derivatives[$entity_type_id]['id'] = $base_plugin_definition['id'] . ':' . $entity_type_id;
         $this->derivatives[$entity_type_id]['label'] = $entity_type->getLabel();
         $this->derivatives[$entity_type_id]['target_entity'] = $entity_type_id;
+        $this->derivatives[$entity_type_id]['provider'] = $entity_type->getProvider();
         $this->derivatives[$entity_type_id]['base_plugin_label'] = (string) $base_plugin_definition['label'];
       }
     }

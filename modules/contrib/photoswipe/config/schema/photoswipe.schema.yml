@@ -98,6 +98,9 @@ photoswipe.settings:
         arrowNextTitle:
           type: label
           label: 'Next Arrow Tooltip'
+        downloadTitle:
+          type: label
+          label: 'Download Tooltip'
         indexIndicatorSep:
           type: label
           label: 'Index Indicator Separator'
@@ -135,6 +138,12 @@ field.formatter.settings.photoswipe_field_formatter:
     photoswipe_view_mode:
       type: string
       label: 'Photoswipe View Mode'
+    photoswipe_remove_gallery_wrapper_class:
+      type: boolean
+      label: 'Remove photoswipe-gallery wrapper class'
+    photoswipe_show_download_button:
+      type: boolean
+      label: 'Show download button'
     image_loading:
       type: mapping
       label: 'Image loading settings'
@@ -144,28 +153,5 @@ field.formatter.settings.photoswipe_field_formatter:
           label: 'Loading attribute'
 
 field.formatter.settings.photoswipe_responsive_field_formatter:
-  type: mapping
+  type: field.formatter.settings.photoswipe_field_formatter
   label: 'Photoswipe responsive display format settings'
-  mapping:
-    photoswipe_thumbnail_style_first:
-      type: string
-      label: 'Photoswipe Node Style First'
-    photoswipe_thumbnail_style:
-      type: string
-      label: 'Photoswipe Node Style'
-    photoswipe_image_style:
-      type: string
-      label: 'Photoswipe Image Style'
-    photoswipe_reference_image_field:
-      type: string
-      label: 'Photoswipe Reference Image Field'
-    photoswipe_view_mode:
-      type: string
-      label: 'Photoswipe View Mode'
-    image_loading:
-      type: mapping
-      label: 'Image loading settings'
-      mapping:
-        attribute:
-          type: string
-          label: 'Loading attribute'

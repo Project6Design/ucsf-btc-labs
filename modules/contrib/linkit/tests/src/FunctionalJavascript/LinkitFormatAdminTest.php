@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\linkit\FunctionalJavascript;
 
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the linkit alterations on the text format forms.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class LinkitFormatAdminTest extends WebDriverTestBase {
 
   /**

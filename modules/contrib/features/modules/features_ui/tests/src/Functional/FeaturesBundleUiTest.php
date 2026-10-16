@@ -4,21 +4,15 @@ namespace Drupal\Tests\features_ui\Functional;
 
 use Drupal\features\FeaturesBundleInterface;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests configuring bundles.
- *
- * @group features_ui
  */
+#[RunTestsInSeparateProcesses]
+#[Group('features_ui')]
 class FeaturesBundleUiTest extends BrowserTestBase {
-
-  /**
-   * The variable.
-   *
-   * @var mixed
-   * @todo Remove the disabled strict config schema checking.
-   */
-  protected $strictConfigSchema = FALSE;
 
   /**
    * {@inheritdoc}
@@ -41,6 +35,7 @@ class FeaturesBundleUiTest extends BrowserTestBase {
    * {@inheritdoc}
    */
   public function setUp(): void {
+    $this->strictConfigSchema = FALSE;
     parent::setUp();
     $this->bundleStorage = \Drupal::entityTypeManager()->getStorage('features_bundle');
 

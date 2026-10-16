@@ -7,8 +7,7 @@ id: sitemap
 label: 'Sitemap tour'
 module: sitemap
 routes:
-  -
-    route_name: sitemap.settings
+  - route_name: sitemap.settings
 tips:
   page-title:
     id: page-title

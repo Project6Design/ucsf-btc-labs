@@ -4,9 +4,11 @@ namespace Drupal\linkit\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Cache\CacheableDependencyInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Field\Attribute\FieldFormatter;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\link\LinkItemInterface;
 use Drupal\link\Plugin\Field\FieldFormatter\LinkFormatter;
 use Drupal\linkit\ProfileInterface;
@@ -16,15 +18,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'linkit' formatter.
- *
- * @FieldFormatter(
- *   id = "linkit",
- *   label = @Translation("Linkit"),
- *   field_types = {
- *     "link"
- *   }
- * )
  */
+#[FieldFormatter(
+  id: 'linkit',
+  label: new TranslatableMarkup('Linkit'),
+  field_types: ['link']
+)]
 class LinkitFormatter extends LinkFormatter {
 
   /**
@@ -123,18 +122,25 @@ class LinkitFormatter extends LinkFormatter {
         if ($url instanceof CacheableDependencyInterface) {
           $cacheable_url = $url;
         }
+
         // Keep query and fragment.
         $parsed_url = parse_url($link_item->uri);
         if (!empty($parsed_url['query'])) {
           $parsed_query = [];
           parse_str($parsed_url['query'], $parsed_query);
-          if (!empty($parsed_query)) {
-            $url->setOption('query', $parsed_query);
-          }
+          $url->setOption('query', $parsed_query);
         }
+        elseif (!empty($link_item->options['query'])) {
+          $url->setOption('query', $link_item->options['query']);
+        }
+
         if (!empty($parsed_url['fragment'])) {
           $url->setOption('fragment', $parsed_url['fragment']);
         }
+        elseif (!empty($link_item->options['fragment'])) {
+          $url->setOption('fragment', $link_item->options['fragment']);
+        }
+
         $attributes = (array) $url->getOption('attributes');
         $attributes = array_merge($item_url_attributes ?: [], $attributes ?: []);
         // Restore rel and target options.

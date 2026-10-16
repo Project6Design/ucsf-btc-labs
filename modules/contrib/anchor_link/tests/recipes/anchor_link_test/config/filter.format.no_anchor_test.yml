@@ -1,0 +1,12 @@
+langcode: en
+status: true
+name: 'No Anchor Test'
+format: no_anchor_test
+weight: 6
+filters:
+  filter_htmlcorrector:
+    id: filter_htmlcorrector
+    provider: filter
+    status: true
+    weight: 10
+    settings: {  }

@@ -1,0 +1,9 @@
+{
+    "name": "drupal/editor_file",
+    "description": "Editor File upload",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/core": "^10.5 || ^11.2"
+    }
+}

@@ -105,9 +105,11 @@ class RouteNormalizerRequestSubscriber implements EventSubscriberInterface {
       // page because it's not a real route.
       $route_name = $this->pathMatcher->isFrontPage() ? '<front>' : '<current>';
 
-      // Explicitly replicate PathAliasSubscriber::onKernelController() to set
-      // the cache key.
-      if ($this->aliasManager instanceof AliasManager) {
+      // The path alias preload cache has been removed, see
+      // https://www.drupal.org/node/3532412.
+      if ($this->aliasManager instanceof AliasManager && version_compare(\Drupal::VERSION, '11.3', '<')) {
+        // Explicitly replicate PathAliasSubscriber::onKernelController() to set
+        // the cache key.
         $this->aliasManager->setCacheKey(rtrim($this->currentPath->getPath($event->getRequest()), '/'));
       }
 
@@ -117,7 +119,7 @@ class RouteNormalizerRequestSubscriber implements EventSubscriberInterface {
       $redirect_uri = $this->urlGenerator->generateFromRoute($route_name, [], $options);
 
       // Strip off query parameters added by the route such as a CSRF token.
-      if (strpos($redirect_uri, '?') !== FALSE) {
+      if (str_contains($redirect_uri, '?')) {
         $redirect_uri = strtok($redirect_uri, '?');
       }
 

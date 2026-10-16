@@ -77,6 +77,7 @@ class ConstantContactResource extends ResourceBase {
    *
    * Takes the post request and sends it
    * to Constant Contact API endpoints.
+   *
    * @param string $list_id
    *   CC list (list_id). Can be an array of list uuids.
    *
@@ -97,14 +98,17 @@ class ConstantContactResource extends ResourceBase {
       foreach ($list_id as $lid) {
         if (!isset($enabledLists[$lid]) || $enabledLists[$lid] !== 1) {
           throw new AccessDeniedHttpException('This list is not enabled or does not exist.');
-        } else {
+        }
+        else {
           $lists[] = $lid;
         }
       }
-    } else if (is_string($list_id)) {
+    }
+    elseif (is_string($list_id)) {
       if (!isset($enabledLists[$list_id]) || $enabledLists[$list_id] !== 1) {
         throw new AccessDeniedHttpException('This endpoint is not enabled or does not exist.');
-      } else {
+      }
+      else {
         $lists[] = $list_id;
       }
     }
@@ -112,4 +116,5 @@ class ConstantContactResource extends ResourceBase {
     $response = $this->constantContact->submitContactForm($data, [$list_id]);
     return new ModifiedResourceResponse($response);
   }
+
 }

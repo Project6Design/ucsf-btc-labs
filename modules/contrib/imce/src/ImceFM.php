@@ -93,12 +93,12 @@ class ImceFM {
    *
    * @param array $conf
    *   File manager configuration.
-   * @param \Drupal\Core\Session\AccountProxyInterface $user
+   * @param \Drupal\Core\Session\AccountProxyInterface|null $user
    *   The active user.
-   * @param \Symfony\Component\HttpFoundation\Request $request
+   * @param \Symfony\Component\HttpFoundation\Request|null $request
    *   The active request that contains parameters for file manager operations.
    */
-  public function __construct(array $conf, AccountProxyInterface $user = NULL, Request $request = NULL) {
+  public function __construct(array $conf, ?AccountProxyInterface $user = NULL, ?Request $request = NULL) {
     $this->conf = $conf;
     $this->user = $user ?: Imce::currentUser();
     $this->request = $request;
@@ -235,7 +235,7 @@ class ImceFM {
   /**
    * Adds a folder to the tree.
    */
-  public function addFolder($path, array $conf = NULL) {
+  public function addFolder($path, ?array $conf = NULL) {
     // Existing.
     $folder = $this->getFolder($path);
     if ($folder) {
@@ -680,7 +680,7 @@ class ImceFM {
     // Build only once.
     $regexp = &$this->conf['image_extensions_regexp'];
     if (!isset($regexp)) {
-      $exts = trim($this->getConf('image_extensions', 'jpg jpeg png gif webp'));
+      $exts = trim($this->getConf('image_extensions', 'jpg jpeg png gif webp avif'));
       $regexp = $exts ? '/\.(' . preg_replace('/ +/', '|', $exts) . ')$/i' : FALSE;
     }
     return $regexp;

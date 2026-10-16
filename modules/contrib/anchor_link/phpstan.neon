@@ -1,0 +1,15 @@
+parameters:
+  level: 1
+  excludePaths:
+    - */node_modules/*
+    # Legacy CKEditor 4 plugins: they extend Drupal\ckeditor\CKEditorPluginBase,
+    # a base class removed from Drupal core in 10/11, so they are only loadable
+    # on the module's Drupal 9 support and cannot be analyzed here.
+    - src/Plugin/CKEditorPlugin/*
+    # CKEditor 4 to 5 upgrade-path plugin: only used while migrating CKEditor 4
+    # text formats, legacy alongside the CKEditor 4 plugins above.
+    - src/Plugin/CKEditor4To5Upgrade/*
+    # Optional Linkit integration: only loadable when the (optional) linkit
+    # module is installed, which it is not in the analysis environment.
+    - src/Plugin/Linkit/*
+  reportUnmatchedIgnoredErrors: false

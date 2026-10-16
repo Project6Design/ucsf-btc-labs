@@ -2,8 +2,8 @@
 
 namespace Drupal\anchor_link\Plugin\CKEditorPlugin;
 
-use Drupal\editor\Entity\Editor;
 use Drupal\ckeditor\CKEditorPluginBase;
+use Drupal\editor\Entity\Editor;
 
 /**
  * Defines the "link" plugin.
@@ -65,7 +65,7 @@ class Link extends CKEditorPluginBase {
     return [];
   }
 
-    /**
+  /**
    * Get the CKEditor Link library path.
    */
   protected function getLibraryPath() {

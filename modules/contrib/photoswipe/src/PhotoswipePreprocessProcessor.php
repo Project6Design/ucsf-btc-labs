@@ -94,10 +94,10 @@ class PhotoswipePreprocessProcessor implements ContainerInjectionInterface {
   }
 
   /**
-   * An associative array containing image variables.
    * Builds a renderable array for the given image.
    *
    * @param array $variables
+   *   An associative array containing image variables.
    *
    * @return array
    *   Renderable array containing the image.

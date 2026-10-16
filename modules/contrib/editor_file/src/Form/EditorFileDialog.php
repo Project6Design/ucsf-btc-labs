@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Drupal\editor_file\Form;
 
 use Drupal\Component\Utility\Bytes;
-use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Utility\Environment;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Config\Entity\ConfigEntityStorageInterface;
 use Drupal\Core\Entity\EntityRepositoryInterface;
 use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
@@ -34,6 +34,13 @@ class EditorFileDialog extends FormBase implements BaseFormIdInterface {
    * @var \Drupal\Core\Entity\EntityStorageInterface
    */
   protected $fileStorage;
+
+  /**
+   * The editor storage service.
+   *
+   * @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface
+   */
+  protected $editorStorage;
 
   /**
    * The entity repository service.
@@ -68,6 +75,8 @@ class EditorFileDialog extends FormBase implements BaseFormIdInterface {
    *
    * @param \Drupal\Core\Entity\EntityStorageInterface $file_storage
    *   The file storage service.
+   * @param \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $editor_storage
+   *   The editor storage service.
    * @param \Drupal\Core\Entity\EntityRepositoryInterface $entity_repository
    *   The entity repository service.
    * @param \Drupal\Core\Render\RendererInterface $renderer
@@ -77,8 +86,9 @@ class EditorFileDialog extends FormBase implements BaseFormIdInterface {
    * @param \Drupal\file\Validation\FileValidatorInterface $file_validator
    *   The file validator service.
    */
-  public function __construct(EntityStorageInterface $file_storage, EntityRepositoryInterface $entity_repository, RendererInterface $renderer, FileUrlGeneratorInterface $file_url_generator, FileValidatorInterface $file_validator) {
+  public function __construct(EntityStorageInterface $file_storage, ConfigEntityStorageInterface $editor_storage, EntityRepositoryInterface $entity_repository, RendererInterface $renderer, FileUrlGeneratorInterface $file_url_generator, FileValidatorInterface $file_validator) {
     $this->fileStorage = $file_storage;
+    $this->editorStorage = $editor_storage;
     $this->entityRepository = $entity_repository;
     $this->renderer = $renderer;
     $this->fileUrlGenerator = $file_url_generator;
@@ -91,6 +101,7 @@ class EditorFileDialog extends FormBase implements BaseFormIdInterface {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('entity_type.manager')->getStorage('file'),
+      $container->get('entity_type.manager')->getStorage('editor'),
       $container->get('entity.repository'),
       $container->get('renderer'),
       $container->get('file_url_generator'),
@@ -151,7 +162,7 @@ class EditorFileDialog extends FormBase implements BaseFormIdInterface {
     $form['#suffix'] = '</div>';
 
     // Load dialog settings.
-    $editor = editor_load($filter_format->id());
+    $editor = $this->editorStorage->load($filter_format->id());
     $settings = $editor->getSettings();
     $file_upload = $settings['plugins']['editor_file_file'];
     $form_state->set('file_upload_settings', $file_upload);
@@ -178,7 +189,7 @@ class EditorFileDialog extends FormBase implements BaseFormIdInterface {
       '#upload_validators' => $form['fid']['#upload_validators'],
       '#cardinality' => 1,
     ];
-    $form['fid']['#description'] = $this->renderer->renderPlain($file_upload_help);
+    $form['fid']['#description'] = $this->renderer->renderInIsolation($file_upload_help);
 
     $form['attributes']['href'] = [
       '#title' => $this->t('URL'),
@@ -280,7 +291,7 @@ class EditorFileDialog extends FormBase implements BaseFormIdInterface {
         // Add a specific class for each and every mime type.
         'file--mime-' . strtr($mime_type, ['/' => '-', '.' => '-']),
         // Add a more general class for groups of well known MIME types.
-        'file--' . DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.3.0', fn() => IconMimeTypes::getIconClass($mime_type), fn() => file_icon_class($mime_type)),
+        'file--' . IconMimeTypes::getIconClass($mime_type),
       ];
       // Merge with existing classes (eg: those added w/ Editor Advanced Link).
       if (!empty($form_state->getValue('attributes')['class'])) {

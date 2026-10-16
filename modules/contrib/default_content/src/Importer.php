@@ -156,7 +156,7 @@ class Importer implements ImporterInterface {
    *
    * @see https://www.drupal.org/node/3296226
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, ContentFileStorageInterface $content_file_storage,AccountSwitcherInterface $account_switcher, ContentEntityNormalizerInterface $content_entity_normalizer, $extension_list, FileSystemInterface $file_system = NULL, $link_domain = NULL) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager, EventDispatcherInterface $event_dispatcher, ContentFileStorageInterface $content_file_storage, AccountSwitcherInterface $account_switcher, ContentEntityNormalizerInterface $content_entity_normalizer, $extension_list, ?FileSystemInterface $file_system = NULL, $link_domain = NULL) {
     $this->entityTypeManager = $entity_type_manager;
     $this->eventDispatcher = $event_dispatcher;
     $this->contentFileStorage = $content_file_storage;
@@ -297,9 +297,9 @@ class Importer implements ImporterInterface {
           // If a file exists in the same folder, copy it to the designed
           // target URI.
           if ($entity instanceof FileInterface) {
-            $file_source = \dirname($file->uri) . '/' . $entity->getFilename();
+            $file_source = $this->fileSystem->dirname($file->uri) . '/' . $entity->getFilename();
             if (\file_exists($file_source)) {
-              $target_directory = dirname($entity->getFileUri());
+              $target_directory = $this->fileSystem->dirname($entity->getFileUri());
               $this->fileSystem->prepareDirectory($target_directory, FileSystemInterface::CREATE_DIRECTORY);
               $new_uri = $this->fileSystem->copy($file_source, $entity->getFileUri());
               $entity->setFileUri($new_uri);

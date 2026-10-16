@@ -5,15 +5,13 @@ namespace mglaman\PHPStanDrupal\Rules\Drupal\PluginManager;
 use PhpParser\Node;
 use PhpParser\Node\Stmt\ClassMethod;
 use PHPStan\Analyser\Scope;
-use PHPStan\ShouldNotHappenException;
-use PHPStan\Type\Type;
-use function array_map;
+use PHPStan\Rules\RuleErrorBuilder;
 use function count;
 
 /**
  * @extends AbstractPluginManagerRule<ClassMethod>
  */
-class PluginManagerSetsCacheBackendRule extends AbstractPluginManagerRule
+final class PluginManagerSetsCacheBackendRule extends AbstractPluginManagerRule
 {
     public function getNodeType(): string
     {
@@ -23,7 +21,7 @@ class PluginManagerSetsCacheBackendRule extends AbstractPluginManagerRule
     public function processNode(Node $node, Scope $scope): array
     {
         if (!$scope->isInClass()) {
-            throw new ShouldNotHappenException();
+            return [];
         }
 
         if ($scope->isInTrait()) {
@@ -55,22 +53,15 @@ class PluginManagerSetsCacheBackendRule extends AbstractPluginManagerRule
                     continue;
                 }
                 $hasCacheBackendSet = true;
-
-                $cacheKey = array_map(
-                    static fn (Type $type) => $type->getValue(),
-                    $scope->getType($setCacheBackendArgs[1]->value)->getConstantStrings()
-                );
-                if (count($cacheKey) === 0) {
-                    continue;
-                }
-
                 break;
             }
         }
 
         $errors = [];
         if (!$hasCacheBackendSet) {
-            $errors[] = 'Missing cache backend declaration for performance.';
+            $errors[] = RuleErrorBuilder::message('Missing cache backend declaration for performance.')
+            ->identifier('pluginManagerSetsCacheBackend.missingCacheBackend')
+            ->build();
         }
 
         return $errors;

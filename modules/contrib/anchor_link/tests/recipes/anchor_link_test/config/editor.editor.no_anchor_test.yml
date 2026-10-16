@@ -1,0 +1,20 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - filter.format.no_anchor_test
+  module:
+    - ckeditor5
+format: no_anchor_test
+editor: ckeditor5
+settings:
+  toolbar:
+    items:
+      - bold
+      - '|'
+      - sourceEditing
+  plugins:
+    ckeditor5_sourceEditing:
+      allowed_tags: {  }
+image_upload:
+  status: false

@@ -2,15 +2,51 @@
 
 namespace Drupal\photoswipe\Form;
 
-use Drupal\Core\Cache\Cache;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Asset\LibraryDiscoveryInterface;
+use Drupal\Core\Config\TypedConfigManagerInterface;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * {@inheritdoc}
  */
 class PhotoswipeSettings extends ConfigFormBase {
+
+  /**
+   * The library discovery service.
+   *
+   * @var \Drupal\Core\Asset\LibraryDiscoveryInterface
+   */
+  protected $libraryDiscovery;
+
+  /**
+   * Constructs a PhotoswipeSettings object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The factory for configuration objects.
+   * @param \Drupal\Core\Config\TypedConfigManagerInterface $typedConfigManager
+   *   The typed configuration manager.
+   * @param \Drupal\Core\Asset\LibraryDiscoveryInterface $libraryDiscovery
+   *   The library discovery service.
+   */
+  public function __construct(ConfigFactoryInterface $configFactory, TypedConfigManagerInterface $typedConfigManager, LibraryDiscoveryInterface $libraryDiscovery) {
+    parent::__construct($configFactory, $typedConfigManager);
+    $this->libraryDiscovery = $libraryDiscovery;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('config.typed'),
+      $container->get('library.discovery')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -318,6 +354,14 @@ class PhotoswipeSettings extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['downloadTitle'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Download Aria Label'),
+      '#default_value' => $config->get('options.downloadTitle'),
+      '#description' => $this->t('The aria-label that should be set on the download button.'),
+      '#required' => TRUE,
+    ];
+
     $form['indexIndicatorSep'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Index Indicator Separator'),
@@ -410,6 +454,7 @@ class PhotoswipeSettings extends ConfigFormBase {
       ->set('options.zoomTitle', $form_state->getValue('zoomTitle'))
       ->set('options.arrowPrevTitle', $form_state->getValue('arrowPrevTitle'))
       ->set('options.arrowNextTitle', $form_state->getValue('arrowNextTitle'))
+      ->set('options.downloadTitle', $form_state->getValue('downloadTitle'))
       ->set('options.indexIndicatorSep', $form_state->getValue('indexIndicatorSep'))
       ->set('options.errorMsg', $form_state->getValue('errorMsg'))
       ->set('options.preload', [
@@ -421,8 +466,11 @@ class PhotoswipeSettings extends ConfigFormBase {
       ->save();
     parent::submitForm($form, $form_state);
 
-    // @todo This can probably be more fine graded in the future:
-    Cache::invalidateTags(['rendered']);
+    // CDN vs local is chosen in library_info_alter.
+    // clearCachedDefinitions() is deprecated since Drupal 11.1 in favor of
+    // clear(), which doesn't exist in Drupal 10:
+    // @phpstan-ignore-next-line
+    $this->libraryDiscovery->clearCachedDefinitions();
   }
 
   /**

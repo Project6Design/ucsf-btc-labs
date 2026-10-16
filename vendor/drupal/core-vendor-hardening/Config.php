@@ -70,7 +70,6 @@ class Config {
     'symfony/event-dispatcher' => ['Tests'],
     'symfony/http-foundation' => ['Tests'],
     'symfony/http-kernel' => ['Tests'],
-    'symfony/phpunit-bridge' => ['Tests'],
     'symfony/process' => ['Tests'],
     'symfony/psr-http-message-bridge' => ['Tests'],
     'symfony/routing' => ['Tests'],
@@ -127,6 +126,11 @@ class Config {
       $this->configData = array_change_key_case($package_config['drupal-core-vendor-hardening'], CASE_LOWER);
     }
 
+    // Find the packages which should not be cleaned up.
+    $do_not_clean = array_filter($this->configData, function ($paths) {
+      return $paths === FALSE;
+    });
+
     // Ensure the values are arrays.
     $this->configData = array_map(function ($paths) {
       return (array) $paths;
@@ -138,6 +142,10 @@ class Config {
         $this->configData[$package] ?? [],
         $paths);
     }
+
+    // Remove packages that should not be cleaned up.
+    $this->configData = array_diff_key($this->configData, $do_not_clean);
+
     return $this->configData;
   }
 

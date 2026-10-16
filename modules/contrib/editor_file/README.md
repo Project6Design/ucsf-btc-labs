@@ -25,11 +25,7 @@ manually create the link.
 
 ## Requirements
 
-This module requires no modules outside of Drupal core for versions 8 and 9.
-
-Since Drupal 10, CKEditor 4 has been replaced by CKEditor 5 in Drupal Core so
-you need to use the [CKEditor 4 - WYSIWYG HTML editor](https://www.drupal.org/project/ckeditor)
-module until CKEditor 5 integration is ready (see 2.x branch).
+This module requires no modules outside of Drupal core.
 
 ## Recommended modules
 
@@ -56,6 +52,7 @@ tags and correct faulty HTML filter" is enabled, you should ensure that
 dragging the button in the toolbar successfully added the
 `data-entity-type` and `data-entity-uuid` attributes to your `<a>` tag.
 
+<!--- cspell:disable -->
 ## Maintainers
 
 - [Edouard Cunibil (DuaelFr)](https://www.drupal.org/u/duaelfr)
@@ -63,3 +60,4 @@ dragging the button in the toolbar successfully added the
 ### Supporting organization
 
 - [Happyculture](https://www.drupal.org/happyculture)
+<!--- cspell:enable -->

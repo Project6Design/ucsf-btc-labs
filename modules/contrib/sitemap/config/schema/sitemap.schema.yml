@@ -61,7 +61,11 @@ sitemap_plugin_settings.frontpage:
   mapping:
     rss:
       type: path
-      label: "RSS"
+      label: 'RSS'
+      nullable: true
+    front_text_override:
+      type: label
+      label: 'Text override'
       nullable: true
 
 # Schema for Menu plugin settings.
@@ -72,6 +76,9 @@ sitemap_plugin_settings.menu:
       type: boolean
       label: 'Show disabled'
       nullable: true
+    menu_depth:
+      type: integer
+      label: 'Menu depth'
 
 # Schema for Vocabulary plugin settings.
 sitemap_plugin_settings.vocabulary:
@@ -79,7 +86,7 @@ sitemap_plugin_settings.vocabulary:
   mapping:
     show_description:
       type: boolean
-      label: "Show description"
+      label: 'Show description'
       nullable: true
     show_count:
       type: boolean
@@ -120,4 +127,17 @@ sitemap_plugin_settings.vocabulary:
     rss_depth:
       type: integer
       label: 'RSS depth'
+      nullable: true
+
+# Schema for the sitemap_syndicate block plugin.
+block.settings.sitemap_syndicate:
+  type: block_settings
+  label: 'Syndicate block settings'
+  deprecated: "The Syndicate block is deprecated in sitemap:8.x-2.x and is removed from sitemap:3.0.0."
+  mapping:
+    cache:
+      type: ignore
+    rss_feed_path:
+      type: path
+      label: "Feed URL"
       nullable: true

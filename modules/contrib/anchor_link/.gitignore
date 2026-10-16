@@ -1,0 +1,20 @@
+# Node / varbase-e2e
+/node_modules
+/.yarn
+yarn-error.log
+.pnp.*
+
+# Test run artefacts
+/tests/reports/*
+!/tests/reports/README.md
+/tests/screenshots/*
+!/tests/screenshots/README.md
+/tests/videos/*
+!/tests/videos/README.md
+.playwright-mcp/
+
+# Composer (when developed inside a site)
+/vendor
+
+# gitlab-ci-local runner state
+/.gitlab-ci-local

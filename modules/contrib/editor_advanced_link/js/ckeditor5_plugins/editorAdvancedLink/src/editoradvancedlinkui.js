@@ -1,195 +1,210 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Plugin } from 'ckeditor5/src/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { LabeledFieldView, createLabeledInputText } from 'ckeditor5/src/ui';
+import {
+  LabeledFieldView,
+  createLabeledInputText,
+  CollapsibleView,
+  FormRowView,
+} from 'ckeditor5/src/ui';
 import { additionalFormElements, additionalFormGroups } from './utils';
-import DetailsView from './details/detailsview';
 
-export default class EditorAdvancedLinkUi extends Plugin {
+export default class EditorAdvancedLinkUI extends Plugin {
   init() {
-    this.groups = {};
+    // Using example from CKEditor5 docs:
+    // https://ckeditor.com/docs/ckeditor5/latest/framework/how-tos.html#how-to-add-a-custom-button-to-the-link-dialog
+    const editor = this.editor;
+    const contextualBalloonPlugin = editor.plugins.get('ContextualBalloon');
+    const linkUI = editor.plugins.get('LinkUI');
 
-    // TRICKY: Work-around until the CKEditor team offers a better solution:
-    // force the ContextualBalloon to get instantiated early thanks to
-    // DrupalImage not yet being optimized like
-    // https://github.com/ckeditor/ckeditor5/commit/c276c45a934e4ad7c2a8ccd0bd9a01f6442d4cd3#diff-1753317a1a0b947ca8b66581b533616a5309f6d4236a527b9d21ba03e13a78d8.
-    if (this.editor.plugins.get('LinkUI')._createViews) {
-      this.editor.plugins.get('LinkUI')._createViews();
-    }
-    this._changeFormToVertical();
-    this._addExtraFormFields();
+    this.listenTo(contextualBalloonPlugin, 'change:visibleView', (evt, name, visibleView) => {
+      const formView = linkUI.formView;
+
+      // If the link form has not been initialized yet or the visible view does not match it,
+      // do nothing.
+      if (!formView || visibleView !== formView) {
+        return;
+      }
+
+      // Detach the listener.
+      this.stopListening(contextualBalloonPlugin, 'change:visibleView');
+      this.linkFormView = formView;
+
+      this._registerComponents();
+    });
   }
 
-  _addExtraFormFields() {
-    const { editor } = this;
-    // Copy the same solution from LinkUI as pointed out on
-    // https://www.drupal.org/project/drupal/issues/3317769#comment-14985648 and
-    // https://git.drupalcode.org/project/drupal/-/merge_requests/2909/diffs?commit_id=cc2cece3be1a9513b02a53d8a6862a6841ef4d5a.
-    editor.plugins
-      .get('ContextualBalloon')
-      .on('set:visibleView', (evt, propertyName, newValue, oldValue) => {
-        const linkFormView = editor.plugins.get('LinkUI').formView;
-        if (newValue === oldValue || newValue !== linkFormView) {
-          return;
+  /**
+   * Add advanced fields to link popup.
+   */
+  _registerComponents() {
+    const editor = this.editor;
+    const linkFormView = editor.plugins.get('LinkUI').formView;
+
+    // If for any reason the link form is not available,
+    // bail out early to avoid runtime errors.
+    if (!linkFormView) {
+      return;
+    }
+
+    const linkCommand = editor.commands.get('link');
+    const { enabledModelNames } = editor.plugins.get(
+      'EditorAdvancedLinkEditing',
+    );
+
+    // Insert below CKEditor5's "Displayed text" field.
+    let insertIndex = 2;
+    let fieldCount = 0;
+
+    enabledModelNames.forEach((modelName) => {
+      // Skip if field already exists.
+      if (typeof linkFormView[modelName] === 'undefined') {
+        const options = additionalFormElements[modelName];
+        let parentGroup = linkFormView[options.group];
+        let parentForm = parentGroup ?? linkFormView;
+
+        // Skip if group already exists.
+        if (options.group && !parentGroup) {
+          const groupOptions = additionalFormGroups[options.group];
+          parentGroup = this._createGroup(options.group, groupOptions.label);
+
+          // Insert group into link form.
+          linkFormView.children.add(
+            parentGroup,
+            insertIndex
+          );
+          // Increase insert index for link form.
+          insertIndex++;
+
+          // Add group to focus array.
+          linkFormView._focusables.add(parentGroup);
+          linkFormView.focusTracker.add(parentGroup.element);
+
+          // Track group in link form object.
+          linkFormView[options.group] = parentGroup;
+          parentForm = parentGroup;
         }
 
-        const { enabledModelNames } = editor.plugins.get(
-          'EditorAdvancedLinkEditing',
+        const newTextField = this._createTextField(options.label);
+
+        // Insert new row/field into parent form (group or link form).
+        parentForm.children.add(
+          this._createFormRow(newTextField),
+          parentForm === linkFormView ? insertIndex : parentForm.children.length
         );
-        enabledModelNames.reverse().forEach((modelName) => {
-          this._createExtraFormField(
-            modelName,
-            additionalFormElements[modelName],
-          );
-        });
-        this._handleExtraFormFieldSubmit(enabledModelNames);
-        // Add groups to form view last to ensure they're not beetween fields.
-        this._addGroupsToFormView();
-        this._moveTargetDecoratorToAdvancedGroup();
-      });
-  }
 
-  _changeFormToVertical() {
-    const linkFormView = this.editor.plugins.get('LinkUI').formView;
-    linkFormView.extendTemplate({
-      attributes: {
-        class: ['ck-vertical-form', 'ck-link-form_layout-vertical'],
-      },
+        // Increase insert index if field was added to link form.
+        if (parentForm === linkFormView) {
+          insertIndex++;
+        }
+
+        linkFormView._focusables.add(newTextField);
+        linkFormView.focusTracker.add(newTextField.element);
+        // Track field in link form object.
+        linkFormView[modelName] = newTextField;
+        fieldCount++;
+
+        // Bind values of new fields.
+        linkFormView[modelName].fieldView
+          .bind('value').to(linkCommand, modelName);
+
+        // Note: Copy & pasted from LinkUI.
+        // https://github.com/ckeditor/ckeditor5/blob/f0a093339631b774b2d3422e2a579e27be79bbeb/packages/ckeditor5-link/src/linkui.js#L333-L333
+        linkFormView[modelName].fieldView.value = linkCommand[modelName] || '';
+      }
     });
+
+    if (fieldCount > 0) {
+      this._handleExtraFormFieldSubmit(enabledModelNames);
+    }
   }
 
-  _createExtraFormField(modelName, options) {
+  /**
+   * Creates a labeled input view for text field with a label.
+   */
+  _createTextField(label) {
     const { editor } = this;
     const { locale } = editor;
-    const linkFormView = editor.plugins.get('LinkUI').formView;
-    const linkCommand = editor.commands.get('link');
-    if (typeof linkFormView[modelName] === 'undefined') {
-      const fieldParent = options.group
-        ? this._getGroup(options.group)
-        : linkFormView;
 
-      const extraFieldView = new LabeledFieldView(
-        locale,
-        createLabeledInputText,
-      );
-      extraFieldView.label = options.label;
-      fieldParent.children.add(extraFieldView, 1);
-
-      if (!options.group) {
-        linkFormView._focusables.add(extraFieldView, 1);
-        linkFormView.focusTracker.add(extraFieldView.element);
-      }
-
-      linkFormView[modelName] = extraFieldView;
-      linkFormView[modelName].fieldView
-        .bind('value')
-        .to(linkCommand, modelName);
-      // Note: Copy & pasted from LinkUI.
-      // https://github.com/ckeditor/ckeditor5/blob/f0a093339631b774b2d3422e2a579e27be79bbeb/packages/ckeditor5-link/src/linkui.js#L333-L333
-      linkFormView[modelName].fieldView.element.value =
-        linkCommand[modelName] || '';
-    }
+    const t = locale.t;
+    const labeledInput = new LabeledFieldView(locale, createLabeledInputText);
+    labeledInput.label = label;
+    labeledInput.class = 'ck-labeled-field-view_full-width';
+    return labeledInput;
   }
 
-  _addGroupsToFormView() {
-    if (Object.entries(this.groups).length === 0) {
-      return;
-    }
-
+  /**
+   * Creates a row.
+   */
+  _createFormRow(child) {
     const { editor } = this;
-    const linkFormView = editor.plugins.get('LinkUI').formView;
+    const { locale } = editor;
 
-    Object.values(this.groups).reverse().forEach((group) => {
-      if (!group.added) {
-        linkFormView.children.add(group, 2);
-        group.parent = linkFormView;
-
-        linkFormView._focusables.add(group, 2);
-        linkFormView.focusTracker.add(group.element);
-
-        group.added = true;
-      }
-    });
-
-    const buttons = [
-      linkFormView.children.find((child) => child.template.attributes.class.indexOf('ck-button-save') > -1),
-      linkFormView.children.find((child) => child.template.attributes.class.indexOf('ck-button-cancel') > -1),
-    ];
-    buttons.forEach((item, i) => {
-      linkFormView.children.remove(item);
-      linkFormView._focusables.remove(item);
-      linkFormView.focusTracker.remove(item.element);
-
-      linkFormView.children.add(item, 3 + i);
-      linkFormView._focusables.add(item, 3 + i);
-      linkFormView.focusTracker.add(item.element);
+    return new FormRowView(locale, {
+      children: [
+        child
+      ],
+      class: [
+        'ck-form__row_large-bottom-padding'
+      ]
     });
   }
 
-  _getGroup(groupName) {
-    if (!this.groups[groupName]) {
-      const { editor } = this;
-      const { locale } = editor;
-
-      this.groups[groupName] = new DetailsView(locale, {
-        label: additionalFormGroups[groupName].label,
-      });
-    }
-    return this.groups[groupName];
-  }
-
-  _moveTargetDecoratorToAdvancedGroup() {
+  /**
+   * Creates a collapsible group.
+   */
+  _createGroup(groupName, label) {
     const { editor } = this;
-    const linkFormView = editor.plugins.get('LinkUI').formView;
+    const { locale } = editor;
 
-    if (linkFormView.targetMoved) {
-      return;
-    }
-
-    linkFormView._manualDecoratorSwitches._items.forEach((item) => {
-      if (item.label === Drupal.t('Open in new window')) {
-        this._getGroup('advanced').children.add(item);
-      }
-    });
-    linkFormView.targetMoved = true;
+    const group = new CollapsibleView(locale);
+    group.label = label;
+    group.set('isCollapsed', true);
+    return group;
   }
 
+  /**
+   * Update link form state.
+   */
   _handleExtraFormFieldSubmit(modelNames) {
     const { editor } = this;
     const linkFormView = editor.plugins.get('LinkUI').formView;
     const linkCommand = editor.commands.get('link');
 
-    this.listenTo(
-      linkFormView,
-      'submit',
-      () => {
-        const values = modelNames.reduce((state, modelName) => {
-          state[modelName] = linkFormView[modelName].fieldView.element.value;
-          return state;
-        }, {});
-        // Stop the execution of the link command caused by closing the form.
-        // Inject the extra attribute value. The highest priority listener here
-        // injects the argument (here below 👇).
-        // - The high priority listener in
-        //   _addExtraAttributeOnLinkCommandExecute() gets that argument and sets
-        //   the extra attribute.
-        // - The normal (default) priority listener in ckeditor5-link sets
-        //   (creates) the actual link.
-        linkCommand.once(
-          'execute',
-          (evt, args) => {
-            if (args.length < 3) {
-              args.push(values);
-            } else if (args.length === 3) {
-              Object.assign(args[2], values);
-            } else {
-              throw Error('The link command has more than 3 arguments.');
-            }
-          },
-          { priority: 'highest' },
-        );
-      },
-      { priority: 'high' },
-    );
+    // Attach listener to link editing form submit.
+    // This event listener is not executed when link properties (target) are updated.
+    this.listenTo(linkFormView, 'submit', () => {
+      if (linkFormView.isValid()) {
+        const advancedAttributeValues = this._getSubmittedValues(linkFormView, modelNames);
+
+        linkCommand.once('execute', (evt, args) => {
+          // CKEditor v45 includes a 'displayed text' input value. If present,
+          // send this information along so we can properly update the selection.
+          let displayedText = '';
+          if (typeof linkFormView.displayedTextInputView != 'undefined') {
+            displayedText = linkFormView.displayedTextInputView.fieldView.element.value;
+          }
+          // Inject advanced attributes into link command arguments.
+          args[1]['advanced_attributes'] = advancedAttributeValues;
+          args[1]['advanced_attributes']['displayedText'] = displayedText;
+        }, {
+          priority: 'highest'
+        });
+      }
+    }, {
+      priority: 'high',
+    });
   }
+
+  _getSubmittedValues(linkFormView, modelNames) {
+    const values = modelNames.reduce((state, modelName) => {
+      const oldValue = linkFormView[modelName].fieldView.value;
+      const newValue = linkFormView[modelName].fieldView.element.value;
+      state[modelName] = linkFormView[modelName].fieldView.element.value;
+      return state;
+    }, {});
+
+    return values;
+  }
+
 }

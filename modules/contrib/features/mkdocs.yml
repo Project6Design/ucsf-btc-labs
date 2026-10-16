@@ -1,0 +1,65 @@
+site_name: Features
+repo_url: https://git.drupalcode.org/project/features
+repo_name: features
+edit_uri: /-/edit/8.x-3.x/docs/
+theme:
+  name: material
+  logo: icon-w-drupal.png
+  favicon: logo.png
+  palette:
+    # Palette toggle for automatic mode
+    - media: '(prefers-color-scheme)'
+      primary: blue
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - media: '(prefers-color-scheme: light)'
+      primary: blue
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: '(prefers-color-scheme: dark)'
+      primary: blue
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - content.code.copy
+markdown_extensions:
+  - pymdownx.highlight:
+      pygments_lang_class: true
+      line_spans: __span
+  - pymdownx.superfences
+plugins:
+  - search
+  - privacy:
+      enabled: !ENV [CI, false]
+nav:
+  - Introduction: index.md
+  - Getting started: getting-started.md
+  - Building Features:
+      - Create an individual Feature: build--create.md
+      - Create a Feature bundle: build--bundles.md
+      - Configure packaging settings: build--packaging.md
+      - Deploy configuration from other modules: build--other-configuration.md
+      - Build a distribution: build--distribution.md
+  - Using and updating Features:
+      - Install modules created by Features: usage--install.md
+      - Deploy updates and "import" changes: usage--update.md
+      - Remove Features from your site: usage--remove.md
+  - Reference material:
+      - Configuration management strategies: reference--configuration-management.md
+      - Interoperability principles of Features: reference--interoperability.md
+      - Complementary and related modules: reference--related-modules.md
+      - Suggested workflow for Features: reference--workflow.md
+      - Further reading and presentations: reference--reading.md
+  - Developers:
+      - "Read first: Do you really need Features?": developers--do-you-need-features.md
+      - Drush support: developers--drush-support.md
+      - Extending Features with plugins: developers--plugins.md
+
+

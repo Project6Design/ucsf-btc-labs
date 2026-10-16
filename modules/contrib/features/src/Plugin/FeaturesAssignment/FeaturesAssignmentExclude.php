@@ -2,6 +2,8 @@
 
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 
 /**
@@ -25,6 +27,25 @@ use Drupal\features\FeaturesAssignmentMethodBase;
  *   }
  * )
  */
+#[Assignment(
+  id: 'exclude',
+  weight: -5,
+  name: new TranslatableMarkup('Exclude'),
+  description: new TranslatableMarkup('Exclude configuration items from packaging by various methods including by configuration type. When configuration is excluded, it won\'t be automatically reassigned to other packages.'),
+  config_route_name: 'features.assignment_exclude',
+  default_settings: [
+    'curated' => FALSE,
+    'module' => [
+      'installed' => FALSE,
+      'profile' => FALSE,
+      'namespace' => FALSE,
+      'namespace_any' => FALSE,
+    ],
+    'types' => [
+      'config' => [],
+    ],
+  ]
+)]
 class FeaturesAssignmentExclude extends FeaturesAssignmentMethodBase {
 
   /**
@@ -68,7 +89,7 @@ class FeaturesAssignmentExclude extends FeaturesAssignmentMethodBase {
           // for the current bundle, if any. We want the profile that was
           // installed.
           $profile_name = \Drupal::installProfile();
-          if (isset($all_modules[$profile_name])) {
+          if (!is_null($profile_name) && isset($all_modules[$profile_name])) {
             $profile_list = $this->featuresManager->listExtensionConfig($all_modules[$profile_name]);
             // If the configuration has been assigned to a feature that's
             // present on the file system, don't make an exception for it.

@@ -2,16 +2,20 @@
 
 namespace Drupal\Tests\url_embed\Functional;
 
-use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\link\LinkItemInterface;
+use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests url_embed link field formatter.
  *
  * @group url_embed
  */
+#[RunTestsInSeparateProcesses]
+#[Group('url_embed')]
 class LinkEmbedFormatterTest extends BrowserTestBase {
 
   /**

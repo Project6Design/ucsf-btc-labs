@@ -3,6 +3,8 @@
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
 use Drupal\Core\Extension\Extension;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 use Drupal\features\FeaturesManagerInterface;
 
@@ -16,6 +18,12 @@ use Drupal\features\FeaturesManagerInterface;
  *   description = @Translation("Add exported config to existing packages."),
  * )
  */
+#[Assignment(
+  id: 'existing',
+  weight: 12,
+  name: new TranslatableMarkup('Existing'),
+  description: new TranslatableMarkup('Add exported config to existing packages.')
+)]
 class FeaturesAssignmentExisting extends FeaturesAssignmentMethodBase {
 
   /**

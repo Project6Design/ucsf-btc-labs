@@ -4,23 +4,24 @@ namespace Drupal\sitemap_custom_plugin_test\Plugin\Sitemap;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Url;
+use Drupal\sitemap\Attribute\Sitemap;
 use Drupal\sitemap\SitemapBase;
 
 /**
  * An un-derived plugin, for adding a single, custom section.
- *
- * @Sitemap(
- *   id = "sitemap_custom_plugin_test_simple",
- *   title = @Translation("Test simple plugin"),
- *   description = @Translation("An un-derived, test sitemap plugin."),
- *   settings = {
- *     "title" = @Translation("Test simple plugin"),
- *     "fizz" = "buzz",
- *   },
- *   enabled = TRUE,
- * )
  */
+#[Sitemap(
+  id: 'sitemap_custom_plugin_test_simple',
+  title: new TranslatableMarkup('Test simple plugin'),
+  description: new TranslatableMarkup('An un-derived, test sitemap plugin.'),
+  enabled: TRUE,
+  settings: [
+    'title' => new TranslatableMarkup('Test simple plugin'),
+    'fizz' => 'buzz',
+  ]
+)]
 class SimpleSitemapPlugin extends SitemapBase {
 
   /**

@@ -3,18 +3,19 @@
 namespace Drupal\linkit\Plugin\Linkit\Matcher;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\linkit\Attribute\Matcher;
 use Drupal\node\NodeInterface;
 
 /**
  * Provides specific linkit matchers for the node entity type.
- *
- * @Matcher(
- *   id = "entity:node",
- *   label = @Translation("Content"),
- *   target_entity = "node",
- *   provider = "node"
- * )
  */
+#[Matcher(
+  id: "entity:node",
+  label: new TranslatableMarkup("Content"),
+  target_entity: "node",
+  provider: "node",
+)]
 class NodeMatcher extends EntityMatcher {
 
   /**

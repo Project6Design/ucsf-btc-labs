@@ -2,8 +2,8 @@
 
 namespace Drupal\Tests\url_embed\Functional;
 
-use Drupal\Tests\BrowserTestBase;
 use Drupal\filter\Entity\FilterFormat;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Base class for all url_embed tests.

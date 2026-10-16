@@ -78,19 +78,18 @@ final class StatusCommands extends DrushCommands
         'install-profile' => 'Install profile',
         'root' => 'Drupal root',
         'drupal-settings-file' => 'Drupal Settings',
-        'site-path' => 'Site path',
         'site' => 'Site path',
         'themes' => 'Themes path',
         'modules' => 'Modules path',
         'files' => 'Files, Public',
         'private' => 'Files, Private',
         'temp' => 'Files, Temp',
+        // config-sync is deprecated. Use 'config' instead.
         'config-sync' => 'Drupal config',
-        'files-path' => 'Files, Public',
-        'temp-path' => 'Files, Temp',
+        'config' => 'Drupal config',
         '%paths' => 'Other paths'
     ])]
-    #[CLI\DefaultTableFields(fields: ['drupal-version', 'uri', 'db-driver', 'db-hostname', 'db-port', 'db-username', 'db-name', 'db-status', 'bootstrap', 'theme', 'admin-theme', 'php-bin', 'php-conf', 'php-os', 'php-version', 'drush-script', 'drush-version', 'drush-temp', 'drush-conf', 'install-profile', 'root', 'site', 'files', 'private', 'temp'])]
+    #[CLI\DefaultTableFields(fields: ['drupal-version', 'uri', 'db-driver', 'db-hostname', 'db-port', 'db-username', 'db-name', 'db-status', 'bootstrap', 'theme', 'admin-theme', 'php-bin', 'php-conf', 'php-os', 'php-version', 'drush-script', 'drush-version', 'drush-temp', 'drush-conf', 'install-profile', 'root', 'site', 'files', 'private', 'temp', 'config'])]
     #[CLI\Bootstrap(level: DrupalBootLevels::MAX)]
     #[CLI\Topics(topics: [DocsCommands::README])]
     public function status($options = ['project' => self::REQ, 'format' => 'table']): PropertyList
@@ -107,7 +106,7 @@ final class StatusCommands extends DrushCommands
     {
         $boot_manager = Drush::bootstrapManager();
         $boot_object = Drush::bootstrap();
-        if (($drupal_root = $boot_manager->getRoot()) && ($boot_object instanceof DrupalBoot)) {
+        if (($drupal_root = $boot_manager->getRoot())) {
             $status_table['drupal-version'] = $boot_object->getVersion($drupal_root);
             $conf_dir = $boot_object->confPath();
             $settings_file = Path::join($conf_dir, 'settings.php');
@@ -129,9 +128,7 @@ final class StatusCommands extends DrushCommands
                         $status_table['db-port'] = isset($db_spec['port']) ? $db_spec['port'] : null;
                     }
                     if ($boot_manager->hasBootstrapped(DrupalBootLevels::CONFIGURATION)) {
-                        if (method_exists('Drupal', 'installProfile')) {
-                            $status_table['install-profile'] = \Drupal::installProfile();
-                        }
+                        $status_table['install-profile'] = \Drupal::installProfile();
                         if ($boot_manager->hasBootstrapped(DrupalBootLevels::DATABASE)) {
                             $status_table['db-status'] = dt('Connected');
                             if ($boot_manager->hasBootstrapped(DrupalBootLevels::FULL)) {
@@ -224,6 +221,7 @@ final class StatusCommands extends DrushCommands
                 if ($boot_manager->hasBootstrapped(DrupalBootLevels::CONFIGURATION)) {
                     try {
                         $paths["%config-sync"] = Settings::get('config_sync_directory');
+                        $paths["%config"] = Settings::get('config_sync_directory');
                     } catch (\Exception $e) {
                         // Nothing to do.
                     }

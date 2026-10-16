@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Drupal\Tests\linkit\Kernel\Matchers;
 
 use Drupal\Tests\linkit\Kernel\LinkitKernelTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests email matcher.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class EmailMatcherTest extends LinkitKernelTestBase {
 
   /**

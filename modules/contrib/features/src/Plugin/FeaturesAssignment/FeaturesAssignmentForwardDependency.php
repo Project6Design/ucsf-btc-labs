@@ -3,6 +3,8 @@
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
 use Drupal\Component\Graph\Graph;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 
 /**
@@ -15,6 +17,12 @@ use Drupal\features\FeaturesAssignmentMethodBase;
  *   description = @Translation("Add to packages configuration on which items in the package depend."),
  * )
  */
+#[Assignment(
+  id: 'forward_dependency',
+  weight: 20,
+  name: new TranslatableMarkup('Forward dependency'),
+  description: new TranslatableMarkup('Add to packages configuration on which items in the package depend.')
+)]
 class FeaturesAssignmentForwardDependency extends FeaturesAssignmentMethodBase {
 
   /**

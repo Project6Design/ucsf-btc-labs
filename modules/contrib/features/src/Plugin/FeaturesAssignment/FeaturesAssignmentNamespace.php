@@ -2,6 +2,8 @@
 
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 
 /**
@@ -14,6 +16,12 @@ use Drupal\features\FeaturesAssignmentMethodBase;
  *   description = @Translation("Add config to packages that contain that package's machine name."),
  * )
  */
+#[Assignment(
+  id: 'namespace',
+  weight: 0,
+  name: new TranslatableMarkup('Namespace'),
+  description: new TranslatableMarkup('Add config to packages that contain that package\'s machine name.')
+)]
 class FeaturesAssignmentNamespace extends FeaturesAssignmentMethodBase {
 
   /**

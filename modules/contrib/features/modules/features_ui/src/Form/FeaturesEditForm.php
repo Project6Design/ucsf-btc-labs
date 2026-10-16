@@ -2,18 +2,15 @@
 
 namespace Drupal\features_ui\Form;
 
+use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\SortArray;
 use Drupal\Component\Utility\Xss;
-use Drupal\features\FeaturesAssignerInterface;
-use Drupal\features\FeaturesGeneratorInterface;
-use Drupal\features\FeaturesManagerInterface;
-use Drupal\features\ConfigurationItem;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\features\ConfigurationItem;
+use Drupal\features\FeaturesManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Component\Render\FormattableMarkup;
-use Drupal\config_update\ConfigRevertInterface;
 
 /**
  * Defines the features settings form.
@@ -275,6 +272,7 @@ class FeaturesEditForm extends FormBase {
       '#size' => 30,
     ];
 
+    // phpcs:ignore
     [$full_name, $path] = $this->featuresManager->getExportInfo($this->package, $bundle);
     $form['info']['directory'] = [
       '#title' => $this->t('Path'),
@@ -285,7 +283,7 @@ class FeaturesEditForm extends FormBase {
       '#size' => 30,
     ];
 
-    $require_all = $this->package->getRequiredAll();
+    $this->package->getRequiredAll();
     $form['info']['require_all'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Mark all config as required'),
@@ -403,11 +401,15 @@ class FeaturesEditForm extends FormBase {
   /**
    * Callback for machine_name exists()
    *
-   * @param $value
-   * @param $element
-   * @param $form_state
+   * @param string $value
+   *   The value.
+   * @param mixed $element
+   *   The target element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
    *
    * @return bool
+   *   Whether or not the feature exists.
    */
   public function featureExists($value, $element, $form_state) {
     $bundle = $this->assigner->getBundle($this->bundle);
@@ -418,8 +420,10 @@ class FeaturesEditForm extends FormBase {
   }
 
   /**
-   * Returns the render array elements for the Components selection on the Edit
-   * form.
+   * Returns the render array elements for the Components selection.
+   *
+   * @return array
+   *   The render array.
    */
   protected function buildComponentList(FormStateInterface $form_state) {
     $element = [
@@ -434,7 +438,7 @@ class FeaturesEditForm extends FormBase {
 
     // Filter field used in JavaScript, so JavaScript will unhide it.
     $element['features_filter_wrapper'] = [
-      '#type' => 'fieldgroup',
+      '#type' => 'fieldset',
       '#title' => $this->t('Filters'),
       '#title_display' => 'invisible',
       '#tree' => FALSE,
@@ -580,7 +584,7 @@ class FeaturesEditForm extends FormBase {
         foreach ($sections as $section) {
           $element[$component][$section] = [
             '#type' => 'checkboxes',
-            '#options' => !empty($component_info['_features_options'][$section]) ?  $this->domDecodeOptions($component_info['_features_options'][$section]) : [],
+            '#options' => !empty($component_info['_features_options'][$section]) ? $this->domDecodeOptions($component_info['_features_options'][$section]) : [],
             '#default_value' => !empty($component_info['_features_selected'][$section]) ? $this->domDecodeOptions($component_info['_features_selected'][$section], FALSE) : [],
             '#attributes' => [
               'class' => ['component-' . $section, 'js-component-' . $section],
@@ -614,8 +618,7 @@ class FeaturesEditForm extends FormBase {
   }
 
   /**
-   * Returns the full feature export array based upon user selections in
-   * form_state.
+   * Returns the full feature export array based upon user selections.
    *
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   Optional form_state information for user selections. Can be updated to
@@ -624,8 +627,8 @@ class FeaturesEditForm extends FormBase {
    * @return \Drupal\features\Package
    *   New export array to be exported
    *   array['components'][$component_name] = $component_info
-   *     $component_info['_features_options'][$section] is list of available options
-   *     $component_info['_features_selected'][$section] is option state TRUE/FALSE
+   *     $component_info['_features_options'][$section] list of options
+   *     $component_info['_features_selected'][$section] option state TRUE/FALSE
    *   $section = array('sources', included', 'detected', 'added')
    *     sources - options that are available to be added to the feature
    *     included - options that have been previously exported to the feature
@@ -672,7 +675,7 @@ class FeaturesEditForm extends FormBase {
     $components = [];
     $this->conflicts = [];
     foreach ($config as $item_name => $item) {
-      if (($item->getPackage() != $package_name) &&
+      if (!is_null($item->getPackage()) && ($item->getPackage() != $package_name) &&
         !empty($packages[$item->getPackage()]) && ($packages[$item->getPackage()]->getStatus() != FeaturesManagerInterface::STATUS_NO_EXPORT)) {
         $this->conflicts[$item->getType()][$item->getShortName()] = $item->getLabel();
       }
@@ -691,10 +694,7 @@ class FeaturesEditForm extends FormBase {
       // configuration storage.
       if (isset($config[$item_name])) {
         $item = $config[$item_name];
-        // Remove any conflicts if those are not being allowed.
-        // if ($this->allowConflicts || !isset($this->conflicts[$item['type']][$item['name_short']])) {
         $exported_features_info[$item->getType()][$item->getShortName()] = $item->getLabel();
-        // }
       }
       else {
         $this->missing[] = $item_name;
@@ -751,7 +751,10 @@ class FeaturesEditForm extends FormBase {
       // checkboxes.
       foreach (['included', 'added', 'detected'] as $section) {
         if (!$form_state->isValueEmpty([$component, $section])) {
-          $config_new[$component] = $config_new[$component] + $this->domDecodeOptions(array_filter($form_state->getValue([$component, $section])));
+          $config_new[$component] = $config_new[$component] + $this->domDecodeOptions(array_filter($form_state->getValue([
+            $component,
+            $section,
+          ])));
           $config_count[$component]++;
         }
       }
@@ -1037,7 +1040,8 @@ class FeaturesEditForm extends FormBase {
         try {
           $this->configRevert->import($type, $item['name_short']);
           $this->messenger()->addStatus($this->t('Imported @name', ['@name' => $config_name]));
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
           $this->messenger()->addError($this->t('Error importing @name : @message',
             ['@name' => $config_name, '@message' => $e->getMessage()]));
         }
@@ -1116,8 +1120,7 @@ class FeaturesEditForm extends FormBase {
   }
 
   /**
-   * Decodes an array of option values that have been encoded by
-   * features_dom_encode_options().
+   * Decodes an array of option values that have been encoded.
    *
    * @param array $options
    *   The key to encode.

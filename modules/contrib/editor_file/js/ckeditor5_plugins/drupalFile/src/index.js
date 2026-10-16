@@ -6,7 +6,7 @@
  * I.e. this file's purpose is to make plugin(s) discoverable.
  */
 
-import DrupalFile from "./drupalfile";
+import DrupalFile from './drupalfile';
 import DrupalInsertFile from './insertfile/drupalinsertfile';
 
 // @todo test extensively

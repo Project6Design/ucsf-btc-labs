@@ -6,11 +6,14 @@ parameters:
 	parallel:
 		maximumNumberOfProcesses: 0
 	customRulesetUsed: true
+	level: 0
 	ignoreErrors:
 		- '#\Drupal calls should be avoided in classes, use dependency injection instead#'
 		- '#Plugin definitions cannot be altered.#'
 		- '#Missing cache backend declaration for performance.#'
 		- '#Plugin manager has cache backend specified but does not declare cache tags.#'
+		# new static() is a best practice in Drupal, so we cannot fix that.
+		- "#^Unsafe usage of new static#"
 	# FROM mglaman/drupal-check/phpstan/base_config.neon
 	reportUnmatchedIgnoredErrors: false
 	excludePaths:

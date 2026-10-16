@@ -5,7 +5,6 @@
  * Container photoswipe_dynamic_caption hooks.
  */
 
-use Drupal\Component\Utility\Xss;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FormatterInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -30,6 +29,12 @@ function photoswipe_dynamic_caption_library_info_alter(&$libraries, $module) {
       elseif ($is_local) {
         $libraries['photoswipe_dynamic_caption.init']['dependencies'][] = 'photoswipe_dynamic_caption/photoswipe_dynamic_caption.local';
       }
+
+      // Optionally load DOMPurify when HTML captions are enabled and the
+      // library is installed.
+      if (!empty(\Drupal::config('photoswipe_dynamic_caption.settings')->get('allowHtmlCaptions')) && $library_file_finder->find('dompurify/dist/purify.min.js')) {
+        $libraries['photoswipe_dynamic_caption.init']['dependencies'][] = 'photoswipe_dynamic_caption/dompurify';
+      }
       break;
 
     // We need this because we want react on event that is triggered when
@@ -43,12 +48,16 @@ function photoswipe_dynamic_caption_library_info_alter(&$libraries, $module) {
 /**
  * Implements hook_photoswipe_js_options_alter().
  */
-function photoswipe_dynamic_caption_photoswipe_js_options_alter(array &$settings) {
+function photoswipe_dynamic_caption_photoswipe_js_options_alter(array &$settings, array &$cacheTags = []) {
   // Other modules might already set caption options:
   $options = $settings['captionOptions'] ?? [];
   // Merge user options with our global options (user options have higher
   // priority):
   $settings['captionOptions'] = array_merge(\Drupal::config('photoswipe_dynamic_caption.settings')->get('options'), $options);
+  // Also add our allowHtmlCaptions setting:
+  $settings['allowHtmlCaptions'] = !empty(\Drupal::config('photoswipe_dynamic_caption.settings')->get('allowHtmlCaptions'));
+  // Ensure cached formatter output is invalidated when caption settings change.
+  $cacheTags[] = 'config:photoswipe_dynamic_caption.settings';
 }
 
 /**
@@ -71,6 +80,7 @@ function photoswipe_dynamic_caption_field_formatter_third_party_settings_form(Fo
       'entity_label' => t('Entity label'),
       'custom' => t('Custom (with tokens)'),
     ];
+
     // Add media entity name if the target is a media entity:
     $field_settings = $field_definition->getSettings();
     if (isset($field_settings['target_type']) && $field_settings['target_type'] === 'media') {
@@ -83,6 +93,21 @@ function photoswipe_dynamic_caption_field_formatter_third_party_settings_form(Fo
         if ($parent_field != $field_definition->getName()) {
           $caption_options[$parent_field] = $parent_field;
         }
+      }
+    }
+
+    // If we target another entity, also add its field as potential caption
+    // options:
+    if ($field_definition->getType() == 'entity_reference') {
+      $target_type = $field_definition->getSetting('target_type');
+      $target_bundles = $field_definition->getSetting('handler_settings')['target_bundles'];
+
+      // We always have 1 target, so we can access it directly:
+      /** @var \Drupal\Core\Field\FieldDefinitionInterface[] $fields */
+      $fields = \Drupal::service('entity_field.manager')->getFieldDefinitions($target_type, reset($target_bundles));
+
+      foreach ($fields as $field) {
+        $caption_options['photoswipe_dynamic_caption_referenced_entity_' . $field->getName()] = 'Referenced Entity: ' . $field->getName();
       }
     }
 
@@ -216,37 +241,69 @@ function photoswipe_dynamic_caption_get_caption(ImageDTO $imageDTO) {
         break;
 
       case 'custom':
-        $entity_type = $imageDTO->getEntity()->getEntityTypeId();
-        $caption = \Drupal::service('token')->replace($thirdPartySettings['photoswipe_dynamic_caption']['photoswipe_caption_custom'],
-        [
-          $entity_type => $imageDTO->getEntity(),
-          'file' => $imageDTO->getItem(),
-        ],
-        [
+        // Note: For media reference fields the ImageDTO already replaced the
+        // item of the formatted field (the reference to the media) with the
+        // image field item of the media entity, so $item is the media's image
+        // field here, not the field the formatter is attached to.
+        $item = $imageDTO->getItem();
+        // The entity the formatted field belongs to, e.g. the node:
+        $hostEntity = $imageDTO->getEntity();
+        // The entity the image field item belongs to (the entity that has the
+        // image field). For media references this is the media entity, for an
+        // image field directly on a node it is the node itself:
+        $itemOwnerEntity = $item->getEntity();
+        // The file the image field item points to:
+        $itemTargetEntity = $item->entity;
+        // Provide all of them to the token service, keyed by their entity
+        // type (e.g. node, media, file), so tokens like [node:title],
+        // [media:name] and [file:name] work. If two entities share a type
+        // (host and owner are both the node), the first one is kept:
+        $tokenData = [];
+        foreach ([$hostEntity, $itemOwnerEntity, $itemTargetEntity] as $tokenEntity) {
+          if (!empty($tokenEntity)) {
+            $tokenData += [$tokenEntity->getEntityTypeId() => $tokenEntity];
+          }
+        }
+        $caption = \Drupal::service('token')->replace($thirdPartySettings['photoswipe_dynamic_caption']['photoswipe_caption_custom'], $tokenData, [
           'clear' => TRUE,
           'langcode' => \Drupal::service('language_manager')->getCurrentLanguage()->getId(),
-        ]
-        );
+        ]);
         break;
 
       case '':
         return '';
 
       default:
+        // The caption setting starts with
+        // "photoswipe_dynamic_caption_referenced_entity_", we need to check the
+        // field values of the referenced entity:
+        if (str_starts_with($caption_setting, 'photoswipe_dynamic_caption_referenced_entity_')) {
+          $entity = $imageDTO->getItem()->getParent()->getEntity();
+          $caption_setting = str_replace('photoswipe_dynamic_caption_referenced_entity_', '', $caption_setting);
+        }
+        // Else we check the entity itself:
+        else {
+          $entity = $imageDTO->getEntity();
+        }
         // Assume the user wants to use another node field as the caption.
-        $entity = $imageDTO->getEntity();
-        if (isset($entity->{$caption_setting}) && ($fieldValue = $entity->get($caption_setting)->value) !== NULL) {
+        if ($entity->hasField($caption_setting)) {
           // Note, even if we have a field with a cardinality > 1, "value" will
           // always resolve to a single value here.
-          // The caption value needs to get escaped:
-          $caption = Xss::filter($fieldValue);
+          $fieldValue = $entity->get($caption_setting)->value;
+          // The field value is empty, return early:
+          if (empty($fieldValue)) {
+            $caption = '';
+            break;
+          }
+          // Assign the field value to the caption:
+          $caption = $fieldValue;
         }
         else {
           // No such field exists or the field value is empty. Log a warning:
           $bundle = $entity->bundle();
           $entityType = $entity->getEntityTypeId();
           $entityId = $entity->id();
-          \Drupal::logger('photoswipe_dynamic_caption')->warning("The caption for an image inside entity '@entityId' (entity type: '@entityType', bundle '@bundle') could not get generated. Either the field '@fieldName' doesn't exist on the entity, or its value is NULL.", [
+          \Drupal::logger('photoswipe_dynamic_caption')->warning("The caption for an image inside entity '@entityId' (entity type: '@entityType', bundle '@bundle') could not get generated. The field '@fieldName' doesn't exist on the entity.", [
             '@entityId' => $entityId,
             '@bundle' => $bundle,
             '@entityType' => $entityType,
@@ -261,5 +318,7 @@ function photoswipe_dynamic_caption_get_caption(ImageDTO $imageDTO) {
   if ($caption === NULL) {
     $caption = '';
   }
+  // Return the plain caption. We escape it on the js side only, so injected
+  // js outside of the formatter markup will also get escaped.
   return $caption;
 }

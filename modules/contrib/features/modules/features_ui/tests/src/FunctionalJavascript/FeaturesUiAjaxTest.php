@@ -4,21 +4,15 @@ namespace Drupal\Tests\features_ui\FunctionalJavascript;
 
 use Drupal\Core\Url;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the creation of a features bundle using AJAX.
- *
- * @group features_ui
  */
+#[Group('features_ui')]
+#[RunTestsInSeparateProcesses]
 class FeaturesUiAjaxTest extends WebDriverTestBase {
-
-  /**
-   * The variable.
-   *
-   * @var mixed
-   * @todo Remove the disabled strict config schema checking.
-   */
-  protected $strictConfigSchema = FALSE;
 
   /**
    * {@inheritdoc}
@@ -34,6 +28,7 @@ class FeaturesUiAjaxTest extends WebDriverTestBase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
+    $this->strictConfigSchema = FALSE;
     parent::setUp();
     $user = $this->drupalCreateUser(['administer site configuration', 'export configuration']);
     $this->drupalLogin($user);

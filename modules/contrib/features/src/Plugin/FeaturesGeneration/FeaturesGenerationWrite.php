@@ -2,10 +2,12 @@
 
 namespace Drupal\features\Plugin\FeaturesGeneration;
 
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\File\FileSystemInterface;
-use Drupal\features\FeaturesGenerationMethodBase;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Generation;
 use Drupal\features\FeaturesBundleInterface;
+use Drupal\features\FeaturesGenerationMethodBase;
 use Drupal\features\Package;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -19,6 +21,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   description = @Translation("Write packages and optional profile to the file system."),
  * )
  */
+#[Generation(
+  id: FeaturesGenerationWrite::METHOD_ID,
+  weight: 2,
+  name: new TranslatableMarkup('Write'),
+  description: new TranslatableMarkup('Write packages and optional profile to the file system.')
+)]
 class FeaturesGenerationWrite extends FeaturesGenerationMethodBase implements ContainerFactoryPluginInterface {
 
   /**

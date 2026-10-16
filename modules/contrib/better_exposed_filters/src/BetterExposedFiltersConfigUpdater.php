@@ -405,6 +405,75 @@ class BetterExposedFiltersConfigUpdater {
   }
 
   /**
+   * Set default value for new per-filter "no_reset" option.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The View to update.
+   *
+   * @return bool
+   *   Whether the view was updated.
+   */
+  public function updateAddNoResetKey(ViewEntityInterface $view): bool {
+    $changed = FALSE;
+    // Go through each display on each view.
+    $displays = $view->get('display');
+    foreach ($displays as &$display) {
+      if (isset($display['display_options']['exposed_form']['type'])) {
+        if ($display['display_options']['exposed_form']['type'] == 'bef') {
+          $exposed_form = $display['display_options']['exposed_form'];
+
+          $bef_settings = $exposed_form['options']['bef'];
+          if (isset($bef_settings['filter'])) {
+            foreach ($bef_settings['filter'] as $filter_id => $settings) {
+              if (!isset($settings['advanced']) || isset($settings['advanced']['no_reset'])) {
+                continue;
+              }
+              $display['display_options']['exposed_form']['options']['bef']['filter'][$filter_id]['advanced']['no_reset'] = FALSE;
+              $changed = TRUE;
+            }
+          }
+        }
+      }
+    }
+    if ($changed) {
+      $view->set('display', $displays);
+    }
+    return $changed;
+  }
+
+  /**
+   * Set default value for the new exposed sort "no_reset" option.
+   *
+   * @param \Drupal\views\ViewEntityInterface $view
+   *   The View to update.
+   *
+   * @return bool
+   *   Whether the view was updated.
+   */
+  public function updateAddSortNoResetKey(ViewEntityInterface $view): bool {
+    $changed = FALSE;
+    // Go through each display on each view.
+    $displays = $view->get('display');
+    foreach ($displays as &$display) {
+      if (isset($display['display_options']['exposed_form']['type'])) {
+        if ($display['display_options']['exposed_form']['type'] == 'bef') {
+          $exposed_form = $display['display_options']['exposed_form'];
+
+          $bef_settings = $exposed_form['options']['bef'];
+          if (isset($bef_settings['sort']['advanced']) && !isset($bef_settings['sort']['advanced']['no_reset'])) {
+            $display['display_options']['exposed_form']['options']['bef']['sort']['advanced']['no_reset'] = FALSE;
+            $changed = TRUE;
+          }
+        }
+      }
+    }
+    if ($changed) {
+      $view->set('display', $displays);
+    }
+    return $changed;
+  }
+
+  /**
    * Remove the sort_options_unsupported key.
    *
    * @param \Drupal\views\ViewEntityInterface $view

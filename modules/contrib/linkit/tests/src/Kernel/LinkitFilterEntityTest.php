@@ -12,6 +12,7 @@ use Drupal\file\FileInterface;
 use Drupal\filter\FilterPluginCollection;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\Tests\Traits\Core\PathAliasTestTrait;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the Linkit filter.
@@ -20,6 +21,7 @@ use Drupal\Tests\Traits\Core\PathAliasTestTrait;
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class LinkitFilterEntityTest extends LinkitKernelTestBase {
 
   use AssertLinkitFilterTrait;
@@ -63,7 +65,7 @@ class LinkitFilterEntityTest extends LinkitKernelTestBase {
   /**
    * {@inheritdoc}
    */
-  public function register(ContainerBuilder $container) {
+  public function register(ContainerBuilder $container): void {
     parent::register($container);
 
     // Undo what the parent did, to allow testing path aliases in kernel tests.

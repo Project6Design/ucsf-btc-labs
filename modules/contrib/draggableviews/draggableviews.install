@@ -34,7 +34,7 @@ function draggableviews_schema() {
       ],
       'args' => [
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 1024,
         'not null' => FALSE,
         'default' => '',
         'description' => 'Makes the order unique for a given set of arguments',
@@ -91,4 +91,12 @@ function draggableviews_update_8105() {
     'description' => 'Makes the order unique for a given set of arguments',
   ];
   \Drupal::database()->schema()->changeField('draggableviews_structure', 'args', 'args', $field_spec);
+}
+
+/**
+ * Repeat update 8105 in order to update length of args field to fit new schema.
+ */
+function draggableviews_update_8106() {
+  // Just execute the same update as the latest release.
+  draggableviews_update_8105();
 }

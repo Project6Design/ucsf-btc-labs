@@ -38,7 +38,7 @@ class WithArgs extends JoinPluginBase {
     $sort = $view->sort ?? [];
     foreach ($sort as $sortClass) {
       if ($sortClass instanceof DraggableViewsSort) {
-        $pass = $sortClass->options['draggable_views_pass_arguments'] ?? 0;
+        $pass = $sortClass->options['draggable_views_pass_arguments'] ?? FALSE;
         if (empty($pass) || $pass === '0') {
           $includeArgs = FALSE;
         }

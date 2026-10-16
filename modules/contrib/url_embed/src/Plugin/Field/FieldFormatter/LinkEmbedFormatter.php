@@ -2,6 +2,8 @@
 
 namespace Drupal\url_embed\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\Attribute\FieldFormatter;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -18,6 +20,11 @@ use Drupal\url_embed\UrlEmbedHelperTrait;
  *   }
  * )
  */
+#[FieldFormatter(
+  id: 'url_embed',
+  label: new TranslatableMarkup('Embedded URL'),
+  field_types: ['link']
+)]
 class LinkEmbedFormatter extends FormatterBase {
   use UrlEmbedHelperTrait;
 

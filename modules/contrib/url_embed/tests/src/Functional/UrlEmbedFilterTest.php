@@ -2,6 +2,8 @@
 
 namespace Drupal\Tests\url_embed\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\filter\Entity\FilterFormat;
 
 /**
@@ -9,6 +11,8 @@ use Drupal\filter\Entity\FilterFormat;
  *
  * @group url_embed
  */
+#[Group('url_embed')]
+#[RunTestsInSeparateProcesses]
 class UrlEmbedFilterTest extends UrlEmbedTestBase {
 
   /**

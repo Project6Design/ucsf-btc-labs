@@ -44,6 +44,9 @@ better_exposed_filters_filter_widget:
         is_secondary:
           type: boolean
           label: 'This filter is a secondary option'
+        no_reset:
+          type: boolean
+          label: 'Do not reset this filter'
         hide_label:
           type: boolean
           label: 'Hide the label'

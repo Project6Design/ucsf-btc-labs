@@ -811,7 +811,7 @@
   imce.hasImageExtension = function (name) {
     let re = imce.imageExtensionsRE;
     if (!re) {
-      let exts = imce.getConf('image_extensions', 'jpg jpeg png gif webp');
+      let exts = imce.getConf('image_extensions', 'jpg jpeg png gif webp avif');
       exts = exts.trim().replace(/ +/g, '|');
       re = new RegExp(`\\.(${exts})$`, 'i');
       imce.imageExtensionsRE = re;

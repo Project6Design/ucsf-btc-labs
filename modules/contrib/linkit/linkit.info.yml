@@ -2,13 +2,10 @@ name: Linkit
 type: module
 description: 'Provides an easy interface for internal and external linking with wysiwyg editors.'
 package: User interface
-core_version_requirement: '>=10.1'
+core_version_requirement: '^10.2 || ^11 || ^12'
 configure: entity.linkit_profile.collection
-test_dependencies:
-  - imce:imce
-  - drupal:ckeditor
 
-# Information added by Drupal.org packaging script on 2025-06-20
-version: '7.0.5'
+# Information added by Drupal.org packaging script on 2026-09-17
+version: '7.0.17'
 project: 'linkit'
-datestamp: 1750458297
+datestamp: 1789675706

@@ -7,12 +7,14 @@ namespace Drupal\Tests\linkit\Kernel\Matchers;
 use Drupal\file\Entity\File;
 use Drupal\file\FileInterface;
 use Drupal\Tests\linkit\Kernel\LinkitKernelTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests file matcher.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class FileMatcherTest extends LinkitKernelTestBase {
 
   /**

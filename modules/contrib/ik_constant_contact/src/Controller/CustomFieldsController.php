@@ -43,11 +43,11 @@ class CustomFieldsController extends ControllerBase {
    *   Return markup array.
    */
   public function content() {
-    $fields = $this->constantContact->getCustomFields(false);
+    $fields = $this->constantContact->getCustomFields(FALSE);
     $header = ['Custom Field Name', 'Field Type', 'Custom Field ID'];
     $rows = [];
 
-    if ($fields && count($fields->custom_fields) > 0)  {
+    if ($fields && count($fields->custom_fields) > 0) {
       $markup = $this->t('Custom fields available for your account:') . '<ul>';
       foreach ($fields->custom_fields as $field) {
         $rows[] = [
@@ -55,20 +55,19 @@ class CustomFieldsController extends ControllerBase {
           $this->t($field->type),
           [
             'data' => [
-              '#markup' => '<code>' . $field->custom_field_id . '</code>'
-            ]
-          ]
+              '#markup' => '<code>' . $field->custom_field_id . '</code>',
+            ],
+          ],
         ];
       }
 
-      
     }
 
     return [
       '#type' => 'table',
       '#header' => $header,
       '#rows' => $rows,
-      '#empty' => $this->t('There are no custom fields found.')
+      '#empty' => $this->t('There are no custom fields found.'),
     ];
   }
 

@@ -3,6 +3,8 @@
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
 use Drupal\Core\Config\InstallStorage;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 
 /**
@@ -22,6 +24,18 @@ use Drupal\features\FeaturesAssignmentMethodBase;
  *   }
  * )
  */
+#[Assignment(
+  id: 'optional',
+  weight: 0,
+  name: new TranslatableMarkup('Optional type'),
+  description: new TranslatableMarkup('Assign designated types of configuration to the \'config/optional\' install directory. For example, if views are selected as optional, views assigned to any feature will be exported to the \'config/optional\' directory and will not create a dependency on the Views module.'),
+  config_route_name: 'features.assignment_optional',
+  default_settings: [
+    'types' => [
+      'config' => [],
+    ],
+  ]
+)]
 class FeaturesAssignmentOptionalType extends FeaturesAssignmentMethodBase {
 
   /**

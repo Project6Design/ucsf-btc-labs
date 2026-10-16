@@ -10,7 +10,9 @@ use Psr\Http\Message\UriInterface;
 
 class ExtractorFactory
 {
+    /** @var class-string<Extractor> */
     private string $default = Extractor::class;
+    /** @var array<string, class-string<Extractor>> */
     private array $adapters = [
         'slides.com' => Adapters\Slides\Extractor::class,
         'pinterest.com' => Adapters\Pinterest\Extractor::class,
@@ -22,7 +24,6 @@ class ExtractorFactory
         'github.com' => Adapters\Github\Extractor::class,
         'wikipedia.org' => Adapters\Wikipedia\Extractor::class,
         'archive.org' => Adapters\Archive\Extractor::class,
-        'sassmeister.com' => Adapters\Sassmeister\Extractor::class,
         'facebook.com' => Adapters\Facebook\Extractor::class,
         'instagram.com' => Adapters\Instagram\Extractor::class,
         'imageshack.com' => Adapters\ImageShack\Extractor::class,
@@ -32,9 +33,14 @@ class ExtractorFactory
         'twitter.com' => Adapters\Twitter\Extractor::class,
         'x.com' => Adapters\Twitter\Extractor::class,
     ];
+    /** @var array<string, class-string<Detectors\Detector<Extractor>>> */
     private array $customDetectors = [];
+    /** @var array<string, mixed> */
     private array $settings;
 
+    /**
+     * @param array<string, mixed>|null $settings
+     */
     public function __construct(?array $settings = [])
     {
         $this->settings = $settings ?? [];
@@ -59,12 +65,12 @@ class ExtractorFactory
             }
         }
 
-        /** @var Extractor $extractor */
         $extractor = new $class($uri, $request, $response, $crawler);
         $extractor->setSettings($this->settings);
 
-        foreach ($this->customDetectors as $name => $detector) {
-            $extractor->addDetector($name, new $detector($extractor));
+        foreach ($this->customDetectors as $name => $detectorClass) {
+            $detector = new $detectorClass($extractor);
+            $extractor->addDetector($name, $detector);
         }
 
         foreach ($extractor->createCustomDetectors() as $name => $detector) {
@@ -74,11 +80,17 @@ class ExtractorFactory
         return $extractor;
     }
 
+    /**
+     * @param class-string<Extractor> $class
+     */
     public function addAdapter(string $pattern, string $class): void
     {
         $this->adapters[$pattern] = $class;
     }
 
+    /**
+     * @param class-string<Detectors\Detector<Extractor>> $class
+     */
     public function addDetector(string $name, string $class): void
     {
         $this->customDetectors[$name] = $class;
@@ -89,11 +101,17 @@ class ExtractorFactory
         unset($this->adapters[$pattern]);
     }
 
+    /**
+     * @param class-string<Extractor> $class
+     */
     public function setDefault(string $class): void
     {
         $this->default = $class;
     }
 
+    /**
+     * @param array<string, mixed> $settings
+     */
     public function setSettings(array $settings): void
     {
         $this->settings = $settings;

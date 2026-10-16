@@ -67,6 +67,7 @@ linkit.autocomplete:
   requirements:
     # Access is handled by the matchers.
     _access: 'TRUE'
+    _user_is_logged_in: 'TRUE'
   options:
     _theme: ajax_base_page
     parameters:

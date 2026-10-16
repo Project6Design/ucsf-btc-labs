@@ -2,6 +2,8 @@
 
 namespace Drupal\features\Plugin\FeaturesAssignment;
 
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\features\Attribute\Assignment;
 use Drupal\features\FeaturesAssignmentMethodBase;
 use Drupal\features\FeaturesManagerInterface;
 
@@ -21,6 +23,18 @@ use Drupal\features\FeaturesManagerInterface;
  *   }
  * )
  */
+#[Assignment(
+  id: 'alter',
+  weight: 0,
+  name: new TranslatableMarkup('Alter'),
+  description: new TranslatableMarkup('Alter configuration items before they are exported. Altering includes options such as removing permissions from roles.'),
+  config_route_name: 'features.assignment_alter',
+  default_settings: [
+    'core' => TRUE,
+    'uuid' => TRUE,
+    'user_permissions' => TRUE,
+  ]
+)]
 class FeaturesAssignmentAlter extends FeaturesAssignmentMethodBase {
 
   /**

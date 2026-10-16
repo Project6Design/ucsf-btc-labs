@@ -6,12 +6,14 @@ namespace Drupal\Tests\linkit\Functional\Controller;
 
 use Drupal\linkit\Tests\ProfileCreationTrait;
 use Drupal\Tests\linkit\Functional\LinkitBrowserTestBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Linkit controller.
  *
  * @group linkit
  */
+#[RunTestsInSeparateProcesses]
 class LinkitControllerTest extends LinkitBrowserTestBase {
 
   use ProfileCreationTrait;

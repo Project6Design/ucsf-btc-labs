@@ -10,8 +10,11 @@
  *
  * @param array $settings
  *   Default Photoswipe settings array.
+ * @param array $cacheTags
+ *   Cache tags for the render element these options are attached to. Append
+ *   tags for any config you read that affects the options.
  */
-function hook_photoswipe_js_options_alter(array &$settings) {
+function hook_photoswipe_js_options_alter(array &$settings, array &$cacheTags = []) {
   // Disable sharing links.
   $settings['shareEl'] = FALSE;
 

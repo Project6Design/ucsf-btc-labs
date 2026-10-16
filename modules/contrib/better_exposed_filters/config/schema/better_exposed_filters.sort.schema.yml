@@ -25,6 +25,9 @@ better_exposed_filters_sort_widget:
         reset_label:
           type: label
           label: 'Reset sort label'
+        no_reset:
+          type: boolean
+          label: 'Do not reset the exposed sort'
         collapsible:
           type: boolean
           label: 'Make sort options collapsible'

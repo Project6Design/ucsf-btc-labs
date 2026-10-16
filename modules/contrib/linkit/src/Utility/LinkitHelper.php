@@ -2,9 +2,10 @@
 
 namespace Drupal\linkit\Utility;
 
+use Drupal\Component\Plugin\PluginBase;
 use Drupal\Component\Utility\UrlHelper;
-use Drupal\Core\Url;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Url;
 
 /**
  * Provides helper to operate on URIs.
@@ -39,7 +40,7 @@ class LinkitHelper {
       if (count($parts) === 2) {
         [$entity_type, $entity_id] = $parts;
         $entity_manager = \Drupal::entityTypeManager();
-        if ($entity_manager->hasDefinition($entity_type)) {
+        if (!str_contains($entity_type, PluginBase::DERIVATIVE_SEPARATOR) && $entity_manager->hasDefinition($entity_type)) {
           if ($entity = $entity_manager->getStorage($entity_type)->load($entity_id)) {
             return \Drupal::service('entity.repository')->getTranslationFromContext($entity);
           }
@@ -103,7 +104,7 @@ class LinkitHelper {
 
     $entity = self::getEntityFromUserInput($input);
     if ($entity) {
-      return 'entity:' . $entity->getEntityTypeId() . '/' . $entity->id() . static::getQueryAndFragment($input);
+      return 'entity:' . $entity->getEntityTypeId() . '/' . $entity->id();
     }
 
     // It's a relative link. If it's a file, store it as `base:`. Otherwise it's

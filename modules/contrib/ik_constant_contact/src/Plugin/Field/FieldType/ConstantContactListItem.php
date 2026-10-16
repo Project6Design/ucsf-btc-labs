@@ -10,12 +10,10 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\OptionsProviderInterface;
-use Drupal\Core\TypedData\TypedDataInterface;
-use Drupal\options\Plugin\Field\FieldType\ListStringItem;
 
 /**
  * Provides a field type for Constant Contact Lists.
- * 
+ *
  * @FieldType(
  *   id = "constant_contact_lists",
  *   label = @Translation("Constant Contact Lists"),
@@ -25,15 +23,15 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
  *   description = @Translation("All entity to select a Constant Contact list(s) to subscribe to."),
  * )
  */
-
- class ConstantContactListItem extends FieldItemBase implements OptionsProviderInterface {
+class ConstantContactListItem extends FieldItemBase implements OptionsProviderInterface {
 
   /**
    * Instantiate our service.
    * Doesn'ts eem to be able to inject in FieldType
+   *
    * @see https://drupal.stackexchange.com/questions/224247/how-do-i-inject-a-dependency-into-a-fieldtype-plugin
    *
-   * @return Drupal\ik_constant_contact\Service\ConstantContact;
+   * @return Drupal\ik_constant_contact\Service\ConstantContact
    */
   private function constantContact() {
     return \Drupal::service('ik_constant_contact');
@@ -52,10 +50,9 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
       'subscribe_on_save' => FALSE,
       'unsubscribe_on_delete' => FALSE,
       'field_mapping' => [
-        'email_address' => NULL
-      ]
+        'email_address' => NULL,
+      ],
     ] + parent::defaultStorageSettings();
-
 
     foreach ($ccFields as $ccKey => $ccField) {
       $settings['field_mapping'][$ccField] = NULL;
@@ -81,7 +78,7 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
     ];
   }
 
-   /**
+  /**
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
@@ -104,17 +101,16 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
    * {@inheritdoc}
    */
   public function storageSettingsForm(array &$form, FormStateInterface $form_state, $has_data) {
-    $element = parent::storageSettingsForm($form, $form_state, false);
+    $element = parent::storageSettingsForm($form, $form_state, FALSE);
     $entityType = $this->getEntity();
     $entityFields = $entityType->getFields();
     $cc = $this->constantContact();
-    $lists = $cc->getEnabledContactLists(false);
-
+    $lists = $cc->getEnabledContactLists(FALSE);
 
     $element['subscribe_on_save'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Subscribe to the selected lists on entity save/create. Will require an email field to map the contact to.'),
-      '#default_value' => $this->getSetting('subscribe_on_save')
+      '#default_value' => $this->getSetting('subscribe_on_save'),
     ];
 
     $element['unsubscribe_on_delete'] = [
@@ -123,8 +119,8 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
       '#description' => $this->t('Checking this will unsubscribe the contact from all lists upon entity delete. Will require an email field to map the contact to.'),
       '#default_value' => $this->getSetting('unsubscribe_on_delete'),
       '#states' => [
-        'visible' => [':input[name="settings[subscribe_on_save]"]' => ['checked' => TRUE]]
-      ]
+        'visible' => [':input[name="settings[subscribe_on_save]"]' => ['checked' => TRUE]],
+      ],
     ];
 
     $element['field_mapping'] = [
@@ -132,18 +128,18 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
       '#title' => $this->t('Entity Field Mapping to Constant Contact Fields'),
       '#tree' => TRUE,
       '#states' => [
-        'visible' => [':input[name="settings[subscribe_on_save]"]' => ['checked' => TRUE]]
-      ]
+        'visible' => [':input[name="settings[subscribe_on_save]"]' => ['checked' => TRUE]],
+      ],
     ];
 
     $element['field_mapping']['email_address'] = [
       '#type' => 'select',
       '#title' => $this->t('Email'),
-      '#default_value' => isset($this->getSetting('field_mapping')['email_address']) ? $this->getSetting('field_mapping')['email_address'] : NULL,
+      '#default_value' => $this->getSetting('field_mapping')['email_address'] ?? NULL,
       '#description' => $this->t('Requires a field of type <strong>email</strong>'),
       '#states' => [
-        'required' => [':input[name="settings[subscribe_on_save]"]' => ['checked' => TRUE]]
-      ]
+        'required' => [':input[name="settings[subscribe_on_save]"]' => ['checked' => TRUE]],
+      ],
     ];
 
     $ccConfig = $cc->getConfig();
@@ -153,16 +149,15 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
       $element['field_mapping'][$ccKey] = [
         '#type' => 'select',
         '#title' => $ccField,
-        '#default_value' => isset($this->getSetting('field_mapping')[$ccKey]) ? $this->getSetting('field_mapping')[$ccKey] : NULL,
-        '#options' => ['' => 'Do not map this field']
+        '#default_value' => $this->getSetting('field_mapping')[$ccKey] ?? NULL,
+        '#options' => ['' => 'Do not map this field'],
       ];
     }
 
     $element['field_mapping']['street_address']['#description'] = $this->t('Requires a field of type <strong>address</strong>');
 
-
-    // Add field mapping options
-    // @TODO - what to do if field is deleted.
+    // Add field mapping options.
+    // @todo what to do if field is deleted.
     foreach ($entityFields as $fieldName => $fieldItemList) {
       $fieldDefinition = $fieldItemList->getFieldDefinition();
       $fieldLabel = $fieldDefinition->getLabel();
@@ -170,12 +165,15 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
 
       if ($fieldType === 'email') {
         $element['field_mapping']['email_address']['#options'][$fieldName] = $fieldLabel;
-      } else if ($fieldType === 'address') {
+      }
+      elseif ($fieldType === 'address') {
         $element['field_mapping']['street_address']['#options'][$fieldName] = $fieldLabel;
-      } else if ($fieldType === 'datetime') {
+      }
+      elseif ($fieldType === 'datetime') {
         $element['field_mapping']['birthday']['#options'][$fieldName] = $fieldLabel;
         $element['field_mapping']['anniversary']['#options'][$fieldName] = $fieldLabel;
-      } else if (in_array($fieldType, ['string'])) {
+      }
+      elseif (in_array($fieldType, ['string'])) {
         foreach ($ccFields as $ccKey => $ccField) {
           if ($ccKey !== 'street_address') {
             $element['field_mapping'][$ccKey]['#options'][$fieldName] = $fieldLabel;
@@ -185,48 +183,50 @@ use Drupal\options\Plugin\Field\FieldType\ListStringItem;
     }
 
     if (count($lists) === 0) {
-      \Drupal::service('messenger')->addError(t('You must enable at least one mailing list for this field to work. <a href="/admin/config/services/ik-constant-contact/lists">View available lists.</a>') );
+      \Drupal::service('messenger')->addError(t('You must enable at least one mailing list for this field to work. <a href="/admin/config/services/ik-constant-contact/lists">View available lists.</a>'));
     }
 
     return $element;
   }
 
-
   /**
    * {@inheritdoc}
    */
-  public function getPossibleValues(AccountInterface $account = NULL) {
+  public function getPossibleValues(?AccountInterface $account = NULL) {
     return $this->getSettableValues($account);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getPossibleOptions(AccountInterface $account = NULL) {
+  public function getPossibleOptions(?AccountInterface $account = NULL) {
     return $this->getSettableOptions($account);
   }
-
 
   /**
    * {@inheritdoc}
    */
-  public function getSettableValues(AccountInterface $account = NULL) {
+  public function getSettableValues(?AccountInterface $account = NULL) {
     // Flatten options first, because "settable options" may contain group
     // arrays.
     $flatten_options = OptGroup::flattenOptions($this->getSettableOptions($account));
     return array_keys($flatten_options);
   }
 
-  public function getSettableOptions(AccountInterface $account = NULL) {
+  /**
+   *
+   */
+  public function getSettableOptions(?AccountInterface $account = NULL) {
     $cc = $this->constantContact();
     $options = [];
 
-    $lists = $cc->getEnabledContactLists(false);
+    $lists = $cc->getEnabledContactLists(FALSE);
 
     foreach ($lists as $id => $list) {
       $options[$id] = $list->name;
     }
-    
+
     return $options;
   }
+
 }

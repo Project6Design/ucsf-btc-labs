@@ -1,0 +1,69 @@
+site_name: "CKEditor Anchor Link"
+repo_url: https://git.drupalcode.org/project/anchor_link
+repo_name: drupal/anchor_link
+edit_uri: /-/edit/3.0.x/docs/
+
+theme:
+  name: material
+  language: en
+  logo: logo.png
+  # favicon: favicon.ico
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      primary: indigo
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      primary: indigo
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      primary: indigo
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    # - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.sections
+    # - navigation.expand
+
+nav:
+  - Introduction: "index.md"
+  - User Documentation:
+      - Installation and Setup: "1-users/0-installation.md"
+      - Inserting Anchors: "1-users/1-inserting-anchors.md"
+      - Linking to Anchors: "1-users/2-linking-to-anchors.md"
+      - Common Use Cases: "1-users/3-use-cases.md"
+  - Administrator Documentation:
+      - Configuration: "2-admins/0-configuration.md"
+      - Text Formats and Allowed HTML: "2-admins/1-text-formats.md"
+      - Linkit Integration: "2-admins/2-linkit-integration.md"
+      - Upgrading: "2-admins/3-upgrading.md"
+  - Developer Documentation:
+      - Architecture: "3-developers/0-architecture.md"
+      - Hooks and Plugins: "3-developers/1-hooks-and-plugins.md"
+      - The Linkit Matcher: "3-developers/2-linkit-matcher.md"
+  - Testing:
+      - Testing Overview: "4-testing/0-overview.md"
+      - Automated Functional Acceptance Testing: "4-testing/1-automated-functional-acceptance-testing.md"
+      - Running Tests: "4-testing/2-running-tests.md"
+      - GitLab CI: "4-testing/3-gitlab-ci.md"
+      - PHPUnit: "4-testing/4-phpunit.md"
+  - Frequently Asked Questions: "faq.md"
+
+plugins:
+  - search
+  - privacy:
+      enabled: !ENV [CI, false]
+
+markdown_extensions:
+  # - markdown.extensions.admonition
+  - pymdownx.extra

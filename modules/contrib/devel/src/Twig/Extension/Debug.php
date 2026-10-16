@@ -19,19 +19,12 @@ use Twig\TwigFunction;
 class Debug extends AbstractExtension {
 
   /**
-   * The devel dumper service.
-   */
-  protected DevelDumperManagerInterface $dumper;
-
-  /**
    * Constructs a Debug object.
    *
    * @param \Drupal\devel\DevelDumperManagerInterface $dumper
    *   The devel dumper service.
    */
-  public function __construct(DevelDumperManagerInterface $dumper) {
-    $this->dumper = $dumper;
-  }
+  public function __construct(protected DevelDumperManagerInterface $dumper) {}
 
   /**
    * {@inheritdoc}
@@ -53,9 +46,6 @@ class Debug extends AbstractExtension {
 
     return [
       new TwigFunction('devel_dump', [$this, 'dump'], $options),
-      new TwigFunction('kpr', [$this, 'dump'], $options),
-      // Preserve familiar kint() function for dumping.
-      new TwigFunction('kint', [$this, 'kint'], $options),
       new TwigFunction('devel_message', [$this, 'message'], $options),
       new TwigFunction('dpm', [$this, 'message'], $options),
       new TwigFunction('dsm', [$this, 'message'], $options),
@@ -97,14 +87,14 @@ class Debug extends AbstractExtension {
    *   An array of parameters passed to the template.
    * @param array $args
    *   An array of parameters passed the function.
-   * @param string $plugin_id
+   * @param string|null $plugin_id
    *   The plugin id. Defaults to null.
    *
    * @return false|string|null
    *   String representation of the input variables, or null if twig_debug mode
    *   is tunred off.
    */
-  private function doDump(Environment $env, array $context, array $args = [], $plugin_id = NULL): false|string|null {
+  private function doDump(Environment $env, array $context, array $args = [], ?string $plugin_id = NULL): false|string|null {
     if (!$env->isDebug()) {
       return NULL;
     }
@@ -126,27 +116,6 @@ class Debug extends AbstractExtension {
     }
 
     return ob_get_clean();
-  }
-
-  /**
-   * Similar to dump() but always uses the kint dumper if available.
-   *
-   * Handles 0, 1, or multiple arguments.
-   *
-   * @param \Twig\Environment $env
-   *   The twig environment instance.
-   * @param array $context
-   *   An array of parameters passed to the template.
-   * @param array $args
-   *   An array of parameters passed the function.
-   *
-   * @return string
-   *   String representation of the input variables.
-   *
-   * @see \Drupal\devel\DevelDumperManager::dump()
-   */
-  public function kint(Environment $env, array $context, array $args = []): string|false|null {
-    return $this->doDump($env, $context, $args, 'kint');
   }
 
   /**

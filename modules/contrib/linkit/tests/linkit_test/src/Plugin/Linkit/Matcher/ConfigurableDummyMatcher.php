@@ -3,18 +3,19 @@
 namespace Drupal\linkit_test\Plugin\Linkit\Matcher;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\linkit\Attribute\Matcher;
 use Drupal\linkit\ConfigurableMatcherBase;
 use Drupal\linkit\Suggestion\DescriptionSuggestion;
 use Drupal\linkit\Suggestion\SuggestionCollection;
 
 /**
  * Provides test linkit matchers for the configurable_dummy_matcher entity type.
- *
- * @Matcher(
- *   id = "configurable_dummy_matcher",
- *   label = @Translation("Configurable Dummy Matcher"),
- * )
  */
+#[Matcher(
+  id: "configurable_dummy_matcher",
+  label: new TranslatableMarkup("Configurable dummy matcher"),
+)]
 class ConfigurableDummyMatcher extends ConfigurableMatcherBase {
 
   /**

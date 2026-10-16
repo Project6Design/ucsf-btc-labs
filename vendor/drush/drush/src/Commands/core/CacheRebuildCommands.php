@@ -14,6 +14,7 @@ use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Drush\Drupal\DrushLoggerServiceProvider;
 
+#[CLI\Bootstrap(DrupalBootLevels::NONE)]
 final class CacheRebuildCommands extends DrushCommands
 {
     use AutowireTrait;

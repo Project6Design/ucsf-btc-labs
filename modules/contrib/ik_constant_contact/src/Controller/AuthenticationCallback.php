@@ -2,13 +2,13 @@
 
 namespace Drupal\ik_constant_contact\Controller;
 
+use Drupal\Core\Utility\Error;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Url;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\ik_constant_contact\Service\ConstantContact;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -108,35 +108,37 @@ class AuthenticationCallback extends ControllerBase {
     $errorDescription = $request->get('error_description');
 
     $settings = $this->constantContact->getConfig();
-    $client_id = isset($settings['client_id']) ? $settings['client_id'] : NULL;
-    $tokenUrl = isset($settings['token_url']) ? $settings['token_url'] : NULL;
-    $client_secret = isset($settings['client_secret']) ? $settings['client_secret'] : NULL;
-    $authType = isset($settings['auth_type']) ? $settings['auth_type'] : 'auth_code';
-    $codeVerifier = isset($settings['code_verifier']) ? $settings['code_verifier'] : NULL;
+    $client_id = $settings['client_id'] ?? NULL;
+    $tokenUrl = $settings['token_url'] ?? NULL;
+    $client_secret = $settings['client_secret'] ?? NULL;
+    $authType = $settings['auth_type'] ?? 'auth_code';
+    $codeVerifier = $settings['code_verifier'] ?? NULL;
 
-    $hasRequiredFields = false;
+    $hasRequiredFields = FALSE;
 
     if ($authType === 'pkce') {
       $hasRequiredFields = $client_id && $code && $codeVerifier;
-    } else {
+    }
+    else {
       $hasRequiredFields = $client_id && $client_secret && $code;
     }
 
-    if ($hasRequiredFields === true) {
+    if ($hasRequiredFields === TRUE) {
       try {
         $client = $this->client;
         $formParams = [
           'code' => $code,
           'redirect_uri' => $this->requestStack->getCurrentRequest()->getSchemeAndHttpHost() . '/admin/config/services/ik-constant-contact/callback',
           'grant_type' => 'authorization_code',
-          'scope' => 'contact_data+campaign_data+offline_access'
+          'scope' => 'contact_data+campaign_data+offline_access',
         ];
         $headers = [];
 
         if ($authType === 'pkce' && $codeVerifier) {
           $formParams['code_verifier'] = $codeVerifier;
           $formParams['client_id'] = $client_id;
-        } else {
+        }
+        else {
           $headers = [
             'Authorization' => 'Basic ' . base64_encode($client_id . ':' . $client_secret),
           ];
@@ -150,21 +152,21 @@ class AuthenticationCallback extends ControllerBase {
         $json = json_decode($response->getBody()->getContents());
 
         if ($json && property_exists($json, 'access_token') && property_exists($json, 'refresh_token')) {
-          // Remove outdated code and use saveTokens instead 
+          // Remove outdated code and use saveTokens instead.
           $this->constantContact->saveTokens($json);
           $this->messenger->addMessage($this->t('Tokens were successfully saved.'));
         }
         else {
-          
+
           $this->messenger->addMessage($this->t('There was a problem authorizing your account.'), $this->messenger::TYPE_ERROR);
         }
       }
       catch (RequestException $e) {
-        \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.1.0', fn() => \Drupal\Core\Utility\Error::logException(\Drupal::logger('ik_constant_contact'), $e), fn() => watchdog_exception('ik_constant_contact', $e));
+        Error::logException(\Drupal::logger('ik_constant_contact'), $e);
         $this->messenger->addMessage($this->t('There was a problem authorizing your account.'), $this->messenger::TYPE_ERROR);
       }
       catch (\Exception $e) {
-        \Drupal\Component\Utility\DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '10.1.0', fn() => \Drupal\Core\Utility\Error::logException(\Drupal::logger('ik_constant_contact'), $e), fn() => watchdog_exception('ik_constant_contact', $e));
+        Error::logException(\Drupal::logger('ik_constant_contact'), $e);
         $this->messenger->addMessage($this->t('There was a problem authorizing your account.'), $this->messenger::TYPE_ERROR);
       }
     }

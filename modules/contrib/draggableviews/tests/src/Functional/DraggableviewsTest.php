@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\draggableviews\Functional;
 
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Tests\BrowserTestBase;
 
 /**
@@ -10,6 +11,8 @@ use Drupal\Tests\BrowserTestBase;
  * @group draggableviews
  */
 class DraggableviewsTest extends BrowserTestBase {
+
+  use StringTranslationTrait;
 
   /**
    * The name of the default theme to use.
@@ -36,6 +39,20 @@ class DraggableviewsTest extends BrowserTestBase {
    * @var string
    */
   protected $profile = 'minimal';
+
+  /**
+   * An admin user with permissions.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $adminUser;
+
+  /**
+   * An authenticated user.
+   *
+   * @var \Drupal\user\UserInterface
+   */
+  protected $authUser;
 
   /**
    * {@inheritdoc}
@@ -118,14 +135,14 @@ class DraggableviewsTest extends BrowserTestBase {
     $this->assertSession()->statusCodeEquals(200);
 
     // Verify that the page contains generated content.
-    $assert_session->pageTextContains(t('Draggable Content 4'));
+    $assert_session->pageTextContains($this->t('Draggable Content 4'));
 
     // Verify that authorized user has access to order page.
     $this->drupalGet('draggableviews-demo/order');
     $this->assertSession()->statusCodeEquals(200);
 
     // Verify that the page contains generated content.
-    $assert_session->pageTextContains(t('Draggable Content 5'));
+    $assert_session->pageTextContains($this->t('Draggable Content 5'));
   }
 
 }

@@ -16,7 +16,7 @@ $extensions = $connection->select('config')
   ->condition('name', 'core.extension')
   ->execute()
   ->fetchField();
-$extensions = unserialize($extensions);
+$extensions = \unserialize($extensions, ['allowed_classes' => FALSE]);
 $extensions['module']['sitemap'] = 0;
 $connection->update('config')
   ->fields(['data' => serialize($extensions)])
@@ -24,6 +24,103 @@ $connection->update('config')
   ->condition('name', 'core.extension')
   ->execute();
 
+
+$rawBlockData = [
+  'uuid' => '8d72a2fe-ee02-4f1e-b987-25c367ad5670',
+  'langcode' => 'en',
+  'status' => TRUE,
+  'dependencies' => [
+    'module' => [
+      'sitemap',
+    ],
+    'theme' => [
+      'stark',
+    ],
+  ],
+  'id' => 'sitemap_syndicate_stark',
+  'theme' => 'stark',
+  'region' => 'content',
+  'weight' => 0,
+  'provider' => NULL,
+  'plugin' => 'sitemap_syndicate',
+  'settings' => [
+    'id' => 'sitemap_syndicate',
+    'label' => 'Syndicate (sitemap)',
+    'label_display' => 'visible',
+    'provider' => 'sitemap',
+    'cache' => [
+      'max_age' => 0,
+    ],
+  ],
+  'visibility' => [],
+];
+$connection->insert('config')
+  ->fields([
+    'collection',
+    'name',
+    'data',
+  ])
+  ->values([
+    'collection' => '',
+    'name' => 'block.block.sitemap_syndicate_stark',
+    'data' => \serialize($rawBlockData),
+  ])
+  ->execute();
+
+$rawSitemapData = [
+  '_core' => [
+    'default_config_hash' => 'GUKBlXIBQ2d0H8Q7M_Rqn1Q93tRxLPfs9cG-VeQC9NI',
+  ],
+  'page_title' => 'Sitemap',
+  'message' => [
+    'value' => '',
+    'format' => 'plain_text',
+  ],
+  'plugins' => [
+    'vocabulary:tags' => [
+      'enabled' => TRUE,
+      'weight' => 0,
+      'settings' => [
+        'title' => 'Tags',
+        'show_description' => FALSE,
+        'show_count' => FALSE,
+        'display_unpublished' => FALSE,
+        'term_depth' => 9,
+        'term_count_threshold' => 0,
+        'customize_link' => FALSE,
+        'term_link' => 'entity.taxonomy_term.canonical|taxonomy_term',
+        'always_link' => FALSE,
+        'enable_rss' => FALSE,
+        'rss_link' => 'view.taxonomy_term.feed_1|arg_0',
+        'rss_depth' => 9,
+      ],
+      'id' => 'vocabulary:tags',
+      'provider' => 'sitemap',
+    ],
+    'frontpage' => [
+      'enabled' => TRUE,
+      'weight' => 0,
+      'settings' => [
+        'title' => 'Front page',
+        'rss' => '/dolor.sit',
+      ],
+      'id' => 'frontpage',
+      'provider' => 'sitemap',
+    ],
+    'menu:main' => [
+      'enabled' => TRUE,
+      'weight' => 0,
+      'settings' => [
+        'title' => 'Main navigation',
+        'show_disabled' => FALSE,
+      ],
+      'id' => 'menu:main',
+      'provider' => 'sitemap',
+    ],
+  ],
+  'include_css' => TRUE,
+  'rss_front' => '/lorem.ipsum',
+];
 $connection->insert('config')
   ->fields([
     'collection',
@@ -33,7 +130,7 @@ $connection->insert('config')
   ->values([
     'collection' => '',
     'name' => 'sitemap.settings',
-    'data' => 'a:5:{s:5:"_core";a:1:{s:19:"default_config_hash";s:43:"GUKBlXIBQ2d0H8Q7M_Rqn1Q93tRxLPfs9cG-VeQC9NI";}s:10:"page_title";s:7:"Sitemap";s:7:"message";a:2:{s:5:"value";s:0:"";s:6:"format";s:10:"plain_text";}s:7:"plugins";a:3:{s:15:"vocabulary:tags";a:5:{s:7:"enabled";b:1;s:6:"weight";i:0;s:8:"settings";a:12:{s:5:"title";s:4:"Tags";s:16:"show_description";b:0;s:10:"show_count";b:0;s:19:"display_unpublished";b:0;s:10:"term_depth";i:9;s:20:"term_count_threshold";i:0;s:14:"customize_link";b:0;s:9:"term_link";s:44:"entity.taxonomy_term.canonical|taxonomy_term";s:11:"always_link";b:0;s:10:"enable_rss";b:0;s:8:"rss_link";s:31:"view.taxonomy_term.feed_1|arg_0";s:9:"rss_depth";i:9;}s:2:"id";s:15:"vocabulary:tags";s:8:"provider";s:7:"sitemap";}s:9:"frontpage";a:5:{s:7:"enabled";b:1;s:6:"weight";i:0;s:8:"settings";a:2:{s:5:"title";s:10:"Front page";s:3:"rss";s:8:"/rss.xml";}s:2:"id";s:9:"frontpage";s:8:"provider";s:7:"sitemap";}s:9:"menu:main";a:5:{s:7:"enabled";b:1;s:6:"weight";i:0;s:8:"settings";a:2:{s:5:"title";s:15:"Main navigation";s:13:"show_disabled";b:0;}s:2:"id";s:9:"menu:main";s:8:"provider";s:7:"sitemap";}}s:11:"include_css";b:1;}',
+    'data' => \serialize($rawSitemapData),
   ])
   ->execute();
 

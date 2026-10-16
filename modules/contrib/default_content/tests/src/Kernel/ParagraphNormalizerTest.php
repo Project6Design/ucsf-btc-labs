@@ -192,17 +192,12 @@ class ParagraphNormalizerTest extends KernelTestBase {
         ],
         'promote' => [
           0 => [
-            'value' => TRUE,
+            'value' => $node->isPromoted(),
           ],
         ],
         'sticky' => [
           0 => [
             'value' => FALSE,
-          ],
-        ],
-        'revision_translation_affected' => [
-          0 => [
-            'value' => TRUE,
           ],
         ],
         'field_paragraphs' => [
@@ -231,11 +226,6 @@ class ParagraphNormalizerTest extends KernelTestBase {
                     'value' => [],
                   ],
                 ],
-                'revision_translation_affected' => [
-                  0 => [
-                    'value' => TRUE,
-                  ],
-                ],
                 'field_paragraphs' => [
                   0 => [
                     'entity' => [
@@ -262,11 +252,6 @@ class ParagraphNormalizerTest extends KernelTestBase {
                             'value' => ['this is' => 'a behavior setting'],
                           ],
                         ],
-                        'revision_translation_affected' => [
-                          0 => [
-                            'value' => TRUE,
-                          ],
-                        ],
                         'field_paragraphs' => [
                           0 => [
                             'entity' => [
@@ -291,11 +276,6 @@ class ParagraphNormalizerTest extends KernelTestBase {
                                 'behavior_settings' => [
                                   0 => [
                                     'value' => [],
-                                  ],
-                                ],
-                                'revision_translation_affected' => [
-                                  0 => [
-                                    'value' => TRUE,
                                   ],
                                 ],
                                 'field_node_reference' => [

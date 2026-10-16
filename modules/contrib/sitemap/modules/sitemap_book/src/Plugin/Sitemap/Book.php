@@ -2,28 +2,29 @@
 
 namespace Drupal\sitemap_book\Plugin\Sitemap;
 
-use Drupal\book\BookManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\book\BookManagerInterface;
+use Drupal\sitemap\Attribute\Sitemap;
 use Drupal\sitemap\SitemapBase;
+use Drupal\sitemap_book\Plugin\Derivative\BookSitemapDeriver;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a sitemap for a book.
- *
- * @Sitemap(
- *   id = "book",
- *   title = @Translation("Book name"),
- *   description = @Translation("Book type"),
- *   settings = {
- *     "title" = NULL,
- *     "show_expanded" = TRUE,
- *   },
- *   deriver = "Drupal\sitemap_book\Plugin\Derivative\BookSitemapDeriver",
- *   enabled = FALSE,
- *   book = "",
- * )
  */
+#[Sitemap(
+  id: 'book',
+  title: new TranslatableMarkup('Book name'),
+  description: new TranslatableMarkup('Book type'),
+  enabled: FALSE,
+  settings: [
+    'title' => NULL,
+    'show_expanded' => TRUE,
+  ],
+  deriver: BookSitemapDeriver::class,
+)]
 class Book extends SitemapBase {
 
   /**
