@@ -1,0 +1,199 @@
+name: Pantheon Secrets
+
+permissions:
+  contents: read
+
+concurrency:
+  group: 'ci-${{ github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    branches:
+      - 1.x
+  push:
+    branches:
+      - 1.x
+  repository_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      tmate_enabled:
+        description: Enable tmate debugging
+        required: true
+        default: "0"
+      preserve_multidev:
+        description: Preserve testing multidev environments
+        required: true
+        default: "0"
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: [ "8.2", "8.5" ]
+    name: Code linting (PHP ${{ matrix.php-version }})
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: vendor
+          key: composer-${{ matrix.php-version }}-${{ hashFiles('composer.json') }}
+          restore-keys: composer-${{ matrix.php-version }}-
+
+      - name: Composer install
+        run: composer install --no-interaction --no-progress
+
+      - name: Code sniff
+        run: composer run-script code:lint
+
+  phpcompatibility:
+    runs-on: ubuntu-latest
+    name: PHP Compatibility
+    steps:
+      - name: PHPCompatibility
+        uses: pantheon-systems/phpcompatibility-action@44be5a8381691b9a209404a3f45df8254f1ce08f # v1.1.2
+        with:
+          test-versions: 8.2-
+
+  build_test:
+    # Test combinations (floor + ceiling per Drupal version):
+    #   Drupal 10: PHP 8.2, 8.4
+    #   Drupal 11: PHP 8.3, 8.5
+    #   Drupal 12: PHP 8.5 (D12 requires PHP 8.5+)
+    strategy:
+      matrix:
+        drupal-version: [ 10, 11, 12 ]
+        php-version: [ "8.2", "8.3", "8.4", "8.5" ]
+        exclude:
+          - drupal-version: 10
+            php-version: "8.3"
+          - drupal-version: 10
+            php-version: "8.5"
+          - drupal-version: 11
+            php-version: "8.2"
+          - drupal-version: 11
+            php-version: "8.4"
+          - drupal-version: 12
+            php-version: "8.2"
+          - drupal-version: 12
+            php-version: "8.3"
+          - drupal-version: 12
+            php-version: "8.4"
+      fail-fast: false
+    runs-on: ubuntu-latest
+    name: Build and test (Drupal ${{ matrix.drupal-version }}, PHP ${{ matrix.php-version }})
+    needs: [ linting, phpcompatibility ]
+    env:
+      DRUPAL_VERSION: ${{ matrix.drupal-version }}
+      PHP_VERSION: ${{ matrix.php-version }}
+      TERMINUS_SITE: ${{ matrix.drupal-version == 12 && vars.PANTHEON_SITE_D12 || vars.TERMINUS_SITE }}
+      TERMINUS_TOKEN: ${{ secrets.TERMINUS_TOKEN }}
+      GIT_EMAIL: ${{ vars.GIT_EMAIL }}
+      GITHUB_RUN_NUMBER: ${{ github.run_number }}
+      GITHUB_TOKEN: ${{ github.token }}
+      COMMIT_SHA: ${{ github.sha }}
+      # All build_test legs are >= 8.2, so Terminus 4.x is always valid.
+      TERMINUS_VERSION: '4.1.4'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set multidev name and constraint
+        run: ./.ci/set-multidev-and-constraint.sh
+        env:
+          GIT_REF: ${{ github.head_ref || github.ref_name }}
+          GIT_REF_TYPE: ${{ github.ref_type }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+
+      - name: Install Terminus
+        uses: pantheon-systems/terminus-github-actions@b0a005d0e886678b25cb6cd7833cf8d8cf779900 # v1.2.9
+        with:
+          pantheon-machine-token: ${{ env.TERMINUS_TOKEN }}
+          terminus-version: ${{ env.TERMINUS_VERSION }}
+
+      - name: Verify Terminus auth
+        run: terminus auth:whoami
+
+      - name: Install Terminus secrets plugin
+        run: terminus self:plugin:install pantheon-systems/terminus-secrets-manager-plugin
+
+      - name: Setup Git
+        run: |
+          git config --global user.email "$GIT_EMAIL"
+          git config --global user.name "Github Actions"
+          git config --global --add safe.directory '*'
+
+      - name: Setup SSH Keys
+        uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Create multidev and install module
+        run: ./.ci/create-multidev.sh "$MULTIDEV_NAME" "$TERMINUS_SITE" "$GITHUB_ENV" "$GIT_CONSTRAINT" "$PHP_VERSION" "$DRUPAL_VERSION"
+
+      - name: Setup tmate session
+        if: ${{ github.event.inputs.tmate_enabled == 1 }}
+        uses: mxschmitt/action-tmate@35b54afac29c97fb54faba5b513f8fbd1882f113 # v3.24
+
+      - name: Show PHP versions
+        run: |
+          echo "Runner PHP: $(php -v | head -1)"
+          echo "Multidev PHP: $(terminus drush $TERMINUS_SITE.$MULTIDEV_ENV -- ev "echo 'PHP ' . PHP_VERSION;")"
+
+      - name: Run tests
+        run: ./.ci/run-tests.sh
+
+      - name: Delete current multidev
+        if: ${{ success() && github.event.inputs.preserve_multidev != '1' }}
+        run: terminus multidev:delete "$TERMINUS_SITE.$MULTIDEV_ENV" --delete-branch --yes || true
+
+      - name: Show multidev URL for investigation
+        if: ${{ failure() && env.MULTIDEV_ENV != '' }}
+        run: 'echo "Multidev URL: https://${MULTIDEV_ENV}-${TERMINUS_SITE}.pantheonsite.io"'
+
+      - name: Cleanup stale CI multidevs
+        if: always()
+        run: ./.ci/cleanup-multidevs.sh "$MULTIDEV_PREFIX" "${MULTIDEV_ENV:-}"
+
+  mirror:
+    runs-on: ubuntu-latest
+    name: Checkout & push to remote
+    needs: [build_test]
+    if: ${{ github.repository == 'pantheon-systems/pantheon_secrets' && (github.ref_type == 'tag' || github.ref == 'refs/heads/1.x') }}
+    env:
+      BRANCH: ${{ github.ref_name }}
+      WORKSPACE: ${{ github.workspace }}
+      DRUPAL_ORG_REMOTE: ${{ secrets.DRUPAL_ORG_REMOTE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@87a8f067114a8ce263df83e9ed5c849953548bc3 # v2.8.1
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          if_key_exists: ignore
+      - name: Pushes to drupal.org repository
+        run: |
+          cd $WORKSPACE
+          git remote add drupalorg $DRUPAL_ORG_REMOTE
+          git push drupalorg $BRANCH

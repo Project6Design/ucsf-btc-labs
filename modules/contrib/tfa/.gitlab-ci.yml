@@ -1,0 +1,47 @@
+################
+# GitLab template for the tfa module.
+# Utilizes the Drupal gitlab_templates base
+################
+
+include:
+  ################
+  # DrupalCI includes:
+  # As long as you include this, any future includes added by the Drupal Association will be accessible to your pipelines automatically.
+  # View these include files at https://git.drupalcode.org/project/gitlab_templates/
+  ################
+  - project: $_GITLAB_TEMPLATES_REPO
+    ref: $_GITLAB_TEMPLATES_REF
+    file:
+      - '/includes/include.drupalci.main.yml'
+      - '/includes/include.drupalci.variables.yml'
+      - '/includes/include.drupalci.workflows.yml'
+
+################
+# Pipeline configuration variables
+#
+# Docs at https://git.drupalcode.org/project/gitlab_templates/-/blob/1.0.x/includes/include.drupalci.variables.yml
+################
+variables:
+  OPT_IN_TEST_NEXT_MINOR: 1
+  OPT_IN_TEST_NEXT_MAJOR: 1
+
+phpstan-new-baseline:
+  stage: validate
+  rules:
+    - if: '$GENERATE_PHPSTAN_BASELINE == "1"'
+      when: always
+    - when: never
+  script:
+    # Purge the existing baseline.
+    - echo '' > web/modules/custom/$CI_PROJECT_NAME/phpstan-baseline.neon
+    # Generate a new baseline.
+    # We must put the baseline in the source folder to get relative paths.
+    - vendor/bin/phpstan analyse -c web/modules/custom/$CI_PROJECT_NAME/phpstan.neon --no-progress --generate-baseline web/modules/custom/$CI_PROJECT_NAME/phpstan-baseline-new.neon web/modules/custom/$CI_PROJECT_NAME
+    - mv web/modules/custom/$CI_PROJECT_NAME/phpstan-baseline-new.neon phpstan-baseline-new.neon
+  allow_failure: false
+  artifacts:
+    expose_as: phpstan-new-baseline
+    when: always
+    expire_in: 6 mos
+    paths:
+      - phpstan-baseline-new.neon

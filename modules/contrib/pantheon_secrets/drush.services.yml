@@ -1,0 +1,7 @@
+services:
+  pantheon_secrets.commands:
+    class: \Drupal\pantheon_secrets\Commands\PantheonSecretsCommands
+    arguments:
+      - '@pantheon_secrets.secrets_syncer'
+    tags:
+      - { name: drush.command }

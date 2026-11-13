@@ -56,6 +56,8 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         'c' =>
         array (
             'cweagans\\Composer\\' => 18,
+            'chillerlan\\Settings\\' => 20,
+            'chillerlan\\QRCode\\' => 18,
         ),
         'T' =>
         array (
@@ -119,8 +121,14 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
             'PhpTuf\\ComposerStager\\' => 22,
             'PhpParser\\' => 10,
             'Peast\\' => 6,
+            'ParagonIE\\ConstantTime\\' => 23,
             'Pantheon\\Integrations\\' => 22,
+            'PantheonSystems\\CustomerSecrets\\' => 32,
             'PHPStan\\' => 8,
+        ),
+        'O' =>
+        array (
+            'Otp\\' => 4,
         ),
         'M' =>
         array (
@@ -171,6 +179,7 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
             'Doctrine\\Common\\Collections\\' => 28,
             'Doctrine\\Common\\' => 16,
             'Dflydev\\DotAccessData\\' => 22,
+            'Defuse\\Crypto\\' => 14,
         ),
         'C' =>
         array (
@@ -217,6 +226,14 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         'cweagans\\Composer\\' =>
         array (
             0 => __DIR__ . '/..' . '/cweagans/composer-patches/src',
+        ),
+        'chillerlan\\Settings\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/chillerlan/php-settings-container/src',
+        ),
+        'chillerlan\\QRCode\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/chillerlan/php-qrcode/src',
         ),
         'Twig\\Extra\\Html\\' =>
         array (
@@ -423,13 +440,25 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         array (
             0 => __DIR__ . '/..' . '/mck89/peast/lib/Peast',
         ),
+        'ParagonIE\\ConstantTime\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
+        ),
         'Pantheon\\Integrations\\' =>
         array (
             0 => __DIR__ . '/..' . '/pantheon-systems/drupal-integrations/src',
         ),
+        'PantheonSystems\\CustomerSecrets\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/pantheon-systems/customer-secrets-php-sdk/src',
+        ),
         'PHPStan\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpstan/phpstan-deprecation-rules/src',
+        ),
+        'Otp\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/christian-riesen/otp/src',
         ),
         'Masterminds\\' =>
         array (
@@ -547,6 +576,10 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         'Dflydev\\DotAccessData\\' =>
         array (
             0 => __DIR__ . '/..' . '/dflydev/dot-access-data/src',
+        ),
+        'Defuse\\Crypto\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/defuse/php-encryption/src',
         ),
         'Consolidation\\SiteProcess\\' =>
         array (

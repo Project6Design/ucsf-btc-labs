@@ -1,0 +1,13 @@
+# Managed by github-terraform — do not edit manually
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "pantheon_secrets"
+  description: "Drupal module to integrate the Key module with Pantheon secrets"
+  annotations:
+    "backstage.io/techdocs-ref": "dir:docs/"
+spec:
+  type: "tool"
+  lifecycle: "mature"
+  owner: "site-experience"

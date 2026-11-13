@@ -1,0 +1,14 @@
+encryption_method.config.config_test_encryption_method:
+  type: mapping
+  label: 'Config test encryption method configuration'
+  mapping:
+    mode:
+      type: string
+      label: 'Cipher mode'
+      constraints:
+        Choice:
+          choices:
+            - ECB
+            - CBC
+            - CFB
+            - OFB

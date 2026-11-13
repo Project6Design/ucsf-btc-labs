@@ -1,0 +1,6 @@
+/vendor/
+.DS_Store
+.phpunit*
+.idea/
+reports
+/.phpcs-cache

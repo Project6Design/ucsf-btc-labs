@@ -1,0 +1,7 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Direct injection of entity storage via \$storage is not recommended\. Inject Drupal\\Core\\Entity\\EntityTypeManagerInterface and call getStorage\(\) at the call\-site instead\.$#'
+			identifier: drupal.entityStorageDirectInjection
+			count: 1
+			path: src/Controller/EncryptionProfileListBuilder.php
