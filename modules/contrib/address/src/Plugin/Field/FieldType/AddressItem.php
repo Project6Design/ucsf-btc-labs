@@ -177,7 +177,7 @@ class AddressItem extends FieldItemBase implements AddressInterface {
     $properties['locality'] = DataDefinition::create('string')
       ->setLabel(t('The locality (i.e. city)'));
     $properties['dependent_locality'] = DataDefinition::create('string')
-      ->setLabel(t('The dependent locality (i.e. neighbourhood)'));
+      ->setLabel(t('The dependent locality (i.e. neighborhood)'));
     $properties['postal_code'] = DataDefinition::create('string')
       ->setLabel(t('The postal code'));
     $properties['sorting_code'] = DataDefinition::create('string')
@@ -378,7 +378,21 @@ class AddressItem extends FieldItemBase implements AddressInterface {
   public function getConstraints() {
     $constraints = parent::getConstraints();
     $constraint_manager = $this->getTypedDataManager()->getValidationConstraintManager();
-    $field_overrides = new FieldOverrides($this->getFieldOverrides());
+    $field_overrides = $this->getFieldOverrides();
+    if ($country_code = $this->getCountryCode()) {
+      // A "Required" override only makes sense for fields that are part of
+      // the selected country's address format. Ignore it otherwise, since
+      // the field is hidden from the form and can never be filled in (e.g.
+      // administrative_area for Sweden).
+      $address_format = \Drupal::service('address.address_format_repository')->get($country_code);
+      $used_fields = $address_format->getUsedFields();
+      foreach ($field_overrides as $field => $override) {
+        if ($override === FieldOverride::REQUIRED && !in_array($field, $used_fields, TRUE)) {
+          unset($field_overrides[$field]);
+        }
+      }
+    }
+    $field_overrides = new FieldOverrides($field_overrides);
     $constraints[] = $constraint_manager->create('ComplexData', [
       'country_code' => [
         'Country' => [

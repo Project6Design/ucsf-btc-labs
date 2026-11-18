@@ -152,11 +152,7 @@ class LinkitWidget extends LinkWidget {
       $entity = $default_allowed && $uri ? LinkitHelper::getEntityFromUri($uri) : NULL;
     }
     // Display entity URL consistently across all entity types.
-    if ($entity instanceof FileInterface) {
-      // File entities are anomalies, so we handle them differently.
-      $element['uri']['#default_value'] = $this->fileUrlGenerator->generateString($entity->getFileUri());
-    }
-    elseif ($entity instanceof EntityInterface) {
+    if ($entity instanceof EntityInterface) {
       $uri_parts = parse_url($uri);
       $uri_options = [];
 
@@ -177,7 +173,15 @@ class LinkitWidget extends LinkWidget {
         $uri_options['query'] = $item->options['query'];
       }
 
-      $element['uri']['#default_value'] = $entity->toUrl()->setOptions($uri_options)->toString();
+      if ($entity instanceof FileInterface) {
+        // File entities are anomalies: link to the file itself rather than
+        // the entity's canonical route, but keep the query and fragment.
+        $url = $this->fileUrlGenerator->generate($entity->getFileUri())->mergeOptions($uri_options);
+      }
+      else {
+        $url = $entity->toUrl()->setOptions($uri_options);
+      }
+      $element['uri']['#default_value'] = $url->toString();
     }
     // Change the URI field to use the linkit profile.
     $element['uri']['#type'] = 'linkit';

@@ -9,12 +9,14 @@ use Drupal\filter\Entity\FilterFormat;
 use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\Tests\BrowserTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests Embed's preview functionality.
- *
- * @group embed
  */
+#[Group('embed')]
+#[RunTestsInSeparateProcesses]
 class EmbedPreviewTest extends BrowserTestBase {
 
   /**

@@ -29,12 +29,12 @@ trait DomHelperTrait {
       /** @var \DOMElement $replacement_node */
       $replacement_node = $node->ownerDocument->createElement($name);
 
-      // Copy all children of the original node to the new node.
-      if ($node->childNodes->length) {
-        foreach ($node->childNodes as $child) {
-          $child = $replacement_node->ownerDocument->importNode($child, TRUE);
-          $replacement_node->appendChild($child);
-        }
+      // Move all children of the original node to the new node. Both nodes
+      // belong to the same document, so appending a child moves it, which
+      // removes it from the live $node->childNodes list. Taking the first
+      // child each time avoids skipping children while the list changes.
+      while ($node->firstChild) {
+        $replacement_node->appendChild($node->firstChild);
       }
 
       // Copy all attributes of the original node to the new node.

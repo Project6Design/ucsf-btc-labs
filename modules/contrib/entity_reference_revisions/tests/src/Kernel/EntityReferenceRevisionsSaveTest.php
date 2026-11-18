@@ -209,6 +209,47 @@ class EntityReferenceRevisionsSaveTest extends KernelTestBase {
   }
 
   /**
+   * Tests clearing the referenced entity.
+   */
+  public function testSetNullEntityClearsTargetProperties() {
+    $field_storage = FieldStorageConfig::create([
+      'field_name' => 'composite_reference',
+      'entity_type' => 'node',
+      'type' => 'entity_reference_revisions',
+      'settings' => [
+        'target_type' => 'entity_test_composite',
+      ],
+    ]);
+    $field_storage->save();
+    $field = FieldConfig::create([
+      'field_storage' => $field_storage,
+      'bundle' => 'article',
+    ]);
+    $field->save();
+
+    $entity_test = EntityTestCompositeRelationship::create([
+      'uuid' => 'test-entity',
+      'name' => 'Test entity',
+    ]);
+    $entity_test->save();
+
+    $node = Node::create([
+      'title' => $this->randomMachineName(),
+      'type' => 'article',
+      'composite_reference' => $entity_test,
+    ]);
+
+    $item = $node->get('composite_reference')->first();
+    $this->assertEquals($entity_test->id(), $item->target_id);
+    $this->assertEquals($entity_test->getRevisionId(), $item->target_revision_id);
+
+    $item->set('entity', NULL);
+
+    $this->assertNull($item->target_id);
+    $this->assertNull($item->target_revision_id);
+  }
+
+  /**
    * Tests entity_reference_revisions default value and config dependencies.
    */
   public function testEntityReferenceRevisionsDefaultValue() {

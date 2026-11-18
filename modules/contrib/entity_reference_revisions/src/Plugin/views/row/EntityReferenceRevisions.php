@@ -14,7 +14,7 @@ use Drupal\views\Plugin\views\row\Fields;
  *
  * @ViewsRow(
  *   id = "entity_reference_revisions",
- *   title = @Translation("Entity Reference inline fields"),
+ *   title = @Translation("Entity Reference Revisions inline fields"),
  *   help = @Translation("Displays the fields with an optional template."),
  *   theme = "views_view_fields",
  *   register_theme = FALSE,
@@ -23,7 +23,7 @@ use Drupal\views\Plugin\views\row\Fields;
  */
 #[ViewsRow(
   id: 'entity_reference_revisions',
-  title: new TranslatableMarkup('Entity Reference inline fields'),
+  title: new TranslatableMarkup('Entity Reference Revisions inline fields'),
   help: new TranslatableMarkup('Displays the fields with an optional template.'),
   display_types: ['entity_reference'],
   theme: 'views_view_fields',

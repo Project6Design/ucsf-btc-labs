@@ -29,7 +29,7 @@ class AddressFormatConstraintValidator extends ExternalValidator implements Cont
    */
   protected function addViolation(string $field, string $message, mixed $invalid_value, AddressFormat $address_format): void {
     $labels = LabelHelper::getFieldLabels($address_format);
-    $label = $labels[$field];
+    $label = $labels[$field] ?? $field;
 
     $this->context->buildViolation($message, ['@name' => $label])
       ->atPath(FieldHelper::getPropertyName($field))

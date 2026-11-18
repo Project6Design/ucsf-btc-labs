@@ -48,9 +48,9 @@
       }
     ],
     "require-dev": {
-        "enshrined/svg-sanitize": "^0.22",
+        "enshrined/svg-sanitize": "^1",
         "drupal/svg_image": "^3.0",
-        "drupal/svg_image_field": "^2.0",
+        "drupal/svg_image_field": "^2.3.8",
         "drupal/token": "^1"
     },
     "suggest": {

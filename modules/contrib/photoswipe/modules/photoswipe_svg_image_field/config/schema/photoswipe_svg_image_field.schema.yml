@@ -1,13 +1,7 @@
 field.formatter.settings.photoswipe_svg_image_field_formatter:
-  type: mapping
+  type: field.formatter.settings.svg_image_field_formatter
   label: 'Photoswipe SVG Image Field display format settings'
   mapping:
-    photoswipe_thumbnail_width:
-      type: integer
-      label: 'Photoswipe thumbnail width'
-    photoswipe_thumbnail_height:
-      type: integer
-      label: 'Photoswipe thumbnail height'
     photoswipe_remove_gallery_wrapper_class:
       type: boolean
       label: 'Remove photoswipe-gallery wrapper class'

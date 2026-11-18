@@ -304,6 +304,12 @@
           $uri.autocomplete(autocomplete.options);
           $uri.autocomplete('widget').addClass('linkit-ui-autocomplete');
 
+          // Constrain dropdown width to match the input field.
+          $uri.on('autocompleteopen', function () {
+            var $input = $(this);
+            $input.autocomplete('widget').css('width', $input.outerWidth() + 'px');
+          });
+
           $uri.click(function () {
             $uri.autocomplete('search', $uri.val());
           });

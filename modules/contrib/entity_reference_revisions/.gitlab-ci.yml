@@ -53,11 +53,25 @@ variables:
   OPT_IN_TEST_PREVIOUS_MAJOR: 1
   OPT_IN_TEST_PREVIOUS_MINOR: 1
   OPT_IN_TEST_NEXT_MINOR: 1
-  CORE_PREVIOUS_PHP_MIN: 8.1
+  OPT_IN_TEST_NEXT_MAJOR: 1
+  _RUNTESTS_EXTRA: '--suppress-deprecations'
 
+# We are only interested in PHPStan on the current version.
+phpstan (previous major):
+  rules:
+    - when: never
+phpstan (next minor):
+  rules:
+    - when: never
+phpstan (next major):
+  rules:
+    - when: never
+
+# If next major or minor are run, then they should fail.
 phpunit (next major):
-  variables:
-    SYMFONY_DEPRECATIONS_HELPER: "disabled"
+  allow_failure: false
+phpunit (next minor):
+  allow_failure: false
 
 ###################################################################################
 #

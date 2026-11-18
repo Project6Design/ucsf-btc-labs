@@ -35,10 +35,19 @@ variables:
 # into a direct EscaperRuntime::escape() call, so every page render is a fatal
 # TypeError. Keep the CI build below 3.30 until a fixed Twig release is out.
 .composer-base:
+  variables:
+    # Drupal core's own Yarn 4.9.1 would read the project .yarnrc.yml (Yarn >= 4.14 keys) too.
+    YARN_RC_FILENAME: .yarnrc.core.yml
+    YARN_NODE_LINKER: node-modules
   before_script:
     - composer require --dev --no-update "twig/twig:<3.30"
 
 # = Validate stage (all blocking) =
+stylelint:
+  variables:
+    # Drupal core's own Yarn 4.9.1 would read the project .yarnrc.yml (Yarn >= 4.14 keys) too.
+    YARN_RC_FILENAME: .yarnrc.core.yml
+    YARN_NODE_LINKER: node-modules
 composer-lint:
   allow_failure: false
 cspell:
@@ -65,7 +74,7 @@ phpunit:
     - export SIMPLETEST_DB=mysql://$MYSQL_USER:$MYSQL_PASSWORD@database/$MYSQL_DATABASE
   node_playwright: &node_playwright
 
-    - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+    - curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
     - apt-get install -y nodejs
     - node --version && npm --version
     - 'test -f .yarnrc.yml || echo "nodeLinker: node-modules" > .yarnrc.yml'

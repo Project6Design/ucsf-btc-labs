@@ -185,11 +185,34 @@ class EntityReferenceRevisionsFieldItemList extends EntityReferenceFieldItemList
           assert($storage instanceof RevisionableStorageInterface);
           $entity->setOriginal($storage->loadRevisionUnchanged($entity->getLoadedRevisionId()));
         }
-        return $entity->getTranslation($langcode)->hasTranslationChanges();
+        if ($entity->getTranslation($langcode)->hasTranslationChanges()) {
+          return TRUE;
+        }
       }
     }
 
     return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function delete() {
+    // Load referenced entities before calling delete to improve performance.
+    $this->referencedEntities();
+    parent::delete();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function deleteRevision() {
+    // Drupal 11.3+ supports static and persistent revision caching,
+    // load revisions before calling delete to improve performance.
+    if (\version_compare(\Drupal::VERSION, '11.2.99', '>')) {
+      $this->referencedEntities();
+    }
+    parent::deleteRevision();
   }
 
 }

@@ -7,6 +7,7 @@ namespace Drupal\Tests\photoswipe_svg_image_field\Kernel;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Url;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\file\Entity\File;
@@ -36,6 +37,14 @@ class PhotoswipeSvgImageFieldFormatterTest extends FieldKernelTestBase {
     'photoswipe',
     'photoswipe_svg_image_field',
   ];
+
+  /**
+   * {@inheritdoc}
+   *
+   * The update hook test stores settings which are not part of the schema
+   * anymore.
+   */
+  protected $strictConfigSchema = FALSE;
 
   /**
    * The svg_image_field field name used in the test.
@@ -82,8 +91,8 @@ class PhotoswipeSvgImageFieldFormatterTest extends FieldKernelTestBase {
         'type' => 'photoswipe_svg_image_field_formatter',
         'label' => 'hidden',
         'settings' => [
-          'photoswipe_thumbnail_width' => 50,
-          'photoswipe_thumbnail_height' => 60,
+          'width' => 50,
+          'height' => 60,
         ],
       ]);
     $this->display->save();
@@ -128,10 +137,112 @@ class PhotoswipeSvgImageFieldFormatterTest extends FieldKernelTestBase {
     // Photoswipe zoom target.
     $this->assertStringContainsString('data-pswp-width="200"', $output);
     $this->assertStringContainsString('data-pswp-height="150"', $output);
-    // The thumbnail <img> uses the configured thumbnail dimensions instead.
+    // The <img> uses the configured dimensions instead.
     $this->assertMatchesRegularExpression('#<img[^>]*width="50"[^>]*height="60"#', $output);
+    $this->assertStringContainsString('loading="lazy"', $output);
+    // The image itself opens the layer, there is no button in the corner.
+    $this->assertMatchesRegularExpression('#<a href="[^"]*/sanitized"[^>]*>\s*<img[^>]*>\s*</a>#', $output);
+    $this->assertStringNotContainsString('Enlarge image', $output);
+    $this->assertStringNotContainsString('photoswipe-svg-inline', $output);
     $this->assertStringContainsString('alt="An SVG image"', $output);
     $this->assertStringContainsString('title="SVG title"', $output);
+  }
+
+  /**
+   * Tests the inline mode keeps SVG links usable and adds a separate trigger.
+   */
+  public function testInlineSvgRendersSanitizedMarkupWithSiblingTrigger(): void {
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = $this->container->get('renderer');
+
+    $svg = $this->createSvgFile('inline-test.svg', '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" onload="alert(1)"><script>alert(2)</script><a href="https://example.com/target"><rect width="10" height="10"/></a></svg>');
+
+    $entity = EntityTest::create([
+      'name' => $this->randomMachineName(),
+      $this->fieldName => [['target_id' => $svg->id(), 'alt' => 'An SVG image']],
+    ]);
+    $entity->save();
+
+    $this->display->setComponent($this->fieldName, [
+      'type' => 'photoswipe_svg_image_field_formatter',
+      'label' => 'hidden',
+      'settings' => [
+        'width' => 50,
+        'height' => 60,
+        'inline' => TRUE,
+      ],
+    ])->save();
+
+    $build = $this->display->build($entity);
+    $output = (string) $renderer->renderRoot($build[$this->fieldName][0]);
+
+    // The SVG is output inline, including its link, but sanitized.
+    $this->assertStringContainsString('<svg', $output);
+    $this->assertStringContainsString('href="https://example.com/target"', $output);
+    $this->assertStringNotContainsString('<script', $output);
+    $this->assertStringNotContainsString('onload', $output);
+    $this->assertStringNotContainsString('<?xml', $output);
+    $this->assertStringNotContainsString('<img', $output);
+    // The configured dimensions are applied to the SVG.
+    $this->assertMatchesRegularExpression('#<svg[^>]*width="50"[^>]*height="60"#', $output);
+    // The lightbox trigger is a sibling of the SVG, not a wrapper around it,
+    // and still points at the sanitizing route with the intrinsic dimensions.
+    $this->assertMatchesRegularExpression('#</svg>\s*<a href="[^"]*/photoswipe/svg-image-field/' . $svg->id() . '/sanitized"[^>]*class="[^"]*photoswipe[^"]*"#', $output);
+    $this->assertStringContainsString('data-pswp-width="200"', $output);
+    $this->assertStringContainsString('data-pswp-height="150"', $output);
+    $this->assertStringContainsString('photoswipe-svg-inline', $output);
+    $this->assertStringContainsString('Enlarge image', $output);
+  }
+
+  /**
+   * Tests that the update hook converts the settings of the 5.x releases.
+   */
+  public function testLegacySettingsUpdate(): void {
+    $this->display->setComponent($this->fieldName, [
+      'type' => 'photoswipe_svg_image_field_formatter',
+      'label' => 'hidden',
+      'settings' => [],
+    ]);
+    // The plugin manager drops unknown settings, so store them directly.
+    $config = $this->config('core.entity_view_display.' . $this->display->id());
+    $config->set('content.' . $this->fieldName . '.settings', [
+      'photoswipe_thumbnail_width' => 50,
+      'photoswipe_thumbnail_height' => 60,
+      'photoswipe_remove_gallery_wrapper_class' => TRUE,
+    ])->save();
+
+    $this->container->get('module_handler')->loadInclude('photoswipe_svg_image_field', 'install');
+    $sandbox = [];
+    photoswipe_svg_image_field_update_9001($sandbox);
+
+    $settings = EntityViewDisplay::load($this->display->id())->getComponent($this->fieldName)['settings'];
+    $this->assertSame(50, $settings['width']);
+    $this->assertSame(60, $settings['height']);
+    $this->assertTrue($settings['apply_dimensions']);
+    $this->assertTrue($settings['photoswipe_remove_gallery_wrapper_class']);
+    $this->assertArrayNotHasKey('photoswipe_thumbnail_width', $settings);
+    $this->assertArrayNotHasKey('photoswipe_thumbnail_height', $settings);
+
+    // The converted display renders the image like the 5.x release did.
+    $svg = $this->createSvgFile('upgrade-test.svg', '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150"></svg>');
+    $entity = EntityTest::create([
+      'name' => $this->randomMachineName(),
+      $this->fieldName => [['target_id' => $svg->id()]],
+    ]);
+    $entity->save();
+    $build = EntityViewDisplay::load($this->display->id())->build($entity);
+    $output = (string) $this->container->get('renderer')->renderRoot($build[$this->fieldName][0]);
+    $this->assertMatchesRegularExpression('#<img[^>]*width="50"[^>]*height="60"#', $output);
+
+    // An empty thumbnail size meant that no dimensions were applied.
+    $config->set('content.' . $this->fieldName . '.settings', [
+      'photoswipe_thumbnail_width' => NULL,
+      'photoswipe_thumbnail_height' => NULL,
+    ])->save();
+    $sandbox = [];
+    photoswipe_svg_image_field_update_9001($sandbox);
+    $settings = EntityViewDisplay::load($this->display->id())->getComponent($this->fieldName)['settings'];
+    $this->assertFalse($settings['apply_dimensions']);
   }
 
   /**

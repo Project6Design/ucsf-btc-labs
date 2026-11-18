@@ -7,7 +7,7 @@ dependencies:
   - drupal:ckeditor5
   - drupal:editor
 
-# Information added by Drupal.org packaging script on 2026-09-25
-version: '3.0.6'
+# Information added by Drupal.org packaging script on 2026-11-09
+version: '3.0.7'
 project: 'anchor_link'
-datestamp: 1790361062
+datestamp: 1794230450

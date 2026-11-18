@@ -71,7 +71,7 @@ class CountryConstraintValidatorTest extends UnitTestCase {
   /**
    * Data provider for ::testValidate().
    */
-  public function providerTestValidate() {
+  public static function providerTestValidate() {
     // Data provides run before setUp, so $this->constraint is not available.
     $constraint = new CountryConstraint();
 

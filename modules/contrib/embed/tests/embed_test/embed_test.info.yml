@@ -6,7 +6,7 @@ dependencies:
   - embed:embed
   - drupal:node
 
-# Information added by Drupal.org packaging script on 2025-01-23
-version: '8.x-1.10'
+# Information added by Drupal.org packaging script on 2026-11-18
+version: '8.x-1.12'
 project: 'embed'
-datestamp: 1737662979
+datestamp: 1795029440

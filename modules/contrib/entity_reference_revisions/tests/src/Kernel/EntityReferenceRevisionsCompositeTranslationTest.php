@@ -2,6 +2,7 @@
 
 namespace Drupal\Tests\entity_reference_revisions\Kernel;
 
+use Drupal\content_translation\ContentTranslationManagerInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\entity_composite_relationship_test\Entity\EntityTestCompositeRelationship;
@@ -443,6 +444,69 @@ class EntityReferenceRevisionsCompositeTranslationTest extends EntityKernelTestB
 
   }
 
+  public function testCompositeTranslationsAreCreatedFromTheRightSource(): void {
+    /** @var \Drupal\node\NodeStorageInterface $node_storage */
+    $node_storage = \Drupal::entityTypeManager()->getStorage('node');
+
+    // Create a nested composite entity.
+    $nested_composite = EntityTestCompositeRelationship::create([
+      'langcode' => 'en',
+      'name' => 'Initial Nested Source Composite',
+    ]);
+    $nested_composite->save();
+
+    // Create a composite entity.
+    $composite = EntityTestCompositeRelationship::create([
+      'langcode' => 'en',
+      'name' => 'Initial Source Composite',
+      'field_untranslatable' => 'Initial untranslatable field',
+      'composite_reference' => $nested_composite,
+    ]);
+    $composite->save();
+
+    // Create a node with a reference to the test composite entity.
+    $node = Node::create([
+      'langcode' => 'en',
+      'title' => 'Initial Source Node',
+      'type' => 'article',
+      'composite_reference' => $composite,
+    ]);
+    $node->save();
+
+    $node = $node_storage->load($node->id());
+    $this->assertInstanceOf(Node::class, $node);
+
+    $fr_node = $node->addTranslation('fr', ['title' => 'French baguette'] + $node->toArray());
+    $fr_node = $node_storage->createRevision($fr_node);
+    $fr_node->get('composite_reference')->entity->get('composite_reference')->entity->getTranslation('fr')->set('name', 'French layered baguette');
+    $fr_node->save();
+
+    $node = $node_storage->load($node->id());
+    $this->assertInstanceOf(Node::class, $node);
+
+    /**
+     * Simulate how {@see \Drupal\content_translation\Controller\ContentTranslationController::prepareTranslation}
+     * prepares the translation for the add translation form.
+     */
+    $content_translation_manager = \Drupal::service(ContentTranslationManagerInterface::class);
+    $this->assertInstanceOf(ContentTranslationManagerInterface::class, $content_translation_manager);
+
+    $de_node = $node->addTranslation('de', $fr_node->toArray());
+    $metadata = $content_translation_manager->getTranslationMetadata($de_node);
+    $metadata->setSource('fr');
+
+    /**
+     * Simulate creating a new pending revision like
+     * {@see \Drupal\content_moderation\EntityTypeInfo::entityPrepareForm()}.
+     */
+    $de_node = $node_storage->createRevision($de_node);
+    $this->assertInstanceOf(Node::class, $de_node);
+
+    // Check that the composite entities where created from the right source
+    // translation.
+    $this->assertSame('French baguette', $de_node->label());
+    $this->assertSame('French layered baguette', $de_node->get('composite_reference')->entity->get('composite_reference')->entity->get('name')->value);
+  }
   /**
    * Tests that composite translations affects the host entity's translations.
    */

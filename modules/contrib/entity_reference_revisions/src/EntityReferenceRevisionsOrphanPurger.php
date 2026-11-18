@@ -242,19 +242,32 @@ class EntityReferenceRevisionsOrphanPurger {
       return;
     }
 
+    $batch_supports_services = version_compare(\Drupal::VERSION, '11.3.99', '>');
+
     $operations = [];
     foreach ($composite_entity_type_ids as $entity_type_id) {
-      $operations[] = ['_entity_reference_revisions_orphan_purger_batch_dispatcher',
-        [
+      if ($batch_supports_services) {
+        $operations[] = [
           'entity_reference_revisions.orphan_purger:deleteOrphansBatchOperation',
-          $entity_type_id,
-        ],
-      ];
+          [
+            $entity_type_id,
+          ],
+        ];
+      }
+      else {
+        $operations[] = [
+          '_entity_reference_revisions_orphan_purger_batch_dispatcher',
+          [
+            'entity_reference_revisions.orphan_purger:deleteOrphansBatchOperation',
+            $entity_type_id,
+          ],
+        ];
+      }
     }
 
     $batch = [
       'operations' => $operations,
-      'finished' => [EntityReferenceRevisionsOrphanPurger::class, 'batchSubmitFinished'],
+      'finished' => $batch_supports_services ? 'entity_reference_revisions.orphan_purger:doBatchSubmitFinished' : [EntityReferenceRevisionsOrphanPurger::class, 'batchSubmitFinished'],
       'title' => $this->t('Removing orphaned entities.'),
       'progress_message' => $this->t('Processed @current of @total entity types.'),
       'error_message' => $this->t('This batch encountered an error.'),

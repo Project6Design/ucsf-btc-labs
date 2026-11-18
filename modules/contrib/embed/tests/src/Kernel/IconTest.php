@@ -7,13 +7,16 @@ namespace Drupal\Tests\embed\Kernel;
 use Drupal\embed\EmbedButtonInterface;
 use Drupal\embed\Entity\EmbedButton;
 use Drupal\KernelTests\KernelTestBase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests embed button icon file handling.
- *
- * @group embed
- * @coversDefaultClass \Drupal\embed\Entity\EmbedButton
  */
+#[CoversClass(EmbedButton::class)]
+#[Group('embed')]
+#[RunTestsInSeparateProcesses]
 class IconTest extends KernelTestBase {
 
   /**
@@ -36,10 +39,6 @@ class IconTest extends KernelTestBase {
 
   /**
    * Tests the icon functionality.
-   *
-   * @covers ::convertImageToEncodedData
-   * @covers ::convertEncodedDataToImage
-   * @covers ::getIconUrl
    */
   public function testIcon() {
     $button = EmbedButton::create([

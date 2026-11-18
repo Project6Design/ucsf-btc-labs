@@ -10,6 +10,9 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\NodeType;
 
+// cspell:ignore Blaenau Bridgend Ceredigion Chengde Conwy Cynon Glamorgan
+// cspell:ignore Merthyr Pembrokeshire Tarfaen Tydfil Wrexham
+
 /**
  * Tests the default address widget.
  *
@@ -191,6 +194,7 @@ class AddressDefaultWidgetTest extends WebDriverTestBase {
     }, $countries);
     $this->drupalGet($this->fieldConfigUrl);
     $this->submitForm($edit, 'Save settings');
+    $this->assertSession()->waitForText('Manage fields');
     $this->drupalGet($this->nodeAddUrl);
     $this->assertOptions($field_name . '[0][address][country_code]', $countries, 'The restricted list of available countries is present.');
 
@@ -227,6 +231,7 @@ class AddressDefaultWidgetTest extends WebDriverTestBase {
     }, $countries);
     $this->drupalGet($this->fieldConfigUrl);
     $this->submitForm($edit, 'Save settings');
+    $this->assertSession()->waitForText('Manage fields');
 
     // Access the article's edit form and confirm the values are unchanged.
     // 'US' should be in the list along with the available countries and should
@@ -257,6 +262,7 @@ class AddressDefaultWidgetTest extends WebDriverTestBase {
     }, $countries);
     $this->drupalGet($this->fieldConfigUrl);
     $this->submitForm($edit, 'Save settings');
+    $this->assertSession()->waitForText('Manage fields');
 
     $this->drupalGet('node/' . $node->id() . '/edit');
     $this->assertSession()->fieldNotExists($field_name . '[0][address][country_code]');
@@ -289,7 +295,7 @@ class AddressDefaultWidgetTest extends WebDriverTestBase {
       'default_value_input[field_address][0][address][family_name]' => 'Smith',
     ];
     $this->submitForm($edit, 'Save settings');
-    $this->assertSession()->pageTextContains('Saved Address configuration.');
+    $this->assertSession()->waitForText('Saved Address configuration.');
 
     $this->container->get('entity_type.manager')->getStorage('field_config')->resetCache();
     $this->field = FieldConfig::load($this->field->id());
@@ -405,6 +411,7 @@ class AddressDefaultWidgetTest extends WebDriverTestBase {
     ];
     $this->drupalGet($this->fieldConfigUrl);
     $this->submitForm($edit, 'Save settings');
+    $this->assertSession()->waitForText('Manage fields');
 
     $this->drupalGet($this->nodeAddUrl);
     $this->assertEmpty((bool) $this->xpath('//input[@name="field_address[0][address][given_name]" and contains(@required, "required")]'));
@@ -532,7 +539,7 @@ class AddressDefaultWidgetTest extends WebDriverTestBase {
       [
         'given_name' => 'Peter',
         'family_name' => 'Clark',
-        'organization' => 'Other organisation',
+        'organization' => 'Other organization',
         'address_line1' => '1098 Broad Street',
         'locality' => 'Mountain View',
         'administrative_area' => 'NY',

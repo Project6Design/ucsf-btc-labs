@@ -5,7 +5,7 @@
  * Contains post-update hooks for Address.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Drupal\Core\Config\Entity\ConfigEntityUpdater;
 use Drupal\Core\Entity\Display\EntityFormDisplayInterface;

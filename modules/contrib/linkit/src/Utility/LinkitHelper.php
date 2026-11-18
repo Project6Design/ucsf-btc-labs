@@ -114,15 +114,15 @@ class LinkitHelper {
       ->getDirectoryPath();
 
     if (!empty($public_files_dir) && strpos($input, "/$public_files_dir") === 0) {
-      return "base:$input";
+      return "base:" . urldecode($input);
     }
     $scheme = parse_url($input, PHP_URL_SCHEME);
     // Check if the input already contains a scheme.
     if (!empty($scheme)) {
-      return $input;
+      return urldecode($input);
     }
 
-    return "internal:$input";
+    return "internal:" . urldecode($input);
   }
 
   /**

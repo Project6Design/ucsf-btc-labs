@@ -5,7 +5,8 @@ namespace Drupal\photoswipe\Controller;
 use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\file\FileInterface;
-use enshrined\svgSanitize\Sanitizer;
+use Drupal\photoswipe\SvgSanitizerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -27,6 +28,32 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class SanitizedSvgController extends ControllerBase {
 
   /**
+   * The SVG sanitizer.
+   *
+   * @var \Drupal\photoswipe\SvgSanitizerInterface
+   */
+  protected $svgSanitizer;
+
+  /**
+   * Constructs a new SanitizedSvgController object.
+   *
+   * @param \Drupal\photoswipe\SvgSanitizerInterface $svgSanitizer
+   *   The SVG sanitizer.
+   */
+  public function __construct(SvgSanitizerInterface $svgSanitizer) {
+    $this->svgSanitizer = $svgSanitizer;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('photoswipe.svg_sanitizer'),
+    );
+  }
+
+  /**
    * Returns the sanitized contents of an SVG file.
    *
    * @param \Drupal\file\FileInterface $file
@@ -40,15 +67,8 @@ class SanitizedSvgController extends ControllerBase {
       throw new NotFoundHttpException();
     }
 
-    // Ignore "E_WARNING" through "@" suppression operator and throw an error
-    // instead:
-    $contents = @file_get_contents($file->getFileUri());
-    if ($contents === FALSE) {
-      throw new NotFoundHttpException();
-    }
-
-    $sanitized = (new Sanitizer())->sanitize($contents);
-    if ($sanitized === FALSE) {
+    $sanitized = $this->svgSanitizer->sanitizeFile($file);
+    if ($sanitized === NULL) {
       throw new NotFoundHttpException();
     }
 

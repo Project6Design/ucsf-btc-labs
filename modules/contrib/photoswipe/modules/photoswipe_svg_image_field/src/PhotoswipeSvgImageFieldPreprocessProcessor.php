@@ -4,12 +4,13 @@ namespace Drupal\photoswipe_svg_image_field;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
+use Drupal\Core\Template\Attribute;
 use Drupal\Core\Url;
 use Drupal\file\FileInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Preprocesses Photoswipe images for the SVG Image Field module.
+ * Preprocesses the Photoswipe link for the SVG Image Field module.
  *
  * The 'svg_image_field' field item has no width/height columns and is not
  * compatible with image styles, so this processor reads the source SVG
@@ -61,36 +62,35 @@ class PhotoswipeSvgImageFieldPreprocessProcessor implements ContainerInjectionIn
       return;
     }
 
-    $uri = $file->getFileUri();
     $dimensions = $this->getSvgDimensions($file);
+    // Without intrinsic dimensions, fall back to the configured size.
+    $appliedWidth = !empty($settings['apply_dimensions']) ? (int) $settings['width'] : 0;
+    $appliedHeight = !empty($settings['apply_dimensions']) ? (int) $settings['height'] : 0;
+    $width = $dimensions['width'] ?: $appliedWidth;
+    $height = $dimensions['height'] ?: $appliedHeight;
 
-    $thumbnailWidth = (int) $settings['photoswipe_thumbnail_width'] ?: NULL;
-    $thumbnailHeight = (int) $settings['photoswipe_thumbnail_height'] ?: NULL;
-
-    $itemAttributes = $variables['item_attributes'];
-    if ($item->_attributes) {
-      $itemAttributes = array_merge($item->_attributes, $itemAttributes);
-    }
-
-    $variables['image'] = [
-      '#theme' => 'image',
-      '#uri' => $uri,
-      '#alt' => $item->alt ?: NULL,
-      '#title' => $item->title ?: NULL,
-      '#width' => $thumbnailWidth,
-      '#height' => $thumbnailHeight,
-      '#attributes' => $itemAttributes,
-    ];
     // This processor only ever handles SVG files, and this field type has
     // no image style support, so link to a sanitized copy of the original
     // rather than the stored file itself, which may contain untrusted
     // markup from the upload.
+    // The inline svg (when enabled) is sanitized through the parent
+    // SvgImageFieldFormatter::loadInlineSvgData(), which respects the
+    // "sanitize" and "sanitize_remote" display settings.
+    // Because the inline sanitization doesn't modify the actual file, we still
+    // need this linked file sanitization for the lightbox:
+    // @todo This might change in https://www.drupal.org/project/photoswipe/issues/3635489:
     $variables['path'] = Url::fromRoute('photoswipe_svg_image_field.sanitized_svg', ['file' => $file->id()])
       ->setAbsolute()
       ->toString();
     $variables['attributes']['class'][] = 'photoswipe';
-    $variables['attributes']['data-pswp-width'] = $dimensions['width'] ?: $thumbnailWidth;
-    $variables['attributes']['data-pswp-height'] = $dimensions['height'] ?: $thumbnailHeight;
+    if (!empty($width) && !empty($height)) {
+      $variables['attributes']['data-pswp-width'] = $width;
+      $variables['attributes']['data-pswp-height'] = $height;
+    }
+
+    if (!empty($variables['inline'])) {
+      $variables['wrapper_attributes'] = new Attribute(['class' => ['photoswipe-svg-inline']]);
+    }
   }
 
   /**

@@ -2,49 +2,52 @@
 
 namespace Drupal\embed\Entity;
 
-use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Config\Entity\ConfigEntityBase;
+use Drupal\Core\Entity\Attribute\ConfigEntityType;
+use Drupal\Core\Entity\EntityDeleteForm;
 use Drupal\Core\File\FileExists;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\embed\EmbedButtonInterface;
+use Drupal\embed\EmbedButtonListBuilder;
+use Drupal\embed\Form\EmbedButtonForm;
 
 /**
  * Defines the EmbedButton entity.
- *
- * @ConfigEntityType(
- *   id = "embed_button",
- *   label = @Translation("Embed button"),
- *   handlers = {
- *     "form" = {
- *       "add" = "Drupal\embed\Form\EmbedButtonForm",
- *       "edit" = "Drupal\embed\Form\EmbedButtonForm",
- *       "delete" = "Drupal\Core\Entity\EntityDeleteForm",
- *     },
- *     "list_builder" = "Drupal\embed\EmbedButtonListBuilder",
- *   },
- *   admin_permission = "administer embed buttons",
- *   config_prefix = "button",
- *   entity_keys = {
- *     "id" = "id",
- *     "label" = "label",
- *   },
- *   links = {
- *     "edit-form" = "/admin/config/content/embed/button/manage/{embed_button}",
- *     "delete-form" = "/admin/config/content/embed/button/manage/{embed_button}/delete",
- *     "collection" = "/admin/config/content/embed",
- *   },
- *   config_export = {
- *     "label",
- *     "id",
- *     "type_id",
- *     "type_settings",
- *     "icon",
- *     "icon_uuid",
- *   }
- * )
  */
+#[ConfigEntityType(
+  id: 'embed_button',
+  label: new TranslatableMarkup('Embed button'),
+  config_prefix: 'button',
+  entity_keys: [
+    'id' => 'id',
+    'label' => 'label',
+  ],
+  handlers: [
+    'form' => [
+      'add' => EmbedButtonForm::class,
+      'edit' => EmbedButtonForm::class,
+      'delete' => EntityDeleteForm::class,
+    ],
+    'list_builder' => EmbedButtonListBuilder::class,
+  ],
+  links: [
+    'edit-form' => '/admin/config/content/embed/button/manage/{embed_button}',
+    'delete-form' => '/admin/config/content/embed/button/manage/{embed_button}/delete',
+    'collection' => '/admin/config/content/embed',
+  ],
+  admin_permission: 'administer embed buttons',
+  config_export: [
+    'label',
+    'id',
+    'type_id',
+    'type_settings',
+    'icon',
+    'icon_uuid',
+  ],
+)]
 class EmbedButton extends ConfigEntityBase implements EmbedButtonInterface {
 
   use StringTranslationTrait;
@@ -146,6 +149,8 @@ class EmbedButton extends ConfigEntityBase implements EmbedButtonInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * @return $this
    */
   public function calculateDependencies() {
     parent::calculateDependencies();
@@ -153,9 +158,8 @@ class EmbedButton extends ConfigEntityBase implements EmbedButtonInterface {
     // Gather the dependencies of the embed type plugin.
     if ($plugin = $this->getTypePlugin()) {
       $this->calculatePluginDependencies($plugin);
-      return $this->dependencies;
     }
-    return NULL;
+    return $this;
   }
 
   /**
@@ -214,14 +218,7 @@ class EmbedButton extends ConfigEntityBase implements EmbedButtonInterface {
       /** @var \Drupal\Core\File\FileSystemInterface $filesystem */
       $fileSystem = \Drupal::service('file_system');
       $fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS);
-      $fileExists = DeprecationHelper::backwardsCompatibleCall(
-        currentVersion: \Drupal::VERSION,
-        deprecatedVersion: '10.3',
-        currentCallable: fn() => FileExists::Replace,
-        deprecatedCallable: fn() => FileSystemInterface::EXISTS_REPLACE,
-      );
-
-      $fileSystem->saveData(base64_decode($data['data']), $data['uri'], $fileExists);
+      $fileSystem->saveData(base64_decode($data['data']), $data['uri'], FileExists::Replace);
     }
     return $data['uri'];
   }

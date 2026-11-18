@@ -9,6 +9,7 @@ use Drupal\address\LabelHelper;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -131,7 +132,6 @@ class AdministrativeArea extends CountryAwareInOperatorBase {
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     $this->formState = $form_state;
-    \Drupal::moduleHandler()->loadInclude('views_ui', 'inc', 'admin');
     $form['country'] = [
       '#type' => 'container',
       '#weight' => -300,
@@ -148,7 +148,7 @@ class AdministrativeArea extends CountryAwareInOperatorBase {
       '#ajax' => [
         'callback' => [get_class($this), 'ajaxRefreshCountry'],
         'wrapper' => 'admin-area-value-options-ajax-wrapper',
-        'url' => views_ui_build_form_url($form_state),
+        'url' => $this->buildFormUrl($form_state),
       ],
     ];
 
@@ -227,7 +227,7 @@ class AdministrativeArea extends CountryAwareInOperatorBase {
       '#ajax' => [
         'callback' => [get_class($this), 'ajaxRefreshCountry'],
         'wrapper' => 'admin-area-value-options-ajax-wrapper',
-        'url' => views_ui_build_form_url($form_state),
+        'url' => $this->buildFormUrl($form_state),
       ],
       '#states' => [
         'visible' => [
@@ -621,6 +621,40 @@ class AdministrativeArea extends CountryAwareInOperatorBase {
     }
 
     return $countries;
+  }
+
+  /**
+   * Builds the AJAX form URL for the Views UI configuration form.
+   *
+   * @todo In Drupal >= 11.4.0, use \Drupal\views\ViewsFormHelperTrait instead
+   *   and replace this method with the trait's buildFormUrl().
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The current state of the form.
+   *
+   * @return \Drupal\Core\Url
+   *   The URL object pointing to the form URL.
+   */
+  protected function buildFormUrl(FormStateInterface $form_state) {
+    $ajax = !$form_state->get('ajax') ? 'nojs' : 'ajax';
+    $name = $form_state->get('view')->id();
+    $form_key = $form_state->get('form_key');
+    $display_id = $form_state->get('display_id');
+    $form_key = str_replace('-', '_', $form_key);
+    $route_name = 'views_ui.form_' . $form_key;
+    $route_parameters = [
+      'js' => $ajax,
+      'view' => $name,
+      'display_id' => $display_id,
+    ];
+    $url = Url::fromRoute($route_name, $route_parameters);
+    if ($type = $form_state->get('type')) {
+      $url->setRouteParameter('type', $type);
+    }
+    if ($id = $form_state->get('id')) {
+      $url->setRouteParameter('id', $id);
+    }
+    return $url;
   }
 
   /**

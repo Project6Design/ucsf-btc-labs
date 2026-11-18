@@ -107,6 +107,12 @@ class OrphanPurger extends QueueWorkerBase implements ContainerFactoryPluginInte
       return;
     }
 
+    $definition = $this->entityTypeManager->getDefinition($entity_type_id);
+    if (!$definition->get('entity_revision_parent_type_field') || !$definition->get('entity_revision_parent_id_field') || !$definition->get('entity_revision_parent_field_name_field')) {
+      static::$processedEntities[$entity_cache_key] = TRUE;
+      return;
+    }
+
     // Check the usage of data item and remove if not used.
     $composite_storage = $this->entityTypeManager->getStorage($entity_type_id);
     $composite_type = $this->entityTypeManager->getDefinition($entity_type_id);

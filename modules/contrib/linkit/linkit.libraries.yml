@@ -17,7 +17,6 @@ linkit.base:
     - core/drupalSettings
 
 linkit.autocomplete:
-  version: 1.0.0
   js:
     js/linkit.autocomplete.js: {}
   css:

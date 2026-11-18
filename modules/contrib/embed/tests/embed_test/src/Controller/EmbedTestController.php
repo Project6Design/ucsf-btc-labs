@@ -36,7 +36,7 @@ final class EmbedTestController extends ControllerBase {
    * Verify HTML response.
    */
   public function testAccess(Request $request, EditorInterface $editor, EmbedButtonInterface $embed_button) {
-    $text = $request->get('value');
+    $text = $request->query->get('value');
 
     $response = new HtmlResponse([
       '#markup' => $text,

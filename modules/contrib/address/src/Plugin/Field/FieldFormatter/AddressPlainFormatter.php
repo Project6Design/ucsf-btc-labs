@@ -223,11 +223,6 @@ class AddressPlainFormatter extends FormatterBase implements ContainerFactoryPlu
           'name' => $subdivision->getName(),
         ];
       }
-
-      if (!$subdivision->hasChildren()) {
-        // The current subdivision has no children, stop.
-        break;
-      }
     }
 
     return $values;

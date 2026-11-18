@@ -14,8 +14,8 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '606a39d89246991a373564698c2d8383' => __DIR__ . '/..' . '/symfony/polyfill-php85/bootstrap.php',
-        '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         '9d2b9fc6db0f153a0a149fefb182415e' => __DIR__ . '/..' . '/symfony/polyfill-php84/bootstrap.php',
         '89efb1254ef2d1c5d80096acd12c4098' => __DIR__ . '/..' . '/twig/twig/src/Resources/core.php',
         'ffecb95d45175fd40f75be8a23b34f90' => __DIR__ . '/..' . '/twig/twig/src/Resources/debug.php',
@@ -82,6 +82,7 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
             'Symfony\\Contracts\\Translation\\' => 30,
             'Symfony\\Contracts\\Service\\' => 26,
             'Symfony\\Contracts\\EventDispatcher\\' => 34,
+            'Symfony\\Contracts\\Cache\\' => 24,
             'Symfony\\Component\\Yaml\\' => 23,
             'Symfony\\Component\\VarExporter\\' => 30,
             'Symfony\\Component\\VarDumper\\' => 28,
@@ -101,8 +102,10 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
             'Symfony\\Component\\ErrorHandler\\' => 31,
             'Symfony\\Component\\DependencyInjection\\' => 38,
             'Symfony\\Component\\Console\\' => 26,
+            'Symfony\\Component\\Cache\\' => 24,
             'Symfony\\Bridge\\PsrHttpMessage\\' => 30,
             'SendGrid\\' => 9,
+            'SelfUpdate\\' => 11,
         ),
         'R' =>
         array (
@@ -140,6 +143,10 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         array (
             'League\\Container\\' => 17,
             'Laravel\\Prompts\\' => 16,
+        ),
+        'K' =>
+        array (
+            'Kevinrob\\GuzzleCache\\' => 21,
         ),
         'J' =>
         array (
@@ -307,6 +314,10 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         array (
             0 => __DIR__ . '/..' . '/symfony/event-dispatcher-contracts',
         ),
+        'Symfony\\Contracts\\Cache\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/cache-contracts',
+        ),
         'Symfony\\Component\\Yaml\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/yaml',
@@ -383,6 +394,10 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         array (
             0 => __DIR__ . '/..' . '/symfony/console',
         ),
+        'Symfony\\Component\\Cache\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/cache',
+        ),
         'Symfony\\Bridge\\PsrHttpMessage\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/psr-http-message-bridge',
@@ -390,6 +405,10 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         'SendGrid\\' =>
         array (
             0 => __DIR__ . '/..' . '/fastglass/sendgrid/src',
+        ),
+        'SelfUpdate\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/consolidation/self-update/src',
         ),
         'Robo\\' =>
         array (
@@ -479,6 +498,10 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         'Laravel\\Prompts\\' =>
         array (
             0 => __DIR__ . '/..' . '/laravel/prompts/src',
+        ),
+        'Kevinrob\\GuzzleCache\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/kevinrob/guzzle-cache-middleware/src',
         ),
         'JsonSchema\\' =>
         array (
@@ -750,6 +773,7 @@ class ComposerStaticInit5b8f8706cfb14f51285fcece2f82d3bb
         'System' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/System.php',
         'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
+        '©' => __DIR__ . '/..' . '/symfony/cache/Traits/ValueWrapper.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

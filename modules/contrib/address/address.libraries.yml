@@ -1,5 +1,4 @@
 form:
-  version: VERSION
   css:
     theme:
       css/address.form.css: {}

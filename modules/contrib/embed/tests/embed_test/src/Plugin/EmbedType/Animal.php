@@ -3,16 +3,17 @@
 namespace Drupal\embed_test\Plugin\EmbedType;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\embed\Attribute\EmbedType;
 use Drupal\embed\EmbedType\EmbedTypeBase;
 
 /**
  * Animal test embed type.
- *
- * @EmbedType(
- *   id = "embed_test_animal",
- *   label = @Translation("Animals"),
- * )
  */
+#[EmbedType(
+  id: 'embed_test_animal',
+  label: new TranslatableMarkup('Animals'),
+)]
 class Animal extends EmbedTypeBase {
 
   /**

@@ -12,8 +12,16 @@ include:
 #
 variables:
   _LENIENT_ALLOW_LIST: ckeditor
-  # Broaden test coverage.
   SKIP_ESLINT: 1
   _PHPUNIT_CONCURRENT: 1
-  OPT_IN_TEST_PREVIOUS_MAJOR: 1
+  # Project names in AGENTS.md.
+  _CSPELL_WORDS: 'ephoto,webform'
+  # Broaden test coverage.
+  OPT_IN_TEST_PREVIOUS_MINOR: 1
   OPT_IN_TEST_NEXT_MINOR: 1
+  OPT_IN_TEST_NEXT_MAJOR: 1
+  OPT_IN_TEST_MAX_PHP: 1
+  _AUTORUN_PREVIOUS_MINOR: 'all'
+  _AUTORUN_NEXT_MINOR: 'all'
+  _AUTORUN_NEXT_MAJOR: 'push-and-mr'
+  _AUTORUN_MAX_PHP: 'push-and-mr'

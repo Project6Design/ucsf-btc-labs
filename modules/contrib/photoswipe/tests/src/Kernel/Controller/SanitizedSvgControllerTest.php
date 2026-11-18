@@ -7,6 +7,7 @@ namespace Drupal\Tests\photoswipe\Kernel\Controller;
 use Drupal\file\Entity\File;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\photoswipe\Controller\SanitizedSvgController;
+use Drupal\photoswipe\SvgSanitizer;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
@@ -55,7 +56,7 @@ class SanitizedSvgControllerTest extends KernelTestBase {
   public function testMaliciousMarkupIsStripped(): void {
     $file = $this->createFileWithContents('malicious.svg', '<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"><script>alert(2)</script><circle r="1"/></svg>');
 
-    $response = (new SanitizedSvgController())->view($file);
+    $response = (new SanitizedSvgController(new SvgSanitizer()))->view($file);
 
     $this->assertSame(200, $response->getStatusCode());
     $this->assertSame('image/svg+xml', $response->headers->get('Content-Type'));
@@ -72,7 +73,7 @@ class SanitizedSvgControllerTest extends KernelTestBase {
   public function testCleanSvgIsServed(): void {
     $file = $this->createFileWithContents('clean.svg', '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><circle r="1"/></svg>');
 
-    $response = (new SanitizedSvgController())->view($file);
+    $response = (new SanitizedSvgController(new SvgSanitizer()))->view($file);
 
     $this->assertSame(200, $response->getStatusCode());
     $this->assertStringContainsString('<circle', $response->getContent());
@@ -87,7 +88,7 @@ class SanitizedSvgControllerTest extends KernelTestBase {
   public function testFilenameWithQuoteIsEncodedSafely(): void {
     $file = $this->createFileWithContents('quote".svg', '<svg xmlns="http://www.w3.org/2000/svg"></svg>');
 
-    $response = (new SanitizedSvgController())->view($file);
+    $response = (new SanitizedSvgController(new SvgSanitizer()))->view($file);
 
     $disposition = $response->headers->get('Content-Disposition');
     // A raw, unescaped quote in the filename would terminate the
@@ -105,7 +106,7 @@ class SanitizedSvgControllerTest extends KernelTestBase {
     $file->save();
 
     $this->expectException(NotFoundHttpException::class);
-    (new SanitizedSvgController())->view($file);
+    (new SanitizedSvgController(new SvgSanitizer()))->view($file);
   }
 
   /**
@@ -117,7 +118,7 @@ class SanitizedSvgControllerTest extends KernelTestBase {
     $file->save();
 
     $this->expectException(NotFoundHttpException::class);
-    (new SanitizedSvgController())->view($file);
+    (new SanitizedSvgController(new SvgSanitizer()))->view($file);
   }
 
 }

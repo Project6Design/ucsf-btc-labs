@@ -7,12 +7,14 @@ namespace Drupal\Tests\embed\FunctionalJavascript;
 use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests the administrative UI.
- *
- * @group embed
  */
+#[Group('embed')]
+#[RunTestsInSeparateProcesses]
 class EmbedButtonAdminTest extends WebDriverTestBase {
 
   /**

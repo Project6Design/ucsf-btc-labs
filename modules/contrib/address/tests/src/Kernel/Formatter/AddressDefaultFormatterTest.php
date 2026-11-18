@@ -5,6 +5,8 @@ namespace Drupal\Tests\address\Kernel\Formatter;
 use Drupal\entity_test\Entity\EntityTestMul;
 use Drupal\language\Entity\ConfigurableLanguage;
 
+// cspell:ignore Ahuachapán Canelones Canillo Creu Hsin Pando
+
 /**
  * Tests the address_default formatter.
  *

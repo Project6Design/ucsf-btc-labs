@@ -20,7 +20,7 @@ final class EmbedSettingsForm extends ConfigFormBase {
    *
    * @var \Drupal\Core\StreamWrapper\StreamWrapperManagerInterface
    */
-  private $streamWrapperManager;
+  protected $streamWrapperManager;
 
   /**
    * Constructs a EmbedSettingsForm object.
@@ -40,7 +40,7 @@ final class EmbedSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container): static {
     return new static(
       $container->get('config.factory'),
       $container->get('config.typed'),
@@ -51,21 +51,21 @@ final class EmbedSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId(): string {
     return 'embed_settings';
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
+  protected function getEditableConfigNames(): array {
     return ['embed.settings'];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state): array {
     $config = $this->config('embed.settings');
 
     $scheme_options = $this->streamWrapperManager->getNames(StreamWrapperInterface::WRITE_VISIBLE);

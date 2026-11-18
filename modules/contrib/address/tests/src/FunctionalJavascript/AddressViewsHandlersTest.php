@@ -5,6 +5,8 @@ namespace Drupal\Tests\address\FunctionalJavascript;
 use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\node\Entity\Node;
 
+// cspell:ignore Alexanderplatz Armería Rivoli
+
 /**
  * Tests the Views handlers provided by the Address module.
  *
@@ -176,7 +178,7 @@ class AddressViewsHandlersTest extends WebDriverTestBase {
   /**
    * Data provider for testAddressFieldHandlers().
    */
-  public function addressFieldHandlersDataProvider() {
+  public static function addressFieldHandlersDataProvider() {
     return [
       // Country field.
       [
@@ -368,10 +370,8 @@ class AddressViewsHandlersTest extends WebDriverTestBase {
       ->pressButton('Remove');
     $assert->assertWaitOnAjaxRequest();
 
-    // Open advanced options.
-    $page->find('css', 'summary:contains("Advanced")')->click();
-
     // Add country contextual filter.
+    $page->find('css', 'summary:contains("Advanced")')?->click();
     $this->clickLink('views-add-argument');
     $assert->waitForField('name[node__field_address_test.field_address_test_country_code]');
     $page->checkField('name[node__field_address_test.field_address_test_country_code]');
@@ -383,7 +383,7 @@ class AddressViewsHandlersTest extends WebDriverTestBase {
     $assert->assertWaitOnAjaxRequest();
 
     // Check if contextual filter is added.
-    $page->find('css', 'summary:contains("Advanced")')->click();
+    $page->find('css', 'summary:contains("Advanced")')?->click();
     $assert->linkExists('Content: Address:country_code');
 
     // Set administrative area filter to use contextual country filter.

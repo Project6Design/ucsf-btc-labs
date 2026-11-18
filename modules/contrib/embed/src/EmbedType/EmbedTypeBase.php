@@ -22,7 +22,7 @@ abstract class EmbedTypeBase extends PluginBase implements EmbedTypeInterface, C
   public function __construct(array $configuration, $plugin_id, $plugin_definition, protected ?ModuleExtensionList $moduleList = NULL) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     if (!$this->moduleList) {
-      @trigger_error('Calling ' . __METHOD__ . ' without the $moduleList argument is deprecated in embed:8.x-1.9 and it will be required in embed:2.0.0. See https://www.drupal.org/node/3467748', E_USER_DEPRECATED);
+      @trigger_error('Calling ' . __METHOD__ . ' without the $moduleList argument is deprecated in embed:8.x-1.10 and it will be required in embed:2.0.0. See https://www.drupal.org/node/3467748', E_USER_DEPRECATED);
       // @phpstan-ignore-next-line
       $this->moduleList = \Drupal::service('extension.list.module');
     }
@@ -31,6 +31,8 @@ abstract class EmbedTypeBase extends PluginBase implements EmbedTypeInterface, C
 
   /**
    * {@inheritdoc}
+   *
+   * @return static
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
@@ -43,6 +45,9 @@ abstract class EmbedTypeBase extends PluginBase implements EmbedTypeInterface, C
 
   /**
    * {@inheritdoc}
+   *
+   * @return array
+   *   An array of dependencies grouped by type.
    */
   public function calculateDependencies() {
     return [];
@@ -50,6 +55,9 @@ abstract class EmbedTypeBase extends PluginBase implements EmbedTypeInterface, C
 
   /**
    * {@inheritdoc}
+   *
+   * @return array
+   *   An associative array with the default configuration.
    */
   public function defaultConfiguration() {
     return [];
@@ -57,6 +65,9 @@ abstract class EmbedTypeBase extends PluginBase implements EmbedTypeInterface, C
 
   /**
    * {@inheritdoc}
+   *
+   * @return array
+   *   An array of this plugin's configuration.
    */
   public function getConfiguration() {
     return $this->configuration;
@@ -91,6 +102,9 @@ abstract class EmbedTypeBase extends PluginBase implements EmbedTypeInterface, C
 
   /**
    * {@inheritdoc}
+   *
+   * @return array
+   *   The form structure.
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     return $form;
@@ -123,7 +137,7 @@ abstract class EmbedTypeBase extends PluginBase implements EmbedTypeInterface, C
    * @return \Drupal\Core\Extension\ModuleExtensionList
    *   The module extension list service.
    *
-   * @deprecated in embed:8.x-1.9 and is removed from embed:2.0.0. Use
+   * @deprecated in embed:8.x-1.10 and is removed from embed:2.0.0. Use
    *   $this->moduleList instead.
    *
    * @see https://www.drupal.org/node/3467748

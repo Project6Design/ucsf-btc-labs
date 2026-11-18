@@ -2,7 +2,6 @@
 
 namespace Drupal\embed\Controller;
 
-use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Core\Access\CsrfTokenGenerator;
 use Drupal\Core\Ajax\AjaxHelperTrait;
 use Drupal\Core\Ajax\AjaxResponse;
@@ -89,8 +88,7 @@ class EmbedController extends ControllerBase {
    */
   public function preview(Request $request, FilterFormatInterface $filter_format) {
     $this->checkCsrf($request, $this->currentUser());
-
-    $text = $request->get('text') ?: $request->get('value');
+    $text = $request->query->get('text') ?: $request->query->get('value');
     if (empty($text)) {
       throw new NotFoundHttpException();
     }
@@ -108,12 +106,7 @@ class EmbedController extends ControllerBase {
       return $response;
     }
     else {
-      $html = DeprecationHelper::backwardsCompatibleCall(
-        currentVersion: \Drupal::VERSION,
-        deprecatedVersion: '10.3',
-        currentCallable: fn() => $this->renderer->renderInIsolation($build),
-        deprecatedCallable: fn() => $this->renderer->renderPlain($build),
-      );
+      $html = $this->renderer->renderInIsolation($build);
 
       // Note that we intentionally do not use:
       // - \Drupal\Core\Cache\CacheableResponse because caching it on the server

@@ -3,16 +3,17 @@
 namespace Drupal\embed_test\Plugin\EmbedType;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\embed\Attribute\EmbedType;
 use Drupal\embed\EmbedType\EmbedTypeBase;
 
 /**
  * An embed type plugin for testing the plugin form. Using aircraft.
- *
- * @EmbedType(
- *   id = "embed_test_aircraft",
- *   label = @Translation("Aircraft"),
- * )
  */
+#[EmbedType(
+  id: 'embed_test_aircraft',
+  label: new TranslatableMarkup('Aircraft'),
+)]
 class Aircraft extends EmbedTypeBase {
 
   /**

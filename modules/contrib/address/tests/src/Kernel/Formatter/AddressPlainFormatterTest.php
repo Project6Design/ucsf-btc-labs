@@ -4,6 +4,8 @@ namespace Drupal\Tests\address\Kernel\Formatter;
 
 use Drupal\entity_test\Entity\EntityTestMul;
 
+// cspell:ignore Canillo Creu
+
 /**
  * Tests the address_plain formatter.
  *
@@ -39,7 +41,7 @@ class AddressPlainFormatterTest extends FormatterTestBase {
   /**
    * Data provider for plain formatter output test.
    */
-  public function renderDataProvider(): array {
+  public static function renderDataProvider(): array {
     return [
       // Regular address.
       [
@@ -89,6 +91,19 @@ class AddressPlainFormatterTest extends FormatterTestBase {
           'United States',
         ],
       ],
+      // Only country, administrative area and locality.
+      [
+        [
+          'country_code' => 'US',
+          'administrative_area' => 'CA',
+          'locality' => 'San Francisco',
+        ],
+        [
+          'San Francisco',
+          'CA',
+          'United States',
+        ],
+      ],
     ];
   }
 
@@ -121,7 +136,7 @@ class AddressPlainFormatterTest extends FormatterTestBase {
       'address_line1' => 'C. Prat de la Creu, 62-64',
     ];
     foreach (['full', 'my_custom_view_mode'] as $view_mode) {
-      // Simulate themeing of the address test entity.
+      // Simulate theming of the address test entity.
       $variables['theme_hook_original'] = 'address_plain';
       $variables['view_mode'] = $view_mode;
       $variables['address'] = $entity->{$this->fieldName}->get(0);

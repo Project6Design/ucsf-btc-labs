@@ -2,6 +2,7 @@
 
 namespace Drupal\entity_reference_revisions\Plugin\Field\FieldType;
 
+use Drupal\Component\Utility\DeprecationHelper;
 use Drupal\Component\Utility\Random;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -59,14 +60,14 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
   public function storageSettingsForm(array &$form, FormStateInterface $form_state, $has_data) {
 
     $entity_types = \Drupal::entityTypeManager()->getDefinitions();
-    $options = array();
+    $options = [];
     foreach ($entity_types as $entity_type) {
       if ($entity_type->isRevisionable()) {
         $options[$entity_type->id()] = $entity_type->getLabel();
       }
     }
 
-    $element['target_type'] = array(
+    $element['target_type'] = [
       '#type' => 'select',
       '#title' => $this->t('Type of item to reference'),
       '#options' => $options,
@@ -74,7 +75,7 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
       '#required' => TRUE,
       '#disabled' => $has_data,
       '#size' => 1,
-    );
+    ];
 
     return $element;
   }
@@ -83,7 +84,7 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
    * {@inheritdoc}
    */
   public static function getPreconfiguredOptions() {
-    $options = array();
+    $options = [];
 
     // Add all the commonly referenced entity types as distinct pre-configured
     // options.
@@ -100,8 +101,8 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
         'field_storage_config' => [
           'settings' => [
             'target_type' => $entity_type->id(),
-          ]
-        ]
+          ],
+        ],
       ];
 
       $default_reference_settings = $entity_type->get('default_reference_revision_settings');
@@ -124,7 +125,7 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
 
     if ($target_type_info->getKey('revision')) {
       $target_revision_id_definition = DataReferenceTargetDefinition::create('integer')
-        ->setLabel(t('@label revision ID', array('@label' => $target_type_info->getLabel())))
+        ->setLabel(t('@label revision ID', ['@label' => $target_type_info->getLabel()]))
         ->setSetting('unsigned', TRUE);
 
       $target_revision_id_definition->setRequired(TRUE);
@@ -152,12 +153,12 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
     $schema = parent::schema($field_definition);
 
     if ($target_type_info->getKey('revision')) {
-      $schema['columns']['target_revision_id'] = array(
+      $schema['columns']['target_revision_id'] = [
         'description' => 'The revision ID of the target entity.',
         'type' => 'int',
         'unsigned' => TRUE,
-      );
-      $schema['indexes']['target_revision_id'] = array('target_revision_id');
+      ];
+      $schema['indexes']['target_revision_id'] = ['target_revision_id'];
     }
 
     return $schema;
@@ -212,7 +213,7 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
    */
   public function getValue() {
     $values = parent::getValue();
-    if ($this->entity instanceof EntityNeedsSaveInterface && $this->entity->needsSave()) {
+    if ($this->isEntityLoaded() && $this->entity instanceof EntityNeedsSaveInterface && $this->entity->needsSave()) {
       $values['entity'] = $this->entity;
     }
     return $values;
@@ -226,20 +227,21 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
     if ($property_name == 'entity') {
       $property = $this->get('entity');
       $target_id = $property->isTargetNew() ? NULL : $property->getTargetIdentifier();
+      $target_revision_id = $property->getValue()?->getRevisionId();
       $this->writePropertyValue('target_id', $target_id);
-      $this->writePropertyValue('target_revision_id', $property->getValue()->getRevisionId());
+      $this->writePropertyValue('target_revision_id', $target_revision_id);
     }
     elseif ($property_name == 'target_id' && $this->target_id != NULL && $this->target_revision_id) {
-      $this->writePropertyValue('entity', array(
+      $this->writePropertyValue('entity', [
         'target_id' => $this->target_id,
         'target_revision_id' => $this->target_revision_id,
-      ));
+      ]);
     }
     elseif ($property_name == 'target_revision_id' && $this->target_revision_id && $this->target_id) {
-      $this->writePropertyValue('entity', array(
+      $this->writePropertyValue('entity', [
         'target_id' => $this->target_id,
         'target_revision_id' => $this->target_revision_id,
-      ));
+      ]);
     }
     if ($notify && isset($this->parent)) {
       $this->parent->onChange($this->name);
@@ -270,10 +272,10 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
     parent::preSave();
 
     $is_affected = TRUE;
+    $set_new_revision = FALSE;
     if (!$has_new) {
       // Create a new revision if it is a composite entity in a host with a new
       // revision.
-
       $host = $this->getEntity();
       $needs_save = $this->entity instanceof EntityNeedsSaveInterface && $this->entity->needsSave();
 
@@ -316,10 +318,23 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
           }
         }
 
+        // Drupal 11.x enforces that an existing default revision cannot be
+        // saved as a non-default revision without creating a new revision.
+        // If the entity was loaded as the default revision and is being saved
+        // as non-default (e.g., when the host is saved as a draft), we must
+        // create a new revision. The isDefaultRevision state is kept as-is
+        // to match the host's revision state.
+        // @see https://www.drupal.org/project/drupal/issues/3499181
+        // @see https://www.drupal.org/project/inline_entity_form/issues/3532374
+        if (!$this->entity->isNewRevision() && $this->entity->wasDefaultRevision() && !$this->entity->isDefaultRevision()) {
+          $this->entity->setNewRevision(TRUE);
+          $set_new_revision = TRUE;
+        }
+
         $this->entity->save();
       }
     }
-    if ($this->entity && $is_affected) {
+    if ($this->entity && ($is_affected || $set_new_revision)) {
       $this->target_revision_id = $this->entity->getRevisionId();
     }
   }
@@ -357,8 +372,8 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
     if (method_exists($parent_entity, 'getOriginal')) {
       $original = $parent_entity->getOriginal();
     }
-    elseif (isset($parent_entity->original)) {
-      $original = $parent_entity->original;
+    elseif (DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => $parent_entity->getOriginal() !== NULL, fn() => isset($parent_entity->original))) {
+      $original = DeprecationHelper::backwardsCompatibleCall(\Drupal::VERSION, '11.2.0', fn() => $parent_entity->getOriginal(), fn() => $parent_entity->original);
     }
     if ($original && !$this->getFieldDefinition()->isTranslatable()) {
       $langcodes = array_keys($parent_entity->getTranslationLanguages());
@@ -390,7 +405,15 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
     if ($needs_save) {
       // Check if any of the keys has changed, save it, do not create a new
       // revision.
-      $entity->setNewRevision(FALSE);
+      // Drupal 11.x enforces that an existing default revision cannot be
+      // saved as a non-default revision without creating a new revision.
+      // @see https://www.drupal.org/project/drupal/issues/3499181
+      if ($entity->wasDefaultRevision() && !$entity->isDefaultRevision()) {
+        $entity->setNewRevision(TRUE);
+      }
+      else {
+        $entity->setNewRevision(FALSE);
+      }
       $entity->save();
     }
   }
@@ -407,11 +430,19 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
     if (!$child) {
       return;
     }
+    $child_type = $child->getEntityType();
+    if (!$child_type->get('entity_revision_parent_type_field') || !$child_type->get('entity_revision_parent_id_field')) {
+      return;
+    }
     if ($child->isDefaultRevision()) {
-      \Drupal::queue('entity_reference_revisions_orphan_purger')->createItem([
-        'entity_id' => $child->id(),
-        'entity_type_id' => $child->getEntityTypeId(),
-      ]);
+      // Queue composites only.
+      if ($child->getEntityType()->get('entity_revision_parent_type_field') && $child->getEntityType()->get('entity_revision_parent_id_field')) {
+        \Drupal::queue('entity_reference_revisions_orphan_purger')->createItem([
+          'entity_id' => $child->id(),
+          'entity_type_id' => $child->getEntityTypeId(),
+        ]);
+      }
+
       return;
     }
 
@@ -513,7 +544,7 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
     $label = NULL;
     if ($label_key = $target_type->getKey('label')) {
       $random = new Random();
-      // @TODO set the length somehow less arbitrary.
+      // @todo set the length somehow less arbitrary.
       $label = $random->word(mt_rand(1, 10));
     }
 
@@ -532,7 +563,7 @@ class EntityReferenceRevisionsItem extends EntityReferenceItem implements Option
       $field_storage = $instance->getFieldStorageDefinition();
       $max = $cardinality = $field_storage->getCardinality();
       if ($cardinality == FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED) {
-        // Just an arbitrary number for 'unlimited'
+        // Just an arbitrary number for 'unlimited'.
         $max = rand(1, 5);
       }
       $field_name = $field_storage->getName();

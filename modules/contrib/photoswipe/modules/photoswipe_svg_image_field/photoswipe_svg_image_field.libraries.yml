@@ -1,0 +1,4 @@
+formatter:
+  css:
+    component:
+      css/photoswipe-svg.css: {}

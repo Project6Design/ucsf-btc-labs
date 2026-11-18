@@ -67,10 +67,8 @@ class EntityReferenceRevisionsDestinationTest extends KernelTestBase implements 
 
     /** @var \Drupal\Core\Entity\EntityStorageBase $storage */
     $reflected_storage = new \ReflectionProperty($destination, 'storage');
-    $reflected_storage->setAccessible(TRUE);
     $storage = $reflected_storage->getValue($destination);
     $reflected_entity_type_id = new \ReflectionProperty($storage, 'entityTypeId');
-    $reflected_entity_type_id->setAccessible(TRUE);
     $actual = $reflected_entity_type_id->getValue($storage);
 
     $this->assertEquals($expected, $actual);
@@ -101,7 +99,6 @@ class EntityReferenceRevisionsDestinationTest extends KernelTestBase implements 
     $migrationExecutable = (new MigrateExecutable($migration, $this));
     /** @var \Drupal\Core\Entity\EntityStorageBase $storage */
     $reflected_storage = new \ReflectionProperty($migration->getDestinationPlugin(), 'storage');
-    $reflected_storage->setAccessible(TRUE);
     $storage = $reflected_storage->getValue($migration->getDestinationPlugin());
     // Test inserting and updating by looping twice.
     for ($i = 0; $i < 2; $i++) {
@@ -254,7 +251,6 @@ class EntityReferenceRevisionsDestinationTest extends KernelTestBase implements 
     $migrationExecutable = (new MigrateExecutable($migration, $this));
     /** @var \Drupal\Core\Entity\EntityStorageBase $storage */
     $reflected_storage = new \ReflectionProperty($migration->getDestinationPlugin(), 'storage');
-    $reflected_storage->setAccessible(TRUE);
     $storage = $reflected_storage->getValue($migration->getDestinationPlugin());
     // Test inserting and updating by looping twice.
     for ($i = 0; $i < 2; $i++) {
@@ -311,7 +307,7 @@ class EntityReferenceRevisionsDestinationTest extends KernelTestBase implements 
           [
             ['id' => 1, 'revision_id' => 1, 'label' => 'content item 1a'],
             ['id' => 2, 'revision_id' => 2, 'label' => 'content item 2'],
-          ]
+          ],
         ],
       ],
       'with ids, new revisions and force revision' => [
@@ -345,7 +341,7 @@ class EntityReferenceRevisionsDestinationTest extends KernelTestBase implements 
           [
             ['id' => 1, 'revision_id' => 3, 'label' => 'content item 1a'],
             ['id' => 2, 'revision_id' => 4, 'label' => 'content item 2'],
-          ]
+          ],
         ],
       ],
     ];
@@ -413,7 +409,6 @@ class EntityReferenceRevisionsDestinationTest extends KernelTestBase implements 
     // purposes of registering the migration for the migration process plugin.
     $reflector = new \ReflectionObject($this->migrationPluginManager);
     $property = $reflector->getProperty('definitions');
-    $property->setAccessible(TRUE);
     $property->setValue($this->migrationPluginManager, $definitions);
     $this->container->set('plugin.manager.migration', $this->migrationPluginManager);
 
@@ -422,7 +417,6 @@ class EntityReferenceRevisionsDestinationTest extends KernelTestBase implements 
       $migrationExecutable = (new MigrateExecutable($migration, $this));
       /** @var \Drupal\Core\Entity\EntityStorageBase $storage */
       $reflected_storage = new \ReflectionProperty($migration->getDestinationPlugin(), 'storage');
-      $reflected_storage->setAccessible(TRUE);
       $storage = $reflected_storage->getValue($migration->getDestinationPlugin());
       $migrationExecutable->import();
       foreach ($datum['expected'] as $expected) {

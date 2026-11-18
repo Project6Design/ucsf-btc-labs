@@ -9,6 +9,8 @@ use CommerceGuys\Addressing\AddressFormat\DependentLocalityType;
 use CommerceGuys\Addressing\AddressFormat\LocalityType;
 use CommerceGuys\Addressing\AddressFormat\PostalCodeType;
 
+// cspell:ignore Cedex Eircode Townland
+
 /**
  * Provides translated labels for the library enums.
  */
@@ -33,7 +35,7 @@ class LabelHelper {
       AddressField::ADDRESS_LINE3 => t('Address line 3', [], ['context' => 'Address label']),
       AddressField::POSTAL_CODE => t('Postal code', [], ['context' => 'Address label']),
       AddressField::SORTING_CODE => t('Sorting code', [], ['context' => 'Address label']),
-      AddressField::DEPENDENT_LOCALITY => t('Dependent locality (e.g. Neighbourhood)', [], ['context' => 'Address label']),
+      AddressField::DEPENDENT_LOCALITY => t('Dependent locality (e.g. Neighborhood)', [], ['context' => 'Address label']),
       AddressField::LOCALITY => t('Locality (e.g. City)', [], ['context' => 'Address label']),
       AddressField::ADMINISTRATIVE_AREA => t('Administrative area (e.g. State or Province)', [], ['context' => 'Address label']),
     ];

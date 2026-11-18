@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\embed\Functional;
 
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
 /**
  * Tests the preview controller and route.
- *
- * @group embed
  */
+#[Group('embed')]
+#[RunTestsInSeparateProcesses]
 class PreviewTest extends EmbedTestBase {
 
   const SUCCESS = 'Success!';

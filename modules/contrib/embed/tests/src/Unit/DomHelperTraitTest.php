@@ -8,12 +8,13 @@ use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Html;
 use Drupal\embed\DomHelperTrait;
 use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests \Drupal\embed\DomHelperTrait.
- *
- * @group embed
  */
+#[Group('embed')]
 class DomHelperTraitTest extends UnitTestCase {
   use DomHelperTrait;
 
@@ -47,13 +48,19 @@ class DomHelperTraitTest extends UnitTestCase {
     $this->changeNodeName($this->node, 'tested');
     $this->assertEquals($this->node->tagName, 'tested');
     $this->assertEquals(Html::serialize($this->document), '<outer><tested foo="bar" namespace:foo="bar"><test bar="foo"></test></tested></outer>');
+
+    // Test a node with multiple children, including text nodes.
+    $document = Html::load('<p><b>one<br>two<i>three</i>four</b></p>');
+    $node = $document->getElementsByTagName('b')->item(0);
+    $this->changeNodeName($node, 'strong');
+    $this->assertEquals('strong', $node->tagName);
+    $this->assertEquals('<p><strong>one<br>two<i>three</i>four</strong></p>', Html::serialize($document));
   }
 
   /**
    * Tests DomHelperTrait::setNodeContent().
-   *
-   * @dataProvider providerTestSetNodeContent
    */
+  #[DataProvider('providerTestSetNodeContent')]
   public function testSetNodeContent($content, $expected_output) {
     $this->setNodeContent($this->node, $content);
     $this->assertEquals(Html::serialize($this->document), $expected_output);
@@ -89,9 +96,8 @@ class DomHelperTraitTest extends UnitTestCase {
 
   /**
    * Test DomHelperTrait::replaceNodeContent().
-   *
-   * @dataProvider providerTestReplaceNodeContent
    */
+  #[DataProvider('providerTestReplaceNodeContent')]
   public function testReplaceNodeContent($content, $expected_output) {
     $this->replaceNodeContent($this->node, $content);
     $this->assertEquals($expected_output, Html::serialize($this->document));

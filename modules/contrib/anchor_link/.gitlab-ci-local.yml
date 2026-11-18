@@ -27,7 +27,7 @@ variables:
 
 cspell:
   stage: validate
-  image: node:20
+  image: node:24
   before_script:
     - npm install -g cspell@8
   script:
@@ -36,7 +36,7 @@ cspell:
 
 eslint:
   stage: validate
-  image: node:20
+  image: node:24
   before_script:
     - corepack enable
     - yarn install
@@ -58,7 +58,7 @@ eslint:
 # tests/recipes/anchor_link_test recipe.
 functional-tests:
   stage: test
-  image: node:20-bookworm
+  image: node:24-bookworm
   # MariaDB service (Drupal 11 needs SQLite >= 3.45, newer than Debian ships,
   # so use a DB server - the same way the real drupalci pipeline does).
   services:

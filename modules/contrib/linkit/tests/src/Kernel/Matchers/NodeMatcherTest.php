@@ -276,6 +276,49 @@ class NodeMatcherTest extends LinkitKernelTestBase {
   }
 
   /**
+   * Tests matching IDs while retaining numeric title matches.
+   */
+  public function testNodeMatcherNumericIdSearch(): void {
+    $target = Node::load(1);
+    $target->setTitle('Named target');
+    $target->save();
+    $numeric_title = Node::load(3);
+    $numeric_title->setTitle('Reference 1');
+    $numeric_title->save();
+
+    $plugin = $this->manager->createInstance('entity:node', []);
+    $paths = array_map(static fn($suggestion) => $suggestion->getPath(), $plugin->execute('1')->getSuggestions());
+    $this->assertEqualsCanonicalizing(['/node/1', '/node/3'], $paths);
+
+    $suggestions = $plugin->execute(' 1 ')->getSuggestions();
+    $this->assertCount(1, $suggestions);
+    $this->assertSame('/node/1', $suggestions[0]->getPath());
+    $this->assertCount(0, $plugin->execute('999999')->getSuggestions());
+    $this->assertCount(0, $plugin->execute('1abc')->getSuggestions());
+    $this->assertSame('/node/1', $plugin->execute('Named target')->getSuggestions()[0]->getPath());
+  }
+
+  /**
+   * Tests that numeric ID lookup respects bundle restrictions and node access.
+   */
+  public function testNodeMatcherNumericIdRestrictions(): void {
+    $plugin = $this->manager->createInstance('entity:node', [
+      'settings' => ['bundles' => ['test1' => 'test1']],
+    ]);
+    $this->assertCount(0, $plugin->execute('3')->getSuggestions());
+    $this->assertCount(0, $plugin->execute('4')->getSuggestions());
+
+    $plugin = $this->manager->createInstance('entity:node', [
+      'settings' => ['include_unpublished' => TRUE],
+    ]);
+    $this->assertCount(0, $plugin->execute('4')->getSuggestions());
+    \Drupal::currentUser()->setAccount($this->createUser([], ['bypass node access']));
+    $suggestions = $plugin->execute('4')->getSuggestions();
+    $this->assertCount(1, $suggestions);
+    $this->assertSame('/node/4', $suggestions[0]->getPath());
+  }
+
+  /**
    * Tests node matcher when searching on the node path.
    */
   public function testNodeMatcherPathSearch() {

@@ -802,6 +802,96 @@ class EntityReferenceRevisionsCompositeTest extends EntityKernelTestBase {
   }
 
   /**
+   * Tests saving a default-revision composite as non-default via a new host.
+   *
+   * Reproduces the EntityStorageException when an existing default-revision
+   * composite entity has isDefaultRevision(FALSE) set (synced from a
+   * non-default host revision) and is referenced by a new (unsaved) composite
+   * host. Because the host is new, preSave() skips the revision sync block
+   * (!$host->isNew()), and the entity is saved without setNewRevision() being
+   * called. This violates core's check that a default revision cannot be
+   * demoted to non-default without creating a new revision.
+   *
+   * @see https://www.drupal.org/project/entity_reference_revisions/issues/3571637
+   * @see \Drupal\Core\Entity\ContentEntityStorageBase::doPreSave()
+   */
+  public function testDefaultRevisionDemotionWithNewHost(): void {
+    // Add a nested entity_reference_revisions field on the composite entity
+    // to simulate nested composite relationships.
+    $nested_field_storage = FieldStorageConfig::create([
+      'field_name' => 'nested_composite',
+      'entity_type' => 'entity_test_composite',
+      'type' => 'entity_reference_revisions',
+      'settings' => [
+        'target_type' => 'entity_test_composite',
+      ],
+    ]);
+    $nested_field_storage->save();
+    FieldConfig::create([
+      'field_storage' => $nested_field_storage,
+      'bundle' => 'entity_test_composite',
+      'translatable' => FALSE,
+    ])->save();
+
+    // Create a node with a composite entity (both default revisions).
+    $composite = EntityTestCompositeRelationship::create([
+      'uuid' => $this->randomMachineName(),
+      'name' => $this->randomMachineName(),
+    ]);
+    $composite->save();
+    $node = Node::create([
+      'title' => $this->randomMachineName(),
+      'type' => 'article',
+      'composite_reference' => $composite,
+    ]);
+    $node->save();
+
+    $this->assertRevisionCount(1, 'entity_test_composite', $composite->id());
+
+    // Reload the composite as the default revision, as the form would.
+    $this->entityTypeManager->getStorage('entity_test_composite')->resetCache();
+    $composite = EntityTestCompositeRelationship::load($composite->id());
+    $this->assertTrue($composite->wasDefaultRevision());
+    $this->assertTrue($composite->isDefaultRevision());
+
+    // Mark the composite as non-default and needing save, then place it
+    // inside a NEW host composite. The new host causes preSave() to skip
+    // the revision sync block (!$host->isNew()), triggering the bug.
+    $composite->isDefaultRevision(FALSE);
+    $composite->setNeedsSave(TRUE);
+    $container = EntityTestCompositeRelationship::create([
+      'uuid' => $this->randomMachineName(),
+      'name' => 'Container',
+      'nested_composite' => $composite,
+    ]);
+
+    // Save the node as a non-default (draft) revision with the container.
+    $node = $this->entityTypeManager->getStorage('node')->load($node->id());
+    $node->composite_reference = $container;
+    $node->setNewRevision(TRUE);
+    $node->isDefaultRevision(FALSE);
+    $node->save();
+
+    // If we reach here, the fix works. Verify state.
+    $this->entityTypeManager->getStorage('entity_test_composite')->resetCache();
+    $this->entityTypeManager->getStorage('node')->resetCache();
+
+    // The inner composite should have a new non-default revision.
+    $composite_latest_rev_id = $this->entityTypeManager
+      ->getStorage('entity_test_composite')
+      ->getLatestRevisionId($composite->id());
+    $composite_latest = $this->entityTypeManager
+      ->getStorage('entity_test_composite')
+      ->loadRevision($composite_latest_rev_id);
+    $this->assertFalse($composite_latest->isDefaultRevision());
+
+    // The original default revision should still exist and be intact.
+    $composite_default = EntityTestCompositeRelationship::load($composite->id());
+    $this->assertNotNull($composite_default);
+    $this->assertTrue($composite_default->isDefaultRevision());
+  }
+
+  /**
    * Creates and assigns the composite entity to a node.
    *
    * @param string $node_type

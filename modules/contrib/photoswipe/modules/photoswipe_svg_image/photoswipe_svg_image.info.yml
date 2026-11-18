@@ -8,7 +8,7 @@ dependencies:
   - photoswipe:photoswipe
   - svg_image:svg_image
 
-# Information added by Drupal.org packaging script on 2026-10-14
-version: '5.0.12'
+# Information added by Drupal.org packaging script on 2026-11-10
+version: '5.0.14'
 project: 'photoswipe'
-datestamp: 1791998154
+datestamp: 1794311622

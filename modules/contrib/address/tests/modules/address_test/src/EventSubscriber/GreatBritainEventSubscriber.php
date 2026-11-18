@@ -8,6 +8,9 @@ use Drupal\address\Event\AddressFormatEvent;
 use Drupal\address\Event\SubdivisionsEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+// cspell:ignore Blaenau Bridgend Ceredigion Conwy Cynon Glamorgan Merthyr
+// cspell:ignore Pembrokeshire Tarfaen Tydfil Wrexham
+
 /**
  * Adds a county field and a predefined list of counties for Great Britain.
  *

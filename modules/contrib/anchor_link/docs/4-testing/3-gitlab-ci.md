@@ -65,7 +65,7 @@ Shared setup lives under `.fragments` and is pulled in with `!reference`:
 - **`web_db`** - creates the `files` and `simpletest` directories, fixes
   permissions, points `/var/www/html` at the built docroot, starts Apache and
   exports `SIMPLETEST_DB`.
-- **`node_playwright`** - installs Node 20, enables Corepack, runs `yarn
+- **`node_playwright`** - installs Node 24, enables Corepack, runs `yarn
   install`, and installs Chromium with its system dependencies.
 
 `node_playwright` backs `cucumber.js` up before `yarn install` and restores it

@@ -14,8 +14,9 @@ function photoswipe_svg_image_field_theme() {
   return [
     'photoswipe_svg_image_field_formatter' => [
       'variables' => [
+        'svg' => [],
+        'inline' => FALSE,
         'item' => NULL,
-        'item_attributes' => [],
         'entity' => NULL,
         'display_settings' => [],
         'third_party_settings' => [],

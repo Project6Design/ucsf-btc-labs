@@ -384,6 +384,14 @@ class EntityMatcher extends ConfigurableMatcherBase {
       if ($entity_type instanceof ConfigEntityTypeInterface) {
         $query->condition($label_key, $search_string, 'CONTAINS');
       }
+      elseif (ctype_digit($trimmed = trim((string) $search_string)) && ($id_key = $entity_type->getKey('id'))) {
+        // A numeric search string also matches the entity ID, so an entity
+        // can be looked up by its ID instead of only by its title.
+        $or = $query->orConditionGroup()
+          ->condition($label_key, '%' . $search_string . '%', 'LIKE')
+          ->condition($id_key, (int) $trimmed);
+        $query->condition($or);
+      }
       else {
         $query->condition($label_key, '%' . $search_string . '%', 'LIKE');
       }

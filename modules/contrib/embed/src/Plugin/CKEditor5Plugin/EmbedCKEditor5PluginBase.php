@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\entity_embed\Plugin\CKEditor5Plugin;
+namespace Drupal\embed\Plugin\CKEditor5Plugin;
 
 use Drupal\ckeditor5\Plugin\CKEditor5PluginDefault;
 use Drupal\ckeditor5\Plugin\CKEditor5PluginDefinition;

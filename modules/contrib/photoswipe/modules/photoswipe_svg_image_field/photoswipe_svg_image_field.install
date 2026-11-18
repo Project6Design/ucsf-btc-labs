@@ -5,8 +5,11 @@
  * Install, uninstall and update hooks for PhotoSwipe SVG Image Field module.
  */
 
+use Drupal\Core\Config\Entity\ConfigEntityUpdater;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\Core\Hook\Attribute\LegacyRequirementsHook;
+use Drupal\layout_builder\Entity\LayoutEntityDisplayInterface;
 use enshrined\svgSanitize\Sanitizer;
 
 /**
@@ -33,4 +36,83 @@ function photoswipe_svg_image_field_requirements($phase) {
   }
 
   return $requirements;
+}
+
+/**
+ * Convert the formatter settings to the ones of the SVG Image Field formatter.
+ *
+ * The formatter now extends the "SVG Image Field formatter", so the thumbnail
+ * size is configured by its "width" and "height" settings. Existing displays
+ * keep their output.
+ */
+function photoswipe_svg_image_field_update_9001(array &$sandbox): void {
+  \Drupal::classResolver(ConfigEntityUpdater::class)->update($sandbox, 'entity_view_display', function (EntityViewDisplayInterface $display): bool {
+    $changed = FALSE;
+    foreach ($display->getComponents() as $name => $component) {
+      if (($component['type'] ?? NULL) !== 'photoswipe_svg_image_field_formatter') {
+        continue;
+      }
+      $settings = $component['settings'] ?? [];
+      $upgradedSettings = _photoswipe_svg_image_field_upgrade_legacy_settings($settings);
+      if ($upgradedSettings !== $settings) {
+        $component['settings'] = $upgradedSettings;
+        $display->setComponent($name, $component);
+        $changed = TRUE;
+      }
+    }
+
+    // Field blocks placed with Layout Builder store their own formatter
+    // settings.
+    if ($display instanceof LayoutEntityDisplayInterface) {
+      // The sections are objects, which are changed in place.
+      foreach ($display->getSections() as $section) {
+        foreach ($section->getComponents() as $sectionComponent) {
+          $configuration = $sectionComponent->get('configuration');
+          if (($configuration['formatter']['type'] ?? NULL) !== 'photoswipe_svg_image_field_formatter') {
+            continue;
+          }
+          $settings = $configuration['formatter']['settings'] ?? [];
+          $upgradedSettings = _photoswipe_svg_image_field_upgrade_legacy_settings($settings);
+          if ($upgradedSettings !== $settings) {
+            $configuration['formatter']['settings'] = $upgradedSettings;
+            $sectionComponent->setConfiguration($configuration);
+            $changed = TRUE;
+          }
+        }
+      }
+    }
+
+    return $changed;
+  });
+}
+
+/**
+ * Converts the settings of the 5.x releases of the formatter.
+ *
+ * Before the formatter extended the "SVG Image Field formatter", it had its
+ * own settings for the thumbnail size. The formatter plugin manager drops
+ * unknown settings, so this can only be done in an update hook.
+ *
+ * @param array $settings
+ *   The formatter settings.
+ *
+ * @return array
+ *   The settings, with the legacy settings moved to the ones replacing them.
+ */
+function _photoswipe_svg_image_field_upgrade_legacy_settings(array $settings): array {
+  $legacySettings = [
+    'photoswipe_thumbnail_width' => 'width',
+    'photoswipe_thumbnail_height' => 'height',
+  ];
+  foreach ($legacySettings as $legacyKey => $key) {
+    if (array_key_exists($legacyKey, $settings)) {
+      $settings[$key] = $settings[$legacyKey];
+      unset($settings[$legacyKey]);
+    }
+  }
+  // An empty thumbnail size meant that no dimensions were applied.
+  if (array_key_exists('width', $settings) && empty($settings['width']) && empty($settings['height'])) {
+    $settings['apply_dimensions'] = FALSE;
+  }
+  return $settings;
 }

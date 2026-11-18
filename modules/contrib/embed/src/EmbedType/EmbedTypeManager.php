@@ -6,6 +6,7 @@ use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\DefaultPluginManager;
 use Drupal\embed\Annotation\EmbedType;
+use Drupal\embed\Attribute\EmbedType as EmbedTypeAttribute;
 
 /**
  * Provides an Embed type plugin manager.
@@ -28,7 +29,7 @@ class EmbedTypeManager extends DefaultPluginManager {
    *   The module handler to invoke the alter hook with.
    */
   public function __construct(\Traversable $namespaces, CacheBackendInterface $cache_backend, ModuleHandlerInterface $module_handler) {
-    parent::__construct('Plugin/EmbedType', $namespaces, $module_handler, EmbedTypeInterface::class, EmbedType::class);
+    parent::__construct('Plugin/EmbedType', $namespaces, $module_handler, EmbedTypeInterface::class, EmbedTypeAttribute::class, EmbedType::class);
     $this->alterInfo('embed_type_plugins');
     $this->setCacheBackend($cache_backend, 'embed_type_plugins');
   }

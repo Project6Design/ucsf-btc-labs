@@ -4,17 +4,28 @@
  * Returns HTML for an SVG Image Field item using Photoswipe.
  *
  * Available variables:
- * - image: image render array for the thumbnail.
- * - path: The path of the original SVG that should be displayed in Photoswipe.
- * - attributes: Link attributes.
+ * - svg: The render array of the SVG, as output by the "SVG Image Field
+ *   formatter" (an image or inline SVG).
+ * - inline: TRUE if the SVG is output inline. The Photoswipe layer is then
+ *   opened by a button in the corner of the SVG, otherwise by the image itself.
+ * - path: The path of the sanitized SVG that should be displayed in Photoswipe.
+ * - attributes: Attributes of the link, which opens the Photoswipe layer.
+ * - wrapper_attributes: Attributes of the wrapper around the inline SVG and
+ *   the button (only if inline).
  * - item: A SvgImageFieldItem object.
  * - display_settings: formatter settings.
  *
  * @ingroup themeable
  */
 #}
-{% if path is not empty %}
-  <a href="{{ path }}" {{ attributes }}>{{ image }}</a>
-{% else %}
+{% if path is empty %}
   <!-- Broken image detected in photoswipe-svg-image-field-formatter.html.twig. Please check the source field values. -->
+{% elseif inline %}
+  {# The lightbox trigger is a sibling of the SVG, so links inside the SVG stay clickable. #}
+  <div{{ wrapper_attributes }}>
+    {{ svg }}
+    <a href="{{ path }}" {{ attributes }} aria-label="{{ 'Enlarge image'|t }}" title="{{ 'Enlarge image'|t }}"></a>
+  </div>
+{% else %}
+  <a href="{{ path }}" {{ attributes }}>{{ svg }}</a>
 {% endif %}

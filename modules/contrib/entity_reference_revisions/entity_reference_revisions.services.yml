@@ -6,3 +6,11 @@ services:
   Drupal\entity_reference_revisions\Hook\EntityHooks:
     class: Drupal\entity_reference_revisions\Hook\EntityHooks
     autowire: true
+
+  Drupal\entity_reference_revisions\Hook\EntityReferenceRevisionsHooks:
+    class: Drupal\entity_reference_revisions\Hook\EntityReferenceRevisionsHooks
+    autowire: true
+
+  Drupal\entity_reference_revisions\Hook\EntityReferenceRevisionsViewsHooks:
+    class: Drupal\entity_reference_revisions\Hook\EntityReferenceRevisionsViewsHooks
+    autowire: true

@@ -21,7 +21,7 @@ class AddressFieldBuilder extends CoreFieldBuilder {
   /**
    * {@inheritdoc}
    */
-  public function build(FieldItemListInterface $field_items) {
+  public function build(FieldItemListInterface $field_items): array {
     $result = [];
 
     foreach ($field_items as $field_key => $field_item) {

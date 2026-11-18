@@ -7,20 +7,22 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\filter\Attribute\Filter;
 use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
+use Drupal\filter\Plugin\FilterInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Renders a full node view from an embed code like node:NID.
- *
- * @Filter(
- *   id = "embed_test_node",
- *   title = @Translation("Test Node"),
- *   description = @Translation("Embeds nodes using node:NID embed codes."),
- *   type = Drupal\filter\Plugin\FilterInterface::TYPE_MARKUP_LANGUAGE,
- * )
  */
+#[Filter(
+  id: 'embed_test_node',
+  title: new TranslatableMarkup('Test Node'),
+  type: FilterInterface::TYPE_MARKUP_LANGUAGE,
+  description: new TranslatableMarkup('Embeds nodes using node:NID embed codes.'),
+)]
 class EntityEmbedByID extends FilterBase implements ContainerFactoryPluginInterface {
 
   /**

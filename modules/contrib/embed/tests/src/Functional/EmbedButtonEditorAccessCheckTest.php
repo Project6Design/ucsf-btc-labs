@@ -6,14 +6,19 @@ namespace Drupal\Tests\embed\Functional;
 
 use Drupal\editor\EditorInterface;
 use Drupal\editor\Entity\Editor;
+use Drupal\embed\Access\EmbedButtonEditorAccessCheck;
 use Drupal\Tests\system\Functional\Cache\AssertPageCacheContextsAndTagsTrait;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Tests EmbedButtonEditorAccessCheck.
- *
- * @coversDefaultClass \Drupal\embed\Access\EmbedButtonEditorAccessCheck
- * @group embed
  */
+#[CoversClass(EmbedButtonEditorAccessCheck::class)]
+#[Group('embed')]
+#[RunTestsInSeparateProcesses]
 class EmbedButtonEditorAccessCheckTest extends EmbedTestBase {
 
   use AssertPageCacheContextsAndTagsTrait;
@@ -79,10 +84,8 @@ class EmbedButtonEditorAccessCheckTest extends EmbedTestBase {
 
   /**
    * Tests \Drupal\embed\Access\EmbedButtonEditorAccessCheck.
-   *
-   * @covers ::access
-   * @dataProvider providerEmbedbuttonEditorAccessCheck
    */
+  #[DataProvider('providerEmbedbuttonEditorAccessCheck')]
   public function testEmbedButtonEditorAccessCheck(string $editor) {
     $this->setUpEditor($editor);
 

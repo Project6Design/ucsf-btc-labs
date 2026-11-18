@@ -1,4 +1,4 @@
-
+/* cspell:ignore csvg cpath */
 .field-option__icon.field-icon-address {
   position: relative;
   height: 100%;
@@ -7,4 +7,3 @@
   background-position: center;
   background-size: 36px;
 }
-

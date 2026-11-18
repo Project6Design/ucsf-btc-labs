@@ -56,14 +56,29 @@ function photoswipe_dynamic_caption_requirements($phase) {
     '@here' => Link::fromTextAndUrl(t('here'), Url::fromUri('https://www.drupal.org/docs/develop/using-composer/manage-dependencies#third-party-libraries'))->toString(),
   ]);
 
+  // DOMPurify is optional: only report it missing when HTML captions are
+  // enabled. It is never loaded from a CDN, so this runs before the CDN check
+  // and is merged into every return below.
+  $requirements = [];
+  if (!empty($is_allow_html_captions_enabled) && empty($dompurify_file)) {
+    $requirements['photoswipe_dynamic_caption_dompurify'] = [
+      'title' => t('DOMPurify library'),
+      'severity' => REQUIREMENT_ERROR,
+      'value' => t('<strong>DOMPurify library for Photoswipe Dynamic Caption <em>"Allow HTML captions"</em> setting not found</strong>'),
+      'description' => t('<em>Allow HTML captions</em> setting is enabled, but the DOMPurify library was not found at <code>libraries/dompurify/dist/purify.min.js</code>. Captions will be escaped as plain text until the library is installed. Download it from <a href=":url" target="_blank" rel="noopener noreferrer">DOMPurify releases</a> or see the README.md for details.', [
+        ':url' => 'https://github.com/cure53/DOMPurify/releases/latest',
+      ]),
+    ];
+  }
+
   // CDN is enabled, return early:
   if ($is_cdn_enabled) {
-    return [];
+    return $requirements;
   }
 
   // Library directory is empty:
   if (empty($library_dir)) {
-    return [
+    return $requirements + [
       'photoswipe_dynamic_caption' => [
         'title' => t('Photoswipe dynamic caption plugin'),
         'severity' => REQUIREMENT_ERROR,
@@ -79,7 +94,7 @@ function photoswipe_dynamic_caption_requirements($phase) {
 
   // Package json could not be found:
   if (empty($package_json_path)) {
-    return [
+    return $requirements + [
       'photoswipe_dynamic_caption' => [
         'title' => t('Photoswipe dynamic caption plugin'),
         'severity' => REQUIREMENT_ERROR,
@@ -93,7 +108,7 @@ function photoswipe_dynamic_caption_requirements($phase) {
   $package_json = json_decode(file_get_contents($package_json_path) ?: '{}', TRUE) ?: [];
   $package_json_version = $package_json['version'] ?? NULL;
   if (empty($package_json_version)) {
-    return [
+    return $requirements + [
       'photoswipe_dynamic_caption' => [
         'title' => t('Photoswipe dynamic caption plugin'),
         'severity' => REQUIREMENT_ERROR,
@@ -106,7 +121,7 @@ function photoswipe_dynamic_caption_requirements($phase) {
   // Version not compatible:
   [$major] = explode('.', $package_json['version'] ?? '');
   if ((int) $major !== $version_required) {
-    return [
+    return $requirements + [
       'photoswipe_dynamic_caption' => [
         'title' => t('Photoswipe dynamic caption plugin'),
         'severity' => REQUIREMENT_ERROR,
@@ -118,24 +133,8 @@ function photoswipe_dynamic_caption_requirements($phase) {
     ];
   }
 
-  // DOMPurify file could not be found:
-  if ($is_allow_html_captions_enabled) {
-    if (empty($dompurify_file)) {
-      return [
-        'photoswipe_dynamic_caption' => [
-          'title' => t('DOMPurify library'),
-          'severity' => REQUIREMENT_ERROR,
-          'value' => t('<strong>DOMPurify library for Photoswipe Dynamic Caption <em>"Allow HTML captions"</em> setting not found</strong>'),
-          'description' => t('<em>Allow HTML captions</em> setting is enabled, but the DOMPurify library was not found at <code>libraries/dompurify/dist/purify.min.js</code>. Captions will be escaped as plain text until the library is installed. Download it from <a href=":url" target="_blank" rel="noopener noreferrer">DOMPurify releases</a> or see the README.md for details.', [
-            ':url' => 'https://github.com/cure53/DOMPurify/releases/latest',
-          ]),
-        ],
-      ];
-    }
-  }
-
-  // This should never be reached. Still return an empty array, just in case:
-  return [];
+  // No plugin errors, return the (possibly empty) DOMPurify requirements:
+  return $requirements;
 }
 
 /**
